@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>C++11中的日期和时间库</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>C++11中的日期和时间库 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>C++11供给了日期时候相干的库chrono，经由过程chrono相干的库我们可以很便利的处理惩罚日期和时候。</p>
+
+<p>C++11还供给了字符串的宽窄转换功能，也供给了字符串和数字的彼此转换的库。</p>
+
+<p>有了这些库供给的便利的对象类，我们能便利的处理惩罚日期和时候相干的转换和格局输出。</p>
+
+<hr />
+
+<h3>chrono</h3>
+
+<blockquote>
+</blockquote>
+
+<p>chrono库首要包含了三种类型：时候间隔Duration、时钟Clocks和时候点Time point。</p>
+
+<hr />
+
+<h3>Duration</h3>
+
+<blockquote>
+</blockquote>
+
+<p>duration默示一段时候间隔，用来记录时候长度，可以默示几秒钟、几分钟或者几个小时的时候间隔，duration的原型是：</p>
+
+<pre><code>template&lt;class Rep， class Period = std::ratio&lt;1&gt;&gt; class duration;
+</code></pre>
+
+<p>第一个模板参数Rep是一个数值类型，默示时钟个数；第二个模板参数是一个默认模板参数std::ratio，它的原型是：</p>
+
+<pre><code>template&lt;std::intmax_t Num， std::intmax_t Denom = 1&gt; class ratio;
+</code></pre>
+
+<hr />
+
+<pre><code>typedef duration &lt;Rep， ratio&lt;3600，1&gt;&gt; hours;
+
+typedef duration &lt;Rep， ratio&lt;60，1&gt;&gt; minutes;
+
+typedef duration &lt;Rep， ratio&lt;1，1&gt;&gt; seconds;
+
+typedef duration &lt;Rep， ratio&lt;1，1000&gt;&gt; milliseconds;
+
+typedef duration &lt;Rep， ratio&lt;1，1000000&gt;&gt; microseconds;
+
+typedef duration &lt;Rep， ratio&lt;1，1000000000&gt;&gt; nanoseconds;
+</code></pre>
+
+<hr />
+
+<p>由过程定义这些常用的时候间隔类型，我们能便利的应用它们，比如线程的休眠：</p>
+
+<pre><code>std::this_thread::sleep_for（std::chrono::seconds（3））; //休眠三秒
+std::this_thread::sleep_for（std::chrono:: milliseconds （100））; //休眠100毫秒
+</code></pre>
+
+<hr />
+
+<p>chrono还供给了获取时候间隔的时钟周期个数的办法count（），它的根蒂根基用法：</p>
+
+<pre><code>＃include &lt;chrono&gt;
+＃include &lt;iostream&gt;
+int main（）
+{
+    std::chrono::milliseconds ms{3}; // 3 毫秒
+    // 6000 microseconds constructed  3 milliseconds
+    std::chrono::microseconds us = 2*ms; //6000微秒
+    // 30Hz clock using fractional ticks
+    std::chrono::duration&lt;double， std::ratio&lt;1， 30&gt;&gt; hz30（3.5）;
+    std::cout &lt;&lt;  &quot;3 ms duration has &quot; &lt;&lt; ms.count（） &lt;&lt; 
+    &quot; ticks\n&quot;&lt;&lt;  &quot;6000 us duration has &quot; &lt;&lt; us.count（） &lt;&lt; &quot; ticks\n&quot;
+}
+输出：
+3 ms duration has 3 ticks
+6000 us duration has 6000 ticks
+</code></pre>
+
+<hr />
+
+<p>时候间隔之间可以做运算，比如下面的例子中策画两端时候间隔的差值：</p>
+
+<pre><code>std::chrono::minutes t1（ 10 ）;
+std::chrono::seconds t2（ 60 ）;
+std::chrono::seconds t3 = t1 - t2;
+std::cout &lt;&lt; t3.count（） &lt;&lt; &quot; second&quot; &lt;&lt; std::endl;
+</code></pre>
+
+<hr />
+
+<h3>Time point</h3>
+
+<blockquote>
+</blockquote>
+
+<p>time_point默示一个时候点，用来获取1970.1.1以来的秒数和当前的时候</p>
+
+<p>可以做一些时候的斗劲和算术运算，可以和ctime库连络起来显示时候。</p>
+
+<p>time_point必必要clock来计时，time_point有一个函数time__eproch（）用来获得1970年1月1日到time_point时候经过的duration。</p>
+
+<p>下面的例子策画当前时候间隔1970年1月一日有几许天：</p>
+
+<pre><code>＃include &lt;iostream&gt;
+＃include &lt;ratio&gt;
+＃include &lt;chrono&gt;
+int main （）
+{
+  using namespace std::chrono;
+  typedef duration&lt;int，std::ratio&lt;60*60*24&gt;&gt; days_type;
+  time_point&lt;system_clock，days_type&gt; today = time_point_cast&lt;days_type&gt;（system_clock::now（））;
+  std::cout &lt;&lt; today.time_since_epoch（）.count（） &lt;&lt; &quot; days since epoch&quot; &lt;&lt; std::endl;
+  return 0;
+}
+</code></pre>
+
+<p>time_point还支撑一些算术元算，比如两个time_point的差值时钟周期数，还可以和duration相加减。</p>
+
+<p>下面的例子输出前一天和后一天的日期：</p>
+
+<pre><code>＃include &lt;iostream&gt;
+＃include &lt;iomanip&gt;
+＃include &lt;ctime&gt;
+＃include &lt;chrono&gt;
+int main（）
+{
+    using namespace std::chrono;
+    system_clock::time_point now = system_clock::now（）;
+    std::time_t last = system_clock::to_time_t（now - std::chrono::hours（24））;
+　　std::time_t next= system_clock::to_time_t（now - std::chrono::hours（24））;
+    std::cout &lt;&lt; &quot;One day ago， the time was &quot;&lt;&lt; std::put_time（std::localtime（&amp;last）， &quot;％F ％T&quot;） &lt;&lt; &quot;&quot;\n&quot;&quot;;
+　　std::cout &lt;&lt; &quot;Next day， the time was &quot;&lt;&lt; std::put_time（std::localtime（&amp;next）， &quot;％F ％T&quot;） &lt;&lt; &quot;&quot;\n&quot;&quot;;
+}
+输出：
+One day ago， the time was 2014-3-2622:38:27
+Next day， the time was 2014-3-2822:38:27
+</code></pre>
+
+<hr />
+
+<h3>Clocks</h3>
+
+<blockquote>
+</blockquote>
+
+<p>默示当前的体系时钟，内部有time_point， duration， Rep， Period等信息</p>
+
+<p>它首要用来获取当前时候，以及实现time_t和time_point的彼此转换。Clocks包含三种时钟：</p>
+
+<pre><code>system_clock：从体系获取的时钟；
+steady_clock：不克不及被批改的时钟；
+high_resolution_clock：高精度时钟，实际上是system_clock或者steady_clock的别号。
+</code></pre>
+
+<p>可以经由过程now（）来获取当前时候点：</p>
+
+<pre><code>＃include &lt;iostream&gt;
+＃include &lt;chrono&gt;
+int main（）
+{
+    std::chrono::steady_clock::time_point t1 = std::chrono::system_clock::now（）;
+    std::cout &lt;&lt; &quot;Hello World\n&quot;;
+    std::chrono::steady_clock::time_point t2 = std::chrono:: system_clock::now（）;
+    std::cout &lt;&lt; （t2-t1）.count（）&lt;&lt;” tick count”&lt;&lt;endl;
+}
+输出：
+Hello World
+20801tick count
+</code></pre>
+
+<p>经由过程期钟获取两个时候点之相差几许个时钟周期</p>
+
+<p>我们可以经由过程duration_cast将其转换为其它时钟周期的duration：</p>
+
+<pre><code>std::chrono::duration_cast&lt;std::chrono::microseconds&gt;（ t2-t1 ）.count（）
+输出：
+20 microseconds
+</code></pre>
+
+<p>system_clock的to_time_t办法可以将一个time_point转换为ctime：</p>
+
+<pre><code>std::time_t now_c = std::chrono::system_clock::to_time_t（time_point）;
+</code></pre>
+
+<hr />
+
+<h3>时候的格局化输出</h3>
+
+<blockquote>
+</blockquote>
+
+<p>system_clock和std::put_time共同起来应用可以格局化日期的输出，std::put_time能将日期格局化输出。</p>
+
+<p>下面的例子是将当前时候格局化输出：</p>
+
+<pre><code>＃include &lt;chrono&gt;
+＃include &lt;ctime&gt;
+＃include &lt;iomanip&gt;
+＃include &lt;string&gt;
+
+using namespace std;
+
+int main（）
+{
+    auto t = chrono::system_clock::to_time_t（std::chrono::system_clock::now（））;
+    cout&lt;&lt; std::put_time（std::localtime（&amp;t）， &quot;％Y-％m-％d ％X&quot;）&lt;&lt;endl;
+    cout&lt;&lt; std::put_time（std::localtime（&amp;t）， &quot;％Y-％m-％d ％H.％M.％S&quot;）&lt;&lt;endl;
+    return 0;
+}
+上方的例子将输出：
+2014-3-27 22:11:49
+2014-3-27 22.11.49
+</code></pre>
+
+<hr />
+
+<h3>timer</h3>
+
+<blockquote>
+</blockquote>
+
+<p>可以哄骗high_resolution_clock来实现一个类似于boost.timer的按时器</p>
+
+<p>如许的timer在测试机能时会经常用到，经常用它来测试函数耗时，它的根蒂根基用法是如许的：</p>
+
+<pre><code>void fun（）
+{
+    cout&lt;&lt;”hello word”&lt;&lt;endl;
+}
+
+int main（）
+{
+     timer t; //开端计时
+     fun（）
+     cout&lt;&lt;t.elapsed（）&lt;&lt;endl; //打印fun函数耗时几许毫秒
+}
+</code></pre>
+
+<hr />
+
+<p>C++11中增长了chrono库，如今用来实现一个按时器是很简单的工作，还可以移除对boost的依附。</p>
+
+<p>它的实现斗劲简单，下面是具体实现：</p>
+
+<pre><code>＃include&lt;chrono&gt;
+using namespace std;
+using namespace std::chrono;
+
+classTimer
+{
+
+public:
+    Timer（） : m_begin（high_resolution_clock::now（）） {}
+    void reset（） { m_begin = high_resolution_clock::now（）; }
+
+    //默认输出毫秒
+    int64_t elapsed（） const
+    {
+    return duration_cast&lt;chrono::milliseconds&gt;（high_resolution_clock::now（） - m_begin）.count（）;
+    }
+
+    //微秒
+    int64_t elapsed_micro（） const
+    {
+    return duration_cast&lt;chrono::microseconds&gt;（high_resolution_clock::now（） - m_begin）.count（）;
+    }
+
+    //纳秒
+    int64_t elapsed_nano（） const
+    {
+    return duration_cast&lt;chrono::nanoseconds&gt;（high_resolution_clock::now（） - m_begin）.count（）;
+    }
+    //秒
+    int64_t elapsed_seconds（） const
+    {
+    return duration_cast&lt;chrono::seconds&gt;（high_resolution_clock::now（） - m_begin）.count（）;
+    }
+
+    //分
+    int64_t elapsed_minutes（） const
+    {
+    return duration_cast&lt;chrono::minutes&gt;（high_resolution_clock::now（） - m_begin）.count（）;
+    }
+
+    //时
+    int64_t elapsed_hours（） const
+    {
+    return duration_cast&lt;chrono::hours&gt;（high_resolution_clock::now（） - m_begin）.count（）;
+    }
+
+private:
+    time_point&lt;high_resolution_clock&gt; m_begin;
+};
+</code></pre>
+
+<p>测试代码：</p>
+
+<pre><code>void fun（）
+{
+    cout&lt;&lt;”hello word”&lt;&lt;endl;
+}
+
+int main（）
+{
+    timer t; //开端计时
+    fun（）
+    cout&lt;&lt;t.elapsed（）&lt;&lt;endl; //打印fun函数耗时几许毫秒
+    cout&lt;&lt;t.elapsed_micro （）&lt;&lt;endl; //打印微秒
+    cout&lt;&lt;t.elapsed_nano （）&lt;&lt;endl; //打印纳秒
+    cout&lt;&lt;t.elapsed_seconds（）&lt;&lt;endl; //打印秒
+    cout&lt;&lt;t.elapsed_minutes（）&lt;&lt;endl; //打印分钟
+    cout&lt;&lt;t.elapsed_hours（）&lt;&lt;endl; //打印小时
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/String%E8%BD%ACuint64_t/" title="String转uint64_t">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Asio-io_service/" title="Asio-io_service">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-10-27</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js之使用transition实现过渡与动画</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Vue.js之使用transition实现过渡与动画 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Vue之使用transition实现过渡与动画</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 文档 ...
+https://cn.vuejs.org/v2/guide/transitions.html
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Vue 提供了 transition 的封装组件
+
+// 在下列情形中，可以给任何元素和组件添加进入/离开过渡
+1. 条件渲染 (使用 v-if)
+2. 条件展示 (使用 v-show)
+3. 动态组件
+4. 组件根节点
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>例:
+
+&lt;div id=&quot;demo&quot;&gt;
+  &lt;button v-on:click=&quot;show = !show&quot;&gt;
+    Toggle
+  &lt;/button&gt;
+  &lt;transition name=&quot;fade&quot;&gt;
+    &lt;p v-if=&quot;show&quot;&gt;hello&lt;/p&gt;
+  &lt;/transition&gt;
+&lt;/div&gt;
+
+new Vue({
+  el: '#demo',
+  data: {
+    show: true
+  }
+})
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to 
+/* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-enter: 定义进入过渡的开始状态。
+    在元素被插入之前生效，在元素被插入之后的下一帧移除。
+v-enter-active: 定义进入过渡生效时的状态
+    在整个进入过渡的阶段中应用，在元素被插入之前生效，
+    在过渡/动画完成之后移除。
+    这个类可以被用来定义进入过渡的过程时间，延迟和曲线函数。
+v-enter-to: 定义进入过渡的结束状态。
+    在元素被插入之后下一帧生效 (与此同时 v-enter 被移除)，
+    在过渡/动画完成之后移除。
+v-leave: 定义离开过渡的开始状态。
+    在离开过渡被触发时立刻生效，下一帧被移除。
+v-leave-active: 定义离开过渡生效时的状态。
+    在整个离开过渡的阶段中应用，在离开过渡被触发时立刻生效，
+    在过渡/动画完成之后移除。
+    这个类可以被用来定义离开过渡的过程时间，延迟和曲线函数。
+v-leave-to: 上定义离开过渡的结束状态。
+    在离开过渡被触发之后下一帧生效 (与此同时 v-leave 被删除)，
+    在过渡/动画完成之后移除。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>对于这些在过渡中切换的类名来说
+
+如果你使用一个没有名字的 &lt;transition&gt; 则 v- 是这些类名的默认前缀。
+如果你使用了 &lt;transition name=&quot;myname&quot;&gt;, 那么 v-enter 会替换为 myname-enter。
+
+v-enter-active 和 v-leave-active 可以控制进入/离开过渡的不同的缓和曲线
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>CSS 过渡, 常用的过渡都是使用 CSS 过渡。
+
+&lt;div id=&quot;example-1&quot;&gt;
+  &lt;button @click=&quot;show = !show&quot;&gt;
+    Toggle render
+  &lt;/button&gt;
+  &lt;transition name=&quot;slide-fade&quot;&gt;
+    &lt;p v-if=&quot;show&quot;&gt;hello&lt;/p&gt;
+  &lt;/transition&gt;
+&lt;/div&gt;
+
+new Vue({
+  el: '#example-1',
+  data: {
+    show: true
+  }
+})
+
+/* 可以设置不同的进入和离开动画 */
+/* 设置持续时间和动画函数 */
+.slide-fade-enter-active {
+  transition: all .3s ease;
+}
+.slide-fade-leave-active {
+  transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active for below version 2.1.8 */ {
+  transform: translateX(10px);
+  opacity: 0;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>/* 定义进入过渡的开始状态 */
+.logo-enter {
+  /* 允许你将元素旋转，缩放，移动，倾斜等。*/
+  /* https://www.runoob.com/cssref/css3-pr-transform.html */
+  transform: translateX(15px);
+  /* 设置元素的不透明级别 */
+  /* 从 0.0 （完全透明）到 1.0（完全不透明）。 */
+  opacity: 0;
+}
+
+/* 定义进入过渡生效时的状态 */
+.logo-enter-active {
+  /* 
+    transition: property duration timing-function delay; 
+    transition-property 规定设置过渡效果的 CSS 属性的名称。
+    transition-duration 规定完成过渡效果需要多少秒或毫秒。
+    transition-timing-function 规定速度效果的速度曲线。
+    transition-delay 定义过渡效果何时开始。 
+  */
+  transition: all 0.5s cubic-bezier(1, 0.5, 0.8, 1) 0.5s;
+  /*
+    cubic-bezier() 函数定义了一个贝塞尔曲线(Cubic Bezier)。 
+    https://www.runoob.com/cssref/func-cubic-bezier.html 
+  */
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>CSS 动画 
+
+animation 动画与元素绑定
+animation: name duration timing-function delay iteration-count direction;
+animation-name  规定需要绑定到选择器的 keyframe 名称
+animation-duration  规定完成动画所花费的时间，以秒或毫秒计。
+animation-timing-function   规定动画的速度曲线。
+animation-delay 规定在动画开始之前的延迟。
+animation-iteration-count   规定动画应该播放的次数。
+animation-direction 规定是否应该轮流反向播放动画。
+https://www.w3school.com.cn/cssref/pr_animation.asp
+
+// 例
+
+&lt;div id=&quot;example-2&quot;&gt;
+  &lt;button @click=&quot;show = !show&quot;&gt;Toggle show&lt;/button&gt;
+  &lt;transition name=&quot;bounce&quot;&gt;
+    &lt;p v-if=&quot;show&quot;&gt;Lorem ipsum dolor sit amconsectetur&lt;/p&gt;
+  &lt;/transition&gt;
+&lt;/div&gt;
+
+new Vue({
+  el: '#example-2',
+  data: {
+    show: true
+  }
+})
+
+.bounce-enter-active {
+  animation: bounce-in .5s;
+}
+.bounce-leave-active {
+  animation: bounce-in .5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Vue.js%E4%B9%8B%E5%AE%9E%E6%88%98%E9%A1%B9%E7%9B%AE%E6%90%AD%E5%BB%BA%E5%8F%8A%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98/" title="Vue.js之实战项目搭建及相关问题">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B9%8BQt%E5%AE%89%E8%A3%85QtWebengine%E7%8E%AF%E5%A2%83/" title="树莓派之Qt安装QtWebengine环境">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-12-21</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#javascript-ref">javascript <span>11</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang之获取Struct的Tag</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang之获取Struct的Tag </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>获取Struce的Tag</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+
+import (
+    &quot;fmt&quot;
+    &quot;reflect&quot;
+)
+
+type Foo struct {
+    FirstName string `tag_name:&quot;tag 1&quot;`
+    LastName  string `tag_name:&quot;tag 2&quot;`
+    Age       int    `tag_name:&quot;tag 3&quot;`
+}
+
+func (f *Foo) reflect() {
+    val := reflect.ValueOf(f).Elem()
+
+    for i := 0; i &lt; val.NumField(); i++ {
+        valueField := val.Field(i)
+        typeField := val.Type().Field(i)
+        tag := typeField.Tag
+
+        fmt.Printf(&quot;Field Name: %s,\t Field Value: %v,\t Tag Value: %s\n&quot;, typeField.Name, valueField.Interface(), tag.Get(&quot;tag_name&quot;))
+    }
+}
+
+func main() {
+    f := &amp;Foo{
+        FirstName: &quot;Drew&quot;,
+        LastName:  &quot;Olson&quot;,
+        Age:       30,
+    }
+
+    f.reflect()
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+import (
+    &quot;fmt&quot;
+    &quot;reflect&quot; // 这里引入reflect模块
+)
+type User struct {
+    Name   string &quot;user name&quot; //这引号里面的就是tag
+    Passwd string &quot;user passsword&quot;
+}
+func main() {
+    user := &amp;User{&quot;chronos&quot;, &quot;pass&quot;}
+    s := reflect.TypeOf(user).Elem() //通过反射获取type定义
+    for i := 0; i &lt; s.NumField(); i++ {
+        fmt.Println(s.Field(i).Tag) //将tag输出出来
+    }
+}
+
+// Golang.org中reflect的示例代码
+package main
+
+import (
+    &quot;fmt&quot;
+    &quot;reflect&quot;
+)
+
+func main() {
+    type S struct {
+    F string `species:&quot;gopher&quot; color:&quot;blue&quot;`
+}
+
+s := S{}
+    st := reflect.TypeOf(s)
+    field := st.Field(0)
+    fmt.Println(field.Tag.Get(&quot;color&quot;), field.Tag.Get(&quot;species&quot;))
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B8%AD%E7%9A%84Race%E6%A3%80%E6%B5%8B/" title="Golang中的Race检测">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8B%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%97%AD%E5%8C%85%E9%97%AE%E9%A2%98/" title="Golang之一个有趣的闭包问题">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-03-05</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

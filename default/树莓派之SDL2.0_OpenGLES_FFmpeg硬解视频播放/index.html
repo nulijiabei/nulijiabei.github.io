@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>树莓派之SDL2.0_OpenGLES_FFmpeg硬解视频播放</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>树莓派之SDL2.0_OpenGLES_FFmpeg硬解视频播放 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>树莓派之SDL2.0_OpenGLES_FFmpeg硬解视频播放</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如何编译 FFmpeg h264_mmal 请看本博客对应博文
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 开启声音需要提前安装 
+apt-get install libasound2-dev
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 首先下载好 SDL 2.0 源码等待编译
+http://www.libsdl.org/download-2.0.php
+
+// 编译一版 OpenGL ES 的 SDL ...
+./configure --prefix=/usr/local \
+   --disable-video-x11 \
+   --disable-pulseaudio \
+   --disable-esd \
+   --disable-video-opengl
+
+Enabled modules : atomic audio video render events joystick 
+            haptic sensor power filesystem threads 
+            timers file loadso cpuinfo assembly
+Assembly Math   :
+Audio drivers   : disk dummy oss alsa(dynamic)
+Video drivers   : dummy rpi opengl_es1 opengl_es2 vulkan
+Input drivers   : linuxev linuxkd
+Using libsamplerate : NO
+Using libudev       : NO
+Using dbus          : NO
+Using ime           : YES
+Using ibus          : NO
+Using fcitx         : NO
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>apt-get install libgbm-dev
+apt-get install libdrm-dev
+apt-get install libasound2-dev
+
+./configure --prefix=/usr/local --disable-rpath --disable-video-directfb --disable-nas --disable-esd --disable-arts --disable-alsa-shared --disable-pulseaudio --disable-video-x11 --disable-video-opengl --disable-video-rpi --enable-video-kmsdrm
+
+Audio drivers   : disk dummy oss alsa
+Video drivers   : dummy kmsdrm(dynamic) opengl_es2 vulkan
+Input drivers   : linuxev linuxkd
+Using libsamplerate : NO
+Using libudev       : NO
+Using dbus          : NO
+Using ime           : YES
+Using ibus          : NO
+Using fcitx         : NO
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>make
+make install
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Windows 系统
+// Qt FFmepg 与 SDL 导入到项目 ...
+INCLUDEPATH += D:/FFmepg/dev/include
+INCLUDEPATH += D:/FFmepg/SDL2/i686-w64-mingw32/include
+LIBS += -lws2_32 -lopengl32 -lole32 -ldxguid -lglut32 -lglu32
+LIBS += D:/FFmepg/dev/lib/libavcodec.dll.a \
+  D:/FFmepg/dev/lib/libavdevice.dll.a \
+  D:/FFmepg/dev/lib/libavfilter.dll.a \
+  D:/FFmepg/dev/lib/libavformat.dll.a \
+  D:/FFmepg/dev/lib/libavutil.dll.a \
+  D:/FFmepg/dev/lib/libswresample.dll.a \
+  D:/FFmepg/dev/lib/libswscale.dll.a \
+  D:/FFmepg/dev/lib/libpostproc.dll.a
+LIBS += D:/FFmepg/SDL2/i686-w64-mingw32/lib/libSDL2.dll.a \
+D:/FFmepg/SDL2/i686-w64-mingw32/lib/libSDL2main.a
+
+// 树莓派 ...
+INCLUDEPATH += /usr/local/include
+LIBS += -lpthread -lm -ldl -lfreetype -lz -lrt
+LIBS += -L/usr/local/lib -lavformat -lavcodec -lavutil -lswscale -lx264 -lSDL2 -lSDL2_image
+LIBS += -L/opt/vc/lib -lmmal_core -lmmal_util -lmmal_vc_client -lbcm_host
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>#ifndef CORE_H
+#define CORE_H
+
+#include &quot;decoder.h&quot;
+#include &lt;QTime&gt;
+#include &lt;QDebug&gt;
+
+extern &quot;C&quot;
+{
+#include &quot;SDL2/SDL.h&quot;
+}
+
+class Core
+{
+private:
+    int screen_w=0,screen_h=0;
+    SDL_Window *screen;
+    SDL_Renderer* sdlRenderer;
+    SDL_Texture* sdlTexture;
+    SDL_Rect sdlRect;
+    Decoder *m_decoder;
+    int m_t_num = -1;
+    QTime m_t_fps;
+public:
+    Core();
+public:
+    bool init();
+    void show();
+    void decoder(Decoder*);
+};
+
+#endif // CORE_H
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>#include &quot;core.h&quot;
+
+Core::Core()
+{
+
+}
+
+void Core::decoder(Decoder *_decoder) {
+    this-&gt;m_decoder = _decoder;
+}
+
+bool Core::init() {
+
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER)) {
+    printf( &quot;Could not initialize SDL - %s\n&quot;, SDL_GetError());
+    return -1;
+    }
+
+    screen_w = this-&gt;m_decoder-&gt;pCodecCtx-&gt;width;
+    screen_h = this-&gt;m_decoder-&gt;pCodecCtx-&gt;height;
+    //SDL 2.0 Support for multiple windows
+    screen = SDL_CreateWindow(&quot;Simplest ffmpeg player's Window&quot;, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                  screen_w, screen_h,
+                  SDL_WINDOW_OPENGL);
+
+    if(!screen) {
+    printf(&quot;SDL: could not create window - exiting:%s\n&quot;,SDL_GetError());
+    return -1;
+    }
+
+    sdlRenderer = SDL_CreateRenderer(screen, -1, 0);
+    //IYUV: Y + U + V  (3 planes)
+    //YV12: Y + V + U  (3 planes)
+    sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_IYUV, SDL_TEXTUREACCESS_STREAMING,this-&gt;m_decoder-&gt;pCodecCtx-&gt;width,this-&gt;m_decoder-&gt;pCodecCtx-&gt;height);
+
+    sdlRect.x=0;
+    sdlRect.y=0;
+    sdlRect.w=screen_w;
+    sdlRect.h=screen_h;
+
+    // Done ...
+    return true;
+
+}
+
+void Core::show() {
+
+    this-&gt;init();
+
+    while (1) {
+
+    int i = m_decoder-&gt;m_frames-&gt;size();
+    if (i &gt; 0)
+    {
+        Frame front = m_decoder-&gt;m_frames-&gt;front();
+
+#if 0
+        SDL_UpdateTexture( sdlTexture, NULL, front.frame-&gt;data[0], front.frame-&gt;linesize[0] );
+#else
+        SDL_UpdateYUVTexture(sdlTexture, &amp;sdlRect,
+                 front.frame-&gt;data[0], front.frame-&gt;linesize[0],
+            front.frame-&gt;data[1], front.frame-&gt;linesize[1],
+            front.frame-&gt;data[2], front.frame-&gt;linesize[2]);
+#endif
+
+        SDL_RenderClear( sdlRenderer );
+        SDL_RenderCopy( sdlRenderer, sdlTexture,  NULL, &amp;sdlRect);
+        SDL_RenderPresent( sdlRenderer );
+
+    }
+    if (i &gt; 1)
+    {
+        m_decoder-&gt;m_frames-&gt;pop();
+    }
+
+    if (m_t_num == -1 || m_t_fps.elapsed() &gt; 1000) {
+        qreal fps = m_t_num * 1000.0 / m_t_fps.elapsed();
+        // m_log-&gt;debug();
+        qDebug(QString(&quot;-&gt; FPS -&gt; %1&quot;).arg(fps).toStdString().c_str());
+        m_t_fps.start();
+        m_t_num = 0;
+    }
+    m_t_num++;
+
+    //Delay 40ms
+    SDL_Delay(33);
+
+    }
+    SDL_Quit();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>#ifndef DECODER_H
+#define DECODER_H
+
+#include &lt;QDebug&gt;
+#include &lt;QThread&gt;
+#include &lt;QRunnable&gt;
+#include &lt;QScopedPointer&gt;
+#include &lt;QImage&gt;
+#include &quot;frames.h&quot;
+
+extern &quot;C&quot;
+{
+#include &quot;libavcodec/avcodec.h&quot;
+#include &quot;libavformat/avformat.h&quot;
+#include &quot;libswscale/swscale.h&quot;
+#include &quot;libavutil/imgutils.h&quot;
+}
+
+class Decoder : public QRunnable
+{
+public:
+    Decoder();
+    ~Decoder();
+    void run();
+    bool create();
+public:
+    AVFormatContext *pFormatCtx;
+    AVCodecContext  *pCodecCtx;
+    AVCodec     *pCodec;
+    int videoindex;
+public:
+    QScopedPointer&lt;Frames&gt; m_frames;
+};
+
+#endif // DECODER_H
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>#include &quot;decoder.h&quot;
+
+Decoder::Decoder()
+{
+    m_frames.reset(new Frames());
+}
+
+Decoder::~Decoder()
+{
+}
+
+bool Decoder::create()
+{
+    av_register_all();
+    avformat_network_init();
+
+    pFormatCtx = avformat_alloc_context();
+
+    if(avformat_open_input(&amp;pFormatCtx, &quot;E:/1111.mp4&quot;, nullptr, nullptr) != 0){
+    printf(&quot;Couldn't open input stream.\n&quot;);
+    return false;
+    }
+
+    if(avformat_find_stream_info(pFormatCtx, nullptr) &lt; 0){
+    printf(&quot;Couldn't find stream information.\n&quot;);
+    return false;
+    }
+
+    videoindex = -1;
+    for(int i = 0; i &lt; pFormatCtx-&gt;nb_streams; i++) {
+    if(pFormatCtx-&gt;streams[i]-&gt;codec-&gt;codec_type == AVMEDIA_TYPE_VIDEO) {
+        videoindex = i;
+        break;
+    }
+    }
+    if(videoindex == -1) {
+    printf(&quot;Didn't find a video stream.\n&quot;);
+    return false;
+    }
+
+    // --------------------------------- //
+    AVCodec* currentCodec = nullptr;
+    currentCodec = av_codec_next(currentCodec);
+    while (currentCodec != nullptr) {
+    if (av_codec_is_encoder(currentCodec)) {
+        // m_log-&gt;debug(QString(&quot;Encoder -&gt; %1 %2&quot;).arg(currentCodec-&gt;name).arg(currentCodec-&gt;long_name));
+    }
+    if (av_codec_is_decoder(currentCodec)) {
+        // m_log-&gt;debug(QString(&quot;Decoder -&gt; %1 %2&quot;).arg(currentCodec-&gt;name).arg(currentCodec-&gt;long_name));
+    }
+    currentCodec = av_codec_next(currentCodec);
+    }
+    // --------------------------------- //
+
+    pCodecCtx = pFormatCtx-&gt;streams[videoindex]-&gt;codec;
+
+#ifdef Q_OS_LINUX
+    pCodec = avcodec_find_decoder_by_name(&quot;h264_mmal&quot;);
+#endif
+
+#ifdef Q_OS_WIN
+    pCodec = avcodec_find_decoder(pCodecCtx-&gt;codec_id);
+#endif
+
+    if(pCodec == nullptr) {
+    printf(&quot;Codec not found.\n&quot;);
+    return false;
+    }
+
+    if(avcodec_open2(pCodecCtx, pCodec, nullptr) &lt; 0) {
+    printf(&quot;Could not open codec.\n&quot;);
+    return false;
+    }
+
+    // printf(&quot;--------------- File Information ----------------\n&quot;);
+    // av_dump_format(pFormatCtx, 0, &quot;PICT0023.AVI&quot;, 0);
+    // printf(&quot;-------------------------------------------------\n&quot;);
+
+    return true;
+}
+
+void Decoder::run()
+{
+
+    this-&gt;create();
+
+    AVFrame *pFrame = av_frame_alloc();
+    // AVFrame *pFrameYUV = av_frame_alloc();
+    // AVFrame *pFrameRGB = av_frame_alloc();
+
+    // int numBytes = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, pCodecCtx-&gt;width, pCodecCtx-&gt;height, 1);
+    // unsigned char *out_buffer = (unsigned char *)av_malloc(numBytes);
+    // unsigned char *rgb_buffer = (unsigned char *)av_malloc(av_image_get_buffer_size(AV_PIX_FMT_RGB32, pCodecCtx-&gt;width, pCodecCtx-&gt;height, 1));
+    // av_image_fill_arrays(pFrameYUV-&gt;data, pFrameYUV-&gt;linesize, out_buffer, AV_PIX_FMT_YUV420P, pCodecCtx-&gt;width, pCodecCtx-&gt;height, 1);
+    // av_image_fill_arrays(pFrameRGB-&gt;data, pFrameRGB-&gt;linesize, rgb_buffer, AV_PIX_FMT_RGB32, pCodecCtx-&gt;width, pCodecCtx-&gt;height, 1);
+    // static struct SwsContext *img_convert_ctx_yuv = sws_getContext(pCodecCtx-&gt;width, pCodecCtx-&gt;height, pCodecCtx-&gt;pix_fmt, pCodecCtx-&gt;width, pCodecCtx-&gt;height, AV_PIX_FMT_YUV420P, SWS_BICUBIC, nullptr, nullptr, nullptr);
+    // static struct SwsContext *img_convert_ctx_rgb = sws_getContext(pCodecCtx-&gt;width,pCodecCtx-&gt;height, AV_PIX_FMT_YUV420P, pCodecCtx-&gt;width, pCodecCtx-&gt;height, AV_PIX_FMT_RGB32, SWS_BICUBIC, nullptr, nullptr, nullptr);
+
+    AVPacket *packet = (AVPacket *)av_malloc(sizeof(AVPacket));
+
+    int count = 0;
+    while (av_read_frame(pFormatCtx, packet) &gt;= 0) {
+    if(packet-&gt;stream_index == videoindex) {
+        for(;;)
+        {
+        int size = m_frames-&gt;size();
+        if (size &lt; 10) {
+            break;
+        }
+        QThread::msleep(10);
+        }
+        // For decoding, call avcodec_send_packet() to give the decoder raw compressed data in an AVPacket.
+        int frameFinished = avcodec_send_packet(pCodecCtx, packet);
+        while (!frameFinished) {
+        // For decoding, call avcodec_receive_frame(). On success, it will return an AVFrame containing uncompressed audio or video data.
+        frameFinished = avcodec_receive_frame(pCodecCtx, pFrame);
+        if (!frameFinished) {
+            // m_log-&gt;debug(QString(&quot;%1 %2&quot;).arg(pFrame-&gt;format == AV_PIX_FMT_YUV420P ? &quot;OK&quot; : &quot;NO&quot;).arg(count));
+            // -----------------------------------------------
+            // sws_scale(img_convert_ctx_yuv, (const uint8_t* const*)pFrame-&gt;data, pFrame-&gt;linesize, 0, pCodecCtx-&gt;height, pFrameYUV-&gt;data, pFrameYUV-&gt;linesize);
+            // sws_scale(img_convert_ctx_rgb, pFrameYUV-&gt;data, pFrameYUV-&gt;linesize, 0, pCodecCtx-&gt;height, pFrameRGB-&gt;data, pFrameRGB-&gt;linesize);
+            // QImage img((uchar *)pFrameRGB-&gt;data[0], pCodecCtx-&gt;width, pCodecCtx-&gt;height, QImage::Format_ARGB32);
+            m_frames-&gt;push(Frame(av_frame_clone(pFrame), count));
+            count++;
+            // -----------------------------------------------
+            av_frame_unref(pFrame);
+        }
+        }
+    }
+    av_packet_unref(packet);
+    }
+
+    // av_free(rgb_buffer);
+    // sws_freeContext(img_convert_ctx_rgb);
+    // av_frame_free(&amp;pFrameRGB);
+    // av_free(out_buffer);
+    // sws_freeContext(img_convert_ctx_yuv);
+    // av_frame_free(&amp;pFrameYUV);
+    av_frame_free(&amp;pFrame);
+    avcodec_close(pCodecCtx);
+    avformat_close_input(&amp;pFormatCtx);
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B8%AD%E6%89%8B%E5%8A%A8%E7%BC%96%E8%AF%91sdl_image%E6%97%A0%E6%B3%95%E5%8A%A0%E8%BD%BDjpeg%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="树莓派中手动编译sdl_image无法加载jpeg解决方案">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Qt%E4%B9%8BQOpenGLWidget%E4%BD%BF%E7%94%A8QPainter%E7%BB%98%E5%88%B6FFmpeg%E8%A7%A3%E7%A0%81%E7%9A%84YUV420P%E5%B8%A7/" title="Qt之QOpenGLWidget使用QPainter绘制FFmpeg解码的YUV420P帧">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-10-12</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#pi-ref">pi <span>19</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

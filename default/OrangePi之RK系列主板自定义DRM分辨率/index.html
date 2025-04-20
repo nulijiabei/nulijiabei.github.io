@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>OrangePi之RK系列主板自定义DRM分辨率</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>OrangePi之RK系列主板自定义DRM分辨率 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>OrangePi之RK系列主板自定义DRM分辨率</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// OrangePi_Build 需要重新编译 kernel ...
+https://github.com/orangepi-xunlong/OrangePi_Build
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Orange Pi RK 系列默认使用 DRM ...
+kernel/drivers/gpu/drm
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在 drm_edid.c 的 edid_cea_modes 中查找 EDID 
+kernel/drivers/gpu/drm/drm_edid.c
+
+// 在 dw-hdmi.c 的 def_modes 中指定 EDID ...
+kernel/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// kernel/drivers/gpu/drm/bridge/synopsys/dw-hdmi.c 
+
+static int dw_hdmi_connector_get_modes(struct drm_connector *connector)
+{
+    struct dw_hdmi *hdmi = container_of(connector, struct dw_hdmi,
+                         connector);
+    struct edid *edid;
+    struct drm_display_mode *mode;
+    // const u8 def_modes[6] = {4, 16, 31, 19, 17, 2};
+    const u8 def_modes[1] = {1}; // 指定 EDID ... 
+    struct drm_display_info *info = &amp;connector-&gt;display_info;
+    struct hdr_static_metadata *metedata =
+            &amp;connector-&gt;display_info.hdmi.hdr_panel_metadata;
+    int i, ret = 0;
+
+    if (!hdmi-&gt;ddc)
+        return 0;
+
+    edid = drm_get_edid(connector, hdmi-&gt;ddc);
+    if(0) { // 关闭使用获取到的EDID, 使用指定EDID ...
+        dev_dbg(hdmi-&gt;dev, &quot;got edid: width[%d] x height[%d]\n&quot;,
+            edid-&gt;width_cm, edid-&gt;height_cm);
+
+        hdmi-&gt;sink_is_hdmi = drm_detect_hdmi_monitor(edid);
+        hdmi-&gt;sink_has_audio = drm_detect_monitor_audio(edid);
+        drm_mode_connector_update_edid_property(connector, edid);
+        cec_notifier_set_phys_addr_from_edid(hdmi-&gt;cec_notifier, edid);
+        ret = drm_add_edid_modes(connector, edid);
+        /* Store the ELD */
+        drm_edid_to_eld(connector, edid);
+        drm_mode_connector_update_hdr_property(connector, metedata);
+        kfree(edid);
+    } else {
+        hdmi-&gt;sink_is_hdmi = true;
+        hdmi-&gt;sink_has_audio = true;
+        for (i = 0; i &lt; sizeof(def_modes); i++) {
+            mode = drm_display_mode_from_vic_index(connector,
+                                   def_modes,
+                                   31, i);
+            if (mode) {
+                if (!i)
+                    mode-&gt;type = DRM_MODE_TYPE_PREFERRED;
+                drm_mode_probed_add(connector, mode);
+                ret++;
+            }
+        }
+        info-&gt;edid_hdmi_dc_modes = 0;
+        info-&gt;hdmi.y420_dc_modes = 0;
+        info-&gt;color_formats = 0;
+
+        dev_info(hdmi-&gt;dev, &quot;failed to get edid\n&quot;);
+    }
+
+    return ret;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// kernel/drivers/gpu/drm/drm_edid.c
+
+/*
+ * Probably taken from CEA-861 spec.
+ * This table is converted from xorg's hw/xfree86/modes/xf86EdidModes.c.
+ *
+ * Index using the VIC.
+ */
+static const struct drm_display_mode edid_cea_modes[] = {
+    /* 0 - dummy, VICs start at 1 */
+    { },
+    /* 1 - 640x480@60Hz */
+    { DRM_MODE(&quot;640x480&quot;, DRM_MODE_TYPE_DRIVER, 25175, 640, 656,
+           752, 800, 0, 480, 490, 492, 525, 0,
+           DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC),
+      .vrefresh = 60, .picture_aspect_ratio = HDMI_PICTURE_ASPECT_4_3, },
+    /* 2 - 720x480@60Hz */
+    { DRM_MODE(&quot;720x480&quot;, DRM_MODE_TYPE_DRIVER, 27000, 720, 736,
+           798, 858, 0, 480, 489, 495, 525, 0,
+           DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC),
+    ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查询当前分辨率 ...
+
+root@danoo:~# fbset -i
+
+mode &quot;800x600&quot;
+    geometry 800 600 2048 2048 32
+    timings 0 0 0 0 0 0 0
+    rgba 8/16,8/8,8/0,0/0
+endmode
+
+Frame buffer device information:
+    Name        : svgadrmfb
+    Address     : 0
+    Size        : 16777216
+    Type        : PACKED PIXELS
+    Visual      : TRUECOLOR
+    XPanStep    : 1
+    YPanStep    : 1
+    YWrapStep   : 0
+    LineLength  : 8192
+    Accelerator : No
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查看 DRM DEBUG 信息
+echo 0x1f &gt; /sys/module/drm/parameters/debug
+
+// 重新插拔 HDMI 后即可通过 dmesg 查看 ...
+dmesg
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Gstreamer%E4%B9%8B%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90/" title="Gstreamer之基础教程案例分析">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/OrangePi%E4%B9%8BAndroid_7.0%E8%8E%B7%E5%8F%96Root%E6%9D%83%E9%99%90/" title="OrangePi之Android_7.0获取Root权限">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-08-02</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#pi-ref">pi <span>19</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

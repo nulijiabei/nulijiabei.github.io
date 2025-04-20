@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>微信小程序注册程序和页面与模块化</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>微信小程序注册程序和页面与模块化 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>微信小程序注册程序和页面与模块化</h4>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 官方开发文档
+https://mp.weixin.qq.com/debug/wxadoc/dev/framework/app-service/app.html?t=20161122
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* 注册程序</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>App() 函数用来注册一个小程序。接受一个 object 参数，其指定小程序的生命周期函数等</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>onLaunch  生命周期函数 &ndash; 监听小程序初始化    当小程序初始化完成时，会触发 onLaunch（全局只触发一次）</li>
+<li>onShow    生命周期函数 &ndash; 监听小程序显示   当小程序启动，或从后台进入前台显示，会触发 onShow</li>
+<li>onHide    生命周期函数 &ndash; 监听小程序隐藏   当小程序从前台进入后台，会触发 onHide</li>
+<li>其它      开发者可以添加任意的函数或数据到 Object 参数中，用 this 可以访问</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>App({
+  onLaunch: function() { 
+    // Do something initial when launch.
+  },
+  onShow: function() {
+      // Do something when show.
+  },
+  onHide: function() {
+      // Do something when hide.
+  },
+  globalData: 'I am global data'
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h5>前台、后台定义：</h5>
+
+<blockquote>
+</blockquote>
+
+<pre><code>    当用户点击左上角关闭，或者按了设备 Home 键离开微信，小程序并没有直接销毁，而是进入了后台；
+    当再次进入微信或再次打开小程序，又会从后台进入前台。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>只有当小程序进入后台一定时间，或者系统资源占用过高，才会被真正的销毁。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h5>获取到小程序实例</h5>
+
+<blockquote>
+</blockquote>
+
+<pre><code>我们提供了全局的 getApp() 函数，可以获取到小程序实例。
+
+// other.js
+var appInstance = getApp()
+console.log(appInstance.globalData) // I am global data
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h5>注意：</h5>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>App() 必须在 app.js 中注册，且不能注册多个。</li>
+<li>不要在定义于 App() 内的函数中调用 getApp() ，使用 this 就可以拿到 app 实例。</li>
+<li>不要在 onLaunch 的时候调用 getCurrentPage()，此时 page 还没有生成。</li>
+<li>通过 getApp() 获取实例之后，不要私自调用生命周期函数。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* 注册页面</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Page() 函数用来注册一个页面。接受一个 object 参数，其指定页面的初始数据、生命周期函数、事件处理函数等。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>data      类型(Object)  页面的初始数据</li>
+<li>onLoad    类型(Function)    生命周期函数&ndash;监听页面加载</li>
+<li>onReady   类型(Function)    生命周期函数&ndash;监听页面初次渲染完成</li>
+<li>onShow    类型(Function)    生命周期函数&ndash;监听页面显示</li>
+<li>onHide    类型(Function)    生命周期函数&ndash;监听页面隐藏</li>
+<li>onUnload  类型(Function)    生命周期函数&ndash;监听页面卸载</li>
+<li>onPullDownRefresh 类型(Function)    页面相关事件处理函数&ndash;监听用户下拉动作</li>
+<li>onReachBottom     类型(Function)    页面上拉触底事件的处理函数</li>
+<li>其他    类型(Any) 开发者可以添加任意的函数或数据到 object 参数中，在页面的函数中用 this 可以访问</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>//index.js
+Page({
+  data: {
+    text: &quot;This is page data.&quot;
+  },
+  onLoad: function(options) {
+    // Do some initialize when page load.
+  },
+  onReady: function() {
+    // Do something when page ready.
+  },
+  onShow: function() {
+    // Do something when page show.
+  },
+  onHide: function() {
+    // Do something when page hide.
+  },
+  onUnload: function() {
+    // Do something when page close.
+  },
+  onPullDownRefresh: function() {
+    // Do something when pull down.
+  },
+  onReachBottom: function() {
+    // Do something when page reach bottom.
+  },
+  // Event handler.
+  viewTap: function() {
+    this.setData({
+      text: 'Set some data for updating view.'
+    })
+  },
+  customData: {
+    hi: 'MINA'
+  }
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* 初始化数据</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>初始化数据将作为页面的第一次渲染。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>data 将会以 JSON 的形式由逻辑层传至渲染层, 所以其数据必须是可以转成 JSON 的格式：字符串，数字，布尔值，对象，数组。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>渲染层可以通过 WXML 对数据进行绑定。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>&lt;view&gt;&lt;/view&gt;
+&lt;view&gt;&lt;/view&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Page({
+  data: {
+    text: 'init data',
+    array: [{msg: '1'}, {msg: '2'}]
+  }
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* 生命周期函数</h4>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>onLoad: 页面加载
+
+<ul>
+<li>一个页面只会调用一次。</li>
+<li>接收页面参数可以获取wx.navigateTo和wx.redirectTo及<navigator/>中的 query。</li>
+</ul></li>
+<li>onShow: 页面显示
+
+<ul>
+<li>每次打开页面都会调用一次。</li>
+</ul></li>
+<li>onReady: 页面初次渲染完成
+
+<ul>
+<li>一个页面只会调用一次，代表页面已经准备妥当，可以和视图层进行交互。</li>
+<li>对界面的设置如wx.setNavigationBarTitle请在onReady之后设置。详见生命周期</li>
+</ul></li>
+<li>onHide: 页面隐藏
+
+<ul>
+<li>当navigateTo或底部tab切换时调用。</li>
+</ul></li>
+<li>onUnload: 页面卸载
+
+<ul>
+<li>当redirectTo或navigateBack的时候调用。</li>
+</ul></li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* 页面相关事件处理函数</h4>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>onPullDownRefresh: 下拉刷新
+
+<ul>
+<li>监听用户下拉刷新事件。</li>
+<li>需要在config的window选项中开启enablePullDownRefresh。</li>
+<li>当处理完数据刷新后，wx.stopPullDownRefresh可以停止当前页面的下拉刷新。</li>
+</ul></li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* 事件处理函数(事件绑定)</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>除了初始化数据和生命周期函数，Page 中还可以定义一些特殊的函数：事件处理函数。
+在渲染层可以在组件中加入事件绑定，当达到触发事件时，就会执行 Page 中定义的事件处理函数。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>&lt;view bindtap=&quot;viewTap&quot;&gt; click me &lt;/view&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Page({
+  viewTap: function() {
+    console.log('view tap')
+  }
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>*  Page.prototype.setData()</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>setData 函数用于将数据从逻辑层发送到视图层，同时改变对应的 this.data 的值。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>注意：
+
+* 直接修改 this.data 无效，无法改变页面的状态，还会造成数据不一致。
+* 单次设置的数据不能超过1024kB，请尽量避免一次设置过多的数据。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>setData() 参数格式:
+
+接受一个对象，以 key，value 的形式表示将 this.data 中的 key 对应的值改变成 value。
+其中 key 可以非常灵活，以数据路径的形式给出
+如 array[2].message，a.b.c.d，并且不需要在 this.data 中预先定义。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>&lt;!--index.wxml--&gt;
+&lt;view&gt;&lt;/view&gt;
+&lt;button bindtap=&quot;changeText&quot;&gt; Change normal data &lt;/button&gt;
+&lt;view&gt;&lt;/view&gt;
+&lt;button bindtap=&quot;changeItemInArray&quot;&gt; Change Array data &lt;/button&gt;
+&lt;view&gt;&lt;/view&gt;
+&lt;button bindtap=&quot;changeItemInObject&quot;&gt; Change Object data &lt;/button&gt;
+&lt;view&gt;&lt;/view&gt;
+&lt;button bindtap=&quot;addNewField&quot;&gt; Add new data &lt;/button&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>//index.js
+Page({
+  data: {
+    text: 'init data',
+    array: [{text: 'init data'}],
+    object: {
+      text: 'init data'
+    }
+  },
+  changeText: function() {
+    // this.data.text = 'changed data'  // bad, it can not work
+    this.setData({
+      text: 'changed data'
+    })
+  },
+  changeItemInArray: function() {
+    // you can use this way to modify a danamic data path
+    this.setData({
+      'array[0].text':'changed data'
+    })
+  },
+  changeItemInObject: function(){
+    this.setData({
+      'object.text': 'changed data'
+    });
+  },
+  addNewField: function() {
+    this.setData({
+      'newField.text': 'new data'
+    })
+  }
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* getCurrentPages()</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>函数用于获取当前页面栈的实例，以数组形式按栈的顺序给出，第一个元素为首页，最后一个元素为当前页面。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>注意：不要尝试修改页面栈，会导致路由以及页面状态错误。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong>页面栈</strong></p>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>框架以栈的形式维护了当前的所有页面。 当发生路由切换的时候，页面栈的表现如下：</em></strong></p>
+
+<ul>
+<li>初始化       新页面入栈</li>
+<li>打开新页面 新页面入栈</li>
+<li>页面重定向 当前页面出栈，新页面入栈</li>
+<li>页面返回      页面不断出栈，直到目标返回页，新页面入栈</li>
+<li>Tab 切换    当前页面出栈，新页面入栈</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* 页面的路由</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>在小程序中所有页面的路由全部由框架进行管理，对于路由的触发方式以及页面生命周期函数如下：</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>初始化       小程序打开的第一个页面 onLoad，onShow<br /></li>
+<li>打开新页面 调用 API wx.navigateTo 或使用组件 <navigator />    onLoad，onShow   onHide</li>
+<li>页面重定向 调用 API wx.redirectTo 或使用组件 <navigator />    onLoad，onShow   onUnload</li>
+<li>页面返回      调用 API wx.navigateBack或用户按左上角返回按钮   onShow  onUnload</li>
+<li>（多层页面返回每个页面都会按顺序触发onUnload）</li>
+<li>Tab切换     多 Tab 模式下用户切换 Tab   第一次打开 onLoad，onshow；否则 onShow   onHide</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* 文件作用域</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>在 JavaScript 文件中声明的变量和函数只在该文件中有效；不同的文件中可以声明相同名字的变量和函数，不会互相影响。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>通过全局函数 getApp() 可以获取全局的应用实例，如果需要全局的数据可以在 App() 中设置，如：</em></strong></p>
+
+<pre><code>// app.js
+App({
+  globalData: 1
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// a.js
+// The localValue can only be used in file a.js.
+var localValue = 'a'
+// Get the app instance.
+var app = getApp()
+// Get the global data and change it.
+app.globalData++
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// b.js
+// You can redefine localValue in file b.js, without interference with the localValue in a.js.
+var localValue = 'b'
+// If a.js it run before b.js, now the globalData shoule be 2.
+console.log(getApp().globalData)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>* 模块化</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>我们可以将一些公共的代码抽离成为一个单独的 js 文件，作为一个模块。模块只有通过 module.exports 或者 exports 才能对外暴露接口。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<p><strong>需要注意的是：</strong></p>
+
+<pre><code>exports 是 module.exports 的一个引用，因此在模块里边随意更改 exports 的指向会造成未知的错误。
+所以我们更推荐开发者采用 module.exports 来暴露模块接口，除非你已经清晰知道这两者的关系。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>小程序目前不支持直接引入 node_modules , 开发者需要使用到 node_modules 时候建议拷贝出相关的代码到小程序的目录中。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// common.js
+function sayHello(name) {
+  console.log(`Hello ${name} !`)
+}
+function sayGoodbye(name) {
+  console.log(`Goodbye ${name} !`)
+}
+
+module.exports.sayHello = sayHello
+exports.sayGoodbye = sayGoodbye
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong>在需要使用这些模块的文件中，使用 require(path) 将公共代码引入</strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>var common = require('common.js')
+Page({
+  helloMINA: function() {
+    common.sayHello('MINA')
+  },
+  goodbyeMINA: function() {
+    common.sayGoodbye('MINA')
+  }
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8B%E9%80%9A%E8%BF%87%E4%BD%BF%E7%94%A8%E5%AE%89%E5%85%A8%E8%AF%81%E4%B9%A6%E5%AE%9E%E7%8E%B0HTTPS%E8%AE%BF%E9%97%AE%E6%9C%8D%E5%8A%A1/" title="Golang之通过使用安全证书实现HTTPS访问服务">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%AF%BC%E8%88%AA%E4%B8%8E%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92/" title="微信小程序导航与参数传递">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-11-29</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#wx-ref">wx <span>4</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

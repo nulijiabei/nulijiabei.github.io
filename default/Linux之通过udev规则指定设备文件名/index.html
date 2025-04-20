@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux之通过udev规则指定设备文件名</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux之通过udev规则指定设备文件名 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Linux之通过udev规则指定设备文件名</h3>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+<p>需求：有三个/dev/video0-3设备，但是每次重启设备的文件名称会改变, 想固定这个设备文件名</p>
+
+<p>当前 /dev/video0 是 PCI 采集卡，1-2是USB摄像头 &hellip;</p>
+</blockquote>
+
+<pre><code>// 通过 udevinfo (ubuntu：udevadm) 查看设备信息
+// udevadm (udev管理工具)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>udevadm info -a /dev/video0 
+
+    Udevadm info starts with the device specified by the devpath and then
+    walks up the chain of parent devices. It prints for every device
+    found, all possible attributes in the udev rules key format.
+    A rule to match, can be composed by the attributes of the device
+    and the attributes from one single parent device.
+
+    looking at device '/devices/pci0000:00/0000:00:1c.5/0000:02:00.0/0000:03:01.0/0000:04:00.0/video4linux/video0':
+        KERNEL==&quot;video0&quot;
+        SUBSYSTEM==&quot;video4linux&quot;
+        DRIVER==&quot;&quot;
+        ATTR{dev_debug}==&quot;0&quot;
+        ATTR{index}==&quot;0&quot;
+        ATTR{name}==&quot;PL330B:RAW 00.00 a0011af2&quot;
+
+    looking at parent device '/devices/pci0000:00/0000:00:1c.5/0000:02:00.0/0000:03:01.0/0000:04:00.0':
+        KERNELS==&quot;0000:04:00.0&quot;
+        SUBSYSTEMS==&quot;pci&quot;
+        DRIVERS==&quot;LINUXV4L2330b&quot;
+        ATTRS{broken_parity_status}==&quot;0&quot;
+        ATTRS{class}==&quot;0xff0000&quot;
+        ATTRS{consistent_dma_mask_bits}==&quot;32&quot;
+        ATTRS{d3cold_allowed}==&quot;1&quot;
+        ATTRS{device}==&quot;0xa001&quot;
+        ATTRS{dma_mask_bits}==&quot;32&quot;
+        ATTRS{driver_override}==&quot;(null)&quot;
+        ATTRS{enable}==&quot;1&quot;
+        ATTRS{irq}==&quot;18&quot;
+        ATTRS{local_cpulist}==&quot;0-7&quot;
+        ATTRS{local_cpus}==&quot;ff&quot;
+        ATTRS{msi_bus}==&quot;1&quot;
+        ATTRS{numa_node}==&quot;-1&quot;
+        ATTRS{revision}==&quot;0x00&quot;
+        ATTRS{subsystem_device}==&quot;0xa001&quot;
+        ATTRS{subsystem_vendor}==&quot;0x1af2&quot;
+        ATTRS{vendor}==&quot;0x1af2&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:1c.5/0000:02:00.0/0000:03:01.0':
+        KERNELS==&quot;0000:03:01.0&quot;
+        SUBSYSTEMS==&quot;pci&quot;
+        DRIVERS==&quot;pcieport&quot;
+        ATTRS{broken_parity_status}==&quot;0&quot;
+        ATTRS{class}==&quot;0x060400&quot;
+        ATTRS{consistent_dma_mask_bits}==&quot;32&quot;
+        ATTRS{d3cold_allowed}==&quot;1&quot;
+        ATTRS{device}==&quot;0x2304&quot;
+        ATTRS{dma_mask_bits}==&quot;32&quot;
+        ATTRS{driver_override}==&quot;(null)&quot;
+        ATTRS{enable}==&quot;1&quot;
+        ATTRS{irq}==&quot;120&quot;
+        ATTRS{local_cpulist}==&quot;0-7&quot;
+        ATTRS{local_cpus}==&quot;ff&quot;
+        ATTRS{msi_bus}==&quot;1&quot;
+        ATTRS{numa_node}==&quot;-1&quot;
+        ATTRS{revision}==&quot;0x05&quot;
+        ATTRS{subsystem_device}==&quot;0x0000&quot;
+        ATTRS{subsystem_vendor}==&quot;0x0000&quot;
+        ATTRS{vendor}==&quot;0x12d8&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:1c.5/0000:02:00.0':
+        KERNELS==&quot;0000:02:00.0&quot;
+        SUBSYSTEMS==&quot;pci&quot;
+        DRIVERS==&quot;pcieport&quot;
+        ATTRS{broken_parity_status}==&quot;0&quot;
+        ATTRS{class}==&quot;0x060400&quot;
+        ATTRS{consistent_dma_mask_bits}==&quot;32&quot;
+        ATTRS{d3cold_allowed}==&quot;1&quot;
+        ATTRS{device}==&quot;0x2304&quot;
+        ATTRS{dma_mask_bits}==&quot;32&quot;
+        ATTRS{driver_override}==&quot;(null)&quot;
+        ATTRS{enable}==&quot;1&quot;
+        ATTRS{irq}==&quot;0&quot;
+        ATTRS{local_cpulist}==&quot;0-7&quot;
+        ATTRS{local_cpus}==&quot;ff&quot;
+        ATTRS{msi_bus}==&quot;1&quot;
+        ATTRS{numa_node}==&quot;-1&quot;
+        ATTRS{revision}==&quot;0x05&quot;
+        ATTRS{subsystem_device}==&quot;0x0000&quot;
+        ATTRS{subsystem_vendor}==&quot;0x0000&quot;
+        ATTRS{vendor}==&quot;0x12d8&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:1c.5':
+        KERNELS==&quot;0000:00:1c.5&quot;
+        SUBSYSTEMS==&quot;pci&quot;
+        DRIVERS==&quot;pcieport&quot;
+        ATTRS{broken_parity_status}==&quot;0&quot;
+        ATTRS{class}==&quot;0x060400&quot;
+        ATTRS{consistent_dma_mask_bits}==&quot;32&quot;
+        ATTRS{d3cold_allowed}==&quot;1&quot;
+        ATTRS{device}==&quot;0xa295&quot;
+        ATTRS{dma_mask_bits}==&quot;32&quot;
+        ATTRS{driver_override}==&quot;(null)&quot;
+        ATTRS{enable}==&quot;1&quot;
+        ATTRS{irq}==&quot;17&quot;
+        ATTRS{local_cpulist}==&quot;0-7&quot;
+        ATTRS{local_cpus}==&quot;ff&quot;
+        ATTRS{msi_bus}==&quot;1&quot;
+        ATTRS{numa_node}==&quot;-1&quot;
+        ATTRS{revision}==&quot;0xf0&quot;
+        ATTRS{subsystem_device}==&quot;0x8694&quot;
+        ATTRS{subsystem_vendor}==&quot;0x1043&quot;
+        ATTRS{vendor}==&quot;0x8086&quot;
+
+      looking at parent device '/devices/pci0000:00':
+        KERNELS==&quot;pci0000:00&quot;
+        SUBSYSTEMS==&quot;&quot;
+        DRIVERS==&quot;&quot;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>udevadm info -a /dev/video1 
+
+    Udevadm info starts with the device specified by the devpath and then
+    walks up the chain of parent devices. It prints for every device
+    found, all possible attributes in the udev rules key format.
+    A rule to match, can be composed by the attributes of the device
+    and the attributes from one single parent device.
+
+      looking at device '/devices/pci0000:00/0000:00:14.0/usb1/1-5/1-5:1.0/video4linux/video1':
+        KERNEL==&quot;video1&quot;
+        SUBSYSTEM==&quot;video4linux&quot;
+        DRIVER==&quot;&quot;
+        ATTR{dev_debug}==&quot;0&quot;
+        ATTR{index}==&quot;0&quot;
+        ATTR{name}==&quot;USB 2.0 Camera&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:14.0/usb1/1-5/1-5:1.0':
+        KERNELS==&quot;1-5:1.0&quot;
+        SUBSYSTEMS==&quot;usb&quot;
+        DRIVERS==&quot;uvcvideo&quot;
+        ATTRS{authorized}==&quot;1&quot;
+        ATTRS{bAlternateSetting}==&quot; 0&quot;
+        ATTRS{bInterfaceClass}==&quot;0e&quot;
+        ATTRS{bInterfaceNumber}==&quot;00&quot;
+        ATTRS{bInterfaceProtocol}==&quot;00&quot;
+        ATTRS{bInterfaceSubClass}==&quot;01&quot;
+        ATTRS{bNumEndpoints}==&quot;01&quot;
+        ATTRS{iad_bFirstInterface}==&quot;00&quot;
+        ATTRS{iad_bFunctionClass}==&quot;0e&quot;
+        ATTRS{iad_bFunctionProtocol}==&quot;00&quot;
+        ATTRS{iad_bFunctionSubClass}==&quot;03&quot;
+        ATTRS{iad_bInterfaceCount}==&quot;02&quot;
+        ATTRS{interface}==&quot;HD USB Camera&quot;
+        ATTRS{supports_autosuspend}==&quot;1&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:14.0/usb1/1-5':
+        KERNELS==&quot;1-5&quot;
+        SUBSYSTEMS==&quot;usb&quot;
+        DRIVERS==&quot;usb&quot;
+        ATTRS{authorized}==&quot;1&quot;
+        ATTRS{avoid_reset_quirk}==&quot;0&quot;
+        ATTRS{bConfigurationValue}==&quot;1&quot;
+        ATTRS{bDeviceClass}==&quot;ef&quot;
+        ATTRS{bDeviceProtocol}==&quot;01&quot;
+        ATTRS{bDeviceSubClass}==&quot;02&quot;
+        ATTRS{bMaxPacketSize0}==&quot;64&quot;
+        ATTRS{bMaxPower}==&quot;500mA&quot;
+        ATTRS{bNumConfigurations}==&quot;1&quot;
+        ATTRS{bNumInterfaces}==&quot; 2&quot;
+        ATTRS{bcdDevice}==&quot;0100&quot;
+        ATTRS{bmAttributes}==&quot;80&quot;
+        ATTRS{busnum}==&quot;1&quot;
+        ATTRS{configuration}==&quot;&quot;
+        ATTRS{devnum}==&quot;3&quot;
+        ATTRS{devpath}==&quot;5&quot;
+        ATTRS{idProduct}==&quot;9230&quot;
+        ATTRS{idVendor}==&quot;05a3&quot;
+        ATTRS{ltm_capable}==&quot;no&quot;
+        ATTRS{manufacturer}==&quot;HD Camera Manufacturer&quot;
+        ATTRS{maxchild}==&quot;0&quot;
+        ATTRS{product}==&quot;USB 2.0 Camera&quot;
+        ATTRS{quirks}==&quot;0x0&quot;
+        ATTRS{removable}==&quot;removable&quot;
+        ATTRS{speed}==&quot;480&quot;
+        ATTRS{urbnum}==&quot;7260181&quot;
+        ATTRS{version}==&quot; 2.00&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:14.0/usb1':
+        KERNELS==&quot;usb1&quot;
+        SUBSYSTEMS==&quot;usb&quot;
+        DRIVERS==&quot;usb&quot;
+        ATTRS{authorized}==&quot;1&quot;
+        ATTRS{authorized_default}==&quot;1&quot;
+        ATTRS{avoid_reset_quirk}==&quot;0&quot;
+        ATTRS{bConfigurationValue}==&quot;1&quot;
+        ATTRS{bDeviceClass}==&quot;09&quot;
+        ATTRS{bDeviceProtocol}==&quot;01&quot;
+        ATTRS{bDeviceSubClass}==&quot;00&quot;
+        ATTRS{bMaxPacketSize0}==&quot;64&quot;
+        ATTRS{bMaxPower}==&quot;0mA&quot;
+        ATTRS{bNumConfigurations}==&quot;1&quot;
+        ATTRS{bNumInterfaces}==&quot; 1&quot;
+        ATTRS{bcdDevice}==&quot;0410&quot;
+        ATTRS{bmAttributes}==&quot;e0&quot;
+        ATTRS{busnum}==&quot;1&quot;
+        ATTRS{configuration}==&quot;&quot;
+        ATTRS{devnum}==&quot;1&quot;
+        ATTRS{devpath}==&quot;0&quot;
+        ATTRS{idProduct}==&quot;0002&quot;
+        ATTRS{idVendor}==&quot;1d6b&quot;
+        ATTRS{interface_authorized_default}==&quot;1&quot;
+        ATTRS{ltm_capable}==&quot;no&quot;
+        ATTRS{manufacturer}==&quot;Linux 4.10.0-27-generic xhci-hcd&quot;
+        ATTRS{maxchild}==&quot;12&quot;
+        ATTRS{product}==&quot;xHCI Host Controller&quot;
+        ATTRS{quirks}==&quot;0x0&quot;
+        ATTRS{removable}==&quot;unknown&quot;
+        ATTRS{serial}==&quot;0000:00:14.0&quot;
+        ATTRS{speed}==&quot;480&quot;
+        ATTRS{urbnum}==&quot;60&quot;
+        ATTRS{version}==&quot; 2.00&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:14.0':
+        KERNELS==&quot;0000:00:14.0&quot;
+        SUBSYSTEMS==&quot;pci&quot;
+        DRIVERS==&quot;xhci_hcd&quot;
+        ATTRS{broken_parity_status}==&quot;0&quot;
+        ATTRS{class}==&quot;0x0c0330&quot;
+        ATTRS{consistent_dma_mask_bits}==&quot;64&quot;
+        ATTRS{d3cold_allowed}==&quot;1&quot;
+        ATTRS{device}==&quot;0xa2af&quot;
+        ATTRS{dma_mask_bits}==&quot;64&quot;
+        ATTRS{driver_override}==&quot;(null)&quot;
+        ATTRS{enable}==&quot;1&quot;
+        ATTRS{irq}==&quot;122&quot;
+        ATTRS{local_cpulist}==&quot;0-7&quot;
+        ATTRS{local_cpus}==&quot;ff&quot;
+        ATTRS{msi_bus}==&quot;1&quot;
+        ATTRS{numa_node}==&quot;-1&quot;
+        ATTRS{revision}==&quot;0x00&quot;
+        ATTRS{subsystem_device}==&quot;0x8694&quot;
+        ATTRS{subsystem_vendor}==&quot;0x1043&quot;
+        ATTRS{vendor}==&quot;0x8086&quot;
+
+      looking at parent device '/devices/pci0000:00':
+        KERNELS==&quot;pci0000:00&quot;
+        SUBSYSTEMS==&quot;&quot;
+        DRIVERS==&quot;&quot;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>udevadm info -a /dev/video2 
+
+    Udevadm info starts with the device specified by the devpath and then
+    walks up the chain of parent devices. It prints for every device
+    found, all possible attributes in the udev rules key format.
+    A rule to match, can be composed by the attributes of the device
+    and the attributes from one single parent device.
+
+      looking at device '/devices/pci0000:00/0000:00:14.0/usb1/1-6/1-6:1.0/video4linux/video2':
+        KERNEL==&quot;video2&quot;
+        SUBSYSTEM==&quot;video4linux&quot;
+        DRIVER==&quot;&quot;
+        ATTR{dev_debug}==&quot;0&quot;
+        ATTR{index}==&quot;0&quot;
+        ATTR{name}==&quot;USB 2.0 Camera&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:14.0/usb1/1-6/1-6:1.0':
+        KERNELS==&quot;1-6:1.0&quot;
+        SUBSYSTEMS==&quot;usb&quot;
+        DRIVERS==&quot;uvcvideo&quot;
+        ATTRS{authorized}==&quot;1&quot;
+        ATTRS{bAlternateSetting}==&quot; 0&quot;
+        ATTRS{bInterfaceClass}==&quot;0e&quot;
+        ATTRS{bInterfaceNumber}==&quot;00&quot;
+        ATTRS{bInterfaceProtocol}==&quot;00&quot;
+        ATTRS{bInterfaceSubClass}==&quot;01&quot;
+        ATTRS{bNumEndpoints}==&quot;01&quot;
+        ATTRS{iad_bFirstInterface}==&quot;00&quot;
+        ATTRS{iad_bFunctionClass}==&quot;0e&quot;
+        ATTRS{iad_bFunctionProtocol}==&quot;00&quot;
+        ATTRS{iad_bFunctionSubClass}==&quot;03&quot;
+        ATTRS{iad_bInterfaceCount}==&quot;02&quot;
+        ATTRS{interface}==&quot;HD USB Camera&quot;
+        ATTRS{supports_autosuspend}==&quot;1&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:14.0/usb1/1-6':
+        KERNELS==&quot;1-6&quot;
+        SUBSYSTEMS==&quot;usb&quot;
+        DRIVERS==&quot;usb&quot;
+        ATTRS{authorized}==&quot;1&quot;
+        ATTRS{avoid_reset_quirk}==&quot;0&quot;
+        ATTRS{bConfigurationValue}==&quot;1&quot;
+        ATTRS{bDeviceClass}==&quot;ef&quot;
+        ATTRS{bDeviceProtocol}==&quot;01&quot;
+        ATTRS{bDeviceSubClass}==&quot;02&quot;
+        ATTRS{bMaxPacketSize0}==&quot;64&quot;
+        ATTRS{bMaxPower}==&quot;500mA&quot;
+        ATTRS{bNumConfigurations}==&quot;1&quot;
+        ATTRS{bNumInterfaces}==&quot; 2&quot;
+        ATTRS{bcdDevice}==&quot;0100&quot;
+        ATTRS{bmAttributes}==&quot;80&quot;
+        ATTRS{busnum}==&quot;1&quot;
+        ATTRS{configuration}==&quot;&quot;
+        ATTRS{devnum}==&quot;4&quot;
+        ATTRS{devpath}==&quot;6&quot;
+        ATTRS{idProduct}==&quot;9230&quot;
+        ATTRS{idVendor}==&quot;05a3&quot;
+        ATTRS{ltm_capable}==&quot;no&quot;
+        ATTRS{manufacturer}==&quot;HD Camera Manufacturer&quot;
+        ATTRS{maxchild}==&quot;0&quot;
+        ATTRS{product}==&quot;USB 2.0 Camera&quot;
+        ATTRS{quirks}==&quot;0x0&quot;
+        ATTRS{removable}==&quot;removable&quot;
+        ATTRS{speed}==&quot;480&quot;
+        ATTRS{urbnum}==&quot;7275257&quot;
+        ATTRS{version}==&quot; 2.00&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:14.0/usb1':
+        KERNELS==&quot;usb1&quot;
+        SUBSYSTEMS==&quot;usb&quot;
+        DRIVERS==&quot;usb&quot;
+        ATTRS{authorized}==&quot;1&quot;
+        ATTRS{authorized_default}==&quot;1&quot;
+        ATTRS{avoid_reset_quirk}==&quot;0&quot;
+        ATTRS{bConfigurationValue}==&quot;1&quot;
+        ATTRS{bDeviceClass}==&quot;09&quot;
+        ATTRS{bDeviceProtocol}==&quot;01&quot;
+        ATTRS{bDeviceSubClass}==&quot;00&quot;
+        ATTRS{bMaxPacketSize0}==&quot;64&quot;
+        ATTRS{bMaxPower}==&quot;0mA&quot;
+        ATTRS{bNumConfigurations}==&quot;1&quot;
+        ATTRS{bNumInterfaces}==&quot; 1&quot;
+        ATTRS{bcdDevice}==&quot;0410&quot;
+        ATTRS{bmAttributes}==&quot;e0&quot;
+        ATTRS{busnum}==&quot;1&quot;
+        ATTRS{configuration}==&quot;&quot;
+        ATTRS{devnum}==&quot;1&quot;
+        ATTRS{devpath}==&quot;0&quot;
+        ATTRS{idProduct}==&quot;0002&quot;
+        ATTRS{idVendor}==&quot;1d6b&quot;
+        ATTRS{interface_authorized_default}==&quot;1&quot;
+        ATTRS{ltm_capable}==&quot;no&quot;
+        ATTRS{manufacturer}==&quot;Linux 4.10.0-27-generic xhci-hcd&quot;
+        ATTRS{maxchild}==&quot;12&quot;
+        ATTRS{product}==&quot;xHCI Host Controller&quot;
+        ATTRS{quirks}==&quot;0x0&quot;
+        ATTRS{removable}==&quot;unknown&quot;
+        ATTRS{serial}==&quot;0000:00:14.0&quot;
+        ATTRS{speed}==&quot;480&quot;
+        ATTRS{urbnum}==&quot;60&quot;
+        ATTRS{version}==&quot; 2.00&quot;
+
+      looking at parent device '/devices/pci0000:00/0000:00:14.0':
+        KERNELS==&quot;0000:00:14.0&quot;
+        SUBSYSTEMS==&quot;pci&quot;
+        DRIVERS==&quot;xhci_hcd&quot;
+        ATTRS{broken_parity_status}==&quot;0&quot;
+        ATTRS{class}==&quot;0x0c0330&quot;
+        ATTRS{consistent_dma_mask_bits}==&quot;64&quot;
+        ATTRS{d3cold_allowed}==&quot;1&quot;
+        ATTRS{device}==&quot;0xa2af&quot;
+        ATTRS{dma_mask_bits}==&quot;64&quot;
+        ATTRS{driver_override}==&quot;(null)&quot;
+        ATTRS{enable}==&quot;1&quot;
+        ATTRS{irq}==&quot;122&quot;
+        ATTRS{local_cpulist}==&quot;0-7&quot;
+        ATTRS{local_cpus}==&quot;ff&quot;
+        ATTRS{msi_bus}==&quot;1&quot;
+        ATTRS{numa_node}==&quot;-1&quot;
+        ATTRS{revision}==&quot;0x00&quot;
+        ATTRS{subsystem_device}==&quot;0x8694&quot;
+        ATTRS{subsystem_vendor}==&quot;0x1043&quot;
+        ATTRS{vendor}==&quot;0x8086&quot;
+
+      looking at parent device '/devices/pci0000:00':
+        KERNELS==&quot;pci0000:00&quot;
+        SUBSYSTEMS==&quot;&quot;
+        DRIVERS==&quot;&quot;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查看设备对应的 KERNELS ...
+root@danoo-System-Product-Name:~# ll /sys/class/video4linux/video0/
+total 0
+drwxr-xr-x 3 root root    0 8月   1 22:16 ./
+drwxr-xr-x 3 root root    0 8月   1 13:58 ../
+-r--r--r-- 1 root root 4096 8月   1 13:58 dev
+-rw-r--r-- 1 root root 4096 8月   1 22:00 dev_debug
+lrwxrwxrwx 1 root root    0 8月   1 13:58 device -&gt; ../../../0000:04:00.0/
+-r--r--r-- 1 root root 4096 8月   1 13:58 index
+-r--r--r-- 1 root root 4096 8月   1 22:00 name
+drwxr-xr-x 2 root root    0 8月   1 22:16 power/
+lrwxrwxrwx 1 root root    0 8月   1 13:58 subsystem -&gt; ../../../../../../../../class/video4linux/
+-rw-r--r-- 1 root root 4096 8月   1 13:58 uevent
+root@danoo-System-Product-Name:~# ll /sys/class/video4linux/video1/
+total 0
+drwxr-xr-x 3 root root    0 8月   1 22:16 ./
+drwxr-xr-x 3 root root    0 8月   1 13:58 ../
+-r--r--r-- 1 root root 4096 8月   1 13:58 dev
+-rw-r--r-- 1 root root 4096 8月   1 22:02 dev_debug
+lrwxrwxrwx 1 root root    0 8月   1 13:58 device -&gt; ../../../1-5:1.0/
+-r--r--r-- 1 root root 4096 8月   1 13:58 index
+-r--r--r-- 1 root root 4096 8月   1 22:02 name
+drwxr-xr-x 2 root root    0 8月   1 22:16 power/
+lrwxrwxrwx 1 root root    0 8月   1 13:58 subsystem -&gt; ../../../../../../../../class/video4linux/
+-rw-r--r-- 1 root root 4096 8月   1 13:58 uevent
+root@danoo-System-Product-Name:~# ll /sys/class/video4linux/video2/
+total 0
+drwxr-xr-x 3 root root    0 8月   1 22:17 ./
+drwxr-xr-x 3 root root    0 8月   1 13:58 ../
+-r--r--r-- 1 root root 4096 8月   1 13:58 dev
+-rw-r--r-- 1 root root 4096 8月   1 22:03 dev_debug
+lrwxrwxrwx 1 root root    0 8月   1 13:58 device -&gt; ../../../1-6:1.0/
+-r--r--r-- 1 root root 4096 8月   1 13:58 index
+-r--r--r-- 1 root root 4096 8月   1 22:03 name
+drwxr-xr-x 2 root root    0 8月   1 22:17 power/
+lrwxrwxrwx 1 root root    0 8月   1 13:58 subsystem -&gt; ../../../../../../../../class/video4linux/
+-rw-r--r-- 1 root root 4096 8月   1 13:58 uevent
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在 /etc/udev/rules.d 下新建udev规则文件 81-uvccam.rules
+
+// video0 为 PCI 设备，通过 vendor 和 device 与 KERNELS 来指定 NAME 和 SYMLINK 名称
+// video0 的 device -&gt; ../../../0000:04:00.0/ 同时用 0000:03:01.0 也可以 ... 
+// 只要包含 vendor 和 device 即可
+KERNEL==&quot;video*&quot;, SUBSYSTEMS==&quot;pci&quot;, ATTRS{vendor}==&quot;0x1af2&quot;, ATTRS{device}==&quot;0xa001&quot;, KERNELS==&quot;0000:04:00.0&quot;,
+    NAME=&quot;video0&quot;, SYMLINK+=&quot;x&quot;
+# KERNEL==&quot;video*&quot;, SUBSYSTEMS==&quot;pci&quot;, ATTRS{vendor}==&quot;0x12d8&quot;, ATTRS{device}==&quot;0x2304&quot;, KERNELS==&quot;0000:03:01.0&quot;,
+    NAME=&quot;video0&quot;, SYMLINK+=&quot;x&quot;
+// video1 为 USB 设备，通过 idVendor 和 idProduct 与 KERNELS 来指定 NAME 和 SYMLINK 名称
+// video1 的 device -&gt; ../../../1-5:1.0/ 此时 KERNELS=&quot;1-5:1.0&quot; 并不包含 idVendor 和 idProduct 
+// 但是 KERNELS=&quot;1-5&quot; 包含同样可以使用 ...
+KERNEL==&quot;video*&quot;, SUBSYSTEMS==&quot;usb&quot;, ATTRS{idVendor}==&quot;05a3&quot;, ATTRS{idProduct}==&quot;9230&quot;, KERNELS==&quot;1-5&quot;,
+    NAME=&quot;video1&quot;, SYMLINK+=&quot;res&quot;
+// video2 为 USB 设备，通过 idVendor 和 idProduct 与 KERNELS 来指定 NAME 和 SYMLINK 名称
+// video1 的 device -&gt; ../../../1-6:1.0/ 此时 KERNELS=&quot;1-5:1.0&quot; 并不包含 idVendor 和 idProduct 
+// 但是 KERNELS=&quot;1-6&quot; 包含同样可以使用 ...
+KERNEL==&quot;video*&quot;, SUBSYSTEMS==&quot;usb&quot;, ATTRS{idVendor}==&quot;05a3&quot;, ATTRS{idProduct}==&quot;9230&quot;, KERNELS==&quot;1-6&quot;,
+    NAME=&quot;video2&quot;, SYMLINK+=&quot;face&quot;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 重启后，即可看到
+
+lrwxrwxrwx 1 root root 6 8月   1 13:58 /dev/x -&gt; video0
+lrwxrwxrwx 1 root root 6 8月   1 13:58 /dev/res -&gt; video1
+lrwxrwxrwx 1 root root 6 8月   1 13:58 /dev/face -&gt; video2
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p><em>声明：此方法通过 <a href="http://blog.csdn.net/linczone/article/details/48342419">http://blog.csdn.net/linczone/article/details/48342419</a> 学习, 内容绝对原创</em></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>查看自己设备的idVendor和idProduct</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>lsusb -vvv
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>udevadm info --attribute-walk --path=/sys/bus/usb-serial/devices/ttyUSB0
+
+    SUBSYSTEMS==&quot;usb&quot;  
+    DRIVERS==&quot;cp210x&quot;  
+    ATTRS{bInterfaceClass}==&quot;ff&quot;  
+    ATTRS{bInterfaceSubClass}==&quot;00&quot;  
+    ATTRS{bInterfaceProtocol}==&quot;00&quot;  
+    ATTRS{bNumEndpoints}==&quot;02&quot;  
+    ATTRS{supports_autosuspend}==&quot;1&quot;  
+    ATTRS{bAlternateSetting}==&quot; 0&quot;  
+    ATTRS{bInterfaceNumber}==&quot;00&quot;  
+    ATTRS{interface}==&quot;CP2102 USB to UART Bridge Controller&quot;  
+    KERNEL==&quot;ttyUSB*&quot;, KERNELS==&quot;1-2.1&quot;, MODE:=&quot;0777&quot;,SYMLINK+=&quot;slamtec_base_&quot;  
+    KERNEL==&quot;ttyUSB*&quot;, KERNELS==&quot;1-2.2&quot;, MODE:=&quot;0777&quot;,SYMLINK+=&quot;slamtec_laser_&quot; 
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>service udev reload
+service udev restart
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Ubuntu%E4%B9%8BFirefox%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF%E5%8F%8A%E5%85%A8%E5%B1%8F/" title="Ubuntu之Firefox开机自启及全屏">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Nginx%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E4%B9%8B%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91/" title="Nginx反向代理之端口转发">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2017-08-01</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

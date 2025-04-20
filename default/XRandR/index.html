@@ -1,0 +1,4111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>XRandR</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>XRandR </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>// XRandR 源码
+
+/* 
+ * Copyright © 2001 Keith Packard, member of The XFree86 Project, Inc.
+ * Copyright © 2002 Hewlett Packard Company, Inc.
+ * Copyright © 2006 Intel Corporation
+ * Copyright © 2013 NVIDIA Corporation
+ *
+ * Permission to use, copy, modify, distribute, and sell this software and its
+ * documentation for any purpose is hereby granted without fee, provided that
+ * the above copyright notice appear in all copies and that both that copyright
+ * notice and this permission notice appear in supporting documentation, and
+ * that the name of the copyright holders not be used in advertising or
+ * publicity pertaining to distribution of the software without specific,
+ * written prior permission.  The copyright holders make no representations
+ * about the suitability of this software for any purpose.  It is provided &quot;as
+ * is&quot; without express or implied warranty.
+ *
+ * THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+ * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+ * EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+ * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+ * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+ * OF THIS SOFTWARE.
+ *
+ * Thanks to Jim Gettys who wrote most of the client side code,
+ * and part of the server code for randr.
+ */
+
+#include &lt;stdio.h&gt;
+#include &lt;X11/Xlib.h&gt;
+#include &lt;X11/Xlibint.h&gt;
+#include &lt;X11/Xproto.h&gt;
+#include &lt;X11/Xatom.h&gt;
+#include &lt;X11/extensions/Xrandr.h&gt;
+#include &lt;X11/extensions/Xrender.h&gt; /* we share subpixel information */
+#include &lt;strings.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;inttypes.h&gt;
+#include &lt;stdarg.h&gt;
+#include &lt;math.h&gt;
+
+#ifdef HAVE_CONFIG_H
+#include &quot;config.h&quot;
+#endif
+
+static char *program_name;
+static Display  *dpy;
+static Window   root;
+static int  screen = -1;
+static Bool verbose = False;
+static Bool automatic = False;
+static Bool properties = False;
+static Bool grab_server = True;
+static Bool no_primary = False;
+
+static const char *direction[5] = {
+    &quot;normal&quot;, 
+    &quot;left&quot;, 
+    &quot;inverted&quot;, 
+    &quot;right&quot;,
+    &quot;\n&quot;};
+
+static const char *reflections[5] = {
+    &quot;normal&quot;, 
+    &quot;x&quot;, 
+    &quot;y&quot;, 
+    &quot;xy&quot;,
+    &quot;\n&quot;};
+
+/* subpixel order */
+static const char *order[6] = {
+    &quot;unknown&quot;,
+    &quot;horizontal rgb&quot;,
+    &quot;horizontal bgr&quot;,
+    &quot;vertical rgb&quot;,
+    &quot;vertical bgr&quot;,
+    &quot;no subpixels&quot;};
+
+static const struct {
+    const char      *string;
+    unsigned long   flag;
+} mode_flags[] = {
+    { &quot;+HSync&quot;, RR_HSyncPositive },
+    { &quot;-HSync&quot;, RR_HSyncNegative },
+    { &quot;+VSync&quot;, RR_VSyncPositive },
+    { &quot;-VSync&quot;, RR_VSyncNegative },
+    { &quot;Interlace&quot;, RR_Interlace },
+    { &quot;DoubleScan&quot;, RR_DoubleScan },
+    { &quot;CSync&quot;,      RR_CSync },
+    { &quot;+CSync&quot;,     RR_CSyncPositive },
+    { &quot;-CSync&quot;,     RR_CSyncNegative },
+    { NULL,     0 }
+};
+
+static void
+usage(void)
+{
+    printf(&quot;usage: %s [options]\n%s&quot;, program_name,
+       &quot;  where options are:\n&quot;
+       &quot;  --display &lt;display&gt; or -d &lt;display&gt;\n&quot;
+       &quot;  --help\n&quot;
+       &quot;  -o &lt;normal,inverted,left,right,0,1,2,3&gt;\n&quot;
+       &quot;            or --orientation &lt;normal,inverted,left,right,0,1,2,3&gt;\n&quot;
+       &quot;  -q        or --query\n&quot;
+       &quot;  -s &lt;size&gt;/&lt;width&gt;x&lt;height&gt; or --size &lt;size&gt;/&lt;width&gt;x&lt;height&gt;\n&quot;
+       &quot;  -r &lt;rate&gt; or --rate &lt;rate&gt; or --refresh &lt;rate&gt;\n&quot;
+       &quot;  -v        or --version\n&quot;
+       &quot;  -x        (reflect in x)\n&quot;
+       &quot;  -y        (reflect in y)\n&quot;
+       &quot;  --screen &lt;screen&gt;\n&quot;
+       &quot;  --verbose\n&quot;
+       &quot;  --current\n&quot;
+       &quot;  --dryrun\n&quot;
+       &quot;  --nograb\n&quot;
+       &quot;  --prop or --properties\n&quot;
+       &quot;  --fb &lt;width&gt;x&lt;height&gt;\n&quot;
+       &quot;  --fbmm &lt;width&gt;x&lt;height&gt;\n&quot;
+       &quot;  --dpi &lt;dpi&gt;/&lt;output&gt;\n&quot;
+       &quot;  --output &lt;output&gt;\n&quot;
+       &quot;      --auto\n&quot;
+       &quot;      --mode &lt;mode&gt;\n&quot;
+       &quot;      --preferred\n&quot;
+       &quot;      --pos &lt;x&gt;x&lt;y&gt;\n&quot;
+       &quot;      --rate &lt;rate&gt; or --refresh &lt;rate&gt;\n&quot;
+       &quot;      --reflect normal,x,y,xy\n&quot;
+       &quot;      --rotate normal,inverted,left,right\n&quot;
+       &quot;      --left-of &lt;output&gt;\n&quot;
+       &quot;      --right-of &lt;output&gt;\n&quot;
+       &quot;      --above &lt;output&gt;\n&quot;
+       &quot;      --below &lt;output&gt;\n&quot;
+       &quot;      --same-as &lt;output&gt;\n&quot;
+       &quot;      --set &lt;property&gt; &lt;value&gt;\n&quot;
+       &quot;      --scale &lt;x&gt;x&lt;y&gt;\n&quot;
+       &quot;      --scale-from &lt;w&gt;x&lt;h&gt;\n&quot;
+       &quot;      --transform &lt;a&gt;,&lt;b&gt;,&lt;c&gt;,&lt;d&gt;,&lt;e&gt;,&lt;f&gt;,&lt;g&gt;,&lt;h&gt;,&lt;i&gt;\n&quot;
+       &quot;      --off\n&quot;
+       &quot;      --crtc &lt;crtc&gt;\n&quot;
+       &quot;      --panning &lt;w&gt;x&lt;h&gt;[+&lt;x&gt;+&lt;y&gt;[/&lt;track:w&gt;x&lt;h&gt;+&lt;x&gt;+&lt;y&gt;[/&lt;border:l&gt;/&lt;t&gt;/&lt;r&gt;/&lt;b&gt;]]]\n&quot;
+       &quot;      --gamma &lt;r&gt;:&lt;g&gt;:&lt;b&gt;\n&quot;
+       &quot;      --brightness &lt;value&gt;\n&quot;
+       &quot;      --primary\n&quot;
+       &quot;  --noprimary\n&quot;
+       &quot;  --newmode &lt;name&gt; &lt;clock MHz&gt;\n&quot;
+       &quot;            &lt;hdisp&gt; &lt;hsync-start&gt; &lt;hsync-end&gt; &lt;htotal&gt;\n&quot;
+       &quot;            &lt;vdisp&gt; &lt;vsync-start&gt; &lt;vsync-end&gt; &lt;vtotal&gt;\n&quot;
+       &quot;            [flags...]\n&quot;
+       &quot;            Valid flags: +HSync -HSync +VSync -VSync\n&quot;
+       &quot;                         +CSync -CSync CSync Interlace DoubleScan\n&quot;
+       &quot;  --rmmode &lt;name&gt;\n&quot;
+       &quot;  --addmode &lt;output&gt; &lt;name&gt;\n&quot;
+       &quot;  --delmode &lt;output&gt; &lt;name&gt;\n&quot;
+       &quot;  --listproviders\n&quot;
+       &quot;  --setprovideroutputsource &lt;prov-xid&gt; &lt;source-xid&gt;\n&quot;
+       &quot;  --setprovideroffloadsink &lt;prov-xid&gt; &lt;sink-xid&gt;\n&quot;);
+}
+
+static void _X_NORETURN _X_ATTRIBUTE_PRINTF(1,2)
+fatal (const char *format, ...)
+{
+    va_list ap;
+
+    va_start (ap, format);
+    fprintf (stderr, &quot;%s: &quot;, program_name);
+    vfprintf (stderr, format, ap);
+    va_end (ap);
+    exit (1);
+    /*NOTREACHED*/
+}
+
+static void _X_ATTRIBUTE_PRINTF(1,2)
+warning (const char *format, ...)
+{
+    va_list ap;
+
+    va_start (ap, format);
+    fprintf (stderr, &quot;%s: &quot;, program_name);
+    vfprintf (stderr, format, ap);
+    va_end (ap);
+}
+
+static void _X_NORETURN _X_ATTRIBUTE_PRINTF(1,2)
+argerr (const char *format, ...)
+{
+    va_list ap;
+
+    va_start (ap, format);
+    fprintf (stderr, &quot;%s: &quot;, program_name);
+    vfprintf (stderr, format, ap);
+    fprintf (stderr, &quot;Try '%s --help' for more information.\n&quot;, program_name);
+    va_end (ap);
+    exit (1);
+    /*NOTREACHED*/
+}
+
+/* Because fmin requires C99 suppport */
+static inline double dmin (double x, double y)
+{
+    return x &lt; y ? x : y;
+}
+
+static const char *
+rotation_name (Rotation rotation)
+{
+    int i;
+
+    if ((rotation &amp; 0xf) == 0)
+    return &quot;normal&quot;;
+    for (i = 0; i &lt; 4; i++)
+    if (rotation &amp; (1 &lt;&lt; i))
+        return direction[i];
+    return &quot;invalid rotation&quot;;
+}
+
+static const char *
+reflection_name (Rotation rotation)
+{
+    rotation &amp;= (RR_Reflect_X|RR_Reflect_Y);
+    switch (rotation) {
+    case 0:
+    return &quot;none&quot;;
+    case RR_Reflect_X:
+    return &quot;X axis&quot;;
+    case RR_Reflect_Y:
+    return &quot;Y axis&quot;;
+    case RR_Reflect_X|RR_Reflect_Y:
+    return &quot;X and Y axis&quot;;
+    }
+    return &quot;invalid reflection&quot;;
+}
+
+static const char *
+capability_name (int cap_bit)
+{
+    switch (cap_bit) {
+    case RR_Capability_SourceOutput:
+    return &quot;Source Output&quot;;
+    case RR_Capability_SinkOutput:
+    return &quot;Sink Output&quot;;
+    case RR_Capability_SourceOffload:
+    return &quot;Source Offload&quot;;
+    case RR_Capability_SinkOffload:
+    return &quot;Sink Offload&quot;;
+    }
+    return &quot;invalid capability&quot;;
+}
+
+typedef enum _relation {
+    relation_left_of,
+    relation_right_of,
+    relation_above,
+    relation_below,
+    relation_same_as,
+} relation_t;
+
+typedef struct {
+    int     x, y, width, height;
+} rectangle_t;
+
+typedef struct {
+    int     x1, y1, x2, y2;
+} box_t;
+
+typedef struct {
+    int     x, y;
+} point_t;
+
+typedef enum _changes {
+    changes_none = 0,
+    changes_crtc = (1 &lt;&lt; 0),
+    changes_mode = (1 &lt;&lt; 1),
+    changes_relation = (1 &lt;&lt; 2),
+    changes_position = (1 &lt;&lt; 3),
+    changes_rotation = (1 &lt;&lt; 4),
+    changes_reflection = (1 &lt;&lt; 5),
+    changes_automatic = (1 &lt;&lt; 6),
+    changes_refresh = (1 &lt;&lt; 7),
+    changes_property = (1 &lt;&lt; 8),
+    changes_transform = (1 &lt;&lt; 9),
+    changes_panning = (1 &lt;&lt; 10),
+    changes_gamma = (1 &lt;&lt; 11),
+    changes_primary = (1 &lt;&lt; 12),
+} changes_t;
+
+typedef enum _name_kind {
+    name_none = 0,
+    name_string = (1 &lt;&lt; 0),
+    name_xid = (1 &lt;&lt; 1),
+    name_index = (1 &lt;&lt; 2),
+    name_preferred = (1 &lt;&lt; 3),
+} name_kind_t;
+
+typedef struct {
+    name_kind_t     kind;
+    char            *string;
+    XID             xid;
+    int         index;
+} name_t;
+
+typedef struct _crtc crtc_t;
+typedef struct _output  output_t;
+typedef struct _transform transform_t;
+typedef struct _umode   umode_t;
+typedef struct _output_prop output_prop_t;
+typedef struct _provider provider_t;
+
+struct _transform {
+    XTransform      transform;
+    const char      *filter;
+    int         nparams;
+    XFixed      *params;
+};
+
+struct _crtc {
+    name_t      crtc;
+    Bool        changing;
+    XRRCrtcInfo     *crtc_info;
+
+    XRRModeInfo     *mode_info;
+    XRRPanning      *panning_info;
+    int         x;
+    int         y;
+    Rotation        rotation;
+    output_t        **outputs;
+    int         noutput;
+    transform_t     current_transform, pending_transform;
+};
+
+struct _output_prop {
+    struct _output_prop *next;
+    char        *name;
+    char        *value;
+};
+
+struct _output {
+    struct _output   *next;
+
+    changes_t       changes;
+
+    output_prop_t   *props;
+
+    name_t      output;
+    XRROutputInfo   *output_info;
+
+    name_t      crtc;
+    crtc_t      *crtc_info;
+    crtc_t      *current_crtc_info;
+
+    name_t      mode;
+    double      refresh;
+    XRRModeInfo     *mode_info;
+
+    name_t      addmode;
+
+    relation_t      relation;
+    char        *relative_to;
+
+    int         x, y;
+    Rotation        rotation;
+
+    XRRPanning      panning;
+
+    Bool            automatic;
+    int             scale_from_w, scale_from_h;
+    transform_t     transform;
+
+    struct {
+    float red;
+    float green;
+    float blue;
+    } gamma;
+
+    float       brightness;
+
+    Bool        primary;
+
+    Bool        found;
+};
+
+typedef enum _umode_action {
+    umode_create, umode_destroy, umode_add, umode_delete
+} umode_action_t;
+
+
+struct _umode {
+    struct _umode   *next;
+
+    umode_action_t  action;
+    XRRModeInfo     mode;
+    name_t      output;
+    name_t      name;
+};
+
+struct _provider {
+    name_t      provider;
+    XRRProviderInfo *info;
+};
+
+static const char *connection[3] = {
+    &quot;connected&quot;,
+    &quot;disconnected&quot;,
+    &quot;unknown connection&quot;};
+
+#define OUTPUT_NAME 1
+
+#define CRTC_OFF    2
+#define CRTC_UNSET  3
+#define CRTC_INDEX  0x40000000
+
+#define MODE_NAME   1
+#define MODE_OFF    2
+#define MODE_UNSET  3
+#define MODE_PREF   4
+
+#define POS_UNSET   -1
+
+static output_t *all_outputs = NULL;
+static output_t **all_outputs_tail = &amp;all_outputs;
+static crtc_t   *crtcs;
+static provider_t   *providers;
+static umode_t  *umodes;
+static int  num_crtcs, num_providers;
+static XRRScreenResources  *res;
+static int  fb_width = 0, fb_height = 0;
+static int  fb_width_mm = 0, fb_height_mm = 0;
+static double   dpi = 0;
+static char *dpi_output_name = NULL;
+static Bool dryrun = False;
+static int  minWidth, maxWidth, minHeight, maxHeight;
+static Bool     has_1_2 = False;
+static Bool     has_1_3 = False;
+static Bool     has_1_4 = False;
+static name_t   provider_name, output_source_provider_name, offload_sink_provider_name;
+
+static int
+mode_height (XRRModeInfo *mode_info, Rotation rotation)
+{
+    switch (rotation &amp; 0xf) {
+    case RR_Rotate_0:
+    case RR_Rotate_180:
+    return mode_info-&gt;height;
+    case RR_Rotate_90:
+    case RR_Rotate_270:
+    return mode_info-&gt;width;
+    default:
+    return 0;
+    }
+}
+
+static int
+mode_width (XRRModeInfo *mode_info, Rotation rotation)
+{
+    switch (rotation &amp; 0xf) {
+    case RR_Rotate_0:
+    case RR_Rotate_180:
+    return mode_info-&gt;width;
+    case RR_Rotate_90:
+    case RR_Rotate_270:
+    return mode_info-&gt;height;
+    default:
+    return 0;
+    }
+}
+
+static Bool
+transform_point (XTransform *transform, double *xp, double *yp)
+{
+    double  vector[3];
+    double  result[3];
+    int     i, j;
+    double  v;
+
+    vector[0] = *xp;
+    vector[1] = *yp;
+    vector[2] = 1;
+    for (j = 0; j &lt; 3; j++)
+    {
+    v = 0;
+    for (i = 0; i &lt; 3; i++)
+        v += (XFixedToDouble (transform-&gt;matrix[j][i]) * vector[i]);
+    result[j] = v;
+    }
+    if (!result[2])
+    return False;
+    for (j = 0; j &lt; 2; j++) {
+    vector[j] = result[j] / result[2];
+    if (vector[j] &gt; 32767 || vector[j] &lt; -32767)
+        return False;
+    }
+    *xp = vector[0];
+    *yp = vector[1];
+    return True;
+}
+
+static void
+path_bounds (XTransform *transform, point_t *points, int npoints, box_t *box)
+{
+    int     i;
+    box_t   point;
+
+    for (i = 0; i &lt; npoints; i++) {
+    double  x, y;
+    x = points[i].x;
+    y = points[i].y;
+    transform_point (transform, &amp;x, &amp;y);
+    point.x1 = floor (x);
+    point.y1 = floor (y);
+    point.x2 = ceil (x);
+    point.y2 = ceil (y);
+    if (i == 0)
+        *box = point;
+    else {
+        if (point.x1 &lt; box-&gt;x1) box-&gt;x1 = point.x1;
+        if (point.y1 &lt; box-&gt;y1) box-&gt;y1 = point.y1;
+        if (point.x2 &gt; box-&gt;x2) box-&gt;x2 = point.x2;
+        if (point.y2 &gt; box-&gt;y2) box-&gt;y2 = point.y2;
+    }
+    }
+}
+
+static void
+mode_geometry (XRRModeInfo *mode_info, Rotation rotation,
+           XTransform *transform,
+           box_t *bounds)
+{
+    point_t rect[4];
+    int width = mode_width (mode_info, rotation);
+    int height = mode_height (mode_info, rotation);
+
+    rect[0].x = 0;
+    rect[0].y = 0;
+    rect[1].x = width;
+    rect[1].y = 0;
+    rect[2].x = width;
+    rect[2].y = height;
+    rect[3].x = 0;
+    rect[3].y = height;
+    path_bounds (transform, rect, 4, bounds);
+}
+
+/* v refresh frequency in Hz */
+static double
+mode_refresh (XRRModeInfo *mode_info)
+{
+    double rate;
+    double vTotal = mode_info-&gt;vTotal;
+
+    if (mode_info-&gt;modeFlags &amp; RR_DoubleScan) {
+    /* doublescan doubles the number of lines */
+    vTotal *= 2;
+    }
+
+    if (mode_info-&gt;modeFlags &amp; RR_Interlace) {
+    /* interlace splits the frame into two fields */
+    /* the field rate is what is typically reported by monitors */
+    vTotal /= 2;
+    }
+
+    if (mode_info-&gt;hTotal &amp;&amp; vTotal)
+    rate = ((double) mode_info-&gt;dotClock /
+        ((double) mode_info-&gt;hTotal * (double) vTotal));
+    else
+    rate = 0;
+    return rate;
+}
+
+/* h sync frequency in Hz */
+static double
+mode_hsync (XRRModeInfo *mode_info)
+{
+    double rate;
+
+    if (mode_info-&gt;hTotal)
+    rate = (double) mode_info-&gt;dotClock / (double) mode_info-&gt;hTotal;
+    else
+    rate = 0;
+    return rate;
+}
+
+static void
+init_name (name_t *name)
+{
+    name-&gt;kind = name_none;
+}
+
+static void
+set_name_string (name_t *name, char *string)
+{
+    name-&gt;kind |= name_string;
+    name-&gt;string = string;
+}
+
+static void
+set_name_xid (name_t *name, XID xid)
+{
+    name-&gt;kind |= name_xid;
+    name-&gt;xid = xid;
+}
+
+static void
+set_name_index (name_t *name, int idx)
+{
+    name-&gt;kind |= name_index;
+    name-&gt;index = idx;
+}
+
+static void
+set_name_preferred (name_t *name)
+{
+    name-&gt;kind |= name_preferred;
+}
+
+static void
+set_name_all (name_t *name, name_t *old)
+{
+    if (old-&gt;kind &amp; name_xid)
+    name-&gt;xid = old-&gt;xid;
+    if (old-&gt;kind &amp; name_string)
+    name-&gt;string = old-&gt;string;
+    if (old-&gt;kind &amp; name_index)
+    name-&gt;index = old-&gt;index;
+    name-&gt;kind |= old-&gt;kind;
+}
+
+static void
+set_name (name_t *name, char *string, name_kind_t valid)
+{
+    unsigned int xid; /* don't make it XID (which is unsigned long):
+             scanf() takes unsigned int */
+    int idx;
+
+    if ((valid &amp; name_xid) &amp;&amp; sscanf (string, &quot;0x%x&quot;, &amp;xid) == 1)
+    set_name_xid (name, xid);
+    else if ((valid &amp; name_index) &amp;&amp; sscanf (string, &quot;%d&quot;, &amp;idx) == 1)
+    set_name_index (name, idx);
+    else if (valid &amp; name_string)
+    set_name_string (name, string);
+    else
+    argerr (&quot;invalid name '%s'\n&quot;, string);
+}
+
+static int
+print_name (const name_t *name)
+{
+    name_kind_t kind = name-&gt;kind;
+
+    if ((kind &amp; name_xid))         return printf(&quot;XID 0x%x&quot;, (unsigned int)name-&gt;xid);
+    else if ((kind &amp; name_string)) return printf(&quot;name %s&quot;, name-&gt;string);
+    else if ((kind &amp; name_index))  return printf(&quot;index %d&quot;, name-&gt;index);
+    else                           return printf(&quot;unknown name&quot;);
+}
+
+static void
+init_transform (transform_t *transform)
+{
+    int x;
+    memset (&amp;transform-&gt;transform, '\0', sizeof (transform-&gt;transform));
+    for (x = 0; x &lt; 3; x++)
+    transform-&gt;transform.matrix[x][x] = XDoubleToFixed (1.0);
+    transform-&gt;filter = &quot;&quot;;
+    transform-&gt;nparams = 0;
+    transform-&gt;params = NULL;
+}
+
+static void
+set_transform (transform_t  *dest,
+           XTransform   *transform,
+           const char   *filter,
+           XFixed       *params,
+           int      nparams)
+{
+    dest-&gt;transform = *transform;
+    /* note: this string is leaked */
+    dest-&gt;filter = strdup (filter);
+    dest-&gt;nparams = nparams;
+    dest-&gt;params = malloc (nparams * sizeof (XFixed));
+    memcpy (dest-&gt;params, params, nparams * sizeof (XFixed));
+}
+
+static void
+copy_transform (transform_t *dest, transform_t *src)
+{
+    set_transform (dest, &amp;src-&gt;transform,
+           src-&gt;filter, src-&gt;params, src-&gt;nparams);
+}
+
+static Bool
+equal_transform (transform_t *a, transform_t *b)
+{
+    if (memcmp (&amp;a-&gt;transform, &amp;b-&gt;transform, sizeof (XTransform)) != 0)
+    return False;
+    if (strcmp (a-&gt;filter, b-&gt;filter) != 0)
+    return False;
+    if (a-&gt;nparams != b-&gt;nparams)
+    return False;
+    if (memcmp (a-&gt;params, b-&gt;params, a-&gt;nparams * sizeof (XFixed)) != 0)
+    return False;
+    return True;
+}
+
+static output_t *
+add_output (void)
+{
+    output_t *output = calloc (1, sizeof (output_t));
+
+    if (!output)
+    fatal (&quot;out of memory\n&quot;);
+    output-&gt;next = NULL;
+    output-&gt;found = False;
+    output-&gt;brightness = 1.0;
+    *all_outputs_tail = output;
+    all_outputs_tail = &amp;output-&gt;next;
+    return output;
+}
+
+static output_t *
+find_output (name_t *name)
+{
+    output_t *output;
+
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+    name_kind_t common = name-&gt;kind &amp; output-&gt;output.kind;
+
+    if ((common &amp; name_xid) &amp;&amp; name-&gt;xid == output-&gt;output.xid)
+        break;
+    if ((common &amp; name_string) &amp;&amp; !strcmp (name-&gt;string, output-&gt;output.string))
+        break;
+    if ((common &amp; name_index) &amp;&amp; name-&gt;index == output-&gt;output.index)
+        break;
+    }
+    return output;
+}
+
+static output_t *
+find_output_by_xid (RROutput output)
+{
+    name_t  output_name;
+
+    init_name (&amp;output_name);
+    set_name_xid (&amp;output_name, output);
+    return find_output (&amp;output_name);
+}
+
+static output_t *
+find_output_by_name (char *name)
+{
+    name_t  output_name;
+
+    init_name (&amp;output_name);
+    set_name_string (&amp;output_name, name);
+    return find_output (&amp;output_name);
+}
+
+static crtc_t *
+find_crtc (name_t *name)
+{
+    int     c;
+    crtc_t  *crtc = NULL;
+
+    for (c = 0; c &lt; num_crtcs; c++)
+    {
+    name_kind_t common;
+
+    crtc = &amp;crtcs[c];
+    common = name-&gt;kind &amp; crtc-&gt;crtc.kind;
+
+    if ((common &amp; name_xid) &amp;&amp; name-&gt;xid == crtc-&gt;crtc.xid)
+        break;
+    if ((common &amp; name_string) &amp;&amp; !strcmp (name-&gt;string, crtc-&gt;crtc.string))
+        break;
+    if ((common &amp; name_index) &amp;&amp; name-&gt;index == crtc-&gt;crtc.index)
+        break;
+    crtc = NULL;
+    }
+    return crtc;
+}
+
+static crtc_t *
+find_crtc_by_xid (RRCrtc crtc)
+{
+    name_t  crtc_name;
+
+    init_name (&amp;crtc_name);
+    set_name_xid (&amp;crtc_name, crtc);
+    return find_crtc (&amp;crtc_name);
+}
+
+static XRRModeInfo *
+find_mode (name_t *name, double refresh)
+{
+    int     m;
+    XRRModeInfo *best = NULL;
+    double  bestDist = 0;
+
+    for (m = 0; m &lt; res-&gt;nmode; m++)
+    {
+    XRRModeInfo *mode = &amp;res-&gt;modes[m];
+    if ((name-&gt;kind &amp; name_xid) &amp;&amp; name-&gt;xid == mode-&gt;id)
+    {
+        best = mode;
+        break;
+    }
+    if ((name-&gt;kind &amp; name_string) &amp;&amp; !strcmp (name-&gt;string, mode-&gt;name))
+    {
+        double   dist;
+
+        if (refresh)
+        dist = fabs (mode_refresh (mode) - refresh);
+        else
+        dist = 0;
+        if (!best || dist &lt; bestDist)
+        {
+        bestDist = dist;
+        best = mode;
+        }
+    }
+    }
+    return best;
+}
+
+static XRRModeInfo *
+find_mode_by_xid (RRMode mode)
+{
+    name_t  mode_name;
+
+    init_name (&amp;mode_name);
+    set_name_xid (&amp;mode_name, mode);
+    return find_mode (&amp;mode_name, 0);
+}
+
+#if 0
+static XRRModeInfo *
+find_mode_by_name (char *name)
+{
+    name_t  mode_name;
+    init_name (&amp;mode_name);
+    set_name_string (&amp;mode_name, name);
+    return find_mode (&amp;mode_name, 0);
+}
+#endif
+
+static
+XRRModeInfo *
+find_mode_for_output (output_t *output, name_t *name)
+{
+    XRROutputInfo   *output_info = output-&gt;output_info;
+    int         m;
+    XRRModeInfo     *best = NULL;
+    double      bestDist = 0;
+
+    for (m = 0; m &lt; output_info-&gt;nmode; m++)
+    {
+    XRRModeInfo     *mode;
+
+    mode = find_mode_by_xid (output_info-&gt;modes[m]);
+    if (!mode) continue;
+    if ((name-&gt;kind &amp; name_xid) &amp;&amp; name-&gt;xid == mode-&gt;id)
+    {
+        best = mode;
+        break;
+    }
+    if ((name-&gt;kind &amp; name_string) &amp;&amp; !strcmp (name-&gt;string, mode-&gt;name))
+    {
+        double   dist;
+
+        /* Stay away from doublescan modes unless refresh rate is specified. */
+        if (!output-&gt;refresh &amp;&amp; (mode-&gt;modeFlags &amp; RR_DoubleScan))
+        continue;
+
+        if (output-&gt;refresh)
+        dist = fabs (mode_refresh (mode) - output-&gt;refresh);
+        else
+        dist = 0;
+        if (!best || dist &lt; bestDist)
+        {
+        bestDist = dist;
+        best = mode;
+        }
+    }
+    }
+    return best;
+}
+
+static XRRModeInfo *
+preferred_mode (output_t *output)
+{
+    XRROutputInfo   *output_info = output-&gt;output_info;
+    int         m;
+    XRRModeInfo     *best;
+    int         bestDist;
+
+    best = NULL;
+    bestDist = 0;
+    for (m = 0; m &lt; output_info-&gt;nmode; m++)
+    {
+    XRRModeInfo *mode_info = find_mode_by_xid (output_info-&gt;modes[m]);
+    int     dist;
+
+    if (m &lt; output_info-&gt;npreferred)
+        dist = 0;
+    else if (output_info-&gt;mm_height)
+        dist = (1000 * DisplayHeight(dpy, screen) / DisplayHeightMM(dpy, screen) -
+            1000 * mode_info-&gt;height / output_info-&gt;mm_height);
+    else
+        dist = DisplayHeight(dpy, screen) - mode_info-&gt;height;
+
+    if (dist &lt; 0) dist = -dist;
+    if (!best || dist &lt; bestDist)
+    {
+        best = mode_info;
+        bestDist = dist;
+    }
+    }
+    return best;
+}
+
+static Bool
+output_can_use_crtc (output_t *output, crtc_t *crtc)
+{
+    XRROutputInfo   *output_info = output-&gt;output_info;
+    int         c;
+
+    for (c = 0; c &lt; output_info-&gt;ncrtc; c++)
+    if (output_info-&gt;crtcs[c] == crtc-&gt;crtc.xid)
+        return True;
+    return False;
+}
+
+static Bool
+output_can_use_mode (output_t *output, XRRModeInfo *mode)
+{
+    XRROutputInfo   *output_info = output-&gt;output_info;
+    int         m;
+
+    for (m = 0; m &lt; output_info-&gt;nmode; m++)
+    if (output_info-&gt;modes[m] == mode-&gt;id)
+        return True;
+    return False;
+}
+
+static Bool
+crtc_can_use_rotation (crtc_t *crtc, Rotation rotation)
+{
+    Rotation    rotations = crtc-&gt;crtc_info-&gt;rotations;
+    Rotation    dir = rotation &amp; (RR_Rotate_0|RR_Rotate_90|RR_Rotate_180|RR_Rotate_270);
+    Rotation    reflect = rotation &amp; (RR_Reflect_X|RR_Reflect_Y);
+    if (((rotations &amp; dir) != 0) &amp;&amp; ((rotations &amp; reflect) == reflect))
+    return True;
+    return False;
+}
+
+#if 0
+static Bool
+crtc_can_use_transform (crtc_t *crtc, XTransform *transform)
+{
+    int major, minor;
+
+    XRRQueryVersion (dpy, &amp;major, &amp;minor);
+    if (major &gt; 1 || (major == 1 &amp;&amp; minor &gt;= 3))
+    return True;
+    return False;
+}
+#endif
+
+/*
+ * Report only rotations that are supported by all crtcs
+ */
+static Rotation
+output_rotations (output_t *output)
+{
+    Bool        found = False;
+    Rotation        rotation = RR_Rotate_0;
+    XRROutputInfo   *output_info = output-&gt;output_info;
+    int         c;
+
+    for (c = 0; c &lt; output_info-&gt;ncrtc; c++)
+    {
+    crtc_t  *crtc = find_crtc_by_xid (output_info-&gt;crtcs[c]);
+    if (crtc)
+    {
+        if (!found) {
+        rotation = crtc-&gt;crtc_info-&gt;rotations;
+        found = True;
+        } else
+        rotation &amp;= crtc-&gt;crtc_info-&gt;rotations;
+    }
+    }
+    return rotation;
+}
+
+static Bool
+output_can_use_rotation (output_t *output, Rotation rotation)
+{
+    XRROutputInfo   *output_info = output-&gt;output_info;
+    int         c;
+
+    /* make sure all of the crtcs can use this rotation.
+     * yes, this is not strictly necessary, but it is 
+     * simpler,and we expect most drivers to either
+     * support rotation everywhere or nowhere
+     */
+    for (c = 0; c &lt; output_info-&gt;ncrtc; c++)
+    {
+    crtc_t  *crtc = find_crtc_by_xid (output_info-&gt;crtcs[c]);
+    if (crtc &amp;&amp; !crtc_can_use_rotation (crtc, rotation))
+        return False;
+    }
+    return True;
+}
+
+static Bool
+output_is_primary(output_t *output)
+{
+    if (has_1_3)
+        return XRRGetOutputPrimary(dpy, root) == output-&gt;output.xid;
+    return False;
+}
+
+/* Returns the index of the last value in an array &lt; 0xffff */
+static int
+find_last_non_clamped(CARD16 array[], int size) {
+    int i;
+    for (i = size - 1; i &gt; 0; i--) {
+    if (array[i] &lt; 0xffff)
+        return i;
+    }
+    return 0;
+}
+
+static void
+set_gamma_info(output_t *output)
+{
+    XRRCrtcGamma *crtc_gamma;
+    double i1, v1, i2, v2;
+    int size, middle, last_best, last_red, last_green, last_blue;
+    CARD16 *best_array;
+
+    if (!output-&gt;crtc_info)
+    return;
+
+    size = XRRGetCrtcGammaSize(dpy, output-&gt;crtc_info-&gt;crtc.xid);
+    if (!size) {
+    warning(&quot;Failed to get size of gamma for output %s\n&quot;, output-&gt;output.string);
+    return;
+    }
+
+    crtc_gamma = XRRGetCrtcGamma(dpy, output-&gt;crtc_info-&gt;crtc.xid);
+    if (!crtc_gamma) {
+    warning(&quot;Failed to get gamma for output %s\n&quot;, output-&gt;output.string);
+    return;
+    }
+
+    /*
+     * Here is a bit tricky because gamma is a whole curve for each
+     * color.  So, typically, we need to represent 3 * 256 values as 3 + 1
+     * values.  Therefore, we approximate the gamma curve (v) by supposing
+     * it always follows the way we set it: a power function (i^g)
+     * multiplied by a brightness (b).
+     * v = i^g * b
+     * so g = (ln(v) - ln(b))/ln(i)
+     * and b can be found using two points (v1,i1) and (v2, i2):
+     * b = e^((ln(v2)*ln(i1) - ln(v1)*ln(i2))/ln(i1/i2))
+     * For the best resolution, we select i2 at the highest place not
+     * clamped and i1 at i2/2. Note that if i2 = 1 (as in most normal
+     * cases), then b = v2.
+     */
+    last_red = find_last_non_clamped(crtc_gamma-&gt;red, size);
+    last_green = find_last_non_clamped(crtc_gamma-&gt;green, size);
+    last_blue = find_last_non_clamped(crtc_gamma-&gt;blue, size);
+    best_array = crtc_gamma-&gt;red;
+    last_best = last_red;
+    if (last_green &gt; last_best) {
+    last_best = last_green;
+    best_array = crtc_gamma-&gt;green;
+    }
+    if (last_blue &gt; last_best) {
+    last_best = last_blue;
+    best_array = crtc_gamma-&gt;blue;
+    }
+    if (last_best == 0)
+    last_best = 1;
+
+    middle = last_best / 2;
+    i1 = (double)(middle + 1) / size;
+    v1 = (double)(best_array[middle]) / 65535;
+    i2 = (double)(last_best + 1) / size;
+    v2 = (double)(best_array[last_best]) / 65535;
+    if (v2 &lt; 0.0001) { /* The screen is black */
+    output-&gt;brightness = 0;
+    output-&gt;gamma.red = 1;
+    output-&gt;gamma.green = 1;
+    output-&gt;gamma.blue = 1;
+    } else {
+    if ((last_best + 1) == size)
+        output-&gt;brightness = v2;
+    else
+        output-&gt;brightness = exp((log(v2)*log(i1) - log(v1)*log(i2))/log(i1/i2));
+    output-&gt;gamma.red = log((double)(crtc_gamma-&gt;red[last_red / 2]) / output-&gt;brightness
+                / 65535) / log((double)((last_red / 2) + 1) / size);
+    output-&gt;gamma.green = log((double)(crtc_gamma-&gt;green[last_green / 2]) / output-&gt;brightness
+                  / 65535) / log((double)((last_green / 2) + 1) / size);
+    output-&gt;gamma.blue = log((double)(crtc_gamma-&gt;blue[last_blue / 2]) / output-&gt;brightness
+                 / 65535) / log((double)((last_blue / 2) + 1) / size);
+    }
+
+    XRRFreeGamma(crtc_gamma);
+}
+
+static void
+set_output_info (output_t *output, RROutput xid, XRROutputInfo *output_info)
+{
+    /* sanity check output info */
+    if (output_info-&gt;connection != RR_Disconnected &amp;&amp; !output_info-&gt;nmode)
+    warning (&quot;Output %s is not disconnected but has no modes\n&quot;,
+         output_info-&gt;name);
+
+    /* set output name and info */
+    if (!(output-&gt;output.kind &amp; name_xid))
+    set_name_xid (&amp;output-&gt;output, xid);
+    if (!(output-&gt;output.kind &amp; name_string))
+    set_name_string (&amp;output-&gt;output, output_info-&gt;name);
+    output-&gt;output_info = output_info;
+
+    /* set crtc name and info */
+    if (!(output-&gt;changes &amp; changes_crtc))
+    set_name_xid (&amp;output-&gt;crtc, output_info-&gt;crtc);
+
+    if (output-&gt;crtc.kind == name_xid &amp;&amp; output-&gt;crtc.xid == None)
+    output-&gt;crtc_info = NULL;
+    else
+    {
+    output-&gt;crtc_info = find_crtc (&amp;output-&gt;crtc);
+    if (!output-&gt;crtc_info)
+    {
+        if (output-&gt;crtc.kind &amp; name_xid)
+        fatal (&quot;cannot find crtc 0x%lx\n&quot;, output-&gt;crtc.xid);
+        if (output-&gt;crtc.kind &amp; name_index)
+        fatal (&quot;cannot find crtc %d\n&quot;, output-&gt;crtc.index);
+    }
+    if (!output_can_use_crtc (output, output-&gt;crtc_info))
+        fatal (&quot;output %s cannot use crtc 0x%lx\n&quot;, output-&gt;output.string,
+           output-&gt;crtc_info-&gt;crtc.xid);
+    }
+
+    /* set mode name and info */
+    if (!(output-&gt;changes &amp; changes_mode))
+    {
+    crtc_t  *crtc = NULL;
+
+    if (output_info-&gt;crtc)
+        crtc = find_crtc_by_xid(output_info-&gt;crtc);
+    if (crtc &amp;&amp; crtc-&gt;crtc_info)
+        set_name_xid (&amp;output-&gt;mode, crtc-&gt;crtc_info-&gt;mode);
+    else if (output-&gt;crtc_info)
+        set_name_xid (&amp;output-&gt;mode, output-&gt;crtc_info-&gt;crtc_info-&gt;mode);
+    else
+        set_name_xid (&amp;output-&gt;mode, None);
+    if (output-&gt;mode.xid)
+    {
+        output-&gt;mode_info = find_mode_by_xid (output-&gt;mode.xid);
+        if (!output-&gt;mode_info)
+        fatal (&quot;server did not report mode 0x%lx for output %s\n&quot;,
+               output-&gt;mode.xid, output-&gt;output.string);
+    }
+    else
+        output-&gt;mode_info = NULL;
+    }
+    else if (output-&gt;mode.kind == name_xid &amp;&amp; output-&gt;mode.xid == None)
+    output-&gt;mode_info = NULL;
+    else
+    {
+    if (output-&gt;mode.kind == name_preferred)
+        output-&gt;mode_info = preferred_mode (output);
+    else
+        output-&gt;mode_info = find_mode_for_output (output, &amp;output-&gt;mode);
+    if (!output-&gt;mode_info)
+    {
+        if (output-&gt;mode.kind &amp; name_preferred)
+        fatal (&quot;cannot find preferred mode\n&quot;);
+        if (output-&gt;mode.kind &amp; name_string)
+        fatal (&quot;cannot find mode %s\n&quot;, output-&gt;mode.string);
+        if (output-&gt;mode.kind &amp; name_xid)
+        fatal (&quot;cannot find mode 0x%lx\n&quot;, output-&gt;mode.xid);
+    }
+    if (!output_can_use_mode (output, output-&gt;mode_info))
+        fatal (&quot;output %s cannot use mode %s\n&quot;, output-&gt;output.string,
+           output-&gt;mode_info-&gt;name);
+    }
+
+    /* set position */
+    if (!(output-&gt;changes &amp; changes_position))
+    {
+    if (output-&gt;crtc_info)
+    {
+        output-&gt;x = output-&gt;crtc_info-&gt;crtc_info-&gt;x;
+        output-&gt;y = output-&gt;crtc_info-&gt;crtc_info-&gt;y;
+    }
+    else
+    {
+        output-&gt;x = 0;
+        output-&gt;y = 0;
+    }
+    }
+
+    /* set rotation */
+    if (!(output-&gt;changes &amp; changes_rotation))
+    {
+    output-&gt;rotation &amp;= ~0xf;
+    if (output-&gt;crtc_info)
+        output-&gt;rotation |= (output-&gt;crtc_info-&gt;crtc_info-&gt;rotation &amp; 0xf);
+    else
+        output-&gt;rotation = RR_Rotate_0;
+    }
+    if (!(output-&gt;changes &amp; changes_reflection))
+    {
+    output-&gt;rotation &amp;= ~(RR_Reflect_X|RR_Reflect_Y);
+    if (output-&gt;crtc_info)
+        output-&gt;rotation |= (output-&gt;crtc_info-&gt;crtc_info-&gt;rotation &amp;
+                 (RR_Reflect_X|RR_Reflect_Y));
+    }
+    if (!output_can_use_rotation (output, output-&gt;rotation))
+    fatal (&quot;output %s cannot use rotation \&quot;%s\&quot; reflection \&quot;%s\&quot;\n&quot;,
+           output-&gt;output.string,
+           rotation_name (output-&gt;rotation),
+           reflection_name (output-&gt;rotation));
+
+    /* set gamma */
+    if (!(output-&gt;changes &amp; changes_gamma))
+        set_gamma_info(output);
+
+    /* set transformation */
+    if (!(output-&gt;changes &amp; changes_transform))
+    {
+    if (output-&gt;crtc_info)
+        copy_transform (&amp;output-&gt;transform, &amp;output-&gt;crtc_info-&gt;current_transform);
+    else
+        init_transform (&amp;output-&gt;transform);
+    } else {
+    /* transform was already set for --scale or --transform */
+
+    /* for --scale-from, figure out the mode size and compute the transform
+     * for the target framebuffer area */
+    if (output-&gt;scale_from_w &gt; 0 &amp;&amp; output-&gt;mode_info) {
+        double sx = (double)output-&gt;scale_from_w /
+                output-&gt;mode_info-&gt;width;
+        double sy = (double)output-&gt;scale_from_h /
+                output-&gt;mode_info-&gt;height;
+        if (verbose)
+        printf(&quot;scaling %s by %lfx%lf\n&quot;, output-&gt;output.string, sx,
+               sy);
+        init_transform (&amp;output-&gt;transform);
+        output-&gt;transform.transform.matrix[0][0] = XDoubleToFixed (sx);
+        output-&gt;transform.transform.matrix[1][1] = XDoubleToFixed (sy);
+        output-&gt;transform.transform.matrix[2][2] = XDoubleToFixed (1.0);
+        if (sx != 1 || sy != 1)
+        output-&gt;transform.filter = &quot;bilinear&quot;;
+        else
+        output-&gt;transform.filter = &quot;nearest&quot;;
+        output-&gt;transform.nparams = 0;
+        output-&gt;transform.params = NULL;
+    }
+    }
+
+    /* set primary */
+    if (!(output-&gt;changes &amp; changes_primary))
+    output-&gt;primary = output_is_primary(output);
+}
+
+static void
+get_screen (Bool current)
+{
+    if (!has_1_2)
+    fatal (&quot;Server RandR version before 1.2\n&quot;);
+
+    if (res)
+    return;
+
+    XRRGetScreenSizeRange (dpy, root, &amp;minWidth, &amp;minHeight,
+               &amp;maxWidth, &amp;maxHeight);
+
+    if (current)
+    res = XRRGetScreenResourcesCurrent (dpy, root);
+    else
+    res = XRRGetScreenResources (dpy, root);
+    if (!res) fatal (&quot;could not get screen resources&quot;);
+}
+
+static void
+get_crtcs (void)
+{
+    int     c;
+
+    num_crtcs = res-&gt;ncrtc;
+    crtcs = calloc (num_crtcs, sizeof (crtc_t));
+    if (!crtcs) fatal (&quot;out of memory\n&quot;);
+
+    for (c = 0; c &lt; res-&gt;ncrtc; c++)
+    {
+    XRRCrtcInfo *crtc_info = XRRGetCrtcInfo (dpy, res, res-&gt;crtcs[c]);
+    XRRCrtcTransformAttributes  *attr;
+    XRRPanning  *panning_info = NULL;
+
+    if (has_1_3) {
+        XRRPanning zero;
+        memset(&amp;zero, 0, sizeof(zero));
+        panning_info = XRRGetPanning  (dpy, res, res-&gt;crtcs[c]);
+        zero.timestamp = panning_info-&gt;timestamp;
+        if (!memcmp(panning_info, &amp;zero, sizeof(zero))) {
+        Xfree(panning_info);
+        panning_info = NULL;
+        }
+    }
+
+    set_name_xid (&amp;crtcs[c].crtc, res-&gt;crtcs[c]);
+    set_name_index (&amp;crtcs[c].crtc, c);
+    if (!crtc_info) fatal (&quot;could not get crtc 0x%lx information\n&quot;, res-&gt;crtcs[c]);
+    crtcs[c].crtc_info = crtc_info;
+    crtcs[c].panning_info = panning_info;
+    if (crtc_info-&gt;mode == None)
+    {
+        crtcs[c].mode_info = NULL;
+        crtcs[c].x = 0;
+        crtcs[c].y = 0;
+        crtcs[c].rotation = RR_Rotate_0;
+    }
+    if (XRRGetCrtcTransform (dpy, res-&gt;crtcs[c], &amp;attr) &amp;&amp; attr) {
+        set_transform (&amp;crtcs[c].current_transform,
+               &amp;attr-&gt;currentTransform,
+               attr-&gt;currentFilter,
+               attr-&gt;currentParams,
+               attr-&gt;currentNparams);
+        XFree (attr);
+    }
+    else
+    {
+        init_transform (&amp;crtcs[c].current_transform);
+    }
+    copy_transform (&amp;crtcs[c].pending_transform, &amp;crtcs[c].current_transform);
+   }
+}
+
+static void
+crtc_add_output (crtc_t *crtc, output_t *output)
+{
+    if (crtc-&gt;outputs)
+    crtc-&gt;outputs = realloc (crtc-&gt;outputs, (crtc-&gt;noutput + 1) * sizeof (output_t *));
+    else
+    {
+    crtc-&gt;outputs = malloc (sizeof (output_t *));
+    crtc-&gt;x = output-&gt;x;
+    crtc-&gt;y = output-&gt;y;
+    crtc-&gt;rotation = output-&gt;rotation;
+    crtc-&gt;mode_info = output-&gt;mode_info;
+    copy_transform (&amp;crtc-&gt;pending_transform, &amp;output-&gt;transform);
+   }
+    if (!crtc-&gt;outputs) fatal (&quot;out of memory\n&quot;);
+    crtc-&gt;outputs[crtc-&gt;noutput++] = output;
+}
+
+static void
+set_crtcs (void)
+{
+    output_t    *output;
+
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+    if (!output-&gt;mode_info) continue;
+    crtc_add_output (output-&gt;crtc_info, output);
+    }
+}
+
+static void
+set_panning (void)
+{
+    output_t    *output;
+
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+    if (! output-&gt;crtc_info)
+        continue;
+    if (! (output-&gt;changes &amp; changes_panning))
+        continue;
+    if (! output-&gt;crtc_info-&gt;panning_info)
+        output-&gt;crtc_info-&gt;panning_info = malloc (sizeof(XRRPanning));
+    memcpy (output-&gt;crtc_info-&gt;panning_info, &amp;output-&gt;panning, sizeof(XRRPanning));
+    output-&gt;crtc_info-&gt;changing = 1;
+    }
+}
+
+static void
+set_gamma(void)
+{
+    output_t    *output;
+
+    for (output = all_outputs; output; output = output-&gt;next) {
+    int i, size;
+    crtc_t *crtc;
+    XRRCrtcGamma *crtc_gamma;
+    float gammaRed;
+    float gammaGreen;
+    float gammaBlue;
+
+    if (!(output-&gt;changes &amp; changes_gamma))
+        continue;
+
+    if (!output-&gt;crtc_info) {
+        fatal(&quot;Need crtc to set gamma on.\n&quot;);
+        continue;
+    }
+
+    crtc = output-&gt;crtc_info;
+
+    size = XRRGetCrtcGammaSize(dpy, crtc-&gt;crtc.xid);
+
+    if (!size) {
+        fatal(&quot;Gamma size is 0.\n&quot;);
+        continue;
+    }
+
+    /*
+     * The gamma-correction lookup table managed through XRR[GS]etCrtcGamma
+     * is 2^n in size, where 'n' is the number of significant bits in
+     * the X Color.  Because an X Color is 16 bits, size cannot be larger
+     * than 2^16.
+     */
+    if (size &gt; 65536) {
+        fatal(&quot;Gamma correction table is impossibly large.\n&quot;);
+        continue;
+    }
+
+    crtc_gamma = XRRAllocGamma(size);
+    if (!crtc_gamma) {
+        fatal(&quot;Gamma allocation failed.\n&quot;);
+        continue;
+    }
+
+    if (output-&gt;gamma.red == 0.0)
+        output-&gt;gamma.red = 1.0;
+    if (output-&gt;gamma.green == 0.0)
+        output-&gt;gamma.green = 1.0;
+    if (output-&gt;gamma.blue == 0.0)
+        output-&gt;gamma.blue = 1.0;
+
+    gammaRed = 1.0 / output-&gt;gamma.red;
+    gammaGreen = 1.0 / output-&gt;gamma.green;
+    gammaBlue = 1.0 / output-&gt;gamma.blue;
+
+    for (i = 0; i &lt; size; i++) {
+        if (gammaRed == 1.0 &amp;&amp; output-&gt;brightness == 1.0)
+        crtc_gamma-&gt;red[i] = (double)i / (double)(size - 1) * 65535.0;
+        else
+        crtc_gamma-&gt;red[i] = dmin(pow((double)i/(double)(size - 1),
+                          gammaRed) * output-&gt;brightness,
+                      1.0) * 65535.0;
+
+        if (gammaGreen == 1.0 &amp;&amp; output-&gt;brightness == 1.0)
+        crtc_gamma-&gt;green[i] = (double)i / (double)(size - 1) * 65535.0;
+        else
+        crtc_gamma-&gt;green[i] = dmin(pow((double)i/(double)(size - 1),
+                        gammaGreen) * output-&gt;brightness,
+                        1.0) * 65535.0;
+
+        if (gammaBlue == 1.0 &amp;&amp; output-&gt;brightness == 1.0)
+        crtc_gamma-&gt;blue[i] = (double)i / (double)(size - 1) * 65535.0;
+        else
+        crtc_gamma-&gt;blue[i] = dmin(pow((double)i/(double)(size - 1),
+                           gammaBlue) * output-&gt;brightness,
+                       1.0) * 65535.0;
+    }
+
+    XRRSetCrtcGamma(dpy, crtc-&gt;crtc.xid, crtc_gamma);
+
+    free(crtc_gamma);
+    }
+}
+
+static void
+set_primary(void)
+{
+    output_t *output;
+
+    if (no_primary) {
+    XRRSetOutputPrimary(dpy, root, None);
+    } else {
+    for (output = all_outputs; output; output = output-&gt;next) {
+        if (!(output-&gt;changes &amp; changes_primary))
+        continue;
+        if (output-&gt;primary)
+        XRRSetOutputPrimary(dpy, root, output-&gt;output.xid);
+    }
+    }
+}
+
+static Status
+crtc_disable (crtc_t *crtc)
+{
+    if (verbose)
+    printf (&quot;crtc %d: disable\n&quot;, crtc-&gt;crtc.index);
+
+    if (dryrun)
+    return RRSetConfigSuccess;
+    return XRRSetCrtcConfig (dpy, res, crtc-&gt;crtc.xid, CurrentTime,
+                 0, 0, None, RR_Rotate_0, NULL, 0);
+}
+
+static void
+crtc_set_transform (crtc_t *crtc, transform_t *transform)
+{
+    int major, minor;
+
+    XRRQueryVersion (dpy, &amp;major, &amp;minor);
+    if (major &gt; 1 || (major == 1 &amp;&amp; minor &gt;= 3))
+    XRRSetCrtcTransform (dpy, crtc-&gt;crtc.xid,
+                 &amp;transform-&gt;transform,
+                 transform-&gt;filter,
+                 transform-&gt;params,
+                 transform-&gt;nparams);
+}
+
+static Status
+crtc_revert (crtc_t *crtc)
+{
+    XRRCrtcInfo *crtc_info = crtc-&gt;crtc_info;
+
+    if (verbose)
+    printf (&quot;crtc %d: revert\n&quot;, crtc-&gt;crtc.index);
+
+    if (dryrun)
+    return RRSetConfigSuccess;
+
+    if (!equal_transform (&amp;crtc-&gt;current_transform, &amp;crtc-&gt;pending_transform))
+    crtc_set_transform (crtc, &amp;crtc-&gt;current_transform);
+    return XRRSetCrtcConfig (dpy, res, crtc-&gt;crtc.xid, CurrentTime,
+                crtc_info-&gt;x, crtc_info-&gt;y,
+                crtc_info-&gt;mode, crtc_info-&gt;rotation,
+                crtc_info-&gt;outputs, crtc_info-&gt;noutput);
+}
+
+static Status
+crtc_apply (crtc_t *crtc)
+{
+    RROutput    *rr_outputs;
+    int     o;
+    Status  s;
+    RRMode  mode = None;
+
+    if (!crtc-&gt;changing || !crtc-&gt;mode_info)
+    return RRSetConfigSuccess;
+
+    rr_outputs = calloc (crtc-&gt;noutput, sizeof (RROutput));
+    if (!rr_outputs)
+    return BadAlloc;
+    for (o = 0; o &lt; crtc-&gt;noutput; o++)
+    rr_outputs[o] = crtc-&gt;outputs[o]-&gt;output.xid;
+    mode = crtc-&gt;mode_info-&gt;id;
+    if (verbose) {
+    printf (&quot;crtc %d: %12s %6.2f +%d+%d&quot;, crtc-&gt;crtc.index,
+        crtc-&gt;mode_info-&gt;name, mode_refresh (crtc-&gt;mode_info),
+        crtc-&gt;x, crtc-&gt;y);
+    for (o = 0; o &lt; crtc-&gt;noutput; o++)
+        printf (&quot; \&quot;%s\&quot;&quot;, crtc-&gt;outputs[o]-&gt;output.string);
+    printf (&quot;\n&quot;);
+    }
+
+    if (dryrun)
+    s = RRSetConfigSuccess;
+    else
+    {
+    if (!equal_transform (&amp;crtc-&gt;current_transform, &amp;crtc-&gt;pending_transform))
+        crtc_set_transform (crtc, &amp;crtc-&gt;pending_transform);
+    s = XRRSetCrtcConfig (dpy, res, crtc-&gt;crtc.xid, CurrentTime,
+                  crtc-&gt;x, crtc-&gt;y, mode, crtc-&gt;rotation,
+                  rr_outputs, crtc-&gt;noutput);
+    if (s == RRSetConfigSuccess &amp;&amp; crtc-&gt;panning_info) {
+        if (has_1_3)
+        s = XRRSetPanning (dpy, res, crtc-&gt;crtc.xid, crtc-&gt;panning_info);
+        else
+        fatal (&quot;panning needs RandR 1.3\n&quot;);
+    }
+    }
+    free (rr_outputs);
+    return s;
+}
+
+static void
+screen_revert (void)
+{
+    if (verbose)
+    printf (&quot;screen %d: revert\n&quot;, screen);
+
+    if (dryrun)
+    return;
+    XRRSetScreenSize (dpy, root,
+              DisplayWidth (dpy, screen),
+              DisplayHeight (dpy, screen),
+              DisplayWidthMM (dpy, screen),
+              DisplayHeightMM (dpy, screen));
+}
+
+static void
+screen_apply (void)
+{
+    if (fb_width == DisplayWidth (dpy, screen) &amp;&amp;
+    fb_height == DisplayHeight (dpy, screen) &amp;&amp;
+    fb_width_mm == DisplayWidthMM (dpy, screen) &amp;&amp;
+    fb_height_mm == DisplayHeightMM (dpy, screen))
+    {
+    return;
+    }
+    if (verbose)
+    printf (&quot;screen %d: %dx%d %dx%d mm %6.2fdpi\n&quot;, screen,
+        fb_width, fb_height, fb_width_mm, fb_height_mm, dpi);
+    if (dryrun)
+    return;
+    XRRSetScreenSize (dpy, root, fb_width, fb_height,
+              fb_width_mm, fb_height_mm);
+}
+
+static void
+revert (void)
+{
+    int c;
+
+    /* first disable all crtcs */
+    for (c = 0; c &lt; res-&gt;ncrtc; c++)
+    crtc_disable (&amp;crtcs[c]);
+    /* next reset screen size */
+    screen_revert ();
+    /* now restore all crtcs */
+    for (c = 0; c &lt; res-&gt;ncrtc; c++)
+    crtc_revert (&amp;crtcs[c]);
+}
+
+/*
+ * uh-oh, something bad happened in the middle of changing
+ * the configuration. Revert to the previous configuration
+ * and bail
+ */
+static void _X_NORETURN
+panic (Status s, crtc_t *crtc)
+{
+    int     c = crtc-&gt;crtc.index;
+    const char *message;
+
+    switch (s) {
+    case RRSetConfigSuccess:        message = &quot;succeeded&quot;;          break;
+    case BadAlloc:          message = &quot;out of memory&quot;;      break;
+    case RRSetConfigFailed:     message = &quot;failed&quot;;         break;
+    case RRSetConfigInvalidConfigTime:  message = &quot;invalid config time&quot;;    break;
+    case RRSetConfigInvalidTime:    message = &quot;invalid time&quot;;       break;
+    default:                message = &quot;unknown failure&quot;;        break;
+    }
+
+    fprintf (stderr, &quot;%s: Configure crtc %d %s\n&quot;, program_name, c, message);
+    revert ();
+    exit (1);
+}
+
+static void
+apply (void)
+{
+    Status  s;
+    int     c;
+
+    /*
+     * Hold the server grabbed while messing with
+     * the screen so that apps which notice the resize
+     * event and ask for xinerama information from the server
+     * receive up-to-date information
+     */
+    if (grab_server)
+    XGrabServer (dpy);
+
+    /*
+     * Turn off any crtcs which are to be disabled or which are
+     * larger than the target size
+     */
+    for (c = 0; c &lt; res-&gt;ncrtc; c++)
+    {
+    crtc_t      *crtc = &amp;crtcs[c];
+    XRRCrtcInfo *crtc_info = crtc-&gt;crtc_info;
+
+    /* if this crtc is already disabled, skip it */
+    if (crtc_info-&gt;mode == None) 
+        continue;
+
+    /* 
+     * If this crtc is to be left enabled, make
+     * sure the old size fits then new screen
+     */
+    if (crtc-&gt;mode_info) 
+    {
+        XRRModeInfo *old_mode = find_mode_by_xid (crtc_info-&gt;mode);
+        int x, y, w, h;
+        box_t bounds;
+
+        if (!old_mode) 
+        panic (RRSetConfigFailed, crtc);
+
+        /* old position and size information */
+        mode_geometry (old_mode, crtc_info-&gt;rotation,
+               &amp;crtc-&gt;current_transform.transform,
+               &amp;bounds);
+
+        x = crtc_info-&gt;x + bounds.x1;
+        y = crtc_info-&gt;y + bounds.y1;
+        w = bounds.x2 - bounds.x1;
+        h = bounds.y2 - bounds.y1;
+
+        /* if it fits, skip it */
+        if (x + w &lt;= fb_width &amp;&amp; y + h &lt;= fb_height) 
+        continue;
+        crtc-&gt;changing = True;
+    }
+    s = crtc_disable (crtc);
+    if (s != RRSetConfigSuccess)
+        panic (s, crtc);
+    }
+
+    /*
+     * Set the screen size
+     */
+    screen_apply ();
+
+    /*
+     * Set crtcs
+     */
+
+    for (c = 0; c &lt; res-&gt;ncrtc; c++)
+    {
+    crtc_t  *crtc = &amp;crtcs[c];
+
+    s = crtc_apply (crtc);
+    if (s != RRSetConfigSuccess)
+        panic (s, crtc);
+    }
+
+    set_primary ();
+
+    /*
+     * Release the server grab and let all clients
+     * respond to the updated state
+     */
+    if (grab_server)
+    XUngrabServer (dpy);
+}
+
+/*
+ * Use current output state to complete the output list
+ */
+static void
+get_outputs (void)
+{
+    int     o;
+    output_t    *q;
+
+    for (o = 0; o &lt; res-&gt;noutput; o++)
+    {
+    XRROutputInfo   *output_info = XRRGetOutputInfo (dpy, res, res-&gt;outputs[o]);
+    output_t    *output;
+    name_t      output_name;
+    if (!output_info) fatal (&quot;could not get output 0x%lx information\n&quot;, res-&gt;outputs[o]);
+    set_name_xid (&amp;output_name, res-&gt;outputs[o]);
+    set_name_index (&amp;output_name, o);
+    set_name_string (&amp;output_name, output_info-&gt;name);
+    output = find_output (&amp;output_name);
+    if (!output)
+    {
+        output = add_output ();
+        set_name_all (&amp;output-&gt;output, &amp;output_name);
+        /*
+         * When global --automatic mode is set, turn on connected but off
+         * outputs, turn off disconnected but on outputs
+         */
+        if (automatic)
+        {
+        switch (output_info-&gt;connection) {
+        case RR_Connected:
+            if (!output_info-&gt;crtc) {
+            output-&gt;changes |= changes_automatic;
+            output-&gt;automatic = True;
+            }
+            break;
+        case RR_Disconnected:
+            if (output_info-&gt;crtc)
+            {
+            output-&gt;changes |= changes_automatic;
+            output-&gt;automatic = True;
+            }
+            break;
+        }
+        }
+    }
+    output-&gt;found = True;
+
+    /*
+     * Automatic mode -- track connection state and enable/disable outputs
+     * as necessary
+     */
+    if (output-&gt;automatic)
+    {
+        switch (output_info-&gt;connection) {
+        case RR_Connected:
+        case RR_UnknownConnection:
+        if ((!(output-&gt;changes &amp; changes_mode)))
+        {
+            set_name_preferred (&amp;output-&gt;mode);
+            output-&gt;changes |= changes_mode;
+        }
+        break;
+        case RR_Disconnected:
+        if ((!(output-&gt;changes &amp; changes_mode)))
+        {
+            set_name_xid (&amp;output-&gt;mode, None);
+            set_name_xid (&amp;output-&gt;crtc, None);
+            output-&gt;changes |= changes_mode;
+            output-&gt;changes |= changes_crtc;
+        }
+        break;
+        }
+    }
+
+    set_output_info (output, res-&gt;outputs[o], output_info);
+    }
+    for (q = all_outputs; q; q = q-&gt;next)
+    {
+    if (!q-&gt;found)
+    {
+        fprintf(stderr, &quot;warning: output %s not found; ignoring\n&quot;,
+            q-&gt;output.string);
+    }
+    }
+}
+
+static void
+mark_changing_crtcs (void)
+{
+    int c;
+
+    for (c = 0; c &lt; num_crtcs; c++)
+    {
+    crtc_t      *crtc = &amp;crtcs[c];
+    int     o;
+    output_t    *output;
+
+    /* walk old output list (to catch disables) */
+    for (o = 0; o &lt; crtc-&gt;crtc_info-&gt;noutput; o++)
+    {
+        output = find_output_by_xid (crtc-&gt;crtc_info-&gt;outputs[o]);
+        if (!output) fatal (&quot;cannot find output 0x%lx\n&quot;,
+                crtc-&gt;crtc_info-&gt;outputs[o]);
+        if (output-&gt;changes)
+        crtc-&gt;changing = True;
+    }
+    /* walk new output list */
+    for (o = 0; o &lt; crtc-&gt;noutput; o++)
+    {
+        output = crtc-&gt;outputs[o];
+        if (output-&gt;changes)
+        crtc-&gt;changing = True;
+    }
+    }
+}
+
+/*
+ * Test whether 'crtc' can be used for 'output'
+ */
+static Bool
+check_crtc_for_output (crtc_t *crtc, output_t *output)
+{
+    int     c;
+    int     l;
+    output_t    *other;
+
+    for (c = 0; c &lt; output-&gt;output_info-&gt;ncrtc; c++)
+    if (output-&gt;output_info-&gt;crtcs[c] == crtc-&gt;crtc.xid)
+        break;
+    if (c == output-&gt;output_info-&gt;ncrtc)
+    return False;
+    for (other = all_outputs; other; other = other-&gt;next)
+    {
+    if (other == output)
+        continue;
+
+    if (other-&gt;mode_info == NULL)
+        continue;
+
+    if (other-&gt;crtc_info != crtc)
+        continue;
+
+    /* see if the output connected to the crtc can clone to this output */
+    for (l = 0; l &lt; output-&gt;output_info-&gt;nclone; l++)
+        if (output-&gt;output_info-&gt;clones[l] == other-&gt;output.xid)
+        break;
+    /* not on the list, can't clone */
+    if (l == output-&gt;output_info-&gt;nclone) 
+        return False;
+    }
+
+    if (crtc-&gt;noutput)
+    {
+    /* make sure the state matches */
+    if (crtc-&gt;mode_info != output-&gt;mode_info)
+        return False;
+    if (crtc-&gt;x != output-&gt;x)
+        return False;
+    if (crtc-&gt;y != output-&gt;y)
+        return False;
+    if (crtc-&gt;rotation != output-&gt;rotation)
+        return False;
+    if (!equal_transform (&amp;crtc-&gt;current_transform, &amp;output-&gt;transform))
+        return False;
+    }
+    else if (crtc-&gt;crtc_info-&gt;noutput)
+    {
+    /* make sure the state matches the already used state */
+    XRRModeInfo *mode = find_mode_by_xid (crtc-&gt;crtc_info-&gt;mode);
+
+    if (mode != output-&gt;mode_info)
+        return False;
+    if (crtc-&gt;crtc_info-&gt;x != output-&gt;x)
+        return False;
+    if (crtc-&gt;crtc_info-&gt;y != output-&gt;y)
+        return False;
+    if (crtc-&gt;crtc_info-&gt;rotation != output-&gt;rotation)
+        return False;
+    }
+    return True;
+}
+
+static crtc_t *
+find_crtc_for_output (output_t *output)
+{
+    int     c;
+
+    for (c = 0; c &lt; output-&gt;output_info-&gt;ncrtc; c++)
+    {
+    crtc_t      *crtc;
+
+    crtc = find_crtc_by_xid (output-&gt;output_info-&gt;crtcs[c]);
+    if (!crtc) fatal (&quot;cannot find crtc 0x%lx\n&quot;, output-&gt;output_info-&gt;crtcs[c]);
+
+    if (check_crtc_for_output (crtc, output))
+        return crtc;
+    }
+    return NULL;
+}
+
+static void
+set_positions (void)
+{
+    output_t    *output;
+    Bool    keep_going;
+    Bool    any_set;
+    int     min_x, min_y;
+
+    for (;;)
+    {
+    any_set = False;
+    keep_going = False;
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+        output_t    *relation;
+        name_t  relation_name;
+
+        if (!(output-&gt;changes &amp; changes_relation)) continue;
+
+        if (output-&gt;mode_info == NULL) continue;
+
+        init_name (&amp;relation_name);
+        set_name_string (&amp;relation_name, output-&gt;relative_to);
+        relation = find_output (&amp;relation_name);
+        if (!relation) fatal (&quot;cannot find output \&quot;%s\&quot;\n&quot;, output-&gt;relative_to);
+
+        if (relation-&gt;mode_info == NULL) 
+        {
+        output-&gt;x = 0;
+        output-&gt;y = 0;
+        output-&gt;changes |= changes_position;
+        any_set = True;
+        continue;
+        }
+        /*
+         * Make sure the dependent object has been set in place
+         */
+        if ((relation-&gt;changes &amp; changes_relation) &amp;&amp; 
+        !(relation-&gt;changes &amp; changes_position))
+        {
+        keep_going = True;
+        continue;
+        }
+
+        switch (output-&gt;relation) {
+        case relation_left_of:
+        output-&gt;y = relation-&gt;y;
+        output-&gt;x = relation-&gt;x - mode_width (output-&gt;mode_info, output-&gt;rotation);
+        break;
+        case relation_right_of:
+        output-&gt;y = relation-&gt;y;
+        output-&gt;x = relation-&gt;x + mode_width (relation-&gt;mode_info, relation-&gt;rotation);
+        break;
+        case relation_above:
+        output-&gt;x = relation-&gt;x;
+        output-&gt;y = relation-&gt;y - mode_height (output-&gt;mode_info, output-&gt;rotation);
+        break;
+        case relation_below:
+        output-&gt;x = relation-&gt;x;
+        output-&gt;y = relation-&gt;y + mode_height (relation-&gt;mode_info, relation-&gt;rotation);
+        break;
+        case relation_same_as:
+        output-&gt;x = relation-&gt;x;
+        output-&gt;y = relation-&gt;y;
+        }
+        output-&gt;changes |= changes_position;
+        any_set = True;
+    }
+    if (!keep_going)
+        break;
+    if (!any_set)
+        fatal (&quot;loop in relative position specifications\n&quot;);
+    }
+
+    /*
+     * Now normalize positions so the upper left corner of all outputs is at 0,0
+     */
+    min_x = 32768;
+    min_y = 32768;
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+    if (output-&gt;mode_info == NULL) continue;
+
+    if (output-&gt;x &lt; min_x) min_x = output-&gt;x;
+    if (output-&gt;y &lt; min_y) min_y = output-&gt;y;
+    }
+    if (min_x || min_y)
+    {
+    /* move all outputs */
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+        if (output-&gt;mode_info == NULL) continue;
+
+        output-&gt;x -= min_x;
+        output-&gt;y -= min_y;
+        output-&gt;changes |= changes_position;
+    }
+    }
+}
+
+static void
+set_screen_size (void)
+{
+    output_t    *output;
+    Bool    fb_specified = fb_width != 0 &amp;&amp; fb_height != 0;
+
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+    XRRModeInfo *mode_info = output-&gt;mode_info;
+    int     x, y, w, h;
+    box_t       bounds;
+
+    if (!mode_info) continue;
+
+    mode_geometry (mode_info, output-&gt;rotation,
+               &amp;output-&gt;transform.transform,
+               &amp;bounds);
+    x = output-&gt;x + bounds.x1;
+    y = output-&gt;y + bounds.y1;
+    w = bounds.x2 - bounds.x1;
+    h = bounds.y2 - bounds.y1;
+    /* make sure output fits in specified size */
+    if (fb_specified)
+    {
+        if (x + w &gt; fb_width || y + h &gt; fb_height)
+        warning (&quot;specified screen %dx%d not large enough for output %s (%dx%d+%d+%d)\n&quot;,
+             fb_width, fb_height, output-&gt;output.string, w, h, x, y);
+    }
+    /* fit fb to output */
+    else
+    {
+        XRRPanning *pan;
+        if (x + w &gt; fb_width)
+        fb_width = x + w;
+        if (y + h &gt; fb_height)
+        fb_height = y + h;
+        if (output-&gt;changes &amp; changes_panning)
+        pan = &amp;output-&gt;panning;
+        else
+        pan = output-&gt;crtc_info ? output-&gt;crtc_info-&gt;panning_info : NULL;
+        if (pan &amp;&amp; pan-&gt;left + pan-&gt;width &gt; fb_width)
+        fb_width = pan-&gt;left + pan-&gt;width;
+        if (pan &amp;&amp; pan-&gt;top + pan-&gt;height &gt; fb_height)
+        fb_height = pan-&gt;top + pan-&gt;height;
+    }
+    }   
+
+    if (fb_width &gt; maxWidth || fb_height &gt; maxHeight)
+    fatal (&quot;screen cannot be larger than %dx%d (desired size %dx%d)\n&quot;,
+           maxWidth, maxHeight, fb_width, fb_height);
+    if (fb_specified)
+    {
+    if (fb_width &lt; minWidth || fb_height &lt; minHeight)
+        fatal (&quot;screen must be at least %dx%d\n&quot;, minWidth, minHeight);
+    }
+    else
+    {
+    if (fb_width &lt; minWidth) fb_width = minWidth;
+    if (fb_height &lt; minHeight) fb_height = minHeight;
+    }
+}
+
+
+static void
+disable_outputs (output_t *outputs)
+{
+    while (outputs)
+    {
+    outputs-&gt;crtc_info = NULL;
+    outputs = outputs-&gt;next;
+    }
+}
+
+/*
+ * find the best mapping from output to crtc available
+ */
+static int
+pick_crtcs_score (output_t *outputs)
+{
+    output_t    *output;
+    int     best_score;
+    int     my_score;
+    int     score;
+    crtc_t  *best_crtc;
+    int     c;
+
+    if (!outputs)
+    return 0;
+
+    output = outputs;
+    outputs = outputs-&gt;next;
+    /*
+     * Score with this output disabled
+     */
+    output-&gt;crtc_info = NULL;
+    best_score = pick_crtcs_score (outputs);
+    if (output-&gt;mode_info == NULL)
+    return best_score;
+
+    best_crtc = NULL;
+    /* 
+     * Now score with this output any valid crtc
+     */
+    for (c = 0; c &lt; output-&gt;output_info-&gt;ncrtc; c++)
+    {
+    crtc_t      *crtc;
+
+    crtc = find_crtc_by_xid (output-&gt;output_info-&gt;crtcs[c]);
+    if (!crtc)
+        fatal (&quot;cannot find crtc 0x%lx\n&quot;, output-&gt;output_info-&gt;crtcs[c]);
+
+    /* reset crtc allocation for following outputs */
+    disable_outputs (outputs);
+    if (!check_crtc_for_output (crtc, output))
+        continue;
+
+    my_score = 1000;
+    /* slight preference for existing connections */
+    if (crtc == output-&gt;current_crtc_info)
+        my_score++;
+
+    output-&gt;crtc_info = crtc;
+    score = my_score + pick_crtcs_score (outputs);
+    if (score &gt; best_score)
+    {
+        best_crtc = crtc;
+        best_score = score;
+    }
+    }
+    if (output-&gt;crtc_info != best_crtc)
+    output-&gt;crtc_info = best_crtc;
+    /*
+     * Reset other outputs based on this one using the best crtc
+     */
+    (void) pick_crtcs_score (outputs);
+
+    return best_score;
+}
+
+/*
+ * Pick crtcs for any changing outputs that don't have one
+ */
+static void
+pick_crtcs (void)
+{
+    output_t    *output;
+
+    /*
+     * First try to match up newly enabled outputs with spare crtcs
+     */
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+    if (output-&gt;changes &amp;&amp; output-&gt;mode_info)
+    {
+        if (output-&gt;crtc_info) {
+        if (output-&gt;crtc_info-&gt;crtc_info-&gt;noutput &gt; 0 &amp;&amp;
+            (output-&gt;crtc_info-&gt;crtc_info-&gt;noutput &gt; 1 ||
+             output != find_output_by_xid (output-&gt;crtc_info-&gt;crtc_info-&gt;outputs[0])))
+            break;
+        } else {
+        output-&gt;crtc_info = find_crtc_for_output (output);
+        if (!output-&gt;crtc_info)
+            break;
+        }
+    }
+    }
+    /*
+     * Everyone is happy
+     */
+    if (!output)
+    return;
+    /*
+     * When the simple way fails, see if there is a way
+     * to swap crtcs around and make things work
+     */
+    for (output = all_outputs; output; output = output-&gt;next)
+    output-&gt;current_crtc_info = output-&gt;crtc_info;
+    pick_crtcs_score (all_outputs);
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+    if (output-&gt;mode_info &amp;&amp; !output-&gt;crtc_info)
+        fatal (&quot;cannot find crtc for output %s\n&quot;, output-&gt;output.string);
+    if (!output-&gt;changes &amp;&amp; output-&gt;crtc_info != output-&gt;current_crtc_info)
+        output-&gt;changes |= changes_crtc;
+    }
+}
+
+static int
+check_strtol(char *s)
+{
+    char *endptr;
+    int result = strtol(s, &amp;endptr, 10);
+    if (s == endptr)
+    argerr (&quot;failed to parse '%s' as a number\n&quot;, s);
+    return result;
+}
+
+static double
+check_strtod(char *s)
+{
+    char *endptr;
+    double result = strtod(s, &amp;endptr);
+    if (s == endptr)
+    argerr (&quot;failed to parse '%s' as a number\n&quot;, s);
+    return result;
+}
+
+
+static void *
+property_values_from_string(const char *str, const Atom type, const int format,
+                int *returned_nitems)
+{
+    char *token, *tmp;
+    void *returned_bytes = NULL;
+    int nitems = 0, bytes_per_item = format / 8;
+
+    if ((type != XA_INTEGER &amp;&amp; type != XA_CARDINAL) ||
+    (format != 8 &amp;&amp; format != 16 &amp;&amp; format != 32))
+    {
+    return NULL;
+    }
+
+    tmp = strdup (str);
+
+    for (token = strtok (tmp, &quot;,&quot;); token; token = strtok (NULL, &quot;,&quot;))
+    {
+    char *endptr;
+    long int val = strtol (token, &amp;endptr, 0);
+
+    if (token == endptr || *endptr != '\0')
+    {
+        argerr (&quot;failed to parse '%s' as a number\n&quot;, token);
+    }
+
+    returned_bytes = realloc (returned_bytes, (nitems + 1) * bytes_per_item);
+
+    if (type == XA_INTEGER &amp;&amp; format == 8)
+    {
+        int8_t *ptr = returned_bytes;
+        ptr[nitems] = (int8_t) val;
+    }
+    else if (type == XA_INTEGER &amp;&amp; format == 16)
+    {
+        int16_t *ptr = returned_bytes;
+        ptr[nitems] = (int16_t) val;
+    }
+    else if (type == XA_INTEGER &amp;&amp; format == 32)
+    {
+        int32_t *ptr = returned_bytes;
+        ptr[nitems] = (int32_t) val;
+    }
+    else if (type == XA_CARDINAL &amp;&amp; format == 8)
+    {
+        uint8_t *ptr = returned_bytes;
+        ptr[nitems] = (uint8_t) val;
+    }
+    else if (type == XA_CARDINAL &amp;&amp; format == 16)
+    {
+        uint16_t *ptr = returned_bytes;
+        ptr[nitems] = (uint16_t) val;
+    }
+    else if (type == XA_CARDINAL &amp;&amp; format == 32)
+    {
+        uint32_t *ptr = returned_bytes;
+        ptr[nitems] = (uint32_t) val;
+    }
+    else
+    {
+        free (tmp);
+        free (returned_bytes);
+        return NULL;
+    }
+
+    nitems++;
+    }
+
+    free (tmp);
+
+    *returned_nitems = nitems;
+    return returned_bytes;
+}
+
+
+static void
+print_output_property_value(int value_format, /* 8, 16, 32 */
+                Atom value_type,  /* XA_{ATOM,INTEGER,CARDINAL} */
+                const void *value_bytes)
+{
+    if (value_type == XA_ATOM &amp;&amp; value_format == 32)
+    {
+    const Atom *val = value_bytes;
+    char *str = XGetAtomName (dpy, *val);
+    if (str != NULL)
+    {
+        printf (&quot;%s&quot;, str);
+        XFree (str);
+        return;
+    }
+    }
+
+    if (value_type == XA_INTEGER)
+    {
+    if (value_format == 8)
+    {
+        const int8_t *val = value_bytes;
+        printf (&quot;%&quot; PRId8, *val);
+        return;
+    }
+    if (value_format == 16)
+    {
+        const int16_t *val = value_bytes;
+        printf (&quot;%&quot; PRId16, *val);
+        return;
+    }
+    if (value_format == 32)
+    {
+        const int32_t *val = value_bytes;
+        printf (&quot;%&quot; PRId32, *val);
+        return;
+    }
+    }
+
+    if (value_type == XA_CARDINAL)
+    {
+    if (value_format == 8)
+    {
+        const uint8_t *val = value_bytes;
+        printf (&quot;%&quot; PRIu8, *val);
+        return;
+    }
+    if (value_format == 16)
+    {
+        const uint16_t *val = value_bytes;
+        printf (&quot;%&quot; PRIu16, *val);
+        return;
+    }
+    if (value_format == 32)
+    {
+        const uint32_t *val = value_bytes;
+        printf (&quot;%&quot; PRIu32, *val);
+        return;
+    }
+    }
+
+    printf (&quot;?&quot;);
+}
+
+static void
+print_edid(int nitems, const unsigned char *prop)
+{
+    int k;
+
+    printf (&quot;\n\t\t&quot;);
+
+    for (k = 0; k &lt; nitems; k++)
+    {
+    if (k != 0 &amp;&amp; (k % 16) == 0)
+    {
+        printf (&quot;\n\t\t&quot;);
+    }
+
+    printf(&quot;%02&quot; PRIx8, prop[k]);
+    }
+
+    printf(&quot;\n&quot;);
+}
+
+static void
+print_guid(const unsigned char *prop)
+{
+    int k;
+
+    printf(&quot;{&quot;);
+
+    for (k = 0; k &lt; 16; k++)
+    {
+    printf(&quot;%02&quot; PRIX8, prop[k]);
+    if (k == 3 || k == 5 || k == 7 || k == 9)
+    {
+        printf(&quot;-&quot;);
+    }
+    }
+
+    printf(&quot;}\n&quot;);
+}
+
+static void
+print_output_property(const char *atom_name,
+              int value_format,
+              Atom value_type,
+              int nitems,
+              const unsigned char *prop)
+{
+    int bytes_per_item = value_format / 8;
+    int k;
+
+    /*
+     * Check for properties that need special formatting.
+     */
+    if (strcmp (atom_name, &quot;EDID&quot;) == 0 &amp;&amp; value_format == 8 &amp;&amp;
+    value_type == XA_INTEGER)
+    {
+    print_edid (nitems, prop);
+    return;
+    }
+    else if (strcmp (atom_name, &quot;GUID&quot;) == 0 &amp;&amp; value_format == 8 &amp;&amp;
+         value_type == XA_INTEGER &amp;&amp; nitems == 16)
+    {
+    print_guid (prop);
+    return;
+    }
+
+    for (k = 0; k &lt; nitems; k++)
+    {
+    if (k != 0)
+    {
+        if ((k % 16) == 0)
+        {
+        printf (&quot;\n\t\t&quot;);
+        }
+    }
+    print_output_property_value (value_format, value_type,
+                     prop + (k * bytes_per_item));
+    printf (&quot; &quot;);
+    }
+
+    printf (&quot;\n&quot;);
+}
+
+static void
+get_providers (void)
+{
+    XRRProviderResources *pr;
+    int i;
+
+    if (!has_1_4 || providers)
+    return;
+
+    pr = XRRGetProviderResources(dpy, root);
+    num_providers = pr-&gt;nproviders;
+    providers = calloc (num_providers, sizeof (provider_t));
+    if (!providers)
+    fatal (&quot;out of memory\n&quot;);
+
+    for (i = 0; i &lt; num_providers; i++) {
+    provider_t *provider = &amp;providers[i];
+    name_t *name = &amp;provider-&gt;provider;
+    XRRProviderInfo *info = XRRGetProviderInfo(dpy, res, pr-&gt;providers[i]);
+
+    provider-&gt;info = info;
+    set_name_xid (name, pr-&gt;providers[i]);
+    set_name_index (name, i);
+    set_name_string (name, info-&gt;name);
+   }
+
+   XRRFreeProviderResources(pr);
+}
+
+static provider_t *
+find_provider (name_t *name)
+{
+    int i;
+
+    if ((name-&gt;kind &amp; name_xid) &amp;&amp; name-&gt;xid == 0)
+    return NULL;
+    for (i = 0; i &lt; num_providers; i++) {
+    provider_t *p = &amp;providers[i];
+    name_kind_t common = name-&gt;kind &amp; p-&gt;provider.kind;
+
+    if ((common &amp; name_xid) &amp;&amp; name-&gt;xid == p-&gt;provider.xid)
+        return p;
+    if ((common &amp; name_string) &amp;&amp; !strcmp (name-&gt;string, p-&gt;provider.string))
+        return p;
+    if ((common &amp; name_index) &amp;&amp; name-&gt;index == p-&gt;provider.index)
+        return p;
+    }
+
+    printf (&quot;Could not find provider with &quot;);
+    print_name (name);
+    printf (&quot;\n&quot;);
+    exit (1);
+}
+
+
+int
+main (int argc, char **argv)
+{
+    XRRScreenSize *sizes;
+    XRRScreenConfiguration *sc;
+    int     nsize;
+    int     nrate;
+    short       *rates;
+    Status  status = RRSetConfigFailed;
+    int     rot = -1;
+    int     query = False;
+    int     action_requested = False;
+    Rotation    current_rotation;
+    XEvent  event;
+    XRRScreenChangeNotifyEvent *sce;    
+    char          *display_name = NULL;
+    int         i;
+    SizeID  current_size;
+    short   current_rate;
+    double      rate = -1;
+    int     size = -1;
+    int     dirind = 0;
+    Bool    setit = False;
+    Bool        version = False;
+    int     event_base, error_base;
+    int     reflection = 0;
+    int     width = 0, height = 0;
+    Bool        have_pixel_size = False;
+    int     ret = 0;
+    output_t    *config_output = NULL;
+    Bool        setit_1_2 = False;
+    Bool        query_1_2 = False;
+    Bool    modeit = False;
+    Bool    propit = False;
+    Bool    query_1 = False;
+    Bool    list_providers = False;
+    Bool        provsetoutsource = False;
+    Bool        provsetoffsink = False;
+    int     major, minor;
+    Bool    current = False;
+    Bool    toggle_x = False;
+    Bool    toggle_y = False;
+
+    program_name = argv[0];
+    for (i = 1; i &lt; argc; i++) {
+    if (!strcmp (&quot;-display&quot;, argv[i]) || !strcmp (&quot;--display&quot;, argv[i]) ||
+        !strcmp (&quot;-d&quot;, argv[i])) {
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        display_name = argv[i];
+        continue;
+    }
+    if (!strcmp(&quot;-help&quot;, argv[i]) || !strcmp(&quot;--help&quot;, argv[i])) {
+        usage();
+        exit(0);
+    }
+    if (!strcmp (&quot;--verbose&quot;, argv[i])) {
+        verbose = True;
+        continue;
+    }
+    if (!strcmp (&quot;--dryrun&quot;, argv[i])) {
+        dryrun = True;
+        verbose = True;
+        continue;
+    }
+    if (!strcmp (&quot;--nograb&quot;, argv[i])) {
+        grab_server = False;
+        continue;
+    }
+    if (!strcmp(&quot;--current&quot;, argv[i])) {
+        current = True;
+        continue;
+    }
+
+    if (!strcmp (&quot;-s&quot;, argv[i]) || !strcmp (&quot;--size&quot;, argv[i])) {
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        if (sscanf (argv[i], &quot;%dx%d&quot;, &amp;width, &amp;height) == 2) {
+        have_pixel_size = True;
+        } else {
+        size = check_strtol(argv[i]);
+        if (size &lt; 0) argerr (&quot;--size argument must be nonnegative\n&quot;);
+        }
+        setit = True;
+        action_requested = True;
+        continue;
+    }
+
+    if (!strcmp (&quot;-r&quot;, argv[i]) ||
+        !strcmp (&quot;--rate&quot;, argv[i]) ||
+        !strcmp (&quot;--refresh&quot;, argv[i]))
+    {
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        rate = check_strtod(argv[i]);
+        setit = True;
+        if (config_output)
+        {
+        config_output-&gt;refresh = rate;
+        config_output-&gt;changes |= changes_refresh;
+        setit_1_2 = True;
+        }
+        action_requested = True;
+        continue;
+    }
+
+    if (!strcmp (&quot;-v&quot;, argv[i]) || !strcmp (&quot;--version&quot;, argv[i])) {
+        version = True;
+        action_requested = True;
+        continue;
+    }
+
+    if (!strcmp (&quot;-x&quot;, argv[i])) {
+        toggle_x = True;
+        setit = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;-y&quot;, argv[i])) {
+        toggle_y = True;
+        setit = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--screen&quot;, argv[i])) {
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        screen = check_strtol(argv[i]);
+        if (screen &lt; 0) argerr (&quot;--screen argument must be nonnegative\n&quot;);
+        continue;
+    }
+    if (!strcmp (&quot;-q&quot;, argv[i]) || !strcmp (&quot;--query&quot;, argv[i])) {
+        query = True;
+        continue;
+    }
+    if (!strcmp (&quot;-o&quot;, argv[i]) || !strcmp (&quot;--orientation&quot;, argv[i])) {
+        char *endptr;
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        dirind = strtol(argv[i], &amp;endptr, 10);
+        if (argv[i] == endptr) {
+        for (dirind = 0; dirind &lt; 4; dirind++) {
+            if (strcmp (direction[dirind], argv[i]) == 0) break;
+        }
+        }
+        if ((dirind &lt; 0) || (dirind &gt; 3))
+        argerr (&quot;%s: invalid argument '%s'\n&quot;, argv[i-1], argv[i]);
+        rot = dirind;
+        setit = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--prop&quot;, argv[i]) ||
+        !strcmp (&quot;--props&quot;, argv[i]) ||
+        !strcmp (&quot;--madprops&quot;, argv[i]) ||
+        !strcmp (&quot;--properties&quot;, argv[i]))
+    {
+        query_1_2 = True;
+        properties = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--output&quot;, argv[i])) {
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+
+        config_output = find_output_by_name (argv[i]);
+        if (!config_output) {
+        config_output = add_output ();
+        set_name (&amp;config_output-&gt;output, argv[i], name_string|name_xid);
+        }
+
+        setit_1_2 = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--crtc&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        set_name (&amp;config_output-&gt;crtc, argv[i], name_xid|name_index);
+        config_output-&gt;changes |= changes_crtc;
+        continue;
+    }
+    if (!strcmp (&quot;--mode&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        set_name (&amp;config_output-&gt;mode, argv[i], name_string|name_xid);
+        config_output-&gt;changes |= changes_mode;
+        continue;
+    }
+    if (!strcmp (&quot;--preferred&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        set_name_preferred (&amp;config_output-&gt;mode);
+        config_output-&gt;changes |= changes_mode;
+        continue;
+    }
+    if (!strcmp (&quot;--pos&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        if (sscanf (argv[i], &quot;%dx%d&quot;,
+            &amp;config_output-&gt;x, &amp;config_output-&gt;y) != 2)
+        argerr (&quot;failed to parse '%s' as a position\n&quot;, argv[i]);
+        config_output-&gt;changes |= changes_position;
+        continue;
+    }
+    if (!strcmp (&quot;--rotation&quot;, argv[i]) || !strcmp (&quot;--rotate&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        for (dirind = 0; dirind &lt; 4; dirind++) {
+        if (strcmp (direction[dirind], argv[i]) == 0) break;
+        }
+        if (dirind == 4)
+        argerr (&quot;%s: invalid argument '%s'\n&quot;, argv[i-1], argv[i]);
+        config_output-&gt;rotation &amp;= ~0xf;
+        config_output-&gt;rotation |= 1 &lt;&lt; dirind;
+        config_output-&gt;changes |= changes_rotation;
+        continue;
+    }
+    if (!strcmp (&quot;--reflect&quot;, argv[i]) || !strcmp (&quot;--reflection&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        for (dirind = 0; dirind &lt; 4; dirind++) {
+        if (strcmp (reflections[dirind], argv[i]) == 0) break;
+        }
+        if (dirind == 4)
+        argerr (&quot;%s: invalid argument '%s'\n&quot;, argv[i-1], argv[i]);
+        config_output-&gt;rotation &amp;= ~(RR_Reflect_X|RR_Reflect_Y);
+        config_output-&gt;rotation |= dirind * RR_Reflect_X;
+        config_output-&gt;changes |= changes_reflection;
+        continue;
+    }
+    if (!strcmp (&quot;--left-of&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        config_output-&gt;relation = relation_left_of;
+        config_output-&gt;relative_to = argv[i];
+        config_output-&gt;changes |= changes_relation;
+        continue;
+    }
+    if (!strcmp (&quot;--right-of&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        config_output-&gt;relation = relation_right_of;
+        config_output-&gt;relative_to = argv[i];
+        config_output-&gt;changes |= changes_relation;
+        continue;
+    }
+    if (!strcmp (&quot;--above&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        config_output-&gt;relation = relation_above;
+        config_output-&gt;relative_to = argv[i];
+        config_output-&gt;changes |= changes_relation;
+        continue;
+    }
+    if (!strcmp (&quot;--below&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        config_output-&gt;relation = relation_below;
+        config_output-&gt;relative_to = argv[i];
+        config_output-&gt;changes |= changes_relation;
+        continue;
+    }
+    if (!strcmp (&quot;--same-as&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        config_output-&gt;relation = relation_same_as;
+        config_output-&gt;relative_to = argv[i];
+        config_output-&gt;changes |= changes_relation;
+        continue;
+    }
+    if (!strcmp (&quot;--panning&quot;, argv[i])) {
+        XRRPanning *pan;
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        pan = &amp;config_output-&gt;panning;
+        switch (sscanf (argv[i], &quot;%dx%d+%d+%d/%dx%d+%d+%d/%d/%d/%d/%d&quot;,
+                &amp;pan-&gt;width, &amp;pan-&gt;height, &amp;pan-&gt;left, &amp;pan-&gt;top,
+                &amp;pan-&gt;track_width, &amp;pan-&gt;track_height,
+                &amp;pan-&gt;track_left, &amp;pan-&gt;track_top,
+                &amp;pan-&gt;border_left, &amp;pan-&gt;border_top,
+                &amp;pan-&gt;border_right, &amp;pan-&gt;border_bottom)) {
+        case 2:
+        pan-&gt;left = pan-&gt;top = 0;
+        /* fall through */
+        case 4:
+        pan-&gt;track_left = pan-&gt;track_top =
+            pan-&gt;track_width = pan-&gt;track_height = 0;
+        /* fall through */
+        case 8:
+        pan-&gt;border_left = pan-&gt;border_top =
+            pan-&gt;border_right = pan-&gt;border_bottom = 0;
+        /* fall through */
+        case 12:
+        break;
+        default:
+        argerr (&quot;%s: invalid argument '%s'\n&quot;, argv[i-1], argv[i]);
+        }
+        config_output-&gt;changes |= changes_panning;
+        continue;
+    }
+    if (!strcmp (&quot;--gamma&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        if (sscanf(argv[i], &quot;%f:%f:%f&quot;, &amp;config_output-&gt;gamma.red,
+            &amp;config_output-&gt;gamma.green, &amp;config_output-&gt;gamma.blue) != 3)
+        argerr (&quot;%s: invalid argument '%s'\n&quot;, argv[i-1], argv[i]);
+        config_output-&gt;changes |= changes_gamma;
+        setit_1_2 = True;
+        continue;
+    }
+    if (!strcmp (&quot;--brightness&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        if (sscanf(argv[i], &quot;%f&quot;, &amp;config_output-&gt;brightness) != 1)
+        argerr (&quot;%s: invalid argument '%s'\n&quot;, argv[i-1], argv[i]);
+        config_output-&gt;changes |= changes_gamma;
+        setit_1_2 = True;
+        continue;
+    }
+    if (!strcmp (&quot;--primary&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        config_output-&gt;changes |= changes_primary;
+        config_output-&gt;primary = True;
+        setit_1_2 = True;
+        continue;
+    }
+    if (!strcmp (&quot;--noprimary&quot;, argv[i])) {
+        no_primary = True;
+        setit_1_2 = True;
+        continue;
+    }
+    if (!strcmp (&quot;--set&quot;, argv[i])) {
+        output_prop_t   *prop;
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (i+2 &gt;= argc) argerr (&quot;%s requires two arguments\n&quot;, argv[i]);
+        prop = malloc (sizeof (output_prop_t));
+        prop-&gt;next = config_output-&gt;props;
+        config_output-&gt;props = prop;
+        prop-&gt;name = argv[++i];
+        prop-&gt;value = argv[++i];
+        propit = True;
+        config_output-&gt;changes |= changes_property;
+        setit_1_2 = True;
+        continue;
+    }
+    if (!strcmp (&quot;--scale&quot;, argv[i]))
+    {
+        double  sx, sy;
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        if (sscanf (argv[i], &quot;%lfx%lf&quot;, &amp;sx, &amp;sy) != 2)
+        argerr (&quot;failed to parse '%s' as a scaling factor\n&quot;, argv[i]);
+        init_transform (&amp;config_output-&gt;transform);
+        config_output-&gt;transform.transform.matrix[0][0] = XDoubleToFixed (sx);
+        config_output-&gt;transform.transform.matrix[1][1] = XDoubleToFixed (sy);
+        config_output-&gt;transform.transform.matrix[2][2] = XDoubleToFixed (1.0);
+        if (sx != 1 || sy != 1)
+        config_output-&gt;transform.filter = &quot;bilinear&quot;;
+        else
+        config_output-&gt;transform.filter = &quot;nearest&quot;;
+        config_output-&gt;transform.nparams = 0;
+        config_output-&gt;transform.params = NULL;
+        config_output-&gt;changes |= changes_transform;
+        continue;
+    }
+    if (!strcmp (&quot;--scale-from&quot;, argv[i]))
+    {
+        int w, h;
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        if (sscanf (argv[i], &quot;%dx%d&quot;, &amp;w, &amp;h) != 2)
+        argerr (&quot;failed to parse '%s' as a scale-from size\n&quot;, argv[i]);
+        if (w &lt;=0 || h &lt;= 0)
+        argerr (&quot;--scale-from dimensions must be nonnegative\n&quot;);
+        config_output-&gt;scale_from_w = w;
+        config_output-&gt;scale_from_h = h;
+        config_output-&gt;changes |= changes_transform;
+        continue;
+    }
+    if (!strcmp (&quot;--transform&quot;, argv[i])) {
+        double  transform[3][3];
+        int     k, l;
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        init_transform (&amp;config_output-&gt;transform);
+        if (strcmp (argv[i], &quot;none&quot;) != 0)
+        {
+        if (sscanf(argv[i], &quot;%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf&quot;,
+               &amp;transform[0][0],&amp;transform[0][1],&amp;transform[0][2],
+               &amp;transform[1][0],&amp;transform[1][1],&amp;transform[1][2],
+               &amp;transform[2][0],&amp;transform[2][1],&amp;transform[2][2])
+            != 9)
+            argerr (&quot;failed to parse '%s' as a transformation\n&quot;, argv[i]);
+        init_transform (&amp;config_output-&gt;transform);
+        for (k = 0; k &lt; 3; k++)
+            for (l = 0; l &lt; 3; l++) {
+            config_output-&gt;transform.transform.matrix[k][l] = XDoubleToFixed (transform[k][l]);
+            }
+        config_output-&gt;transform.filter = &quot;bilinear&quot;;
+        config_output-&gt;transform.nparams = 0;
+        config_output-&gt;transform.params = NULL;
+        }
+        config_output-&gt;changes |= changes_transform;
+        continue;
+    }
+    if (!strcmp (&quot;--off&quot;, argv[i])) {
+        if (!config_output) argerr (&quot;%s must be used after --output\n&quot;, argv[i]);
+        set_name_xid (&amp;config_output-&gt;mode, None);
+        set_name_xid (&amp;config_output-&gt;crtc, None);
+        config_output-&gt;changes |= changes_mode;
+        continue;
+    }
+    if (!strcmp (&quot;--fb&quot;, argv[i])) {
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        if (sscanf (argv[i], &quot;%dx%d&quot;,
+            &amp;fb_width, &amp;fb_height) != 2)
+        argerr (&quot;failed to parse '%s' as a framebuffer size\n&quot;, argv[i]);
+        setit_1_2 = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--fbmm&quot;, argv[i])) {
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        if (sscanf (argv[i], &quot;%dx%d&quot;,
+            &amp;fb_width_mm, &amp;fb_height_mm) != 2)
+        argerr (&quot;failed to parse '%s' as a physical size\n&quot;, argv[i]);
+        setit_1_2 = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--dpi&quot;, argv[i])) {
+        char *strtod_error;
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        dpi = strtod(argv[i], &amp;strtod_error);
+        if (argv[i] == strtod_error)
+        {
+        dpi = 0.0;
+        dpi_output_name = argv[i];
+        }
+        setit_1_2 = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--auto&quot;, argv[i])) {
+        if (config_output)
+        {
+        config_output-&gt;automatic = True;
+        config_output-&gt;changes |= changes_automatic;
+        }
+        else
+        automatic = True;
+        setit_1_2 = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--q12&quot;, argv[i]))
+    {
+        query_1_2 = True;
+        continue;
+    }
+    if (!strcmp (&quot;--q1&quot;, argv[i]))
+    {
+        query_1 = True;
+        continue;
+    }
+    if (!strcmp (&quot;--newmode&quot;, argv[i]))
+    {
+        umode_t  *m = calloc (1, sizeof (umode_t));
+        double    clock;
+
+        ++i;
+        if (i + 9 &gt;= argc)
+        argerr (&quot;failed to parse '%s' as a mode specification\n&quot;, argv[i]);
+        m-&gt;mode.name = argv[i];
+        m-&gt;mode.nameLength = strlen (argv[i]);
+        i++;
+        clock = check_strtod(argv[i++]);
+        m-&gt;mode.dotClock = clock * 1e6;
+
+        m-&gt;mode.width = check_strtol(argv[i++]);
+        m-&gt;mode.hSyncStart = check_strtol(argv[i++]);
+        m-&gt;mode.hSyncEnd = check_strtol(argv[i++]);
+        m-&gt;mode.hTotal = check_strtol(argv[i++]);
+        m-&gt;mode.height = check_strtol(argv[i++]);
+        m-&gt;mode.vSyncStart = check_strtol(argv[i++]);
+        m-&gt;mode.vSyncEnd = check_strtol(argv[i++]);
+        m-&gt;mode.vTotal = check_strtol(argv[i++]);
+        m-&gt;mode.modeFlags = 0;
+        while (i &lt; argc) {
+        int f;
+
+        for (f = 0; mode_flags[f].string; f++)
+            if (!strcasecmp (mode_flags[f].string, argv[i]))
+            break;
+
+        if (!mode_flags[f].string)
+            break;
+        m-&gt;mode.modeFlags |= mode_flags[f].flag;
+        i++;
+        }
+        m-&gt;next = umodes;
+        m-&gt;action = umode_create;
+        umodes = m;
+        modeit = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--rmmode&quot;, argv[i]))
+    {
+        umode_t  *m = calloc (1, sizeof (umode_t));
+
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        set_name (&amp;m-&gt;name, argv[i], name_string|name_xid);
+        m-&gt;action = umode_destroy;
+        m-&gt;next = umodes;
+        umodes = m;
+        modeit = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--addmode&quot;, argv[i]))
+    {
+        umode_t  *m = calloc (1, sizeof (umode_t));
+
+        if (i+2 &gt;= argc) argerr (&quot;%s requires two arguments\n&quot;, argv[i]);
+        set_name (&amp;m-&gt;output, argv[++i], name_string|name_xid);
+        set_name (&amp;m-&gt;name, argv[++i], name_string|name_xid);
+        m-&gt;action = umode_add;
+        m-&gt;next = umodes;
+        umodes = m;
+        modeit = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--delmode&quot;, argv[i]))
+    {
+        umode_t  *m = calloc (1, sizeof (umode_t));
+
+        if (i+2 &gt;= argc) argerr (&quot;%s requires two arguments\n&quot;, argv[i]);
+        set_name (&amp;m-&gt;output, argv[++i], name_string|name_xid);
+        set_name (&amp;m-&gt;name, argv[++i], name_string|name_xid);
+        m-&gt;action = umode_delete;
+        m-&gt;next = umodes;
+        umodes = m;
+        modeit = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp (&quot;--listproviders&quot;, argv[i]))
+    {
+        list_providers = True;
+        action_requested = True;
+        continue;
+    }
+    if (!strcmp(&quot;--setprovideroutputsource&quot;, argv[i]))
+    { 
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        set_name (&amp;provider_name, argv[i], name_string|name_xid|name_index);
+        if (++i&gt;=argc) 
+        set_name_xid (&amp;output_source_provider_name, 0);
+        else
+        set_name (&amp;output_source_provider_name, argv[i], name_string|name_xid|name_index);
+        action_requested = True;
+        provsetoutsource = True;
+        continue;
+    }
+    if (!strcmp(&quot;--setprovideroffloadsink&quot;, argv[i]))
+    { 
+        if (++i &gt;= argc) argerr (&quot;%s requires an argument\n&quot;, argv[i-1]);
+        set_name (&amp;provider_name, argv[i], name_string|name_xid|name_index);
+        if (++i&gt;=argc) 
+        set_name_xid (&amp;offload_sink_provider_name, 0);
+        else
+        set_name (&amp;offload_sink_provider_name, argv[i], name_string|name_xid|name_index);
+        action_requested = True;
+        provsetoffsink = True;
+        continue;
+    }
+
+    argerr (&quot;unrecognized option '%s'\n&quot;, argv[i]);
+    }
+    if (!action_requested)
+        query = True;
+    if (verbose) 
+    {
+    query = True;
+    if (setit &amp;&amp; !setit_1_2)
+        query_1 = True;
+    }
+    if (version)
+    printf(&quot;xrandr program version       &quot; VERSION &quot;\n&quot;);
+
+    dpy = XOpenDisplay (display_name);
+
+    if (dpy == NULL) {
+    fprintf (stderr, &quot;Can't open display %s\n&quot;, XDisplayName(display_name));
+    exit (1);
+    }
+    if (screen &lt; 0)
+    screen = DefaultScreen (dpy);
+    if (screen &gt;= ScreenCount (dpy)) {
+    fprintf (stderr, &quot;Invalid screen number %d (display has %d)\n&quot;,
+         screen, ScreenCount (dpy));
+    exit (1);
+    }
+
+    root = RootWindow (dpy, screen);
+
+    if (!XRRQueryExtension (dpy, &amp;event_base, &amp;error_base) ||
+    !XRRQueryVersion (dpy, &amp;major, &amp;minor))
+    {
+    fprintf (stderr, &quot;RandR extension missing\n&quot;);
+    exit (1);
+    }
+    if (major &gt; 1 || (major == 1 &amp;&amp; minor &gt;= 2))
+    has_1_2 = True;
+    if (major &gt; 1 || (major == 1 &amp;&amp; minor &gt;= 3))
+    has_1_3 = True;
+    if (major &gt; 1 || (major == 1 &amp;&amp; minor &gt;= 4))
+    has_1_4 = True;
+
+    if (has_1_2 &amp;&amp; modeit)
+    {
+    umode_t *m;
+
+    get_screen (current);
+    get_crtcs();
+    get_outputs();
+
+    for (m = umodes; m; m = m-&gt;next)
+    {
+        XRRModeInfo *e;
+        output_t    *o;
+
+        switch (m-&gt;action) {
+        case umode_create:
+        XRRCreateMode (dpy, root, &amp;m-&gt;mode);
+        break;
+        case umode_destroy:
+        e = find_mode (&amp;m-&gt;name, 0);
+        if (!e)
+            fatal (&quot;cannot find mode \&quot;%s\&quot;\n&quot;, m-&gt;name.string);
+        XRRDestroyMode (dpy, e-&gt;id);
+        break;
+        case umode_add:
+        o = find_output (&amp;m-&gt;output);
+        if (!o)
+            fatal (&quot;cannot find output \&quot;%s\&quot;\n&quot;, m-&gt;output.string);
+        e = find_mode (&amp;m-&gt;name, 0);
+        if (!e)
+            fatal (&quot;cannot find mode \&quot;%s\&quot;\n&quot;, m-&gt;name.string);
+        XRRAddOutputMode (dpy, o-&gt;output.xid, e-&gt;id);
+        break;
+        case umode_delete:
+        o = find_output (&amp;m-&gt;output);
+        if (!o)
+            fatal (&quot;cannot find output \&quot;%s\&quot;\n&quot;, m-&gt;output.string);
+        e = find_mode (&amp;m-&gt;name, 0);
+        if (!e)
+            fatal (&quot;cannot find mode \&quot;%s\&quot;\n&quot;, m-&gt;name.string);
+        XRRDeleteOutputMode (dpy, o-&gt;output.xid, e-&gt;id);
+        break;
+        }
+    }
+    if (!setit_1_2)
+    {
+        XSync (dpy, False);
+        exit (0);
+    }
+    }
+    if (has_1_2 &amp;&amp; propit)
+    {
+    output_t *output;
+
+    get_screen (current);
+    get_crtcs();
+    get_outputs();
+
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+        output_prop_t   *prop;
+
+        for (prop = output-&gt;props; prop; prop = prop-&gt;next)
+        {
+        Atom        name = XInternAtom (dpy, prop-&gt;name, False);
+        Atom        type;
+        int     format = 0;
+        unsigned char   *data, *malloced_data = NULL;
+        int     nelements;
+        int     int_value;
+        unsigned long   ulong_value;
+        unsigned char   *prop_data;
+        int     actual_format;
+        unsigned long   nitems, bytes_after;
+        Atom        actual_type;
+        XRRPropertyInfo *propinfo;
+
+        type = AnyPropertyType;
+
+        if (XRRGetOutputProperty (dpy, output-&gt;output.xid, name,
+                      0, 100, False, False,
+                      AnyPropertyType,
+                      &amp;actual_type, &amp;actual_format,
+                      &amp;nitems, &amp;bytes_after, &amp;prop_data) == Success &amp;&amp;
+
+            (propinfo = XRRQueryOutputProperty(dpy, output-&gt;output.xid,
+                              name)))
+        {
+            type = actual_type;
+            format = actual_format;
+        }
+
+        malloced_data = property_values_from_string
+            (prop-&gt;value, type, actual_format, &amp;nelements);
+
+        if (malloced_data)
+        {
+            data = malloced_data;
+            type = actual_type;
+            format = actual_format;
+        }
+        else if (type == AnyPropertyType &amp;&amp;
+            (sscanf (prop-&gt;value, &quot;%d&quot;, &amp;int_value) == 1 ||
+             sscanf (prop-&gt;value, &quot;0x%x&quot;, &amp;int_value) == 1))
+        {
+            type = XA_INTEGER;
+            ulong_value = int_value;
+            data = (unsigned char *) &amp;ulong_value;
+            nelements = 1;
+            format = 32;
+        }
+        else if (type == XA_ATOM)
+        {
+            ulong_value = XInternAtom (dpy, prop-&gt;value, False);
+            data = (unsigned char *) &amp;ulong_value;
+            nelements = 1;
+        }
+        else if (type == XA_STRING || type == AnyPropertyType)
+        {
+            type = XA_STRING;
+            data = (unsigned char *) prop-&gt;value;
+            nelements = strlen (prop-&gt;value);
+            format = 8;
+        }
+        else
+            continue;
+        XRRChangeOutputProperty (dpy, output-&gt;output.xid,
+                     name, type, format, PropModeReplace,
+                     data, nelements);
+        free (malloced_data);
+        }
+    }
+    if (!setit_1_2)
+    {
+        XSync (dpy, False);
+        exit (0);
+    }
+    }
+    if (provsetoutsource)
+    {
+    provider_t *provider, *source;
+
+    if (!has_1_4)
+        fatal (&quot;--setprovideroutputsource requires RandR 1.4\n&quot;);
+
+    get_screen (current);
+    get_providers ();
+
+    provider = find_provider (&amp;provider_name);
+    source = find_provider(&amp;output_source_provider_name);
+
+    XRRSetProviderOutputSource(dpy, provider-&gt;provider.xid, source ? source-&gt;provider.xid : 0);
+    }
+    if (provsetoffsink)
+    {
+    provider_t *provider, *sink;
+
+    if (!has_1_4)
+        fatal (&quot;--setprovideroffloadsink requires RandR 1.4\n&quot;);
+
+    get_screen (current);
+    get_providers ();
+
+    provider = find_provider (&amp;provider_name);
+    sink = find_provider(&amp;offload_sink_provider_name);
+
+    XRRSetProviderOffloadSink(dpy, provider-&gt;provider.xid, sink ? sink-&gt;provider.xid : 0);
+    }
+    if (setit_1_2)
+    {
+    get_screen (current);
+    get_crtcs ();
+    get_outputs ();
+    set_positions ();
+    set_screen_size ();
+
+    pick_crtcs ();
+
+    /*
+     * Assign outputs to crtcs
+     */
+    set_crtcs ();
+
+    /*
+     * Mark changing crtcs
+     */
+    mark_changing_crtcs ();
+
+    /*
+     * If an output was specified to track dpi, use it
+     */
+    if (dpi_output_name)
+    {
+        output_t    *dpi_output = find_output_by_name (dpi_output_name);
+        XRROutputInfo   *output_info;
+        XRRModeInfo *mode_info;
+        if (!dpi_output)
+        fatal (&quot;Cannot find output %s\n&quot;, dpi_output_name);
+        output_info = dpi_output-&gt;output_info;
+        mode_info = dpi_output-&gt;mode_info;
+        if (output_info &amp;&amp; mode_info &amp;&amp; output_info-&gt;mm_height)
+        {
+        /*
+         * When this output covers the whole screen, just use
+         * the known physical size
+         */
+        if (fb_width == mode_info-&gt;width &amp;&amp;
+            fb_height == mode_info-&gt;height)
+        {
+            fb_width_mm = output_info-&gt;mm_width;
+            fb_height_mm = output_info-&gt;mm_height;
+        }
+        else
+        {
+            dpi = (25.4 * mode_info-&gt;height) / output_info-&gt;mm_height;
+        }
+        }
+    }
+
+    /*
+     * Compute physical screen size
+     */
+    if (fb_width_mm == 0 || fb_height_mm == 0)
+    {
+        if (fb_width != DisplayWidth (dpy, screen) ||
+        fb_height != DisplayHeight (dpy, screen) || dpi != 0.0)
+        {
+        if (dpi &lt;= 0)
+            dpi = (25.4 * DisplayHeight (dpy, screen)) / DisplayHeightMM(dpy, screen);
+
+        fb_width_mm = (25.4 * fb_width) / dpi;
+        fb_height_mm = (25.4 * fb_height) / dpi;
+        }
+        else
+        {
+        fb_width_mm = DisplayWidthMM (dpy, screen);
+        fb_height_mm = DisplayHeightMM (dpy, screen);
+        }
+    }
+
+    /*
+     * Set panning
+     */
+    set_panning ();
+
+    /* 
+     * Set gamma on crtc's that belong to the outputs.
+     */
+    set_gamma ();
+
+    /*
+     * Now apply all of the changes
+     */
+    apply ();
+
+    XSync (dpy, False);
+    exit (0);
+    }
+    if (query_1_2 || (query &amp;&amp; has_1_2 &amp;&amp; !query_1))
+    {
+    output_t    *output;
+    int     m;
+
+#define ModeShown   0x80000000
+
+    get_screen (current);
+    get_crtcs ();
+    get_outputs ();
+
+    printf (&quot;Screen %d: minimum %d x %d, current %d x %d, maximum %d x %d\n&quot;,
+        screen, minWidth, minHeight,
+        DisplayWidth (dpy, screen), DisplayHeight(dpy, screen),
+        maxWidth, maxHeight);
+
+    for (output = all_outputs; output; output = output-&gt;next)
+    {
+        XRROutputInfo   *output_info = output-&gt;output_info;
+        crtc_t      *cur_crtc = output-&gt;crtc_info;
+        XRRCrtcInfo     *crtc_info = cur_crtc ? cur_crtc-&gt;crtc_info : NULL;
+        XRRModeInfo     *cur_mode = output-&gt;mode_info;
+        Atom        *props;
+        int         j, nprop;
+        Bool        *mode_shown;
+        Rotation        rotations = output_rotations (output);
+
+        printf (&quot;%s %s&quot;, output_info-&gt;name, connection[output_info-&gt;connection]);
+        if (output-&gt;primary) {
+        printf(&quot; primary&quot;);
+        }
+        if (cur_mode)
+        {
+        if (crtc_info) {
+            printf (&quot; %dx%d+%d+%d&quot;,
+                crtc_info-&gt;width, crtc_info-&gt;height,
+                crtc_info-&gt;x, crtc_info-&gt;y);
+        } else {
+            printf (&quot; %dx%d+%d+%d&quot;,
+                cur_mode-&gt;width, cur_mode-&gt;height, output-&gt;x,
+                output-&gt;y);
+        }
+        if (verbose)
+            printf (&quot; (0x%x)&quot;, (int)cur_mode-&gt;id);
+        if (output-&gt;rotation != RR_Rotate_0 || verbose)
+        {
+            printf (&quot; %s&quot;, 
+                rotation_name (output-&gt;rotation));
+            if (output-&gt;rotation &amp; (RR_Reflect_X|RR_Reflect_Y))
+            printf (&quot; %s&quot;, reflection_name (output-&gt;rotation));
+        }
+        }
+        if (rotations != RR_Rotate_0 || verbose)
+        {
+        Bool    first = True;
+        printf (&quot; (&quot;);
+        for (i = 0; i &lt; 4; i ++) {
+            if ((rotations &gt;&gt; i) &amp; 1) {
+            if (!first) printf (&quot; &quot;); first = False;
+            printf(&quot;%s&quot;, direction[i]);
+            }
+        }
+        if (rotations &amp; RR_Reflect_X)
+        {
+            if (!first) printf (&quot; &quot;); first = False;
+            printf (&quot;x axis&quot;);
+        }
+        if (rotations &amp; RR_Reflect_Y)
+        {
+            if (!first) printf (&quot; &quot;);
+            printf (&quot;y axis&quot;);
+        }
+        printf (&quot;)&quot;);
+        }
+
+        if (cur_mode)
+        {
+        printf (&quot; %dmm x %dmm&quot;,
+            (int)output_info-&gt;mm_width, (int)output_info-&gt;mm_height);
+        }
+
+        if (cur_crtc &amp;&amp; cur_crtc-&gt;panning_info &amp;&amp;
+        cur_crtc-&gt;panning_info-&gt;width &gt; 0)
+        {
+        XRRPanning *pan = cur_crtc-&gt;panning_info;
+        printf (&quot; panning %dx%d+%d+%d&quot;,
+            pan-&gt;width, pan-&gt;height, pan-&gt;left, pan-&gt;top);
+        if ((pan-&gt;track_width    != 0 &amp;&amp;
+             (pan-&gt;track_left    != pan-&gt;left       ||
+              pan-&gt;track_width   != pan-&gt;width      ||
+              pan-&gt;border_left   != 0           ||
+              pan-&gt;border_right  != 0))         ||
+            (pan-&gt;track_height   != 0 &amp;&amp;
+             (pan-&gt;track_top     != pan-&gt;top        ||
+              pan-&gt;track_height  != pan-&gt;height     ||
+              pan-&gt;border_top    != 0           ||
+              pan-&gt;border_bottom != 0)))
+            printf (&quot; tracking %dx%d+%d+%d border %d/%d/%d/%d&quot;,
+                pan-&gt;track_width,  pan-&gt;track_height,
+                pan-&gt;track_left,   pan-&gt;track_top,
+                pan-&gt;border_left,  pan-&gt;border_top,
+                pan-&gt;border_right, pan-&gt;border_bottom);
+        }
+        printf (&quot;\n&quot;);
+
+        if (verbose)
+        {
+        printf (&quot;\tIdentifier: 0x%x\n&quot;, (int)output-&gt;output.xid);
+        printf (&quot;\tTimestamp:  %d\n&quot;, (int)output_info-&gt;timestamp);
+        printf (&quot;\tSubpixel:   %s\n&quot;, order[output_info-&gt;subpixel_order]);
+        if (output-&gt;gamma.red != 0.0 &amp;&amp; output-&gt;gamma.green != 0.0 &amp;&amp; output-&gt;gamma.blue != 0.0) {
+            printf (&quot;\tGamma:      %#.2g:%#.2g:%#.2g\n&quot;,
+                output-&gt;gamma.red, output-&gt;gamma.green, output-&gt;gamma.blue);
+            printf (&quot;\tBrightness: %#.2g\n&quot;, output-&gt;brightness);
+        }
+        printf (&quot;\tClones:    &quot;);
+        for (j = 0; j &lt; output_info-&gt;nclone; j++)
+        {
+            output_t    *clone = find_output_by_xid (output_info-&gt;clones[j]);
+
+            if (clone) printf (&quot; %s&quot;, clone-&gt;output.string);
+        }
+        printf (&quot;\n&quot;);
+        if (output-&gt;crtc_info)
+            printf (&quot;\tCRTC:       %d\n&quot;, output-&gt;crtc_info-&gt;crtc.index);
+        printf (&quot;\tCRTCs:     &quot;);
+        for (j = 0; j &lt; output_info-&gt;ncrtc; j++)
+        {
+            crtc_t  *crtc = find_crtc_by_xid (output_info-&gt;crtcs[j]);
+            if (crtc)
+            printf (&quot; %d&quot;, crtc-&gt;crtc.index);
+        }
+        printf (&quot;\n&quot;);
+        if (output-&gt;crtc_info &amp;&amp; output-&gt;crtc_info-&gt;panning_info) {
+            XRRPanning *pan = output-&gt;crtc_info-&gt;panning_info;
+            printf (&quot;\tPanning:    %dx%d+%d+%d\n&quot;,
+                pan-&gt;width, pan-&gt;height, pan-&gt;left, pan-&gt;top);
+            printf (&quot;\tTracking:   %dx%d+%d+%d\n&quot;,
+                pan-&gt;track_width,  pan-&gt;track_height,
+                pan-&gt;track_left,   pan-&gt;track_top);
+            printf (&quot;\tBorder:     %d/%d/%d/%d\n&quot;,
+                pan-&gt;border_left,  pan-&gt;border_top,
+                pan-&gt;border_right, pan-&gt;border_bottom);
+        }
+        }
+        if (verbose)
+        {
+        int x, y;
+
+        printf (&quot;\tTransform: &quot;);
+        for (y = 0; y &lt; 3; y++)
+        {
+            for (x = 0; x &lt; 3; x++)
+            printf (&quot; %f&quot;, XFixedToDouble (output-&gt;transform.transform.matrix[y][x]));
+            if (y &lt; 2)
+            printf (&quot;\n\t           &quot;);
+        }
+        if (output-&gt;transform.filter)
+            printf (&quot;\n\t           filter: %s&quot;, output-&gt;transform.filter);
+        printf (&quot;\n&quot;);
+        }
+        if (verbose || properties)
+        {
+        props = XRRListOutputProperties (dpy, output-&gt;output.xid,
+                         &amp;nprop);
+        for (j = 0; j &lt; nprop; j++) {
+            unsigned char *prop;
+            int actual_format;
+            unsigned long nitems, bytes_after;
+            Atom actual_type;
+            XRRPropertyInfo *propinfo;
+            char *atom_name = XGetAtomName (dpy, props[j]);
+            int k;
+
+            XRRGetOutputProperty (dpy, output-&gt;output.xid, props[j],
+                      0, 100, False, False,
+                      AnyPropertyType,
+                      &amp;actual_type, &amp;actual_format,
+                      &amp;nitems, &amp;bytes_after, &amp;prop);
+
+            propinfo = XRRQueryOutputProperty(dpy, output-&gt;output.xid,
+                              props[j]);
+
+            printf (&quot;\t%s: &quot;, atom_name);
+
+            print_output_property(atom_name, actual_format,
+                      actual_type, nitems, prop);
+
+            if (propinfo-&gt;range &amp;&amp; propinfo-&gt;num_values &gt; 0)
+            {
+            printf (&quot;\t\trange%s: &quot;,
+                (propinfo-&gt;num_values == 2) ? &quot;&quot; : &quot;s&quot;);
+            for (k = 0; k &lt; propinfo-&gt;num_values / 2; k++)
+            {
+                printf (&quot;(&quot;);
+                print_output_property_value (32, actual_type,
+                             (unsigned char *) &amp;(propinfo-&gt;values[k * 2]));
+                printf (&quot;, &quot;);
+                print_output_property_value (32, actual_type,
+                             (unsigned char *) &amp;(propinfo-&gt;values[k * 2 + 1]));
+                printf (&quot;)&quot;);
+                if (k &lt; propinfo-&gt;num_values / 2 - 1)
+                printf (&quot;, &quot;);
+            }
+            printf (&quot;\n&quot;);
+            }
+            if (!propinfo-&gt;range &amp;&amp; propinfo-&gt;num_values &gt; 0)
+            {
+            printf (&quot;\t\tsupported: &quot;);
+            for (k = 0; k &lt; propinfo-&gt;num_values; k++)
+            {
+                print_output_property_value (32, actual_type,
+                             (unsigned char *) &amp;(propinfo-&gt;values[k]));
+                if (k &lt; propinfo-&gt;num_values - 1)
+                printf (&quot;, &quot;);
+            }
+            printf (&quot;\n&quot;);
+            }
+
+            free(propinfo);
+        }
+        }
+
+        if (verbose)
+        {
+        for (j = 0; j &lt; output_info-&gt;nmode; j++)
+        {
+            XRRModeInfo *mode = find_mode_by_xid (output_info-&gt;modes[j]);
+            int     f;
+
+            printf (&quot;  %s (0x%x) %6.3fMHz&quot;,
+                mode-&gt;name, (int)mode-&gt;id,
+                (double)mode-&gt;dotClock / 1000000.0);
+            for (f = 0; mode_flags[f].flag; f++)
+            if (mode-&gt;modeFlags &amp; mode_flags[f].flag)
+                printf (&quot; %s&quot;, mode_flags[f].string);
+            if (mode == output-&gt;mode_info)
+            printf (&quot; *current&quot;);
+            if (j &lt; output_info-&gt;npreferred)
+            printf (&quot; +preferred&quot;);
+            printf (&quot;\n&quot;);
+            printf (&quot;        h: width  %4d start %4d end %4d total %4d skew %4d clock %6.2fKHz\n&quot;,
+                mode-&gt;width, mode-&gt;hSyncStart, mode-&gt;hSyncEnd,
+                mode-&gt;hTotal, mode-&gt;hSkew, mode_hsync (mode) / 1000);
+            printf (&quot;        v: height %4d start %4d end %4d total %4d           clock %6.2fHz\n&quot;,
+                mode-&gt;height, mode-&gt;vSyncStart, mode-&gt;vSyncEnd, mode-&gt;vTotal,
+                mode_refresh (mode));
+            mode-&gt;modeFlags |= ModeShown;
+        }
+        }
+        else
+        {
+        mode_shown = calloc (output_info-&gt;nmode, sizeof (Bool));
+        if (!mode_shown) fatal (&quot;out of memory\n&quot;);
+        for (j = 0; j &lt; output_info-&gt;nmode; j++)
+        {
+            XRRModeInfo *jmode, *kmode;
+            int k;
+
+            if (mode_shown[j]) continue;
+
+            jmode = find_mode_by_xid (output_info-&gt;modes[j]);
+            printf (&quot; &quot;);
+            printf (&quot;  %-12s&quot;, jmode-&gt;name);
+            for (k = j; k &lt; output_info-&gt;nmode; k++)
+            {
+            if (mode_shown[k]) continue;
+            kmode = find_mode_by_xid (output_info-&gt;modes[k]);
+            if (strcmp (jmode-&gt;name, kmode-&gt;name) != 0) continue;
+            mode_shown[k] = True;
+            kmode-&gt;modeFlags |= ModeShown;
+            printf (&quot; %6.2f&quot;, mode_refresh (kmode));
+            if (kmode == output-&gt;mode_info)
+                printf (&quot;*&quot;);
+            else
+                printf (&quot; &quot;);
+            if (k &lt; output_info-&gt;npreferred)
+                printf (&quot;+&quot;);
+            else
+                printf (&quot; &quot;);
+            }
+            printf (&quot;\n&quot;);
+        }
+        free (mode_shown);
+        }
+    }
+    for (m = 0; m &lt; res-&gt;nmode; m++)
+    {
+        XRRModeInfo *mode = &amp;res-&gt;modes[m];
+
+        if (!(mode-&gt;modeFlags &amp; ModeShown))
+        {
+        printf (&quot;  %s (0x%x) %6.3fMHz\n&quot;,
+            mode-&gt;name, (int)mode-&gt;id,
+            (double)mode-&gt;dotClock / 1000000.0);
+        printf (&quot;        h: width  %4d start %4d end %4d total %4d skew %4d clock %6.2fKHz\n&quot;,
+            mode-&gt;width, mode-&gt;hSyncStart, mode-&gt;hSyncEnd,
+            mode-&gt;hTotal, mode-&gt;hSkew, mode_hsync (mode) / 1000);
+        printf (&quot;        v: height %4d start %4d end %4d total %4d           clock %6.2fHz\n&quot;,
+            mode-&gt;height, mode-&gt;vSyncStart, mode-&gt;vSyncEnd, mode-&gt;vTotal,
+            mode_refresh (mode));
+        }
+    }
+    exit (0);
+    }
+    if (list_providers) {
+    int k;
+
+    if (!has_1_4) {
+        printf (&quot;RandR 1.4 not supported\n&quot;);
+        exit (0);
+    }
+
+    get_screen (current);
+    get_providers ();
+
+    if (providers) {
+        int j;
+
+        printf(&quot;Providers: number : %d\n&quot;, num_providers);
+
+        for (j = 0; j &lt; num_providers; j++) {
+        provider_t *provider = &amp;providers[j];
+        XRRProviderInfo *info = provider-&gt;info;
+
+        printf(&quot;Provider %d: id: 0x%x cap: 0x%x&quot;, j, (int)provider-&gt;provider.xid, info-&gt;capabilities);
+        for (k = 0; k &lt; 4; k++)
+            if (info-&gt;capabilities &amp; (1 &lt;&lt; k))
+                printf(&quot;, %s&quot;, capability_name(1&lt;&lt;k));
+
+        printf(&quot; crtcs: %d outputs: %d associated providers: %d name:%s\n&quot;, info-&gt;ncrtcs, info-&gt;noutputs, info-&gt;nassociatedproviders, info-&gt;name);
+        }
+    }
+    }
+
+    sc = XRRGetScreenInfo (dpy, root);
+
+    if (sc == NULL) 
+    exit (1);
+
+    current_size = XRRConfigCurrentConfiguration (sc, &amp;current_rotation);
+
+    sizes = XRRConfigSizes(sc, &amp;nsize);
+
+    if (have_pixel_size) {
+    for (size = 0; size &lt; nsize; size++)
+    {
+        if (sizes[size].width == width &amp;&amp; sizes[size].height == height)
+        break;
+    }
+    if (size &gt;= nsize) {
+        fprintf (stderr,
+             &quot;Size %dx%d not found in available modes\n&quot;, width, height);
+        exit (1);
+    }
+    }
+    else if (size &lt; 0)
+    size = current_size;
+    else if (size &gt;= nsize) {
+    fprintf (stderr,
+         &quot;Size index %d is too large, there are only %d sizes\n&quot;,
+         size, nsize);
+    exit (1);
+    }
+
+    if (rot &lt; 0)
+    {
+    for (rot = 0; rot &lt; 4; rot++)
+        if (1 &lt;&lt; rot == (current_rotation &amp; 0xf))
+        break;
+    }
+
+    current_rate = XRRConfigCurrentRate (sc);
+
+    if (rate &lt; 0)
+    {
+    if (size == current_size)
+        rate = current_rate;
+    else
+        rate = 0;
+    }
+    else
+    {
+    rates = XRRConfigRates (sc, size, &amp;nrate);
+    for (i = 0; i &lt; nrate; i++)
+        if (rate == rates[i])
+        break;
+    if (i == nrate) {
+        fprintf (stderr, &quot;Rate %.2f Hz not available for this size\n&quot;, rate);
+        exit (1);
+    }
+    }
+
+    if (version) {
+    int major_version, minor_version;
+    XRRQueryVersion (dpy, &amp;major_version, &amp;minor_version);
+    printf(&quot;Server reports RandR version %d.%d\n&quot;, 
+           major_version, minor_version);
+    }
+
+    if (query || query_1) {
+    printf(&quot; SZ:    Pixels          Physical       Refresh\n&quot;);
+    for (i = 0; i &lt; nsize; i++) {
+        int j;
+
+        printf (&quot;%c%-2d %5d x %-5d  (%4dmm x%4dmm )&quot;,
+            i == current_size ? '*' : ' ',
+            i, sizes[i].width, sizes[i].height,
+            sizes[i].mwidth, sizes[i].mheight);
+        rates = XRRConfigRates (sc, i, &amp;nrate);
+        if (nrate) printf (&quot;  &quot;);
+        for (j = 0; j &lt; nrate; j++)
+        printf (&quot;%c%-4d&quot;,
+            i == current_size &amp;&amp; rates[j] == current_rate ? '*' : ' ',
+            rates[j]);
+        printf (&quot;\n&quot;);
+    }
+    }
+
+    {
+    Rotation rotations = XRRConfigRotations(sc, &amp;current_rotation);
+
+    if (toggle_x &amp;&amp; !(current_rotation &amp; RR_Reflect_X)) reflection |= RR_Reflect_X;
+    if (toggle_y &amp;&amp; !(current_rotation &amp; RR_Reflect_Y)) reflection |= RR_Reflect_Y;
+
+    if (query) {
+        printf(&quot;Current rotation - %s\n&quot;,
+           rotation_name (current_rotation));
+
+        printf(&quot;Current reflection - %s\n&quot;,
+           reflection_name (current_rotation));
+
+        printf (&quot;Rotations possible - &quot;);
+        for (i = 0; i &lt; 4; i ++) {
+        if ((rotations &gt;&gt; i) &amp; 1)  printf(&quot;%s &quot;, direction[i]);
+        }
+        printf (&quot;\n&quot;);
+
+        printf (&quot;Reflections possible - &quot;);
+        if (rotations &amp; (RR_Reflect_X|RR_Reflect_Y))
+        {
+        if (rotations &amp; RR_Reflect_X) printf (&quot;X Axis &quot;);
+        if (rotations &amp; RR_Reflect_Y) printf (&quot;Y Axis&quot;);
+        }
+        else
+        printf (&quot;none&quot;);
+        printf (&quot;\n&quot;);
+    }
+    }
+
+    if (verbose) { 
+    printf(&quot;Setting size to %d, rotation to %s\n&quot;,  size, direction[rot]);
+
+    printf (&quot;Setting reflection on &quot;);
+    if (reflection)
+    {
+        if (reflection &amp; RR_Reflect_X) printf (&quot;X Axis &quot;);
+        if (reflection &amp; RR_Reflect_Y) printf (&quot;Y Axis&quot;);
+    }
+    else
+        printf (&quot;neither axis&quot;);
+    printf (&quot;\n&quot;);
+    }
+
+    /* we should test configureNotify on the root window */
+    XSelectInput (dpy, root, StructureNotifyMask);
+
+    if (setit &amp;&amp; !dryrun) XRRSelectInput (dpy, root,
+                   RRScreenChangeNotifyMask);
+    if (setit &amp;&amp; !dryrun) {
+    Rotation rotation = 1 &lt;&lt; rot;
+    status = XRRSetScreenConfigAndRate (dpy, sc, root, (SizeID) size,
+                        (Rotation) (rotation | reflection),
+                        rate, CurrentTime);
+    }
+
+    if (setit &amp;&amp; !dryrun &amp;&amp; status == RRSetConfigFailed) {
+    printf (&quot;Failed to change the screen configuration!\n&quot;);
+    ret = 1;
+    }
+
+    if (verbose &amp;&amp; setit &amp;&amp; !dryrun &amp;&amp; size != current_size) {
+    if (status == RRSetConfigSuccess)
+    {
+        Bool    seen_screen = False;
+        while (!seen_screen) {
+        int spo;
+        XNextEvent(dpy, (XEvent *) &amp;event);
+
+        printf (&quot;Event received, type = %d\n&quot;, event.type);
+        /* update Xlib's knowledge of the event */
+        XRRUpdateConfiguration (&amp;event);
+        if (event.type == ConfigureNotify)
+            printf(&quot;Received ConfigureNotify Event!\n&quot;);
+
+        switch (event.type - event_base) {
+        case RRScreenChangeNotify:
+            sce = (XRRScreenChangeNotifyEvent *) &amp;event;
+
+            printf(&quot;Got a screen change notify event!\n&quot;);
+            printf(&quot; window = %d\n root = %d\n size_index = %d\n rotation %d\n&quot;, 
+               (int) sce-&gt;window, (int) sce-&gt;root, 
+               sce-&gt;size_index,  sce-&gt;rotation);
+            printf(&quot; timestamp = %ld, config_timestamp = %ld\n&quot;,
+               sce-&gt;timestamp, sce-&gt;config_timestamp);
+            printf(&quot; Rotation = %x\n&quot;, sce-&gt;rotation);
+            printf(&quot; %d X %d pixels, %d X %d mm\n&quot;,
+               sce-&gt;width, sce-&gt;height, sce-&gt;mwidth, sce-&gt;mheight);
+            printf(&quot;Display width   %d, height   %d\n&quot;,
+               DisplayWidth(dpy, screen), DisplayHeight(dpy, screen));
+            printf(&quot;Display widthmm %d, heightmm %d\n&quot;, 
+               DisplayWidthMM(dpy, screen), DisplayHeightMM(dpy, screen));
+            spo = sce-&gt;subpixel_order;
+            if ((spo &lt; 0) || (spo &gt; 5))
+            printf (&quot;Unknown subpixel order, value = %d\n&quot;, spo);
+            else printf (&quot;new Subpixel rendering model is %s\n&quot;, order[spo]);
+            seen_screen = True;
+            break;
+        default:
+            if (event.type != ConfigureNotify) 
+            printf(&quot;unknown event received, type = %d!\n&quot;, event.type);
+        }
+        }
+    }
+    }
+    XRRFreeScreenConfigInfo(sc);
+    return(ret);
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/sync.Pool/" title="sync.Pool">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux-%E8%BD%AF%E4%BB%B6%E7%9C%8B%E9%97%A8%E7%8B%97-watchdog/" title="Linux-软件看门狗-watchdog">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-30</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

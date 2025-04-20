@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>总结一套行之有效的CGO与QT开发方案</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>总结一套行之有效的CGO与QT开发方案 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <h3>总结</h3>
+
+<blockquote>
+</blockquote>
+
+<p>使用QT与GO开发图形程序，无非就是在QT中调用GO函数，在GO中使用QT方法。</p>
+
+<p>目的呢，也就是贪图GO的简介以及在网络单元开发的优势，同时发挥QT的界面强项</p>
+
+<p>在MVC中，数据层交给GO，视图交给QT，控制主要交给QT，部分触发事件由GO来做.</p>
+
+<hr />
+
+<h3>具体一些特点</h3>
+
+<blockquote>
+</blockquote>
+
+<p>在 GO 里面调用 C 函数，想必大家一点不陌生。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 特点：
+// 一，注释内可以写C代码,并且通过C库调用方法
+//  A，C代码中可以，#include &lt;stdio.h&gt; 
+//  B，C代码中可以，static int callback() { ...
+//      C，就像写C语言一样...
+// 二，可以引入LIB库，并且通过C库调用方法
+//  A，引入了 examples 库，调用里面的方法 C.start()
+/*
+    static int callback()
+    {
+        return 1;
+    }
+*/
+// #include &lt;stdio.h&gt;
+// #include &lt;stdlib.h&gt;
+// #cgo LDFLAGS: -L./ -lexamples
+import &quot;C&quot;
+import &quot;unsafe&quot;
+
+// 主
+func main() {
+    C.callback()
+    C.start()
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>在 C 中调用 Go 函数，这个不少人不知道，还是上面的例子.</p>
+
+<pre><code>/*
+    extern int cgo_checkconn();
+    // 也可以在C中使用
+    int xxx()
+    {
+        return cgo_checkconn()
+    }
+*/
+// #include &lt;stdio.h&gt;
+// #include &lt;stdlib.h&gt;
+import &quot;C&quot;
+import &quot;unsafe&quot;
+
+// 主
+func main() {
+    // 看这里，把GO转C，然后当C用.
+    // 你可能要问了，这不是多此一举吗.
+    // 往下看吧.
+    C.cgo_checkconn();
+    // 这样也行,哦.
+    C.xxx()
+}
+
+//export cgo_checkconn
+func cgo_checkconn() C.int {
+    return C.int(1)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>好了，至此，你已经看到了什么：</h3>
+
+<blockquote>
+</blockquote>
+
+<p>A，在GO中，通过注释导入#include <xxx.h>头文件来使用其中的函数(C.xxx())</p>
+
+<p>B，在GO中，通过注释引导-lexamples库文件来使用其中的函数(C.xxx())</p>
+
+<p>C，在GO中，通过函数行注释//export cgo_checkconn方式把GO函数转成C函数，并且在C中调用</p>
+
+<p>D，在GO中，通过//export方式将Go转C，一定要，extern(表示变量或者函数的定义在别的文件中)</p>
+
+<hr />
+
+<h3>具体说一下具体，行之有效的调用方法</h3>
+
+<blockquote>
+</blockquote>
+
+<p>一，在 QT 中定义一个类，用来存储GO传过来的函数指针</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Cgo.h
+#ifndef CGO_H
+#define CGO_H
+
+#include &lt;map&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+typedef int (*COMMAND_CGO_CONNECT_FUNCTION)(void*, int, void*, int);
+typedef int (*COMMAND_CGO_CHECKCONN_FUNCTION)();
+typedef void (*COMMAND_CGO_DISCONN_FUNCTION)();
+typedef void (*COMMAND_CGO_COMMAND_FUNCTION)(void*, int);
+typedef void (*COMMAND_CGO_SHORTCUTS_FUNCTION)(void*, int);
+typedef int (*COMMAND_CGO_GOLINE_FUNCTION)(void*, int);
+typedef void (*COMMAND_CGO_READER_FUNCTION)(void*, int);
+typedef int (*COMMAND_CGO_WRITER_FUNCTION)(void*, int, void*, int);
+
+class Cgo
+{
+public:
+    Cgo();
+    int setCgo(void*, void*);
+public:
+    COMMAND_CGO_CONNECT_FUNCTION cgo_connect;
+    COMMAND_CGO_CHECKCONN_FUNCTION cgo_checkconn;
+    COMMAND_CGO_DISCONN_FUNCTION cgo_disconn;
+    COMMAND_CGO_COMMAND_FUNCTION cgo_command;
+    COMMAND_CGO_SHORTCUTS_FUNCTION cgo_shortcuts;
+    COMMAND_CGO_GOLINE_FUNCTION cgo_goline;
+    COMMAND_CGO_READER_FUNCTION cgo_reader;
+    COMMAND_CGO_WRITER_FUNCTION cgo_writer;
+};
+
+#endif // CGO_H
+
+// Cgo.cpp
+#include &lt;QString&gt;
+#include &quot;cgo.h&quot;
+
+Cgo::Cgo()
+{
+    cgo_connect = 0;
+    cgo_checkconn = 0;
+    cgo_disconn = 0;
+    cgo_command = 0;
+    cgo_shortcuts = 0;
+    cgo_goline = 0;
+    cgo_reader = 0;
+    cgo_writer = 0;
+}
+
+int Cgo::setCgo(void* _a, void* _b)
+{
+    if (QString(&quot;cgo_connect&quot;).compare((char*)_a) == 0)
+    cgo_connect = (COMMAND_CGO_CONNECT_FUNCTION)_b;
+    if (QString(&quot;cgo_checkconn&quot;).compare((char*)_a) == 0)
+    cgo_checkconn = (COMMAND_CGO_CHECKCONN_FUNCTION)_b;
+    if (QString(&quot;cgo_disconn&quot;).compare((char*)_a) == 0)
+    cgo_disconn = (COMMAND_CGO_DISCONN_FUNCTION)_b;
+    if (QString(&quot;cgo_command&quot;).compare((char*)_a) == 0)
+    cgo_command = (COMMAND_CGO_COMMAND_FUNCTION)_b;
+    if (QString(&quot;cgo_shortcuts&quot;).compare((char*)_a) == 0)
+    cgo_shortcuts = (COMMAND_CGO_SHORTCUTS_FUNCTION)_b;
+    if (QString(&quot;cgo_goline&quot;).compare((char*)_a) == 0)
+    cgo_goline = (COMMAND_CGO_GOLINE_FUNCTION)_b;
+    if (QString(&quot;cgo_reader&quot;).compare((char*)_a) == 0)
+    cgo_reader = (COMMAND_CGO_READER_FUNCTION)_b;
+    if (QString(&quot;cgo_writer&quot;).compare((char*)_a) == 0)
+    cgo_writer = (COMMAND_CGO_WRITER_FUNCTION)_b;
+    return 1;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>二，在QT中定义一个函数，用于接收GO传过来的函数指针，并且保存到类中.</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 说明
+// 也就是，在 Go 里面调用 QT 函数
+// 然后 把 Go转C 的函数传入 QT 函数内
+// 然后 在 QT 函数内调用 Go转C 的函数
+#include &lt;QApplication&gt;
+#include &lt;QTextCodec&gt;
+#include &quot;examples.h&quot;
+#include &quot;cgo.h&quot;
+
+using namespace std;
+
+// 这里是QT窗口
+Examples * win;
+
+// Cgo 就是保存有GO函数指针的类
+Cgo * cgo;
+
+// 初始化，生成保存函数指针的类 (在Go内调用）
+extern &quot;C&quot; void init()
+{
+    cgo = new Cgo();
+}
+
+// 开始运行 (在Go内调用)
+extern &quot;C&quot; int start()
+{
+    int argc = 0 ;
+    char *argv[] = {};
+    QApplication a(argc, argv);
+    win = new Examples();
+    // 这里把存有GO函数指针的类传入QT窗口类中.
+    win-&gt;setCgo(cgo);
+    win-&gt;show();
+    return a.exec();
+}
+
+// 这里就是，接收GO传入函数指针的地方 (在GO内调用)
+extern &quot;C&quot; void drv_cgo_callback(void* _a, void* _b)
+{
+    // 这里，将函数指针保存到Cgo类中
+    // _a 是函数名，_b 是函数指针
+    cgo-&gt;setCgo(_a, _b);
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<p>三，在 Go 内将函数传入到 QT 中</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+/*
+    extern void init(); // 这里是声明在QT里面的函数，方便调用
+    extern int start(); // 这里是声明在QT里面的函数，方便调用
+    extern void drv_cgo_callback(void*, void*); // 这里是声明在QT里面的函数，方便调用
+    static void callback() // GO中调用
+    {   char * _cgo_connect = &quot;cgo_connect&quot;; // 函数名称，以便QT内区分
+        char * _cgo_checkconn = &quot;cgo_checkconn&quot;; // 函数名称，以便QT内区分
+        char * _cgo_disconn = &quot;cgo_disconn&quot;; // 函数名称，以便QT内区分
+        char * _cgo_command = &quot;cgo_command&quot;; // 函数名称，以便QT内区分
+        char * _cgo_shortcuts = &quot;cgo_shortcuts&quot;; // 函数名称，以便QT内区分
+        char * _cgo_goline = &quot;cgo_goline&quot;; // 函数名称，以便QT内区分
+        char * _cgo_reader = &quot;cgo_reader&quot;; // 函数名称，以便QT内区分
+        char * _cgo_writer = &quot;cgo_writer&quot;; // 函数名称，以便QT内区分
+        extern int cgo_connect(void*, int, void*, int); // 这里是声明在GO转C函数，方便传递
+        extern int cgo_checkconn(); // 这里是声明在GO转C函数，方便传递
+        extern void cgo_disconn(); // 这里是声明在GO转C函数，方便传递
+        extern void cgo_command(void*, int); // 这里是声明在GO转C函数，方便传递
+        extern void cgo_shortcuts(void*, int); // 这里是声明在GO转C函数，方便传递
+        extern void cgo_goline(void*, int); // 这里是声明在GO转C函数，方便传递
+        extern void cgo_reader(void*, int); // 这里是声明在GO转C函数，方便传递
+        extern void cgo_writer(void*, int, void*, int); // 这里是声明在GO转C函数，方便传递
+        drv_cgo_callback(_cgo_connect, &amp;cgo_connect); // 调用 QT 内函数，传入 GO转C 函数指针
+        drv_cgo_callback(_cgo_checkconn, &amp;cgo_checkconn); // 调用 QT 内函数，传入 GO转C 函数指针
+        drv_cgo_callback(_cgo_disconn, &amp;cgo_disconn); // 调用 QT 内函数，传入 GO转C 函数指针
+        drv_cgo_callback(_cgo_command, &amp;cgo_command); // 调用 QT 内函数，传入 GO转C 函数指针
+        drv_cgo_callback(_cgo_shortcuts, &amp;cgo_shortcuts); // 调用 QT 内函数，传入 GO转C 函数指针
+        drv_cgo_callback(_cgo_goline, &amp;cgo_goline); // 调用 QT 内函数，传入 GO转C 函数指针
+        drv_cgo_callback(_cgo_reader, &amp;cgo_reader); // 调用 QT 内函数，传入 GO转C 函数指针
+        drv_cgo_callback(_cgo_writer, &amp;cgo_writer); // 调用 QT 内函数，传入 GO转C 函数指针
+    }
+*/
+// #include &lt;stdio.h&gt;
+// #include &lt;stdlib.h&gt;
+// #cgo LDFLAGS: -L./ -lexamples // 注意：这里将QT编译成库文件，在GO中引入使用.
+import &quot;C&quot;
+import &quot;unsafe&quot;
+import (
+    z &quot;github.com/nutzam/zgo&quot;
+    &quot;log&quot;
+    &quot;runtime&quot;
+    &quot;strings&quot;
+)
+
+// 全局连接
+var StaticConn *Conn
+
+// 开始
+func start() {
+    C.init() // 调用QT中的函数，初始化
+    C.callback() // 调用GO中注释的C函数，建GO转C函数传入到QT中
+    C.start() // 调用QT中的函数，启动程序
+}
+
+// 主
+func main() {
+    log.Println(z.UnixMsSec(1))
+    runtime.GOMAXPROCS(runtime.NumCPU())
+    log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime | log.Lmicroseconds)
+    StaticConn = NewConn()
+    start()
+}
+
+//export cgo_connect
+func cgo_connect(_content unsafe.Pointer, _size C.int, _content_2 unsafe.Pointer, _size_2 C.int) C.int {
+    device := string(C.GoBytes(_content, _size))
+    authorize := string(C.GoBytes(_content_2, _size_2))
+    if err := StaticConn.Connect(device, &quot;1.03&quot;, authorize); err != nil {
+        return C.int(0)
+    }
+    return C.int(1)
+}
+
+//export cgo_checkconn
+func cgo_checkconn() C.int {
+    if StaticConn.CheckConn() {
+        return C.int(1)
+    }
+    return C.int(0)
+}
+
+//export cgo_disconn
+func cgo_disconn() {
+    StaticConn.DisConn()
+}
+
+//export cgo_command
+func cgo_command(_content unsafe.Pointer, _size C.int) {
+    command := string(C.GoBytes(_content, _size))
+    err := StaticConn.SendCommandByConn(z.Trim(command))
+    if err != nil {
+        cgo_message(err.Error())
+    }
+}
+</code></pre>
+
+<hr />
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android-SDK-Manager-Proxy/" title="Android SDK Manager Proxy">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Qt%E4%B8%AD%E6%8B%96%E6%8B%BD%E7%A7%BB%E5%8A%A8%E6%8E%A7%E4%BB%B6%E4%BD%8D%E7%BD%AE/" title="Qt中拖拽移动控件位置">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-02-28</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

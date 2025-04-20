@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之SharedPreferences使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之SharedPreferences使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>SharedPreferences 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<p>SharedPreferences 是一种轻型的数据存储方式</p>
+
+<p>它的本质是基于XML文件存储Key-Value键值对数据, 通常用来存储一些简单的配置信息</p>
+
+<p>其存储位置在/data/data/&lt;包名&gt;/shared_prefs目录下</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 支持的类型
+boolean
+int
+float
+long
+String
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>SharedPreferences 对象本身只能获取数据而不支持存储和修改, 存储修改是通过Editor对象实现。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>SharedPreferences 使用</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// activity_main
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot; android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; android:paddingLeft=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingRight=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingTop=&quot;@dimen/activity_vertical_margin&quot;
+    android:paddingBottom=&quot;@dimen/activity_vertical_margin&quot; tools:context=&quot;.MainActivity&quot;
+    android:orientation=&quot;vertical&quot;&gt;
+
+    &lt;EditText
+        android:id=&quot;@+id/edit_key&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:inputType=&quot;none&quot; /&gt;
+
+
+    &lt;EditText
+        android:id=&quot;@+id/edit_val&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:inputType=&quot;none&quot; /&gt;
+
+    &lt;Button
+        android:id=&quot;@+id/button_write&quot;
+        android:text=&quot;添加&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot; /&gt;
+
+    &lt;Button
+        android:id=&quot;@+id/button_read&quot;
+        android:text=&quot;获取&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_gravity=&quot;center_horizontal|bottom&quot; /&gt;
+
+&lt;/LinearLayout&gt;
+
+// Activity
+public class MainActivity extends Activity {
+
+    private EditText edit_key;
+    private EditText edit_val;
+    private Button but_read;
+    private Button but_write;
+
+    SharedPreferences preferences;
+    SharedPreferences.Editor editor;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    // 获取 Preferences
+    preferences = getPreferences(Activity.MODE_PRIVATE);
+    // 编辑 preferences
+    editor = preferences.edit();
+    edit_key = (EditText) findViewById(R.id.edit_key);
+    edit_val = (EditText) findViewById(R.id.edit_val);
+    but_read = (Button) findViewById(R.id.button_read);
+    but_write = (Button) findViewById(R.id.button_write);
+    but_write.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+        if (!edit_key.getText().toString().isEmpty() &amp;&amp; !edit_val.getText().toString().isEmpty())
+        {
+            // 使用 editor.putString 增加数据
+            editor.putString(edit_key.getText().toString(), edit_val.getText().toString());
+            // Commit 保存
+            if (editor.commit()){
+            Toast.makeText(MainActivity.this, &quot;写入成功&quot;, Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(MainActivity.this, &quot;值不能为空&quot;, Toast.LENGTH_SHORT).show();
+        }
+        }
+    });
+    but_read.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+        if (!edit_key.getText().toString().isEmpty()){
+            // 读取 preferences.getString 
+            String val = preferences.getString(edit_key.getText().toString(), &quot;default&quot;);
+            edit_val.setText(val);
+        } else {
+            Toast.makeText(MainActivity.this, &quot;值不能为空&quot;, Toast.LENGTH_SHORT).show();
+        }
+        }
+    });
+    }
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>getSharedPreferences 与 getPreferences</h3>
+
+<blockquote>
+</blockquote>
+
+<p>getSharedPreferences是Context类中的方法, 可以指定filename以及mode.</p>
+
+<p>getPreferences是Activity类中的方法, 只需指定mode.</p>
+
+<blockquote>
+</blockquote>
+
+<h3>getSharedPreferences 与 getDefaultSharedPreferences</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 自定义的一些偏好设置用getSharedPreferences来获取，例如定义一个loginpref.xml的偏好文件
+SharedPreferences sharedPreferences = getSharedPreferences(&quot;loginpref&quot;, Context.MODE_PRIVATE);
+System.out.println(&quot;set_location = &quot;+sharedPreferences.getBoolean(&quot;islogin&quot;, false));
+Editor editor =  sharedPreferences.edit();
+editor.putBoolean(&quot;islogin&quot;, false);
+editor.commit();
+
+// 每个应用有一个默认的偏好文件preferences.xml，使用getDefaultSharedPreferences获取
+SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+System.out.println(&quot;set_location = &quot;+preferences.getBoolean(&quot;if_set_location&quot;, false));
+Editor editor =  preferences.edit();
+editor.putBoolean(&quot;if_set_location&quot;, false);
+editor.commit();
+// &quot;if_set_location&quot;可能对应的是CheckBoxPreference或者其它，但是通用get***来获取值
+
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;PreferenceCategory android:title=&quot;位置信息设置&quot;&gt;
+    &lt;CheckBoxPreference
+    android:key=&quot;set_location&quot;
+    android:title=&quot;打开或关闭位置信息&quot;
+    android:summary=&quot;更改您的位置设置，打开或者关闭位置共享&quot;
+    android:defaultValue=&quot;true&quot;
+    /&gt;
+
+    &lt;Preference
+    android:key=&quot;set_sys_location&quot;
+    android:title=&quot;系统位置功能设置&quot;
+    android:summary=&quot;点击到系统设置页面打开或关闭GPS位置功能&quot;
+    /&gt; 
+    &lt;/PreferenceCategory&gt;
+&lt;/PreferenceScreen&gt;
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E5%86%85%E9%83%A8%E5%AD%98%E5%82%A8%E4%B8%8E%E5%A4%96%E9%83%A8%E5%AD%98%E5%82%A8%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之内部存储与外部存储的使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BPreferenceFragment%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之PreferenceFragment使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-18</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Rockchip之FFmpeg通过MPP硬解并转储</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Rockchip之FFmpeg通过MPP硬解并转储 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Rockchip之FFmpeg通过MPP硬解并转储</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Rockchip Linux 官方网站 
+https://github.com/rockchip-linux
+
+// Rockchip 支持硬件
+RK29XX/RK30XX/RK31XX
+RK3288/RK3368/RK3399
+RK3228/RK3229/RK3228H/RK3328
+RV1108/RV1107
+
+// Media Process Platform (MPP) module
+https://github.com/rockchip-linux/mpp
+
+// FFmpeg 使用 4.1 版本（此时最新）
+http://ffmpeg.org/
+
+// FFmpeg 编译命令 ...
+./configure --enable-version3 --enable-libdrm --enable-rkmpp --enable-libx264 --enable-nonfree --enable-gpl
+make ; make install
+
+// 编译完成后查看解码器 ...    
+ffmpeg -decoders |grep h264_rkmpp
+V..... h264_rkmpp           h264 (rkmpp) (codec h264)
+
+// 特别注意 
+ffmpeg h264_rkmpp 解码获得的是 AV_PIX_FMT_DRM_PRIME 也就是 DRM 帧数据 ...
+// 如果使用 drm 显示该帧可以直接 zero-copy 绘制帧 ...
+
+// 通过以下操作把 drm 帧拷贝到内存并且转换为NV12 ...
+pFrameOK-&gt;width = pFrame-&gt;width;
+pFrameOK-&gt;height = pFrame-&gt;height;
+pFrameOK-&gt;format = AV_PIX_FMT_NV12;
+// Copy data to or from a hw surface ...
+av_hwframe_transfer_data(pFrameOK, pFrame, 0)
+
+// 此时 pFrameOK 就是转储出来的 NV12 格式帧
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>通过 Rockchip MPP 硬解 FFmpeg AVPacket</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Rockchip MPP 官方
+https://github.com/rockchip-linux/mpp
+
+// 通过以下项目实现 AVPacket 解码
+https://github.com/MUZLATAN/ffmpeg_rtsp_mpp
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 但是上面项目为什么只能解码流而不能解码本地文件呢 ...
+// 因为视频流与本地文件部分格式差异，如下解决
+
+// is video stream
+const char start_code[4] = { 0, 0, 0, 1 };
+if(memcmp(start_code, av_packet-&gt;data, 4) != 0)
+{   // is avc1 code, have no start code of H264
+int len = 0;
+uint8_t *p = av_packet-&gt;data;
+do
+{   // add start_code for each NAL, one frame may have multi NALs.
+    len = ntohl(*((long*)p));
+    memcpy(p, start_code, 4);
+    p += 4;
+    p += len;
+    if(p &gt;= av_packet-&gt;data + av_packet-&gt;size)
+    {
+    break;
+    }
+} while (1);
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 通过 dump_mpp_frame_to_file 可以拿到已经解码的 MppFrame 
+
+...
+if (data-&gt;fp_output &amp;&amp; !err_info){
+    dump_mpp_frame_to_file(frame, data-&gt;fp_output);
+}
+...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// MppFrame to SDL_Texture
+
+char* pixels;
+int pitch;
+
+if (SDL_LockTexture(m_texture, nullptr, (void**)&amp;pixels, &amp;pitch) &lt; 0)
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, &quot;SDL_LockTexture() failed: %s&quot;, SDL_GetError());
+
+decode_simple(&amp;m_decoder-&gt;data, pkt-&gt;avpkt, pixels);
+
+SDL_UnlockTexture(m_texture);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 其中 decode_simple ...
+
+RK_U32 width    = 0;
+RK_U32 height   = 0;
+RK_U32 h_stride = 0;
+RK_U32 v_stride = 0;
+
+MppBuffer buffer = NULL;
+RK_U8 *base = NULL;
+
+width    = mpp_frame_get_width(frame);
+height   = mpp_frame_get_height(frame);
+h_stride = mpp_frame_get_hor_stride(frame);
+v_stride = mpp_frame_get_ver_stride(frame);
+buffer   = mpp_frame_get_buffer(frame);
+
+base = (RK_U8 *)mpp_buffer_get_ptr(buffer);
+RK_U32 buf_size = mpp_frame_get_buf_size(frame);
+size_t base_length = mpp_buffer_get_size(buffer);
+mpp_log(&quot;base_length = %d\n&quot;, base_length);
+
+RK_U32 i;
+RK_U8 *base_y = base;
+RK_U8 *base_c = base + h_stride * v_stride;
+
+// ---------------------------------------------- //
+// 有问题，待修正 ...
+
+int idx = 0;
+for (i = 0; i &lt; height; i++, base_y += h_stride) {
+    memcpy(pixels + idx, base_y, width);
+    idx += width;
+}
+for (i = 0; i &lt; height / 2; i++, base_c += h_stride) {
+    memcpy(pixels + idx, base_c, width);
+    idx += width;
+}
+
+// ---------------------------------------------- //
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// AVPacket to MppPacket
+
+mpp_packet_init(&amp;packet, av_packet-&gt;data, av_packet-&gt;size);
+mpp_packet_set_pts(packet, av_packet-&gt;pts);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B9%8B%E5%9C%A8VC4%E7%9A%84KMS%E4%B8%8A%E4%BD%BF%E7%94%A8Wayland%E6%96%B9%E6%A1%88/" title="树莓派之在VC4的KMS上使用Wayland方案">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux%E4%B9%8B%E9%80%9A%E8%BF%87udev%E8%A7%84%E5%88%99%E6%8C%87%E5%AE%9A%E7%BD%91%E7%BB%9C%E8%AE%BE%E5%A4%87/" title="Linux之通过udev规则指定网络设备">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2019-05-31</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#pi-ref">pi <span>19</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

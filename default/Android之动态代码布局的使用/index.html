@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之动态代码布局的使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之动态代码布局的使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>动态代码布局</h3>
+
+<blockquote>
+</blockquote>
+
+<p>所谓的动态代码布局，也就是不使用XML布局(或不完全使用XML布局)</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>    // 动态代码布局
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+    // 定义了一个 MySwipeRefreshLayout 的 Layout 
+    layout = new MySwipeRefreshLayout(getActivity());
+
+    // 设置ID 
+    layout.setId(this.generateViewId());
+
+    // 设置 LayoutParams
+    ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+    layout.setLayoutParams(layoutParams);
+
+    // 下拉更新
+    layout.setColorScheme(android.R.color.holo_blue_dark,
+        android.R.color.holo_blue_light,
+        android.R.color.holo_green_light,
+        android.R.color.holo_green_light);
+
+    return super.onCreateView(inflater, container, savedInstanceState);
+
+    }
+
+    // replace Fragment
+    // 这里是个 Fragment 替换函数，想要替换 Fragment 就需要 View 的 ID
+    // 所以上面使用了 generateViewId() 获取一个 ID 并且设置给 Fragment
+    // 这里使用的时候只需要 Fragment.getID() 就可以了
+    public void replaceFragment(int viewId, android.app.Fragment fragment) {
+    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+    transaction.replace(viewId, fragment);
+    transaction.commit();
+    }
+
+    /**
+     * An {@code int} value that may be updated atomically.
+     */
+    private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
+
+    /**
+     * 动态生成View ID
+     * API LEVEL 17 以上View.generateViewId()生成
+     * API LEVEL 17 以下需要手动生成
+     */
+    public static int generateViewId() {
+
+    if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        for (; ; ) {
+        final int result = sNextGeneratedId.get();
+        // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
+        int newValue = result + 1;
+        if (newValue &gt; 0x00FFFFFF) newValue = 1; // Roll over to 1, not 0.
+        if (sNextGeneratedId.compareAndSet(result, newValue)) {
+            return result;
+        }
+        }
+    } else {
+        return View.generateViewId();
+    }
+    }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 简单布局LinearLayout
+LinearLayout llayout = new LinearLayout(mContext);
+llayout.setOrientation(LinearLayout.VERTICAL);
+LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+    LinearLayout.LayoutParams.MATCH_PARENT,
+    LinearLayout.LayoutParams.MATCH_PARENT
+);
+llayout.setLayoutParams(layoutParams);
+
+Button btn = new Button(mContext);
+btn.setText(&quot;This is Button&quot;);
+btn.setPadding(8, 8, 8, 8);
+btn.setLayoutParams(lp);
+
+llayout.addView(btn);
+
+//这是在Activity的onCreate()中设置布局
+setContentView(llayout);
+
+btn.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+    Toast.makeText(mContext,
+    &quot;This is dynamic activity&quot;, Toast.LENGTH_LONG).show();
+    }
+});
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 复杂布局RelativeLayout 
+
+//父控件
+RelativeLayout myLayout = new RelativeLayout(this);
+myLayout.setBackgroundColor(Color.BLUE); 
+
+//两个子控件
+Button myButton = new Button(this);
+EditText myEditText = new EditText(this);
+
+//重点:生成对应的ID
+myButton.setId(generateViewId());
+myEditText.setId(generateViewId());
+
+//子控件位置
+RelativeLayout.LayoutParams buttonParams =
+    new RelativeLayout.LayoutParams(
+        RelativeLayout.LayoutParams.WRAP_CONTENT,
+        RelativeLayout.LayoutParams.WRAP_CONTENT);
+buttonParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+buttonParams.addRule(RelativeLayout.CENTER_VERTICAL);
+
+RelativeLayout.LayoutParams textParams =
+    new RelativeLayout.LayoutParams(
+        RelativeLayout.LayoutParams.WRAP_CONTENT,
+        RelativeLayout.LayoutParams.WRAP_CONTENT);
+textParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+textParams.setMargins(0, 0, 0, 80);
+//重点在这里
+textParams.addRule(RelativeLayout.ABOVE, myButton.getId());
+
+//添加布局
+myLayout.addView(myButton, buttonParams);
+myLayout.addView(myEditText, textParams);
+setContentView(myLayout);
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/mymysql%E4%B8%8Ego-mysql-driver%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83/" title="mymysql与go-mysql-driver性能比较">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E5%A4%9A%E7%82%B9%E8%A7%A6%E6%91%B8%E5%9D%90%E6%A0%87%E8%8E%B7%E5%8F%96/" title="Android之多点触摸坐标获取">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-05-06</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

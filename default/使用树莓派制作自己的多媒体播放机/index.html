@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>使用树莓派制作自己的多媒体播放机</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>使用树莓派制作自己的多媒体播放机 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>使用树莓派制作自己的多媒体播放机</h3>
+
+<blockquote>
+</blockquote>
+
+<h4>准备工作</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>* 树莓派(Raspberry Pi Zero)一台
+* SD卡一张
+* 相关配件(电源、显示器、HDMI线、等 ...)
+* 如果非HW的树莓派建议联网(USB-WIFI、USB-Ethernet Adapter、SPI-enc28j60)
+* 当然也可以使用(3A+、3B+、4B)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>系统安装</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>* 下载镜像 https://www.raspberrypi.org/downloads/raspbian/
+* 使用 rufus 或 Win32DiskImager 向 SD卡 写入镜像
+* 配置网络、管理员密码、SSH、等 ...
+* 以下操作均需要使用 root 下操作 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>系统设置</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>分辨率设置</em></strong></p>
+
+<pre><code># /boot/config.txt
+hdmi_group=2
+hdmi_mode=85
+# Raspberry Pi Zero 建议 720p 分辨率
+# Raspberry Pi 3A+、3B+、4B 建议 1080p 分辨率
+</code></pre>
+
+<p><strong><em>显存设置(重启生效)</em></strong></p>
+
+<pre><code># /boot/config.txt
+gpu_mem=192
+# 显存内存分配不能少于192M
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>多媒体播放程序安装</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下载安装
+git clone https://github.com/nulijiabei/xplay.git
+cd xplay/
+cd buster/ # Raspbian Buster with desktop
+sh -x install
+
+// 运行测试(安装成功则出现欢迎使用画面)
+// RPI Zero 建议分辨率 720p
+root@raspberrypi:~#/usr/bin/xplay -R 0,0,1280,720
+// RPI 3A+、3B+、4B 建议分辨率 1080p
+root@raspberrypi:~#/usr/bin/xplay 
+root@raspberrypi:~#/usr/bin/xplay -R 0,0,1920,1080 
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>自定义播放控制</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+
+import socket
+import json
+import time
+import os
+
+def connect():
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client.connect(('127.0.0.1', 8700))
+    return client
+
+def stop(client):
+    data = {}
+    params = {}
+    params['all'] = True
+    data['type'] = &quot;stop&quot;
+    data['params'] = params
+    js = json.dumps(data)
+    client.send((js + '\n#End\n').encode('utf-8'))
+
+def play(client, libName, zIndex, path, top, left, width, height, screenMode, screenRotate):
+    data = {}
+    params = {}
+    params['zIndex'] = zIndex
+    params['path'] = path
+    params['top'] = top
+    params['left'] = left
+    params['width'] = width
+    params['height'] = height
+    params['screen_mode'] = screenMode
+    params['screen_rotate'] = screenRotate
+    data['id'] = (&quot;PLAY_VIDEO_%d&quot;) % (int(round(time.time() * 1000)))
+    data['type'] = &quot;play&quot;
+    data['libName'] = libName
+    data['params'] = params
+    js = json.dumps(data)
+    client.send((js + '\n#End\n').encode('utf-8'))
+
+def getFiles(str):
+    fs = []
+    for root,dirs,files in os.walk(str):
+    for file in files:
+        fs.append(str + '/' + file)
+    return fs
+
+if __name__ == '__main__':
+
+    # 建立连接
+    client = connect()
+
+    # 停止全部
+    stop(client)
+
+    # 循环播放
+    while True:
+
+    # 获取目录素材文件
+    fs = getFiles(r'E:\test')
+    if len(fs) == 0 :
+        time.sleep(5)
+        continue
+
+    # 遍历素材
+    for f in fs:
+        # 是否为视频
+        if f.endswith(&quot;.mp4&quot;) :
+        # 播放视频
+        play(client, &quot;video&quot;, 10, f, 0, 0, 1920, 1080, &quot;landscape&quot;, 0)
+        # 是否为图片
+        if f.endswith(&quot;.jpg&quot;) or f.endswith(&quot;.png&quot;) :
+        # 播放图片
+        play(client, &quot;pic&quot;, 10, f, 0, 0, 1920, 1080, &quot;landscape&quot;, 0)
+        # 间隔5s切换
+        time.sleep(5)
+
+    # 断开连接
+    client.close()
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>更多</h4>
+
+<blockquote>
+</blockquote>
+
+<p><a href="https://github.com/nulijiabei/xplay">https://github.com/nulijiabei/xplay</a></p>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%AE%9A%E5%88%B6%E5%8C%96%E6%A0%91%E8%8E%93%E6%B4%BE%E9%95%9C%E5%83%8F/" title="定制化树莓派镜像">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/NVIDIA-Jetson-Nano-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85-OpenCV4/" title="NVIDIA Jetson Nano 编译安装 OpenCV4">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2019-10-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#pi-ref">pi <span>19</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

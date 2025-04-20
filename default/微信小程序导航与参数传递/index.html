@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>微信小程序导航与参数传递</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>微信小程序导航与参数传递 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>微信小程序导航与参数传递</h4>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 官方开发文档
+https://mp.weixin.qq.com/debug/wxadoc/dev/api/ui-navigate.html?t=20161122
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>API (wx.navigateTo(OBJECT))</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>保留当前页面，跳转到应用内的某个页面，使用wx.navigateBack可以返回到原页面。</em></strong></p>
+
+<ul>
+<li>url 类型(String) 必填(是)  需要跳转的应用内页面的路径,路径后可以带参数。</li>
+<li>success 类型(Function) 必填(否) 接口调用成功的回调函数</li>
+<li>fail 类型(Function) 必填(否) 接口调用失败的回调函数</li>
+<li>complete 类型(Function) 必填(否) 接口调用结束的回调函数（调用成功、失败都会执行）</li>
+</ul>
+
+<p>注意: 参数与路径之间使用?分隔，参数键与参数值用=相连，不同参数用&amp;分隔；如 &lsquo;path?key=value&amp;key2=value2&rsquo;</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 跳转页面
+wx.navigateTo({
+  // 需要跳转的应用内页面的路径 , 路径后可以带参数
+  url: '../logs/logs?name=nljb&amp;addr=www.nljb.net',
+  // 接口调用成功的回调函数
+  success: function (res) {
+    console.log(res)
+  },
+  // 接口调用失败的回调函数
+  fail: function (err) {
+    console.log(err)
+  }
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 目标页面
+Page({
+  // option 为传入参数
+  onLoad: function(option){
+    console.log(option.name)
+    console.log(option.addr)
+  }
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>注意：为了不让用户在使用小程序时造成困扰，我们规定页面路径只能是五层，请尽量避免多层级的交互方式。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>API (wx.redirectTo(OBJECT))</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>关闭当前页面，跳转到应用内的某个页面。</em></strong></p>
+
+<pre><code>wx.redirectTo({
+  url: 'test?id=1'
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>API (wx.navigateBack(OBJECT))</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>关闭当前页面，返回上一页面或多级页面。可通过 getCurrentPages()) 获取当前的页面栈，决定需要返回几层。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>delta 类型(Number) 默认值(1) 返回的页面数，如果 delta 大于现有页面数，则返回到首页。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%B3%A8%E5%86%8C%E7%A8%8B%E5%BA%8F%E5%92%8C%E9%A1%B5%E9%9D%A2%E4%B8%8E%E6%A8%A1%E5%9D%97%E5%8C%96/" title="微信小程序注册程序和页面与模块化">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" title="微信小程序学习笔记">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-11-29</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#wx-ref">wx <span>4</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

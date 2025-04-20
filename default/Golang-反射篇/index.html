@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-反射篇</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-反射篇 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Go语言的基本语法的使用已经在前几篇陆陆续续学完了，</p>
+
+<p>下面可能想写一些Go的标准库的使用了。</p>
+
+<p>先是reflect库。</p>
+
+<p>reflect库的godoc在<a href="http://golang.org/pkg/reflect/">http://golang.org/pkg/reflect/</a></p>
+
+<hr />
+
+<p>Type和Value</p>
+
+<p>首先，reflect包有两个数据类型我们必须知道，一个是Type，一个是Value。</p>
+
+<p>Type就是定义的类型的一个数据类型，Value是值的类型</p>
+
+<p>具体的Type和Value里面包含的方法就要看文档了：</p>
+
+<p><a href="http://golang.org/pkg/reflect/">http://golang.org/pkg/reflect/</a></p>
+
+<pre><code>package main
+
+import(
+    &quot;fmt&quot;
+    &quot;reflect&quot;
+)
+
+type MyStruct struct{
+    name string
+}
+
+func (this *MyStruct)GetName() string {
+    return this.name
+}
+
+func main() {
+    s := &quot;this is string&quot;
+    fmt.Println(reflect.TypeOf(s))
+    fmt.Println(&quot;-------------------&quot;)
+
+    fmt.Println(reflect.ValueOf(s))
+    var x float64 = 3.4
+    fmt.Println(reflect.ValueOf(x))
+    fmt.Println(&quot;-------------------&quot;)
+
+    a := new(MyStruct)
+    a.name = &quot;yejianfeng&quot;
+    typ := reflect.TypeOf(a)
+
+    fmt.Println(typ.NumMethod())
+    fmt.Println(&quot;-------------------&quot;)
+
+    b := reflect.ValueOf(a).MethodByName(&quot;GetName&quot;).Call([]reflect.Value{})
+    fmt.Println(b[0])
+
+}
+</code></pre>
+
+<p>输出结果：</p>
+
+<p><img src="/assets/media/Golang-反射篇/1_0.jpg" alt="" width="300"></p>
+
+<p>这个程序看到几点：</p>
+
+<p>1 TypeOf和ValueOf是获取Type和Value的方法</p>
+
+<p>2 ValueOf返回的<float64 Value>是为了说明这里的value是float643 第三个b的定义实现了php中的string-&gt;method的方法，</p>
+
+<p>为什么返回的是reflect.Value[]数组呢？当然是因为Go的函数可以返回多个值的原因了。</p>
+
+<p>Value的方法和属性</p>
+
+<p><img src="/assets/media/Golang-反射篇/2.jpg" alt="" width="300"></p>
+
+<p>好了，我们看到Value的Type定义了这么多Set方法：</p>
+
+<p>下面看这么个例子：</p>
+
+<pre><code>package main
+
+import(
+    &quot;fmt&quot;
+    &quot;reflect&quot;
+)
+
+type MyStruct struct{
+    name string
+}
+
+func (this *MyStruct)GetName() string {
+    return this.name
+}
+
+func main() {
+    fmt.Println(&quot;--------------&quot;)
+    var a MyStruct
+    b := new(MyStruct)
+    fmt.Println(reflect.ValueOf(a))
+    fmt.Println(reflect.ValueOf(b))
+
+    fmt.Println(&quot;--------------&quot;)
+    a.name = &quot;yejianfeng&quot;
+    b.name = &quot;yejianfeng&quot;
+    val := reflect.ValueOf(a).FieldByName(&quot;name&quot;)
+
+    //painc: val := reflect.ValueOf(b).FieldByName(&quot;name&quot;)
+    fmt.Println(val)
+
+    fmt.Println(&quot;--------------&quot;)
+    fmt.Println(reflect.ValueOf(a).FieldByName(&quot;name&quot;).CanSet())
+    fmt.Println(reflect.ValueOf(&amp;(a.name)).Elem().CanSet())
+
+    fmt.Println(&quot;--------------&quot;)
+    var c string = &quot;yejianfeng&quot;
+    p := reflect.ValueOf(&amp;c)
+    fmt.Println(p.CanSet())   //false
+    fmt.Println(p.Elem().CanSet())  //true
+    p.Elem().SetString(&quot;newName&quot;)
+    fmt.Println(c)
+}
+</code></pre>
+
+<p>返回：</p>
+
+<p><img src="/assets/media/Golang-反射篇/3.jpg" alt="" width="300"></p>
+
+<p>这段代码能有一些事情值得琢磨：</p>
+
+<p>1 为什么a和b的ValueOf返回的是不一样的？</p>
+
+<pre><code>a是一个结构，b是一个指针。好吧，在Go中，指针的定义和C中是一样的。
+</code></pre>
+
+<p>2 reflect.ValueOf(a).FieldByName(&ldquo;name&rdquo;)</p>
+
+<pre><code>这是一个绕路的写法，其实和a.name是一样的意思，主要是要说明一下Value.FieldByName的用法
+</code></pre>
+
+<p>3 val := reflect.ValueOf(b).FieldByName(&ldquo;name&rdquo;) 是有error的，为什么？</p>
+
+<pre><code>b是一个指针，指针的ValueOf返回的是指针的Type，它是没有Field的，所以也就不能使用FieldByName
+</code></pre>
+
+<p>4 fmt.Println(reflect.ValueOf(a).FieldByName(&ldquo;name&rdquo;).CanSet())为什么是false?</p>
+
+<p>看文档中的解释：</p>
+
+<p>好吧，什么是addressable，and was not obtained by the use of unexported struct fields?</p>
+
+<p>CanSet当Value是可寻址的时候，返回true，否则返回false</p>
+
+<p>看到第二个c和p的例子，我们可以这么理解：</p>
+
+<p>当前面的CanSet是一个指针的时候（p）它是不可寻址的，但是当是p.Elem()(实际上就是*p)，它就是可以寻址的</p>
+
+<p>这个确实有点绕。</p>
+
+<p>总而言之，reflect包是开发过程中几乎必备的包之一。能合理和熟练使用它对开发有很大的帮助</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E6%A0%87%E5%87%86%E5%BA%93%E8%A7%A3%E8%AF%BB-%E5%9F%BA%E6%9C%AC%E7%9A%84IO%E6%8E%A5%E5%8F%A3/" title="Golang-标准库解读-基本的IO接口">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Date-%E5%91%BD%E4%BB%A4%E8%AE%BE%E7%BD%AE%E7%B3%BB%E7%BB%9F%E6%97%B6%E9%97%B4%E7%9A%84%E6%96%B9%E6%B3%95/" title="Date-命令设置系统时间的方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-10</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

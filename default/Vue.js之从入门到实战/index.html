@@ -1,0 +1,3221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js之从入门到实战</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Vue.js之从入门到实战 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Vue.js之从入门到实战</h3>
+
+<blockquote>
+</blockquote>
+
+<h4>准备工作</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Node.js https:#nodejs.org/en # 安装
+.\node_modules\npm\npmrc  # 编辑配置
+prefix=E:\NodeModules\npm_global # 自定义路径
+cache=E:\NodeModules\npm_cache # 自定义路径
+PATH=E:\NodeModules\npm_global # 环境变量
+NODE_PATH=E:\NodeModules\npm_global # 环境变量
+
+Visual Studio Code https:#code.visualstudio.com # 安装
+Configure Display Language # 中文简体
+Vetur # 该插件支持 .vue 文件的语法高亮
+ESLint # 该插件支持 JavaScript 语法规则和代码风格检查工具
+
+npm config set registry https://registry.npm.taobao.org
+npm install -g cnpm --registry=https://registry.npm.taobao.org
+
+npm install vue       # 本地安装 Vue
+npm install -g vue        # 全局安装 Vue
+npm install -g @vue/cli   # 扩展安装 Vue Cli
+npm uninstall vue         # 卸载 Vue
+npm list -g --depth 0     # 查看已安装 ...
+npm install element-ui --save # 安装 Element-UI
+npm install vue-router        # 安装 Vue Router 也可在 vue create 时选择
+说明：--save 安装后会在 dependencies 中写入依赖项，项目打包发布时会一并打包
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>开始工作</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>vue ui # 图形界面
+vue create bookstroe # 创建脚手架
+npm run serve # 运行
+
+1. Babel：转码器，用于将 ES6 转为 ES5，从而在现有环境下执行
+2. TypeScript：是 JavaScript 的一个超集，主要提供类型系统和对ES6的支持.
+3. Progressive Web App(PWA) Support：支持渐进式 Web 应用程序
+4. Router：路由管理器（vue-router）
+5. Vuex：Vue 的状态管理
+6. CSS Pre-processors：CSS 预处理器（如 Less、Sass）
+7. Linter / Formatter：代码风格检查和格式检验（如 ESLint）
+8. Unit Testing：单元测试
+9. E2E Testing：End to End 测试
+
+// 创建项目选项 ...
+? Please pick a preset: Manually select features # 手动选择
+? Check the features needed for your project: Choose Vue version, Babel, Router, Vuex, Linter
+? Choose a version of Vue.js that you want to start the project with 2.x
+? Use history mode for router? (Requires proper server setup for index fallback in production) Yes
+? Pick a linter / formatter config: Basic
+? Pick additional lint features: Lint on save
+? Where do you prefer placing config for Babel, ESLint, etc.? In dedicated config files
+? Save this as a preset for future projects? No
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 安装依赖
+cd bookstroe
+npm install
+
+// 打包项目
+npm run build
+
+// 路径问题
+vue.config.js
+
+module.exports = {
+    publicPath: process.env.NODE_ENV === 'production'
+    ? './'
+    : '/'
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>目录结构</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>&gt; node_module # 项目依赖的模块
+&gt; public # 该目录下的文件不会被Webpack编译压缩处理，引用的第三方库的JS文件可以放在这里
+  &gt;&gt; favicon.ico # 图标文件
+  &gt;&gt; index.html # 项目的主页面
+&gt; src # 项目代码的主目录
+  &gt;&gt; assets # 存放项目中的静态资源，如 CSS、图片等
+    &gt;&gt;&gt; logo.png # logo 图片
+  &gt;&gt; components # 编写的组件放在这个目录下（全局）
+    &gt;&gt;&gt; mixin # 混入对象目录
+      &gt;&gt;&gt;&gt; mixin.js # 混入对象
+    &gt;&gt;&gt; HelloWorld.vue # Vue Cli 创建的 Hello World 组件
+  &gt;&gt; views # 页面级组件放在这个目录
+    &gt;&gt;&gt; Home.vue # 创建的 Home 组件
+  &gt;&gt; router # 前端路由
+  &gt;&gt; store # 应用级数据（state）
+  &gt;&gt; App.vue # 项目的根组件（入口）
+  &gt;&gt; main.js # 程序入口 js 文件，加载各种公共组件和所需要用到的插件
+&gt; .browserslistrc # 配置项目目标浏览器的范围
+&gt; .gitignore # 配置在 git 提交项目代码时忽略哪些文件
+&gt; .eslintrc.js # ESLint 使用的配置文件
+&gt; babel.config.js # Babel 使用的配置文件
+&gt; postcss.config.js # PostCSS 使用的配置文件
+&gt; package.json # npm 的配置文件，其中设定了脚本和项目依赖的库
+&gt; package-lock.json # 用于锁定项目实际安装的各个 npm 包的具体来源和版本号
+&gt; README.md # 项目说明文件
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package.json 文件介绍
+
+{
+  &quot;name&quot;: &quot;bookstroe&quot;, // 项目名称
+  &quot;version&quot;: &quot;0.1.0&quot;, // 项目版本
+  &quot;private&quot;: true, // 是否私有项目
+  &quot;scripts&quot;: { // 值是一个对象，其中指定了项目生命周期各个环节需要执行的命令
+    &quot;serve&quot;: &quot;vue-cli-service serve&quot;, // 执行 npm run serve 运行项目
+    &quot;build&quot;: &quot;vue-cli-service build&quot;, // 执行 npm run build 构建项目
+    &quot;lint&quot;: &quot;vue-cli-service lint&quot; // 执行 npm run list 运行 ESLint 验证并格式化代码
+  },
+  &quot;dependencies&quot;: { // 配置项目依赖的模块列表
+    &quot;core-js&quot;: &quot;^3.6.5&quot;,
+    &quot;element-ui&quot;: &quot;^2.14.1&quot;,
+    &quot;vue&quot;: &quot;^2.6.11&quot;,
+    &quot;vue-router&quot;: &quot;^3.2.0&quot;,
+    &quot;vuex&quot;: &quot;^3.4.0&quot;
+  },
+  &quot;devDependencies&quot;: { // 这里的依赖是用于开发环境的，不发布到生产
+    &quot;@vue/cli-plugin-babel&quot;: &quot;~4.5.0&quot;,
+    &quot;@vue/cli-plugin-eslint&quot;: &quot;~4.5.0&quot;,
+    &quot;@vue/cli-plugin-router&quot;: &quot;~4.5.0&quot;,
+    &quot;@vue/cli-plugin-vuex&quot;: &quot;~4.5.0&quot;,
+    &quot;@vue/cli-service&quot;: &quot;~4.5.0&quot;,
+    &quot;babel-eslint&quot;: &quot;^10.1.0&quot;,
+    &quot;eslint&quot;: &quot;^6.7.2&quot;,
+    &quot;eslint-plugin-vue&quot;: &quot;^6.2.2&quot;,
+    &quot;vue-template-compiler&quot;: &quot;^2.6.11&quot;
+  }
+}
+
+// 在使用 NPM 安装依赖的模块，可以根据模块是否需要在生成环境下使用而选择
+// 附加 --save(-S) 或者 --save-dev(-D) 参数 ...
+// npm install element-ui -S 安装后会在 dependencies 中写入依赖项
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>一个典型的单文件组件包含了组件代码、模版代码和CSS样式规则
+&lt;template&gt;&lt;/template&gt; 、&lt;script&gt;&lt;/script&gt;、&lt;style&gt;&lt;/style&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>内置指令</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-show 指令根据表达式的值的真假，来显示或隐藏HTML元素
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- v-show 为 true 则 h1 元素显示，false 则元素不显示 --&gt;
+    &lt;h4 v-show=&quot;ok&quot;&gt;SHOW IS Ture&lt;/h4&gt;
+    &lt;!-- 在 v-show 中使用 JavaScript 表达式 --&gt;
+    &lt;h4 v-show=&quot;age &gt; 25&quot;&gt;Age: \{{ age }}&lt;/h4&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      ok: true,
+      age: 28,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-if/v-else-if/v-else 这三个指令用于实现条件判断
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- v-if 为 ture 则 h1 元素创建(显示)，false 则元素不创建 --&gt;
+    &lt;h4 v-if=&quot;ok&quot;&gt;IF IS True&lt;/h4&gt;
+    &lt;!-- v-if/v-else-if/v-else --&gt;
+    &lt;span v-if=&quot;score &gt;= 85&quot;&gt;优秀&lt;/span&gt;
+    &lt;span v-else-if=&quot;score &gt;= 75&quot;&gt;合格&lt;/span&gt;
+    &lt;span v-else-if=&quot;score &gt;= 60&quot;&gt;及格&lt;/span&gt;
+    &lt;span v-else&gt;不及格&lt;/span&gt;
+    &lt;!-- v-if-key 管理可复用的元素 --&gt;
+    &lt;!-- 在 input 中增加一个具有唯一值的 key 属性 --&gt;
+    &lt;div v-if=&quot;loginType == 'username'&quot;&gt;
+      &lt;label&gt;用户名&lt;/label&gt;
+      &lt;input type=&quot;text&quot; placeholder=&quot;请输入您的用户名&quot; key=&quot;username-input&quot; /&gt;
+    &lt;/div&gt;
+    &lt;div v-else&gt;
+      &lt;label&gt;邮箱&lt;/label&gt;
+      &lt;input type=&quot;text&quot; placeholder=&quot;请输入您的Email&quot; key=&quot;email-input&quot; /&gt;
+    &lt;/div&gt;
+    &lt;p&gt;&lt;button @click=&quot;changeLoginType&quot;&gt;切换登录方式&lt;/button&gt;&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;Hello&quot;,
+  data() {
+    return {
+      ok: true,
+      score: 60,
+      loginType: &quot;username&quot;,
+    };
+  },
+  methods: {
+    changeLoginType() {
+      if (this.loginType === &quot;username&quot;) {
+        this.loginType = &quot;email&quot;;
+      } else {
+        this.loginType = &quot;username&quot;;
+      }
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-for 指令就是通过循环的方式来渲染一个列表，循环的对象可以是数组或JS对象
+
+// Vue和核心是数据与视图的双向绑定
+// 为了监测数组中元素的变化，以便能及时将变化反映到视图中
+// Vue对数组的下列编译方法进行了包裹 ...
+// push()、pop()、shitf()、unshift()、splice()、sort()、reverse()
+// 数组中海油一些非变异方法，如：filter()、concat()、slice() 
+// 他们不会改变原始数组，而总是返回一个新数组 ...
+// 对于这些方法，想让视图自动更新，可以使用新数据替换原来数组即可
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- v-for-array 通过循环方式来渲染一个列表 --&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;(book, index) in books&quot; v-bind:key=&quot;book.title&quot;&gt;
+        \{{ index }} - \{{ book.title }}
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;!-- v-for-object 通过循环方式来渲染一个对象 --&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;(value, key) in objs&quot; v-bind:key=&quot;key&quot;&gt;
+        \{{ key }} - \{{ value }}
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      // 数组数据
+      books: [ 
+        { title: &quot;Vue 无难事&quot;, complete: true },
+        { title: &quot;VC++ 深入详解&quot;, complete: true },
+        { title: &quot;Servlet/JSP 深入详解&quot;, complete: false },
+      ],
+      // 对象数据
+      objs: {
+        one: &quot;这是第一条&quot;,
+        tow: &quot;这是第二条&quot;,
+        three: &quot;这是第三条&quot;,
+      },
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-for 对象更新检测
+
+// 由于JS的限制，Vue不能检测对象属性的添加和删除
+// 要解决这个问题，可以使用Vue全局的set()和delete()方法来添加和删除属性
+// 或者Vue实例$set()和$delete()方法来添加和删除属性，并触发更新
+
+this.$set(book, 'publishDate', '2019-07-01)
+this.$delete(book, 'isbn')
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;(value, key) in objs&quot; v-bind:key=&quot;key&quot;&gt;
+        \{{ key }} - \{{ value }}
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;button @click=&quot;ddd&quot;&gt;删除&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      objs: {
+        one: &quot;这是第一条&quot;,
+        tow: &quot;这是第二条&quot;,
+        three: &quot;这是第三条&quot;,
+      },
+    };
+  },
+  methods: {
+    ddd() {
+      this.$delete(this.objs, &quot;one&quot;);
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-for-key
+
+// 这段代码预先定义了一个books数组对象，通过v-for指令遍历数组，同时提供输入框
+// 在用户输入图片的ID和书名后，向数组添加一个新的图书对象
+// 使用unshift()方法想数组的开头添加一个或多个元素 ...
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- v-for-key 增加一个具有唯一值的 key 属性 --&gt;
+    &lt;p&gt;
+      ID: &lt;input type=&quot;text&quot; v-model=&quot;bookId&quot; /&gt; 书名:
+      &lt;input type=&quot;text&quot; v-model=&quot;titleNm&quot; /&gt;
+      &lt;button v-on:click=&quot;add()&quot;&gt;添加&lt;/button&gt;
+    &lt;/p&gt;
+    &lt;p v-for=&quot;book1 in books&quot; v-bind:key=&quot;book1.id&quot;&gt;
+      &lt;input type=&quot;checkbox&quot; /&gt;
+      &lt;span&gt;ID: \{{ book1.id }}, 书名: \{{ book1.title }}&lt;/span&gt;
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      bookId: &quot;&quot;,
+      titleNm: &quot;&quot;,
+      books: [
+        { id: 1, title: &quot;Vue 无难事&quot; },
+        { id: 2, title: &quot;VC++ 深入详解&quot; },
+        { id: 3, title: &quot;Servlet/JSP 深入详解&quot; },
+      ],
+    };
+  },
+  methods: {
+    add() {
+      this.books.unshift({
+        id: this.bookId,
+        title: this.titleNm,
+      });
+      this.bookId = &quot;&quot;;
+      this.titleNm = &quot;&quot;;
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如果考虑 v-for 与 v-if 一同使用，需要使用计算属性来代替
+
+// 通过计算属性过滤对应条件的数据 ...
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- 计算属性代替 v-for 和 v-if --&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;plan in completePlans&quot; v-bind:key=&quot;plan.content&quot;&gt;
+        \{{ plan.content }}
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      plans: [
+        { content: &quot;吃饭&quot;, completed: true },
+        { content: &quot;睡觉&quot;, completed: false },
+        { content: &quot;打豆豆&quot;, completed: false },
+        { content: &quot;写书&quot;, completed: false },
+        { content: &quot;买菜&quot;, completed: true },
+      ],
+    };
+  },
+  computed: {
+    reversedMessage: function () {
+      return this.message.split(&quot;&quot;).reverse().join(&quot;&quot;);
+    },
+    completePlans() {
+      return this.plans.filter((plan) =&gt; plan.completed);
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-bind 
+
+// 用于响应更新HTML元素属性，将一个或多个属性或者一个组件的prop动态绑定到表达式
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- v-bind(可缩写) 主要用于响应更新HTML元素的属性 --&gt;
+    &lt;!-- 将一个或多个属性或者一个组件的prop动态绑定到表达式 --&gt;
+    &lt;p&gt;&lt;a v-bind:[attrname]=&quot;url&quot;&gt;链接&lt;/a&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;a :[attrname]=&quot;url&quot;&gt;链接&lt;/a&gt;&lt;/p&gt;
+    &lt;form v-bind=&quot;formObj&quot;&gt;
+      &lt;input type=&quot;text&quot; /&gt;
+    &lt;/form&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      attrname: &quot;href&quot;,
+      url: &quot;http://www.baidu.com&quot;,
+      formObj: {
+        method: &quot;get&quot;,
+        action: &quot;#&quot;,
+      },
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-model 指令用来在表单&lt;input&gt;、&lt;textarea&gt;、&lt;select&gt;元素上创建双向绑定
+// 它会更具控件类型自动选取正确的方法来更新元素 ...
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- v-model 在表单&lt;input&gt;、&lt;textarea&gt;及&lt;select&gt;元素上创建双向数据绑定 --&gt;
+    &lt;!-- 它会根据控件类型自动选取正确的方法来更新元素 ... --&gt;
+    &lt;input type=&quot;text&quot; v-model=&quot;message&quot; /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      message: &quot;测试&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-on 指令用于监听DOM事件，并在触发时运行一些JS代码
+// v-on 指令表达式可以是一段JS代码，也可以是一个方法名字或方法调用语句
+
+// 注意：在使用 v-on 指令绑定事件处理器时，就可以使用$event传入原始DOM事件对象
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- click 事件直接使用 JS 语句 --&gt;
+    &lt;p&gt;
+      &lt;button v-on:click=&quot;count += 1&quot;&gt;+1 = \{{ count }}&lt;/button&gt;
+    &lt;/p&gt;
+    &lt;!-- click 事件直接绑定一个方法 --&gt;
+    &lt;p&gt;&lt;button v-on:click=&quot;greet&quot;&gt;Greet&lt;/button&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;button @click=&quot;greet&quot;&gt;Greet&lt;/button&gt;&lt;/p&gt;
+    &lt;!-- click 事件使用内联语句调用方法 --&gt;
+    &lt;p&gt;&lt;button @click=&quot;say('Hi')&quot;&gt;Hi&lt;/button&gt;&lt;/p&gt;
+    &lt;!-- v-on 事件修饰符 --&gt;
+    &lt;!-- .stop 调用 event.stopPropagation() --&gt;
+    &lt;!-- .prevent 调用 event.preventDefault() --&gt;
+    &lt;!-- .capture 添加事件监听器时使用 capture 模式 --&gt;
+    &lt;!-- .self 只当事件是从侦听器绑定的元素本身触发时才触发回调 --&gt;
+    &lt;!-- .{keyCode | keyAlias} 只当事件是从特定按键触发时才触发回调 --&gt;
+    &lt;!-- .native 监听组件根元素的原生事件 --&gt;
+    &lt;!-- .once 只触发一次回调 --&gt;
+    &lt;!-- .left 只当按鼠标左键时触发 --&gt;
+    &lt;!-- .right 只当按鼠标右键时触发 --&gt;
+    &lt;!-- .middle 只当按鼠标中键时触发 --&gt;
+    &lt;!-- .passive 以{passive: true} 模式添加侦听器 --&gt;
+    &lt;a href=&quot;/login&quot; v-on:click.prevent=&quot;greet&quot;&gt;登录&lt;/a&gt;
+    &lt;!-- v-on 按键修饰符 --&gt;
+    &lt;!-- .enter 只有在按键是回车键时调用方法 --&gt;
+    &lt;!-- .tab、.delete、.esc、.space、.up、.down、.left、.right --&gt;
+    &lt;!-- .ctrl、.alt、.shitf、.meta --&gt;
+    &lt;!-- .left、.right、.middle --&gt;
+    &lt;input @keyup.enter=&quot;greet&quot; /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      count: 0,
+      message: &quot;测试&quot;,
+    };
+  },
+  methods: {
+    greet() {
+      alert(this.message);
+    },
+    say(msg) {
+      alert(msg);
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-text 元素用于更新元素的文本内容
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- v-text 元素用于更新元素的文本内容 --&gt;
+    &lt;p&gt;&lt;span v-text=&quot;message&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+    &lt;p&gt;
+      &lt;span&gt;更新元素内容：\{{ message }}&lt;/span&gt;
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      message: &quot;测试&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-html 指令用于更新元素的innerHTML，该部分内容作为普通HTML代码插入
+// 不会作为Vue模版进行编译 ...
+
+&lt;!-- v-html 指令用于更新元素的 innerHTML --&gt;
+&lt;p v-html=&quot;hElt&quot;&gt;&lt;/p&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-once 指令可以让元素或组件只渲染一次，该指令不需要表达式
+
+&lt;!-- v-once 指令可以让元素或组件只渲染一次 --&gt;
+&lt;!-- 例如：导航菜单等，仅需要渲染一次，不会需要修改重新渲染的 --&gt;
+&lt;h1 v-once&gt;V-ONCE：\{{ message }}&lt;/h1&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-pre 指令用于跳过这个元素和它的子元素的编译过程
+// 可以用来显示原始Mustache标签
+// 指令不需要表达式
+
+&lt;!-- v-pre 用于跳过这个元素和它的子元素的编译过程 --&gt;
+&lt;h1 v-pre&gt;V-PRE：\{{ message }}&lt;/h1&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-cloak 指令保持在元素上直到关联实例编译结束
+// 指令不需要表达式
+
+// 说明：浏览器在加载页面时，如果网速较慢或者页面较大，
+// 那么浏览器在构造完DOM树后会在页面中直接显示\{{message}}字样
+// 直到Vue的JS文件加载完毕，Vue实例创建、模版编译后才会被替换为数据
+// 如果使用CSS规则[v-cloak]{display:none}配合v-cloak指令使用，就可以解决这问问题
+
+&lt;!-- v-cloak 这个指令保持在元素上直到关联实例编译结束，编译结束后盖指令被移除 --&gt;
+&lt;!-- 当和CSS规则如[v-cloak]{display:none}一起使用时，可以隐藏未编译的Mustache标签 --&gt;
+&lt;!-- 直到实例准备完毕 --&gt;
+&lt;h1 v-cloak&gt;V-CLOAK：\{{ message }}&lt;/h1&gt;
+
+&lt;style&gt;
+[v-cloak] {
+  display: none;
+}
+&lt;/style&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>自定义指令
+
+自定义指令的注册
+
+// 自定义指令需要注册后才能使用，Vue提供了两种注册方式：全局注册和局部注册
+// 全局注册使用Vue.directive()方法来注册，使用Vue Cli时在main.js中注册
+
+钩子函数
+
+// 自定义指令的功能是在定义对象中实现的，而定义对象则是由钩子函数组成的
+// Vue提供了下面几个钩子函数，这些钩子函数都是可选的：
+// 1. bind 只调用一次，指令第一次绑定到元素时调用
+// 2. inserted 被绑定元素插入父节点时调用
+// 3. update 所在组件的VNode更新时调用
+// 4. componentUpdated 指令所在组件VNode及子VNode全部更新后调用
+// 5. unbind 只调用一次，指令与元素解绑时调用
+
+指令的钩子函数可以带有一些参数：
+// el：指令所绑定的元素，可以用来直接操作DOM
+// binding 一个对象，包含一组属性 ...
+// 1. name 指令名称，不包括 v-前缀
+// 2. value 指令的绑定值，例如：v-mydirective=&quot;1+1&quot; 中 value 值为 2
+// 3. oldValue 指令绑定的前一个值，仅在update和componentUpdated钩子中可用
+// 4. expression 字符串形式的指令表达式, 值为 &quot;1+1&quot;
+// 5. arg 传给指令的参数，可选，例如：v-mydirective:foo 中的 foo
+// 6. modifiers 一个包含修饰符的对象，例如：v-mydirective.foo.bar 中 { foo:true, bar: true }
+// vnode Vue编译生成的虚拟节点
+// oldVnode 上一个虚拟节点，仅在update和componentUpdated钩子中可用
+
+// 全局注册
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;input v-focus /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;   
+
+// main.js
+Vue.directive('focus', {
+  bind: function (el) {
+    el.focus();
+    alert(&quot;Hello ...&quot;);
+  }
+})
+
+new Vue({ ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 局部注册
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;input v-focus /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {};
+  },
+  directives: {
+    focus: {
+      bind: function (el) {
+        el.focus();
+        alert(&quot;Hello ...&quot;);
+      },
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>动态指令参数
+
+// 已经介绍过指令的参数可以是动态参数，同样地
+// 自定义的指令也可以使用动态参数 ...
+// 例如：v-mydirective:[argument]=&quot;value&quot;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- 直接给出指令的参数 --&gt;
+    &lt;p v-pin:top=&quot;100&quot;&gt;Vue.js 无难事&lt;/p&gt;
+    &lt;!-- 使用动态参数 --&gt;
+    &lt;p v-pin:[direction]='100'&gt;Vue.js 无难事&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      direction: &quot;left&quot;,
+    };
+  },
+  directives: {
+    pin: {
+      bind: function (el, binding) {
+        el.style.position = &quot;fixed&quot;;
+        let s = binding.arg || &quot;left&quot;;
+        el.style[s] = binding.value + &quot;px&quot;;
+      },
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>函数简写
+
+// 如果自定义指令在bind和update钩子函数中的行为一致，
+// 且只需要用到这两个钩子，那么可以在注册时传递一个函数对象作为参数
+
+Vue.directive('color-swatch', function (el, binding) {
+    el.style.backgroundColor = binding.value
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>对象字面量
+
+// 如果指令需要多个值，可以传入一个 JS 对象字面量
+&lt;div v-demo=&quot;{ color: 'white', text: 'hello' }&quot;&gt;&lt;/div&gt;
+
+Vue.directive('demo', funciton (el, binding) {
+    console.log(binding.value.color)
+    console.log(binding.value.hello)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>计算属性</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>定义计算属性
+
+// 表达式的逻辑过于复杂的时候，都应当考虑使用计算属性。
+// 计算属性是以函数形式，在Vue实例的选项对象computed中定义
+
+// 当message属性的值改变时，reversedMessage的值也会自动更新
+// 并且会自动同步更新DOM部分 ...
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- 表达式的逻辑过于复杂的时候，都应当考虑使用计算属性 --&gt;
+    &lt;p&gt;计算后的反转字符串: \{{ reversedMessage }}&lt;/p&gt;
+    &lt;p&gt;\{{ fullName }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      message: &quot;Hello, Vue.js 从入门到实战&quot;,
+    };
+  },
+  computed: {
+    reversedMessage: function () {
+      return this.message.split(&quot;&quot;).reverse().join(&quot;&quot;);
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 计算属性默认只有getter，因此是不能直接修改计算属性的
+// 如果需要也可以提供一个setter ...
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;p&gt;First name: &lt;input type=&quot;text&quot; v-model=&quot;firstName&quot; /&gt;&lt;/p&gt;
+    &lt;p&gt;Last name: &lt;input type=&quot;text&quot; v-model=&quot;lastName&quot; /&gt;&lt;/p&gt;
+    &lt;p&gt;\{{ fullName }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      firstName: &quot;Smith&quot;,
+      lastName: &quot;Will&quot;,
+    };
+  },
+  computed: {
+    fullName: {
+      // getter
+      get: function () {
+        return this.firstName + &quot; &quot; + this.lastName;
+      },
+      // setter
+      set: function (newValue) {
+        var names = newValue.split(&quot; &quot;);
+        this.firstName = names[0];
+        this.lastName = names[names.length - 1];
+      },
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>计算属性缓存
+
+// 既然使用方法能实现与计算属性相同的结果，那么还有必要使用计算属性吗？
+// 答案是有必要，因为计算属性是基于它的响应式依赖进行缓存的 ...
+// 只有在计算属性的相关响应式依赖发生改变时才会重新求值 ...
+
+// 这就意味着只要message还没有发生改变，多次访问reversedMessage会立即返回之前结果
+// 而不会再次执行；而如果采用方法，那么不管什么时候访问reversedMessage()都会被调用
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>监听器</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Vue 提供了一种更通用的方式来观察和响应Vue实例上的数据变动：监听属性
+// 当你有一些数据需要随着其他数据变化而变动时，就可以使用监听器
+
+// 听起来好像和计算属性的作用差不多，从功能描述来看，确实是
+// 不过在实际应用中二者有很大差别 ...
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;p&gt;千米：&lt;input type=&quot;text&quot; v-model=&quot;kilometers&quot; /&gt;&lt;/p&gt;
+    &lt;p&gt;米：&lt;input type=&quot;text&quot; v-model=&quot;meters&quot; /&gt;&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      kilometers: 0,
+      meters: 0,
+    };
+  },
+  watch: {
+    kilometers: function (val) {
+      this.meters = val * 1000;
+    },
+    meters: function (val) {
+      this.kilometers = val / 1000;
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>监听器的更多形式
+
+// 监听器在定义时，除了直接写一个函数外，还可以接一个方法名
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;p&gt;年龄：&lt;input type=&quot;text&quot; v-model=&quot;age&quot; /&gt;&lt;/p&gt;
+    &lt;p v-if=&quot;info&quot;&gt;\{{info}}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      age: 0,
+      info: &quot;&quot;,
+    };
+  },
+  methods: {
+    checkAge() {
+      if (this.age &gt;= 18) this.info = &quot;已成年&quot;;
+      else this.info = &quot;未成年&quot;;
+    },
+  },
+  watch: {
+    age: &quot;checkAge&quot;,
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 监听器还可以监听一个对象的属性变化 ...
+
+// handler 用于定义数据变化时调用的监听器函数
+// deep 只要该属性的值发生变化，都会被检测到
+// immediate 监听器函数在监听开始后立即执行
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;input type=&quot;text&quot; v-model=&quot;person.age&quot; /&gt;
+    &lt;p v-if=&quot;info&quot;&gt;\{{ info }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      person: {
+        name: &quot;nulijiabei&quot;,
+        age: 0,
+      },
+      info: &quot;&quot;,
+    };
+  },
+  watch: {
+    person: {
+      handler: function (val) {
+        if (val.age &gt;= 18) this.info = &quot;已成年&quot;;
+        else this.info = &quot;未成年&quot;;
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>class 与 style 绑定</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>HTML元素有两个设置样式的属性：class 和 style 
+// 前者用于指定样式表中class，后者用于设置内联样式
+// 在 Vue.js 中可以用 v-bind 指令来处理它们 ...
+
+绑定 HTML class
+
+// active 这个 class 存在与否将取决于数据属性 isActive 的值
+
+&lt;template&gt;
+  &lt;div v-bind:class=&quot;{ active: isActive }&quot;&gt;&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style&gt;
+.active {
+  width: 100px;
+  height: 100px;
+  background: green;
+}
+&lt;/style&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      isActive: true,
+    };
+  },
+};
+</code></pre>
+
+<p></script></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 也可以在对象中传入更多属性来动态切换多个 class
+// 此外，v-bind:class 指令也可以和普通的class属性一起使用
+
+// 最终渲染结果：&lt;div class=&quot;static active&quot;&gt;&lt;/div&gt;
+
+// 当数据属性isActive或hasError改变时，class 列表将相应地更新
+
+&lt;template&gt;
+  &lt;div
+    class=&quot;static&quot;
+    v-bind:class=&quot;{ active: isActive, 'text-danger': hasError }&quot;
+  &gt;&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style&gt;
+.static {
+  border: solid 2px black;
+}
+.active {
+  width: 100px;
+  height: 100px;
+  background: green;
+}
+&lt;/style&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      isActive: true,
+      hasError: false,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 绑定的数据对象如果较为复杂，可以在数据属性中单独定义一个对象，然后绑定它
+
+&lt;template&gt;
+  &lt;div class=&quot;static&quot; v-bind:class=&quot;classObject&quot;&gt;&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style&gt;
+.static {
+  border: solid 2px black;
+}
+.active {
+  width: 100px;
+  height: 100px;
+  background: green;
+}
+&lt;/style&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      classObject: {
+        active: true,
+        &quot;text-danger&quot;: false,
+      },
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 当然也可以考虑绑定一个返回对象的计算属性，这是一个常用且强大的模式
+
+&lt;template&gt;
+  &lt;div class=&quot;static&quot; v-bind:class=&quot;classObject&quot;&gt;&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style&gt;
+.static {
+  border: solid 2px black;
+}
+.active {
+  width: 100px;
+  height: 100px;
+  background: green;
+}
+&lt;/style&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      isActive: true,
+      error: null,
+    };
+  },
+  computed: {
+    classObject: function () {
+      return {
+        active: this.isActive &amp;&amp; !this.error,
+        &quot;text-danger&quot;: this.error &amp;&amp; this.error.type === &quot;fatal&quot;,
+      };
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>数组语法 
+
+// 除了给 v-bind:class 传递对象外，也可以传递一个数组, 应用一个 class 列表
+
+&lt;template&gt;
+  &lt;div class=&quot;static&quot; v-bind:class=&quot;[activeClass, errorClass]&quot;&gt;&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;style&gt;
+.static {
+  border: solid 2px black;
+}
+.active {
+  width: 100px;
+  height: 100px;
+  background: red;
+}
+&lt;/style&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      activeClass: &quot;active&quot;,
+      errorClass: &quot;text-danger&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 也可以使用三元表达式来根据条件切换 class 
+
+&lt;div v-bind:class=&quot;[isActive ? activeClass : '', errorClass]&quot;&gt;&lt;/div&gt;
+
+data: {
+    activeClass: 'active',
+    errorClass: 'text-danger',
+    isActive: true,
+}
+
+// 当 class 属性的表达式中有多个条件时，可以在数组语法中使用对象语法来简化表达式
+&lt;div v-bind:class=&quot;[{active: isActive }, errorClass]&quot;&gt;&lt;/div&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>在组件上使用 class 属性
+
+// 当在一个自定义组件上使用 class 属性时，这些 class 将被添加到该组件的根元素上面。
+// 这个元素山哥已经存在的 class 不会被覆盖。
+
+// 首先定义一个组件
+Vue.component('my-component', {
+    template: '&lt;p class=&quot;foo bar&quot;&gt;Hi&lt;/p&gt;'
+})
+
+// 然后在使用该组件时添加一些 class
+&lt;my-component class=&quot;baz boo&quot;&gt;&lt;/my-component&gt;
+
+// HTML 将会被渲染为
+&lt;p class=&quot;foo bar baz boo&quot;&gt;Hi&lt;/p&gt;
+
+// 对于带数据绑定 class 也同样适用
+&lt;my-component v-binbd:class=&quot;{ active: isActive }&quot;&gt;&lt;/my-component&gt;
+
+// 当 isActive 计算为真时，HTML 将被渲染为
+&lt;p class=&quot;foo bar active&quot;&gt;Hi&lt;/p&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>绑定内联样式
+
+v-bind:style 的对象语法非常像 HTML 的内联 CSS 样式与法，但其实是一个JS对象
+
+// CSS 属性名可以用驼峰式(camelCase)或短横线分割(kebab-case)来命名
+
+&lt;template&gt;
+  &lt;div v-bind:style=&quot;{ color: activeColor, fontSize: fontSize + 'px' }&quot;&gt;
+    Vue.js 无难事
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      activeColor: &quot;red&quot;,
+      fontSize: 30,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 可以在数属性中定义一个样式对象，然后直接绑定该对象
+
+&lt;template&gt;
+  &lt;div v-bind:style=&quot;styleObject&quot;&gt;Vue.js 无难事&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      styleObject: {
+        color: &quot;red&quot;,
+        fontSize: &quot;30px&quot;,
+      },
+    };
+  },
+};
+&lt;/script&gt;   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>数组语法
+
+v-bind:style 的数组语法可以将多个样式对象应用到同一个元素上
+
+&lt;template&gt;
+  &lt;div v-bind:style=&quot;[baseStyles, moreStyles]&quot;&gt;Vue.js 无难事&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      baseStyles: {
+        border: &quot;solid 2px black&quot;,
+      },
+      moreStyles: {
+        width: &quot;100px&quot;,
+        height: &quot;100px&quot;,
+        background: &quot;orange&quot;,
+      },
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>表单属于绑定</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 表单控件的数据绑定就是用v-model指令来实现的
+// 它会根据控件类型自动选取正确的方法来更新元素
+
+// 在&lt;input&gt;元素中，使用value属性设置一个初始值&quot;Hello Vue.js&quot;
+// 用v-model指令绑定一个表达式message，对应的数据属性是message
+
+// 注意：
+
+// 在结果中可以看到，文本输入框中显示的是数据属性message的值
+// 而&lt;input&gt;元素的value属性的值并没有看到。
+
+// 这是因为v-model指令会忽略所有表单元素的value、checked、selected属性的初始值
+// 而总是将Vue实例的数据属性作为数据来源 ...
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;input type=&quot;text&quot; v-model=&quot;message&quot; value=&quot;Hello Vue.js&quot; /&gt;
+    &lt;p&gt;message: \{{ message }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      message: &quot;Vue.js 无难事&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>v-model.trim 提供了一个 trim 修饰符，可以帮我们自动过滤输入数据首尾的空白字符
+&lt;input type=&quot;text&quot; v-model.trim=&quot;message&quot;&gt;
+
+v-model.lazy 转变为使用change时间进行同步
+// 默认输入框每输入一个字符&quot;num&quot;均会触发.lazy则为输入完成后移动焦点触发
+&lt;input type=&quot;text&quot; v-model.lazy=&quot;num&quot;&gt;
+
+v-model.number 如果想自动将用户输入数据转为数值类型，可以使用.number修饰符
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>多行文本输入框
+
+&lt;textarea v-model=&quot;message&quot;&lt;/textarea&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>复选框
+
+复选框在单独使用和多个复选框一起使用时，v-model 绑定的值会有所不同
+// 单独使用时，绑定的是布尔值，选中为true，未选中为false
+// 多个复选框时，绑定的是同一个数组，选中的复选框的值将被保存到数组中
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;单个复选框&lt;/h3&gt;
+    &lt;input id=&quot;agreement&quot; type=&quot;checkbox&quot; v-model=&quot;isAgree&quot; /&gt;
+    &lt;label for=&quot;agreement&quot;&gt;\{{ isAgree }}&lt;/label&gt;
+    &lt;h3&gt;多个复选框&lt;/h3&gt;
+    &lt;input id=&quot;basketball&quot; type=&quot;checkbox&quot; value=&quot;篮球&quot; v-model=&quot;interests&quot; /&gt;
+    &lt;label for=&quot;basketball&quot;&gt;篮球&lt;/label&gt;
+    &lt;input id=&quot;football&quot; type=&quot;checkbox&quot; value=&quot;足球&quot; v-model=&quot;interests&quot; /&gt;
+    &lt;label for=&quot;football&quot;&gt;足球&lt;/label&gt;
+    &lt;input id=&quot;volleyball&quot; type=&quot;checkbox&quot; value=&quot;排球&quot; v-model=&quot;interests&quot; /&gt;
+    &lt;label for=&quot;volleyball&quot;&gt;排球&lt;/label&gt;
+    &lt;p&gt;你的兴趣爱好是：\{{ interests }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      isAgree: false,
+      interests: [],
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>单选按钮
+
+// 当单选按钮被选中时，v-model 绑定的数据属性的值会被设置为该单选按钮的value值
+
+// 选择&quot;男&quot;时gender值为&quot;1&quot;, 选择&quot;女&quot;时gender值为&quot;0&quot;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;单选框&lt;/h3&gt;
+    &lt;input id=&quot;male&quot; type=&quot;radio&quot; value=&quot;1&quot; v-model=&quot;gender&quot; /&gt;
+    &lt;label for=&quot;male&quot;&gt;男&lt;/label&gt;
+    &lt;input id=&quot;female&quot; type=&quot;radio&quot; value=&quot;0&quot; v-model=&quot;gender&quot; /&gt;
+    &lt;label for=&quot;female&quot;&gt;女&lt;/label&gt;
+    &lt;span&gt;性别：\{{ gender }}&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      gender: &quot;&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>选择框
+
+// 与复选框类型，因为选择框可以是单选，也可以多选，因此v-model在这两种情形下绑定值会有所不同
+// 单选时，绑定的是选项的值(&lt;option&gt;元素value属性的值)
+// 多选时，绑定到一个数组，所有选中的选项的值被保存到数组中
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;选择框&lt;/h3&gt;
+    &lt;select v-model=&quot;education&quot;&gt;
+      &lt;option disabled value=&quot;&quot;&gt;请选择您的学历&lt;/option&gt;
+      &lt;option value=&quot;gz&quot;&gt;高中&lt;/option&gt;
+      &lt;option value=&quot;bk&quot;&gt;本科&lt;/option&gt;
+      &lt;option value=&quot;bs&quot;&gt;博士&lt;/option&gt;
+    &lt;/select&gt;
+    &lt;p&gt;您的学历是：\{{ education }}&lt;/p&gt;
+    &lt;h3&gt;多选选择框&lt;/h3&gt;
+    &lt;select v-model=&quot;searches&quot; multiple&gt;
+      &lt;option
+        v-for=&quot;option in options&quot;
+        v-bind:value=&quot;option.value&quot;
+        v-bind:key=&quot;option.text&quot;
+      &gt;
+        \{{ option.text }}
+      &lt;/option&gt;
+    &lt;/select&gt;
+    &lt;p&gt;新选择的搜索引擎是：\{{ searches }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      education: &quot;&quot;,
+      searches: [],
+      options: [
+        { text: &quot;百度&quot;, value: &quot;baidu.com&quot; },
+        { text: &quot;谷歌&quot;, value: &quot;google.com&quot; },
+        { text: &quot;必应&quot;, value: &quot;bing.com&quot; },
+      ],
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>值绑定，v-model 针对不同的表单控件，绑定的值都有默认的约定
+// 单个复选框，绑定的是布尔值
+// 多个复选框，绑定的是一个数组，选中的复选框value属性值被保存到数组中
+// 有时候你课鞥呢想要改变默认的绑定规则，那么可以使用v-bind把值绑定到
+// Vue实例的一个动态属性上，并且这个属性的值可以不是字符串
+
+值绑定 - 复选框
+
+// 在使用单个复选框时, 在&lt;input&gt;元素上可以使用两个特殊的属性
+// true-value和false-value来指定选中状态和未选中状态下v-model绑定的值是什么
+
+// isAgree的初始值为false
+// 当选中复选框时，其值为true-value属性的值&quot;yes&quot;
+// 之后再去掉复选框时，其值为false-value属性的值&quot;no&quot;
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;input
+      id=&quot;agreement&quot;
+      type=&quot;checkbox&quot;
+      v-model=&quot;isAgree&quot;
+      true-value=&quot;yes&quot;
+      false-value=&quot;no&quot;
+    /&gt;
+    &lt;label for=&quot;agreement&quot;&gt;\{{ isAgree }}&lt;/label&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      isAgree: false,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>true-value 属性和 false-value 属性也可以使用 v-bind
+// 将它们绑定到data选项中的某个数据属性上 ...
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;input
+      id=&quot;agreement&quot;
+      type=&quot;checkbox&quot;
+      v-model=&quot;isAgree&quot;
+      :true-value=&quot;trueVal&quot;
+      :false-value=&quot;falseVal&quot;
+    /&gt;
+    &lt;label for=&quot;agreement&quot;&gt;\{{ isAgree }}&lt;/label&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      isAgree: false,
+      trueVal: &quot;真&quot;,
+      falseVal: &quot;假&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>值绑定 - 单选按钮
+
+// 单选按钮被选中时，v-model 绑定的数据属性的值默认被设置为该单选按钮的value值
+// 可以使用 v-bind 将 &lt;input&gt; 元素的 value 属性再绑定到另一个数据属性上 ...
+// 这样选中后的值就是这个 value 属性绑定的数据属性的值 ...
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;input id=&quot;male&quot; type=&quot;radio&quot; v-model=&quot;gender&quot; :value=&quot;genderVal[0]&quot; /&gt;
+    &lt;label for=&quot;male&quot;&gt;男&lt;/label&gt;
+    &lt;input id=&quot;female&quot; type=&quot;radio&quot; v-model=&quot;gender&quot; :value=&quot;genderVal[1]&quot; /&gt;
+    &lt;label for=&quot;female&quot;&gt;女&lt;/label&gt;
+    &lt;span&gt;性别：\{{ gender }}&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      gender: &quot;&quot;,
+      genderVal: [&quot;帅哥&quot;, &quot;美女&quot;],
+    };
+  },
+};
+&lt;/script&gt;   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>选择框的选项
+
+// 选择框选择内容后其值是选项的值(&lt;option&gt;元素的value属性的值)
+// 选项的value属性也可以使用v-bind指令绑定到一个数据属性上。
+
+&lt;option v-for=&quot;option in options&quot; v-bind:value=&quot;option.value&quot;&gt;
+
+// 也可以像如下写法，将 value 属性绑定到一个对象字面上
+&lt;select v-model=&quot;selected&quot;&gt;
+    &lt;!-- 内联对象字面量 --&gt;
+    &lt;option v-bind:value=&quot;{ number: 123 }&quot;&gt;123&lt;/option&gt;
+&lt;/select&gt;
+
+// 当选中时：
+typeof this.selected // 'object'
+this.selected.number // 123
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>过滤器</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 注意：文本格式化、数组数据过滤、排序
+
+在Vue.js中，过滤器主要用于文本的格式化，或者数组数据的过滤与排序等。
+
+全局过滤器与局部过滤器
+
+// 过滤器本质上是一个函数，与自定义指令相似，过滤器也分为全局和局部过滤器
+
+// 当全局过滤器和局部过滤器重名时，会采用局部过滤器.
+
+全局过滤器使用Vue.filter()方法来注册
+
+// 全局在 main.js 注册 ...
+Vue.filter('capitalize', funciton (value) {
+    if (!value) reutrn '';
+    value = value.toString();
+    return value.charAt(0).toUpperCase() + value.slice(1);
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>局部过滤器
+
+// 过滤器可以用在两个地方：双花括号插值和v-bind表达式
+// 使用时通过管道符(|)添加到表达式的尾部使用 ...
+// &lt;p&gt;\{{ message | capitalize }}&lt;/p&gt;
+// &lt;a v-bind:href=&quot;url | lowercase&gt;&lt;/a&gt;
+
+过滤器的参数
+
+// 过滤器函数总是接收表达式的值作为第一个参数
+// 过滤器本质上是一个JS函数，自然也可以接收多个参数
+
+过滤器的串联
+
+// 过滤器总是接收管道符(|)前的表达式作为第一个参数，利用该特性
+// 可以将多个过滤器通过管道串联起来使用，形成类似于法链的条用形式
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;p&gt;\{{ loginType | capitalize }}&lt;/p&gt;
+    &lt;a v-bind:href=&quot;url | capitalize&quot;&gt;过滤器&lt;/a&gt;
+    &lt;p&gt;\{{ filename | format(&quot;vue&quot;, suffix) }}&lt;/p&gt;
+    &lt;p&gt;\{{ filename | format(&quot;vue&quot;, suffix) | capitalize }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloWorld&quot;,
+  data() {
+    return {
+      loginType: &quot;username&quot;,
+      url: &quot;http://www.baidu.com&quot;,
+      filename: &quot;filters&quot;,
+      suffix: &quot;js&quot;,
+    };
+  },
+  // 过滤器
+  filters: {
+    // 将字符串首字母转换为大写字母的过滤器
+    capitalize: function (value) {
+      if (!value) return &quot;&quot;;
+      value = value.toString();
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    },
+    format: function (value, prefix, suffix) {
+      if (!value) return &quot;&quot;;
+      value = value.toString();
+      return prefix + &quot;-&quot; + value + &quot;.&quot; + suffix;
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>组件</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>编写一个 Hello 全局组件（components/Hello.vue） 
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- 传递参数 --&gt;
+    &lt;div&gt;\{{ msg }}&lt;/div&gt;
+    &lt;!-- 插值(针对内容)：使用Mustache语法（双花括号）的文本插值绑定数据 --&gt;
+    &lt;p&gt;\{{ message.toUpperCase() }}&lt;/p&gt;
+    &lt;!-- v-bind(针对属性)：作用于HTML元素或组件元素的属性上 --&gt;
+    &lt;p&gt;&lt;a v-bind:href=&quot;url&quot;&gt;百度&lt;/a&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;a :href=&quot;url&quot;&gt;百度&lt;/a&gt;&lt;/p&gt;
+    &lt;!-- 指令：指令是带有 v-前缀的特殊属性 --&gt;
+    &lt;p v-html=&quot;spanHtml&quot;&gt;&lt;/p&gt;
+    &lt;p&gt;\{{ spanHtml }}&lt;/p&gt;
+    &lt;button v-on:click=&quot;sayHello&quot;&gt;问候&lt;/button&gt;
+    &lt;button @click=&quot;sayHello&quot;&gt;问候&lt;/button&gt;
+    &lt;!-- 动态指令: 参数名字不要使用大写 --&gt;
+    &lt;p&gt;&lt;a :[attribute]=&quot;url&quot;&gt;百度&lt;/a&gt;&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  props: {
+    msg: String,
+  },
+  data() {
+    return {
+      message: &quot;Hello, Vue.js&quot;,
+      url: &quot;http://www.baidu.com&quot;,
+      spanHtml: &quot;&lt;span style='color: red'&gt;HTML 元素，红色字体&lt;/span&gt;&quot;,
+      attribute: &quot;href&quot;
+    };
+  },
+  methods: {
+    sayHello() {
+      alert(&quot;你好&quot;);
+    },
+  },
+};
+&lt;/script&gt;
+
+使用 Hello 组件（App.vue）
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;!-- 可以使用 v-bind 绑定动态值 --&gt;
+    &lt;Hello msg=&quot;这是传递到组件的参数&quot; /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+# 导入语句中的@符号表示 src 目录，该符号用于简化路径访问
+import Hello from &quot;@/components/Hello.vue&quot;;
+export default {
+  name: 'Hello',
+  components: {
+    Hello
+  }
+}
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>组件传参（类型检查）
+
+什么是 prop：在 props 中定义的组件属性，可以通过 prop 向组件传递数据
+
+// 组件是当作自定义元素来使用的，而元素一般都是有属性的，同样，组件也可以有属性。
+// 在使用组件时，给组件元素设置属性，组件内部如何接受呢？
+// 首先需要在组件内部注册一些自定义的属性，称为 prop 
+// 这些 prop 是放在组件的 props 选项中定义的
+// 在使用组件时，就可以把这些 prop 的名字作为元素的属性名来使用
+// 通过属性向组件传递数据，这些数据将作为组件实例属性被使用
+
+// 验证的 type 可以是下列原生构造函数中的一个：
+1. String
+2. Number
+3. Boolean
+4. Array
+5. Object
+6. Date
+7. Function
+8. Symbol
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;\{{ msg }}&lt;/div&gt;
+  &lt;!-- 子组件向父组件发起通知或传递参数 --&gt;
+  &lt;button v-on:click=&quot;handleClick&quot;&gt;开始欢迎&lt;/button&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;Hello&quot;,
+  props: {
+    // 类型检查
+    msg: String,
+  },
+  data() {
+    return {
+      name: &quot;张三&quot;,
+    };
+  },
+  methods: {
+    handleClick() {
+      // 子组件使用$emit()方法触发事件
+      this.$emit(&quot;greet&quot;, this.name);
+    },
+  },
+};
+&lt;/script&gt;
+
+// HelloTwo.vue
+&lt;template&gt;
+  &lt;div&gt;
+      &lt;p&gt;\{{ post.title }}&lt;/p&gt;
+      &lt;p&gt;作者：\{{ post.author }}&lt;/p&gt;
+      &lt;p&gt;\{{ post.content }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;HelloTwo&quot;,
+  // props: ['post'], // 不类型检查
+  props: { // 类型检查
+    post: {
+      // 检查类型 ...
+      type: Object,
+      // 默认值 ...
+      default: function () {
+        return {};
+      },
+    },
+  },
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+
+// App.vue
+&lt;template&gt;
+    &lt;!-- 组件 --&gt;
+    &lt;!-- 只要组件注册是采用的是PascalCase(首字母大写)命名 --&gt;
+    &lt;!-- 就可以采用kebab-case命名来引用 --&gt;
+    &lt;Hello msg=&quot;这是传递到组件的参数&quot; /&gt;
+    &lt;hello :msg=&quot;message&quot; /&gt;
+    &lt;!-- 父组件通过prop向子组件传递数据 --&gt;
+    &lt;HelloTwo :post=&quot;post&quot;&gt;&lt;/HelloTwo&gt;
+    &lt;hello-two :post=&quot;post&quot;&gt;&lt;/hello-two&gt;
+    &lt;!-- 监听子组件事件 --&gt;
+    &lt;!-- 父组件使用v-on指令监听子组件的自定义事件 --&gt;
+    &lt;hello v-on:greet=&quot;sayHello&quot;&gt;&lt;/hello&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Hello from &quot;@/components/Hello.vue&quot;;
+import HelloTwo from &quot;@/components/HelloTwo.vue&quot;;
+export default {
+  name: &quot;Home&quot;,
+  methods: {
+    textButton() {
+      this.post.author = &quot;测试完成&quot;;
+    },
+    // 子组件的附加参数会自动传入方法
+    sayHello(name) {
+      alert(&quot;Hello, &quot; + name);
+    },
+  },
+  components: {
+    Hello,
+    HelloTwo,
+  },
+  data() {
+    return {
+      message: &quot;这是传递到组件的参数&quot;,
+      post: {
+        author: &quot;孙鑫&quot;,
+        title: &quot;Vue.js无难事&quot;,
+        content: &quot;这本书不错&quot;,
+      },
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>练习(投票)
+
+// TouPiaoItem.vue 子组件
+&lt;template&gt;
+  &lt;li&gt;
+    &lt;h3&gt;\{{ post.title }}&lt;/h3&gt;
+    &lt;p&gt;
+      发帖人：\{{ post.author }} 发帖时间：\{{ post.date }} 投票数：\{{
+        post.vote
+      }}
+    &lt;/p&gt;
+    &lt;!-- 子组件向父组件发起通知或传递参数 --&gt;
+    &lt;button @click=&quot;handleVote&quot;&gt;投票&lt;/button&gt;
+  &lt;/li&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;TouPiaoItem&quot;,
+  props: [&quot;post&quot;],
+  data() {
+    return {};
+  },
+  methods: {
+    handleVote() {
+      // 子组件使用$emit()方法触发事件
+      this.$emit(&quot;vote&quot;);
+    },
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+    &lt;ul&gt;
+      &lt;tou-piao-item v-for=&quot;post in posts&quot; :key=&quot;post.id&quot; :post=&quot;post&quot; @vote=&quot;handleVote(post.id)&quot;&gt;&lt;/tou-piao-item&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import TouPiaoItem from &quot;@/components/TouPiaoItem.vue&quot;;
+export default {
+  name: &quot;App&quot;,
+  methods: {
+    // 父组件接收传出来的值
+    handleVote(id) {
+      this.posts.map((item) =&gt; {
+        item.id === id ? { ...item, voite: ++item.vote } : item;
+      });
+    },
+  },
+  components: {
+    TouPiaoItem,
+  },
+  data() {
+    return {
+      // 父组件数据，传入子组件供子组件显示 ...
+      posts: [
+        {
+          id: 1,
+          title: &quot;这是第一本书&quot;,
+          author: &quot;第一位&quot;,
+          date: &quot;2020/11/16&quot;,
+          vote: 0,
+        },
+        {
+          id: 2,
+          title: &quot;这是第二本书&quot;,
+          author: &quot;第二位&quot;,
+          date: &quot;2020/11/17&quot;,
+          vote: 0,
+        },
+        {
+          id: 3,
+          title: &quot;这是第三本书&quot;,
+          author: &quot;第三位&quot;,
+          date: &quot;2020/11/18&quot;,
+          vote: 0,
+        },
+        {
+          id: 4,
+          title: &quot;这是第四本书&quot;,
+          author: &quot;第四位&quot;,
+          date: &quot;2020/11/19&quot;,
+          vote: 0,
+        },
+      ],
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>.sync 修饰符
+
+// 在一些情况下，可能需要对一个组件的prop进行双向绑定
+// Vue.js 推荐以 update:myPropName 模式触发事件来实现
+
+// Child.vue    
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;span&gt;计数：\{{ count }}&lt;/span&gt;
+    &lt;button @click=&quot;handleClick&quot;&gt;增加计数&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;Child&quot;,
+  props: {
+    // Prop的Name是vla
+    val: {
+      type: Number,
+      default: 0,
+    },
+  },
+  data() {
+    return {
+      // 避免直接改变属性，因为每当父组件重新渲染时，该值都将被覆盖
+      // 所以这里把 val 赋值给 count 
+      count: this.val,
+    };
+  },
+  methods: {
+    handleClick() {
+      // 子组件使用$emit()方法触发事件
+      this.$emit(&quot;update:val&quot;, ++this.count);
+    },
+  },
+};
+&lt;/script&gt;
+
+// App.vue
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;span&gt;计数器的值：\{{ counter }}&lt;/span&gt;
+    // 使用 v-on 指令监听 update:val 事件，接收子组件传来的数据
+    // 使用 v-bind 指令绑定子组件的 val prop 就可以给子组件传递父组件的数据
+    &lt;child v-bind:val=&quot;counter&quot; v-on:update:val=&quot;counter = $event&quot;&gt;&lt;/child&gt;
+    // .sync 修饰符只是简化了 v-bind 和 v-on 指令的使用 ...
+    &lt;child v-bind:val.sync=&quot;counter&quot;&gt;&lt;/child&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Child from &quot;./components/Child.vue&quot;;
+export default {
+  name: &quot;App&quot;,
+  methods: {},
+  components: {
+    Child,
+  },
+  data() {
+    return {
+      counter: 0,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>自定义组件的 v-model
+
+// 当修改父组件message时子组件props.value也随之更改
+// 这是因为，在默认情况下，一个组件上的 ...
+// v-model 会把 value 作为 prop，把 input 事件作为 event
+
+// MyInput.vue 子组件
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;label&gt;\{{ value }}&lt;/label&gt;
+    &lt;!-- 绑定value并且在发生input时调用handleInput传递$event --&gt;
+    &lt;input :value=&quot;value&quot; @input=&quot;handleInput($event)&quot; /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;MyInput&quot;,
+  props: {
+    value: String,
+  },
+  data() {
+    return {};
+  },
+  methods: {
+    handleInput(event) {
+      // 使用$emit()方法触发事件，父组件使用v-on监听
+      this.$emit(&quot;input&quot;, event.target.value);
+    },
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;my-input v-model=&quot;message&quot;&gt;&lt;/my-input&gt;
+    &lt;!-- 等价于 --&gt;
+    &lt;my-input :value=&quot;message&quot; v-on:input=&quot;message = $event&quot;&gt;&lt;/my-input&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import MyInput from &quot;./components/MyInput.vue&quot;;
+export default {
+  name: &quot;App&quot;,
+  components: {
+    MyInput,
+  },
+  data() {
+    return {
+      message: &quot;Vue.js 无难事&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>model 选项 (相当于声明属性改名)
+
+// CheckBox.vue 子组件
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;input
+      type=&quot;checkbox&quot;
+      :checked=&quot;checked&quot;
+      @change=&quot;$emit('change', $event.target.checked)&quot;
+    /&gt;
+    &lt;label&gt;\{{ value }}&lt;/label&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;CheckBox&quot;,
+  model: {
+    // 使用 checked 替换 value 作为 prop
+    prop: 'checked',
+    event: 'change',
+  },
+  props: {
+    // 这里的 value prop 可以用于不同的目的
+    value: String,
+    // 使用 checked 替换 value 作为 prop
+    checked: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    // 此时，isAgree的值将会传入名为checked的prop
+    // 同时，当CheckBox触发change事件并附带一个新的值时，isAgree属性将会被更新
+    // 注意，在组件的model选项中声明了prop后，依然需要在props选项里声明这个prop
+    &lt;check-box v-model=&quot;isAgree&quot; value=&quot;同意协议&quot;&gt;&lt;/check-box&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import CheckBox from &quot;./components/CheckBox.vue&quot;;
+export default {
+  name: &quot;App&quot;,
+  components: {
+    CheckBox,
+  },
+  data() {
+    return {
+      isAgree: false,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>实例 ComboBox
+
+// ComboBox.vue 子组件
+&lt;template&gt;
+  &lt;dev&gt;
+    &lt;table&gt;
+      &lt;tr&gt;
+        &lt;td&gt;\{{ label }}&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+        &lt;td&gt;
+          &lt;input :value=&quot;value&quot; @change=&quot;handleChange($event)&quot; /&gt;
+        &lt;/td&gt;
+        &lt;select :value=&quot;value&quot; @change=&quot;handleChange($event)&quot;&gt;
+          &lt;option disabled value=&quot;&quot;&gt;请选择&lt;/option&gt;
+          &lt;option v-for=&quot;item in list&quot; v-bind:key=&quot;item&quot;&gt;
+            \{{ item }}
+          &lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/dev&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;ComboBox&quot;,
+  props: {
+    label: String,
+    value: String,
+    list: {
+      type: Array,
+      default: function () {
+        return [];
+      },
+    },
+  },
+  data() {
+    return {};
+  },
+  model: {
+    event: &quot;change&quot;,
+  },
+  methods: {
+    handleChange(event) {
+      this.$emit(&quot;change&quot;, event.target.value);
+    },
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;combo-box
+      label=&quot;请选择了解信息的渠道&quot;
+      :list=&quot;['报纸', '网络', '朋友介绍']&quot;
+      v-model=&quot;selectedVal&quot;
+    &gt;&lt;/combo-box&gt;
+    &lt;span&gt;选中的值是：\{{ selectedVal }}&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import ComboBox from &quot;./components/ComboBox.vue&quot;;
+export default {
+  name: &quot;App&quot;,
+  components: {
+    ComboBox,
+  },
+  data() {
+    return {
+      selectedVal: &quot;&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>使用插槽分发内容
+
+// 组件是当作自定义元素来使用的，元素可以有属性和内容
+// 通过组件定义的prop来接收属性值，可以解决属性问题
+// 那么内容呢？这可以通过&lt;slot&gt;元素来解决 ...
+// 插槽(slot)也可以作为父子组件之间通信的另一种实现方式
+
+// 编译作用域，下列name的作用域是父组件
+// &lt;greeting&gt;Hello, \{{name}}&lt;/greeting&gt;
+
+// 父组件模版中的所有内容都是在父作用域内编译
+// 子组件模版中的所有内容都是在子作用域内编译
+
+// 缺省内容：可以给&lt;slot&gt;元素指定一个缺省内容
+// 以防止组件的使用者没有给该组件传递内容 ...
+
+// 可以通过命名插槽来使用多个插槽 ...
+// 没有使用name属性的&lt;slot&gt;元素具有隐含名称default
+
+// v-slot 指令也有缩写语法，既用#号来替换 v-slot
+// &lt;template #default&gt; ...
+
+// Greeting.vue 子组件
+&lt;template&gt;
+  &lt;dev&gt;&lt;slot&gt;&lt;/slot&gt;&lt;/dev&gt;
+  &lt;!-- 缺省内容 --&gt;
+  &lt;slot&gt;这里是缺省内容&lt;/slot&gt;
+  &lt;!-- 命名插槽 --&gt;
+  &lt;slot name=&quot;content&quot;&gt;&lt;/slot&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;Greeting&quot;,
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;!-- 父组件的内容会替换子组件&lt;slot&gt;&lt;/slot&gt;的内容 --&gt;
+    &lt;greeting&gt;Hello Vue.js&lt;/greeting&gt;
+    &lt;!-- 使用命名插槽 --&gt;
+    &lt;greeting&gt;
+      &lt;template v-slot:content&gt;
+        &lt;h1&gt;这里是头部内容&lt;/h1&gt;
+      &lt;/template&gt;
+    &lt;/greeting&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Greeting from './components/Greeting.vue';
+export default {
+  name: &quot;App&quot;,
+  components: {
+    Greeting,
+  },
+  data() {
+    return {
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>作用域插槽(prop)
+
+// 在父级作用域下，在插槽的内容中是无法访问到子组件的数据属性
+// 但有时候需要在父级的插槽内容中访问子组件的数据 ...
+// 为此，可以在子组件的&lt;slot&gt;元素上使用v-bind指定绑定一个prop
+
+// 1. 在子组件插槽中v-bind(绑定)要在父组件插槽中访问的数据(键:值)
+// 2. 在父组件插槽中就可以通过v-slot(键:值)来访问子组件数据
+
+// MyButton.vue 子组件
+&lt;template&gt;
+    &lt;button&gt;
+        &lt;slot v-bind:values=&quot;titles&quot;&gt;\{{titles.login}}&lt;/slot&gt;
+    &lt;/button&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;MyButton&quot;,
+  data() {
+    return {
+      titles: {
+        login: &quot;登录&quot;,
+        register: &quot;注册&quot;,
+      },
+    };
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;my-button&gt;
+      &lt;template v-slot:default=&quot;slotProps&quot;&gt;
+        \{{slotProps.values.register}}
+      &lt;/template&gt;
+    &lt;/my-button&gt;
+    &lt;!-- 统一测试 --&gt;
+    &lt;p&gt;&lt;button @click=&quot;textButton&quot;&gt;测试按钮&lt;/button&gt;&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import MyButton from './components/MyButton.vue';
+export default {
+  name: &quot;App&quot;,
+  components: {
+    MyButton
+  },
+  data() {
+    return {
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>动态组件
+
+// 在页面应用程序中，经常会遇到多标签页面，在Vue.js中，可以通过动态组件来实现
+// 组件的动态切换通过在&lt;component&gt;元素上使用is属性来实现 ...
+
+// 当点击某个按钮时，会触发更改数据属性(currentTab)值
+// 这将导致计算属性currentTabComponent被触发返回新的值
+// &lt;component&gt;元素的is属性使用v-bind指令绑定到一个已注册组件的名字上
+// 随着currentTabComponent值的改变，组件也就自动切换了 ...
+
+// TabComment.vue 子组件
+&lt;template&gt;
+  &lt;p&gt;这是一本好书&lt;/p&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;TabComment&quot;,
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+
+// TabIntroduce.vue 子组件
+&lt;template&gt;
+  &lt;p&gt;&lt;input v-model=&quot;content&quot; /&gt;&lt;/p&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;TabIntroduce&quot;,
+  data() {
+    return {
+      content: &quot;Vue.js 无难事&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+
+// TabQa.vue 子组件
+&lt;template&gt;
+  &lt;p&gt;有人看过吗？怎么样&lt;/p&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;TabQa&quot;,
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;button
+      v-for=&quot;tab in tabs&quot;
+      :key=&quot;tab.title&quot;
+      :class=&quot;['tab-button', { active: currentTab === tab.title }]&quot;
+      @click=&quot;currentTab = tab.title&quot;
+    &gt;
+      \{{ tab.displayName }}
+    &lt;/button&gt;
+    &lt;componentcomponent :is=&quot;currentTabComponent&quot; class=&quot;tab&quot;&gt;&lt;/component&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import TabComment from &quot;./components/TabComment.vue&quot;;
+import TabIntroduce from &quot;./components/TabIntroduce.vue&quot;;
+import TabQa from &quot;./components/TabQa.vue&quot;;
+export default {
+  name: &quot;App&quot;,
+  components: { TabComment, TabIntroduce, TabQa },
+  data() {
+    return {
+      currentTab: &quot;introduce&quot;,
+      tabs: [
+        { title: &quot;introduce&quot;, displayName: &quot;图书介绍&quot; },
+        { title: &quot;comment&quot;, displayName: &quot;图书评价&quot; },
+        { title: &quot;qa&quot;, displayName: &quot;图书问答&quot; },
+      ],
+    };
+  },
+  // 计算属性
+  computed: {
+    currentTabComponent: function () {
+      return &quot;tab-&quot; + this.currentTab;
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>组件的生命周期
+
+1. beforeCreate 
+2. created
+3. beforeMount
+4. mounted
+5. beforeUpdate
+6. updated
+7. activated
+8. deactivated
+9. beforeDestroy
+10. destroyed
+11. errorCaptured
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>混入(mixin) 提供了一种非常灵活的方式，来分发Vue组件中的可复用功能
+
+// 混入就是在一个公共的实例中写入公共的数据或者方法
+// 也就是说你在export default {}里边的内容都可以混入
+
+// 一个混入对象可以包含任意组件选项，当组件使用混入对象时
+// 所有混入对象的选项将被&quot;混合&quot;进入该组件本身的选项。
+
+// components/mixin/mixin.js 混入对象
+
+// 默认混入对象
+export default {
+    created() {
+        this.startMixin()
+    },
+    methods: {
+        startMixin: function () {
+            document.write('欢迎来到混入实例')
+            console.log(&quot;欢迎来到混入实例&quot;)
+        }
+    },
+    data() {
+        return {
+            isNoData: false,
+            isShowLoding: true,
+            title: &quot;这是混入内的数据&quot;
+        }
+    }
+}
+
+// 命名混入对象
+export let myMixin = {
+    created() {
+        this.startMixin()
+    },
+    methods: {
+        startMixin: function () {
+            document.write('欢迎来到混入实例')
+            console.log(&quot;欢迎来到混入实例&quot;)
+        }
+    },
+    data() {
+        return {
+            isNoData: false,
+            isShowLoding: true,
+            title: &quot;这是混入内的数据&quot;
+        }
+    }
+}
+
+// App.vue 
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;!-- title 是混入内的数据 --&gt;
+    &lt;p&gt;\{{title}}&lt;/p&gt;
+    &lt;!-- message 是当前组件内的数据 --&gt;
+    &lt;p&gt;\{{ message }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+&lt;!-- 在需要混入的组件中把这个mixin引入 --&gt;
+&lt;!-- 引入默认混入对象 --&gt;
+import mixin from '@/components/mixin/mixin.js'
+&lt;!-- 引入命名混入对象 --&gt;
+import {myMixin} from &quot;@/components/mixin/mixin.js&quot;;
+export default {
+  name: &quot;App&quot;,
+  mixins: [mixin], // 默认
+  mixins: [myMixin], // 命名
+  data() {
+    return {
+        message: &quot;Vue.js 无难事&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>混入(mixin) 选项合并
+
+// 当混入对象和组件本身包含同名的选项时，这些选项将以下面的策略进行合并
+// 1. 数据对象进行递归合并，在发生冲突时以组件的数据优先
+// 2. 同名的钩子函数被合并到一个数据中，因此这些函数都会被调用
+// 2.1 另外，混入对象的钩子将在组件自身钩子之前调用
+// 3. 值为对象的选项，如 methods、components 和 directives
+// 3.1 将会被合并为同一个对象，当这些对象中存在冲突的键名时，以组件的选项优先
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>混入(mixin) 全局混入
+
+// 混入也可以进行全局注册，这是通过调用Vue.mixin()方法来实现的。
+// 不过全局注册混入对象很危险，因为它会影响随后创建的每个Vue实例
+
+// index.js
+const myMixin = {
+    data() {
+        return {
+            isNoData: false,
+            isShowLoding: true
+        }
+    }
+}
+export default myMixin;
+
+// main.js
+import MinXin from '@/components/MinXins/index.js'
+Vue.mixin(MinXin);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>组件通信的其它方式
+
+// 总结一下前面介绍的组件通信的三种方式：
+// 1. 父组件通过prop向子组件传递数据
+// 2. 子组件通过自定义事件向父组件发起通知或进行数据传递
+// 3. 子组件通过&lt;slot&gt;元素充当占位符，获取父组件分发的内容
+// 3.1 也可以在子组件的&lt;slot&gt;元素上使用v-bind指令绑定一个插槽prop，向父组件提供数据
+
+// 在每一个new Vue实例的子组件中，都可以通过$root属性来访问根实例
+// 对于 Vue Cli 来说 $root 访问的是 main.js 中 new Vue 的根实例
+
+// $root 属性来访问根实例
+// $parent 属性来访问父组件实例
+
+// Child.vue 子组件
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;button @click=&quot;accessRoot&quot;&gt;访问根实例&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;Child&quot;,
+  data() {
+    return {};
+  },
+  methods: {
+    accessRoot() {
+      console.log(&quot;单价：&quot; + this.$parent.price);
+      console.log(&quot;总价：&quot; + this.$parent.totalPrice);
+      console.log(this.$parent.hello());
+    },
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;child&gt;&lt;/child&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Child from './components/Child.vue';
+export default {
+  name: &quot;App&quot;,
+  methods: {
+    hello() {
+      return &quot;Hello, Vue.js 无难事&quot;;
+    },
+  },
+  components: {Child},
+  data() {
+    return {
+      price: 98,
+    };
+  },
+  computed: {
+    totalPrice() {
+      return this.price * 10;
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>访问子组件实例或者子组件元素
+
+// 如果父组件要访问子组件实例怎么办？
+// 可以给子组件或子元素添加一个特殊的属性ref
+// 为子组件或子元素分配一个引用ID
+// 然后父组件就可以通过$refs属性来访问子组件实例或元素
+
+// Child.vue 子组件
+&lt;template&gt;
+  &lt;p&gt;\{{ message }}&lt;/p&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;Child&quot;,
+  data() {
+    return {
+      message: &quot;Vue.js 无难事&quot;,
+    };
+  },
+};
+&lt;/script&gt;
+
+// Parent.vue 父组件
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;!-- 子元素 --&gt;
+    &lt;input ref=&quot;inputElement&quot; /&gt;&lt;br /&gt;
+    &lt;!-- 子组件 --&gt;
+    &lt;child ref=&quot;childComponent&quot;&gt;&lt;/child&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Child from &quot;./Child.vue&quot;;
+export default {
+  name: &quot;Parent&quot;,
+  components: { Child },
+  data() {
+    return {};
+  },
+  mounted() {
+    &lt;!-- 访问了&lt;input&gt;组件的focus元素 --&gt;
+    this.$refs.inputElement.focus();
+    &lt;!-- 访问了&lt;child&gt;子组件的message数据 --&gt;
+    console.log(this.$refs.childComponent.message);
+  },
+};
+&lt;/script&gt;
+
+// App.vue 组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;parent&gt;&lt;/parent&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Parent from './components/Parent.vue';
+export default {
+  name: &quot;App&quot;,
+  methods: {
+  components: {Parent},
+  data() {
+    return {
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>依赖注入
+
+// $root 属性用于访问根实例
+// $parent 属性用于访问父组件实例
+
+// 如果组件嵌套的层级不确定，某个组件的数据或方法需要被后代组件所访问，又该如何实现呢？
+// 这时需要用到两个新的实例选项：provide 和 inject
+
+// provide 选项允许我们指定要提供给后代组件的数据或方法
+// 在后代组件中使用 inject 选项来接收要添加到该实例中的特定属性
+
+// Child.vue 子组件
+&lt;template&gt;
+  &lt;p&gt;\{{ message }}&lt;/p&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;Child&quot;,
+  inject: [&quot;message&quot;, &quot;hello&quot;],
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;child&gt;&lt;/child&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Child from &quot;./components/Child.vue&quot;;
+export default {
+  name: &quot;App&quot;,
+  provide() {
+    return {
+      // 数据属性message和sayHello方法可供后代组件访问
+      message: &quot;Vue.js 无难事 ...&quot;,
+      hello: this.sayHello(&quot;nulijiabei&quot;),
+    };
+  },
+  methods: {
+    sayHello(name) {
+      console.log(&quot;Hello, &quot; + name);
+    },
+  },
+  components: { Child },
+  data() {
+    return {
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>手动监听事件
+
+// 已经介绍过$emit的方法，它用于触发当前实例事件，触发的时间可以被v-on指令监听
+// Vue 还提供了以下三个事件方法，让我们能够以编程的方式手动对自定义事件进行监听
+
+// 1. 监听当前实例上的自定义事件，事件可以由vm.$emit触发
+//    $on(eventName, eventHandler)
+// 2. 监听一个自定义事件，但是触发一次，一旦触发之后，监听器就会被删除
+//    $once(eventName, eventHandler)
+// 3. 删除自定义事件监听器
+//    $off(eventName, eventHandler)
+
+// 也就是，监听当前组件中由$emit触发的事件
+
+// Child.vue 子组件
+&lt;template&gt;
+  &lt;button @click=&quot;handleClick&quot;&gt;手动监听事件&lt;/button&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;Child&quot;,
+  created() {
+    // 监听当前实例的greet事件
+    this.$on(&quot;greet&quot;, function () {
+      this.$parent.sayHello();
+    });
+  },
+  beforeDestroy() {
+    // 删除greet事件的所有监听器
+    this.$off(&quot;greet&quot;);
+  },
+  methods: {
+    // 按钮绑定函数
+    handleClick() {
+      // 触发自定义事件greet
+      this.$emit(&quot;greet&quot;);
+    },
+  },
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;child&gt;&lt;/child&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Child from &quot;./components/Child.vue&quot;;
+export default {
+  name: &quot;App&quot;,
+  methods: {
+    sayHello() {
+      alert(&quot;Hello, Vue.js&quot;);
+    },
+  },
+  components: { Child },
+  data() {
+    return {
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>异步更新队列
+
+// 当单机&quot;修改内容&quot;按钮时，修改组件message数据属性的值
+// 然后使用$refs访问&lt;p&gt;元素内容并在控制台窗口中输出 ...
+
+// 当单机&quot;修改内容&quot;按钮时 ...
+// 希望 this.$refs.msg.textContent 内容为 &quot;VC++ 深入详解&quot;
+// 但实际上 this.$refs.msg.textContent 内容却是 &quot;Vue.js 无难事&quot;
+
+// 这是因为Vue在数据变化需要更新DOM时并不是同步执行，而是异步执行
+// 每当侦听到数据更改时，Vue将开启一个队列，并缓冲在同一事件循环中发生的所有数据变更
+// 如果同一个观察者被多次触发，只会将其放入队列中一次，Vue在缓冲时会去除重复数据 ...
+// 然后在下一个时间循环tick中，Vue刷新队列并执行实际的而工作 ...
+
+// 当在change()方法中修改message属性值的时候，该组件不会立即重新渲染
+// 当队列刷新时，组件会在下一个tick中更新，多数情况下不需要更新这个过程
+// 当时如果想在数据更改后立即访问更新后的DOM，这时就需要nextTick(callback)方法
+// 传递给nextTick()方法的回调函数会在DOM更新完成后被调用 ...
+
+// MyComponent.vue 子组件
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;p ref=&quot;msg&quot;&gt;\{{ message }}&lt;/p&gt;
+    &lt;button @click=&quot;change&quot;&gt;修改内容&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  data() {
+    return {
+      message: &quot;Vue.js 无难事&quot;,
+    };
+  },
+  methods: {
+    change() {
+      this.message = &quot;VC++ 深入详解&quot;;
+      console.log(this.$refs.msg.textContent);
+      // 传递给nextTick()方法的回调函数会在DOM更新完成后被调用
+      this.$nextTick(() =&gt; console.log(this.$refs.msg.textContent));
+    },
+  },
+};
+&lt;/script&gt;
+
+// App.vue 父组件
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;my-component&gt;&lt;/my-component&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import MyComponent from &quot;./components/MyComponent.vue&quot;;
+export default {
+  name: &quot;App&quot;,
+  components: {
+    MyComponent,
+  },
+  data() {
+    return {
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Vue.js%E4%B9%8B%E4%BD%BF%E7%94%A8Vue-Router%E5%BC%80%E5%8F%91%E5%8D%95%E9%A1%B5%E5%BA%94%E7%94%A8/" title="Vue.js之使用Vue-Router开发单页应用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux%E4%B9%8BDRM%E6%88%AA%E5%9B%BE%E6%96%B9%E6%A1%88/" title="Linux之DRM截图方案">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-11-15</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#javascript-ref">javascript <span>11</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

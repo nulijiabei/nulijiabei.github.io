@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之百度地图坐标定位</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之百度地图坐标定位 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>百度地图坐标定位</h3>
+
+<blockquote>
+</blockquote>
+
+<p>百度地图Android定位SDK提供GPS，基站，Wi-Fi等多种定位方式</p>
+
+<blockquote>
+</blockquote>
+
+<p>适用于室、内外多种定位场景，具有出色的定位性能：</p>
+
+<blockquote>
+</blockquote>
+
+<p>定位精度高、覆盖率广、网络定位请求流量小、定位速度快。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Android之百度地图坐标定位/1.jpeg" alt="" width="350" hight="600" ></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>1，在百度开放平台创建应用，并且设置安全码
+    地址：http://lbsyun.baidu.com/apiconsole/key
+
+2，获取应用访问应用（AK）...
+
+3，从百度开放平台下载SDK
+    地址：http://lbsyun.baidu.com/sdk/download
+
+4，基础SDK开发包：定位功能，基础地图，检索功能，LBS云检索
+    获取文件：BaiduLBS_Android.jar + armeabi（目录）
+
+5，将armeabi目录内文件拷贝到项目的../app/src/main/jniLibs/armeabi下
+    将BaiduLBS_Android.jar拷贝到../app/libs目录下，并导入项目（Studio默认自动导入)
+
+6，下载示例代码：http://lbsyun.baidu.com/sdk/download
+    找到：地图+检索+LBS云检索+工具+周边雷达（目录）
+    找到：/BaiduMapsApiDemo/src/baidumapsdk/demo（目录）
+    找到：LocationDemo.java 文件就是定位示例）
+
+7, 将 LocationDemo.java 导入到项目
+    找到：示例项目中的 AndroidManifest.xml （文件）
+    取出：下面示例中的内容，拷贝到当前项目中 ...
+
+8，下面的：LocationActivity.java 是我稍加修改的 LocationDemo.java
+
+9，先做到可以正常运行官方示例（LocationDemo.java）
+
+10，需要提醒的是，生成APK需要通过, Build/Generate Signed APK(Studio) 生成
+        否则程序的指纹信息无法与安全码进行匹配...
+
+// 百度地图仅LBS搜索还有着很多功能... 具体请看官方文档
+// http://developer.baidu.com/map/index.php?title=android-locsdk
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>在application标签中声明service组件,每个app拥有自己单独的定位service
+&lt;service 
+    android:name=&quot;com.baidu.location.f&quot; 
+    android:enabled=&quot;true&quot; 
+    android:process=&quot;:remote&quot;&gt;
+&lt;/service&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>【重要提醒】
+定位SDKv3.1版本之后，以下权限已不需要，请取消声明
+否则将由于Android 5.0多帐户系统加强权限管理而导致应用安装失败。
+&lt;uses-permission android:name=&quot;android.permission.BAIDU_LOCATION_SERVICE&quot;&gt;&lt;/uses-permission&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 声明使用权限
+&lt;!-- 这个权限用于进行网络定位--&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 这个权限用于访问GPS定位--&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 用于访问wifi网络信息，wifi信息会用于进行网络定位--&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_WIFI_STATE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 获取运营商信息，用于支持提供运营商信息相关的接口--&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_NETWORK_STATE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位--&gt;
+&lt;uses-permission android:name=&quot;android.permission.CHANGE_WIFI_STATE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 用于读取手机当前的状态--&gt;
+&lt;uses-permission android:name=&quot;android.permission.READ_PHONE_STATE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 写入扩展存储，向扩展卡写入数据，用于写入离线定位数据--&gt;
+&lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 访问网络，网络定位需要上网--&gt;
+&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+&lt;!-- SD卡读取权限，用户写入离线定位数据--&gt;
+&lt;uses-permission android:name=&quot;android.permission.MOUNT_UNMOUNT_FILESYSTEMS&quot;&gt;&lt;/uses-permission&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>SDK4.2及之后版本需要在Mainfest.xml设置Accesskey
+设置有误会引起定位和地理围栏服务不能正常使用，必须进行Accesskey的正确设置。
+设置AccessKey，在application标签中加入
+// key:开发者申请的key
+&lt;meta-data android:name=&quot;com.baidu.lbsapi.API_KEY&quot; android:value=&quot;key&quot; /&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 具体获取坐标代码
+
+// 定位相关
+LocationClient mLocClient;
+public MyLocationListenner myListener = new MyLocationListenner();
+
+@Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_location);
+    // 定位初始化
+    mLocClient = new LocationClient(this);
+    mLocClient.registerLocationListener(myListener);
+    LocationClientOption option = new LocationClientOption();
+    option.setOpenGps(true);// 打开gps
+    option.setCoorType(&quot;bd09ll&quot;); // 设置坐标类型
+    option.setScanSpan(1000);
+    mLocClient.setLocOption(option);
+    mLocClient.start();
+}
+
+/**
+ * 定位SDK监听函数
+ */
+public class MyLocationListenner implements BDLocationListener {
+    @Override
+    public void onReceiveLocation(BDLocation location) {
+        MyLocationData locData = new MyLocationData.Builder()
+                .accuracy(location.getRadius())
+                // 此处设置开发者获取到的方向信息，顺时针0-360
+                // 这里的方向需要用户通过传感器自定获取并设置
+                .direction(100).latitude(location.getLatitude())
+                .longitude(location.getLongitude()).build();
+        Log.i(&quot;纬度&quot;, String.valueOf(locData.latitude));
+        Log.i(&quot;经度&quot;, String.valueOf(locData.longitude));
+        Log.i(&quot;速度&quot;, String.valueOf(locData.speed));
+        Log.i(&quot;方向&quot;, String.valueOf(locData.direction));
+        Log.i(&quot;精度&quot;, String.valueOf(locData.accuracy));
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 完整的官方SDK定位示例
+public class LocationActivity extends Activity {
+
+    // 定位相关
+    LocationClient mLocClient;
+    public MyLocationListenner myListener = new MyLocationListenner();
+    private LocationMode mCurrentMode;
+    BitmapDescriptor mCurrentMarker;
+
+    MapView mMapView;
+    BaiduMap mBaiduMap;
+
+    // UI相关
+    OnCheckedChangeListener radioButtonListener;
+    Button requestLocButton;
+    boolean isFirstLoc = true;// 是否首次定位
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_location);
+        requestLocButton = (Button) findViewById(R.id.button1);
+        mCurrentMode = LocationMode.NORMAL;
+        requestLocButton.setText(&quot;普通&quot;);
+        OnClickListener btnClickListener = new OnClickListener() {
+            public void onClick(View v) {
+                switch (mCurrentMode) {
+                    case NORMAL:
+                        requestLocButton.setText(&quot;跟随&quot;);
+                        mCurrentMode = LocationMode.FOLLOWING;
+                        mBaiduMap.setMyLocationConfigeration(
+                            new MyLocationConfiguration(mCurrentMode, true, mCurrentMarker));
+                        break;
+                    case COMPASS:
+                        requestLocButton.setText(&quot;普通&quot;);
+                        mCurrentMode = LocationMode.NORMAL;
+                        mBaiduMap.setMyLocationConfigeration(
+                            new MyLocationConfiguration(mCurrentMode, true, mCurrentMarker));
+                        break;
+                    case FOLLOWING:
+                        requestLocButton.setText(&quot;罗盘&quot;);
+                        mCurrentMode = LocationMode.COMPASS;
+                        mBaiduMap.setMyLocationConfigeration(
+                            new MyLocationConfiguration(mCurrentMode, true, mCurrentMarker));
+                        break;
+                }
+            }
+        };
+        requestLocButton.setOnClickListener(btnClickListener);
+
+        RadioGroup group = (RadioGroup) this.findViewById(R.id.radioGroup);
+        radioButtonListener = new OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.defaulticon) {
+                    // 传入null则，恢复默认图标
+                    mCurrentMarker = null;
+                    mBaiduMap.setMyLocationConfigeration(
+                        new MyLocationConfiguration(mCurrentMode, true, null));
+                }
+                if (checkedId == R.id.customicon) {
+                    // 修改为自定义marker
+                    mCurrentMarker = BitmapDescriptorFactory.fromResource(R.drawable.icon_geo);
+                    mBaiduMap.setMyLocationConfigeration(
+                        new MyLocationConfiguration(mCurrentMode, true, mCurrentMarker));
+                }
+            }
+        };
+        group.setOnCheckedChangeListener(radioButtonListener);
+
+        // 地图初始化
+        mMapView = (MapView) findViewById(R.id.bmapView);
+        mBaiduMap = mMapView.getMap();
+        // 开启定位图层
+        mBaiduMap.setMyLocationEnabled(true);
+        // 定位初始化
+        mLocClient = new LocationClient(this);
+        mLocClient.registerLocationListener(myListener);
+        LocationClientOption option = new LocationClientOption();
+        option.setOpenGps(true);// 打开gps
+        option.setCoorType(&quot;bd09ll&quot;); // 设置坐标类型
+        option.setScanSpan(1000);
+        mLocClient.setLocOption(option);
+        mLocClient.start();
+    }
+
+    /**
+     * 定位SDK监听函数
+     */
+    public class MyLocationListenner implements BDLocationListener {
+
+        @Override
+        public void onReceiveLocation(BDLocation location) {
+            // map view 销毁后不在处理新接收的位置
+            if (location == null || mMapView == null)
+                return;
+            MyLocationData locData = new MyLocationData.Builder()
+                    .accuracy(location.getRadius())
+                    // 此处设置开发者获取到的方向信息，顺时针0-360
+                    // 这里的方向需要用户通过传感器自定获取并设置
+                    .direction(100).latitude(location.getLatitude())
+                    .longitude(location.getLongitude()).build();
+            Log.i(&quot;纬度&quot;, String.valueOf(locData.latitude));
+            Log.i(&quot;经度&quot;, String.valueOf(locData.longitude));
+            Log.i(&quot;速度&quot;, String.valueOf(locData.speed));
+            Log.i(&quot;方向&quot;, String.valueOf(locData.direction));
+            Log.i(&quot;精度&quot;, String.valueOf(locData.accuracy));
+            mBaiduMap.setMyLocationData(locData);
+            if (isFirstLoc) {
+                isFirstLoc = false;
+                LatLng ll = new LatLng(location.getLatitude(),
+                        location.getLongitude());
+                MapStatusUpdate u = MapStatusUpdateFactory.newLatLng(ll);
+                mBaiduMap.animateMapStatus(u);
+            }
+        }
+
+        public void onReceivePoi(BDLocation poiLocation) {
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        mMapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        mMapView.onResume();
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        // 退出时销毁定位
+        mLocClient.stop();
+        // 关闭定位图层
+        mBaiduMap.setMyLocationEnabled(false);
+        mMapView.onDestroy();
+        mMapView = null;
+        super.onDestroy();
+    }
+
+}:wq
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E6%97%A5%E6%9C%9F%E6%97%B6%E9%97%B4%E9%80%89%E6%8B%A9%E5%99%A8%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之日期时间选择器使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BELBS%E4%BA%91%E6%90%9C%E7%B4%A2/" title="Android之百度地图LBS云搜索">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-08-03</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

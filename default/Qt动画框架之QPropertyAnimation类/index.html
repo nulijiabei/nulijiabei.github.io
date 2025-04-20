@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Qt动画框架之QPropertyAnimation类</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Qt动画框架之QPropertyAnimation类 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <h3>从下向上，或者从上向下弹出一个 Dialog 窗口</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Dialog::Dialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::Dialog)
+{
+    ui-&gt;setupUi(this);
+    // 隐藏菜单栏
+    // this-&gt;setWindowFlags(Qt::FramelessWindowHint);
+    // 初始化位置到右下角 (初始位置, 不一定需要设置）
+    // this-&gt;move((desktop.availableGeometry().width()-this-&gt;width()),desktop.availableGeometry().height());
+    // 开始显示右下角弹出框
+    showAnimation();
+}
+
+
+Dialog::~Dialog()
+{
+    delete ui;
+}
+
+// 弹出动画
+void Dialog::showAnimation(){
+    // 显示弹出框动画
+    animation=new QPropertyAnimation(this,&quot;pos&quot;);
+    // 移动间隔
+    animation-&gt;setDuration(2000);
+    // 移动效果 
+    animation-&gt;setEasingCurve(QEasingCurve::OutBounce);
+    // 起始位置
+    animation-&gt;setStartValue(QPoint(this-&gt;x(),-desktop.availableGeometry().height()));
+    // 终点位置
+    animation-&gt;setEndValue(QPoint((this-&gt;x()),(this-&gt;y())));
+    // 开始移动
+    animation-&gt;start();
+
+}
+
+// 关闭动画
+void Dialog::closeAnimation(){
+    connect(animation,SIGNAL(finished()),this,SLOT(clearAll()));
+}
+
+// 清理动画指针
+void Dialog::clearAll(){
+    disconnect(animation,SIGNAL(finished()),this,SLOT(clearAll()));
+    delete animation;
+    animation = NULL;
+}
+</code></pre>
+
+<hr />
+
+<h3>网上的一些例子</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>QPushButton button(&quot;Animated Button&quot;);
+button.show();
+QPropertyAnimation animation(&amp;button, &quot;geometry&quot;);
+animation.setDuration(10000);
+animation.setStartValue(QRect(0, 0, 100, 30));
+animation.setEndValue(QRect(250, 250, 100, 30));
+animation.start();
+// 上述代码即在10秒的期限把button从屏幕的左上角移动到(250,250)点处。
+    // 上述代码在开始值与结束值之间做了线性插值。
+// 当然，设置的值在开始处与结束处之间的数值也是合理的，那么插值衍化就沿这些点进行。
+
+QPushButton button(&quot;Animated Button&quot;);
+button.show();
+QPropertyAnimation animation(&amp;button, &quot;geometry&quot;);
+animation.setDuration(10000);
+animation.setKeyValueAt(0, QRect(0, 0, 100, 30));
+animation.setKeyValueAt(0.8, QRect(250, 250, 100, 30));
+animation.setKeyValueAt(1, QRect(0, 0, 100, 30));
+animation.start();
+// 在这个例子中，在8秒的期限将button移到(250,250)，然后在剩下的2秒时间移回至初始的位置；
+// 这些点之间的移动都是通过线性插值的。
+
+QPushButton button(&quot;Animated Button&quot;);
+button.show();
+QPropertyAnimation animation(&amp;button, &quot;geometry&quot;);
+animation.setDuration(3000);
+animation.setStartValue(QRect(0, 0, 100, 30));
+animation.setEndValue(QRect(250, 250, 100, 30));
+animation.setEasingCurve(QEasingCurve::OutBounce);
+animation.start();
+// 上述代码中，动画即沿着OutBounce曲线，该曲线样式是到结束处会弹跳起来像个弹跳球。
+// QEasingCurve类有大量的供你选择的曲线，它们被定义成QEasingCurve::Type枚举。
+// 如果你需要另外的曲线样式，你也可以自己实现一个，然后用QEasingCurve注册它既可。
+
+
+QPushButton *bonnie = new QPushButton(&quot;Bonnie&quot;);
+bonnie-&gt;show();
+QPushButton *clyde = new QPushButton(&quot;Clyde&quot;);
+clyde-&gt;show();
+QPropertyAnimation *anim1 = new QPropertyAnimation(bonnie, &quot;geometry&quot;);// Set up anim1  
+QPropertyAnimation *anim2 = new QPropertyAnimation(clyde, &quot;geometry&quot;);// Set up anim2  
+QParallelAnimationGroup *group = new QParallelAnimationGroup;
+group-&gt;addAnimation(anim1);
+group-&gt;addAnimation(anim2);
+group-&gt;start();
+// 动画分组
+
+QPushButton button(&quot;Animated Button&quot;);
+button.show();
+QPropertyAnimation anim1(&amp;button, &quot;geometry&quot;);
+anim1.setDuration(3000);
+anim1.setStartValue(QRect(0, 0, 100, 30));
+anim1.setEndValue(QRect(500, 500, 100, 30));
+QPropertyAnimation anim2(&amp;button, &quot;geometry&quot;);
+anim2.setDuration(3000);
+anim2.setStartValue(QRect(500, 500, 100, 30));
+anim2.setEndValue(QRect(1000, 500, 100, 30));
+QSequentialAnimationGroup group;
+group.addAnimation(&amp;anim1);
+group.addAnimation(&amp;anim2);
+group.start();
+// 动画分组
+</code></pre>
+
+<hr />
+
+<h3>其它相关</h3>
+
+<pre><code>QApplication::desktop()-&gt;width();QApplication::desktop()-&gt;height(); 
+// 这个方法对于单显示器模式当然没有问题。
+// 但是对于多显示器，特别是使用了扩展桌面的就会有问题了。
+// 今天上午仔细看了QDesktopWidget的帮助
+// 需要使用QApplication::desktop()-&gt;screenGeometry();这个函数有好几个重载的版本，意思都一样。
+// 该函数返回一个QRect，这个QRect的宽和高就是所在Screen的分辨率。获取方法如下：
+void GetScreenInfo()
+{
+    QDesktopWidget* desktopWidget = QApplication::desktop();
+    //获取可用桌面大小
+    QRect deskRect = desktopWidget-&gt;availableGeometry();
+    //获取设备屏幕大小
+    QRect screenRect = desktopWidget-&gt;screenGeometry();
+    g_nActScreenX = screenRect.width();
+    g_nActScreenY = screenRect.height();
+    //g_nActScreenX = deskRect.width();
+    //g_nActScreenY = deskRect.height();
+    //获取系统设置的屏幕个数（屏幕拷贝方式该值为1）
+    g_nScreenCount = desktopWidget-&gt;screenCount();
+}
+// 说到这里，顺便标记以下多屏幕设置成拷贝方式时，获取的屏幕的个数是一个，只有设置成扩展时才返回多个。
+
+// 打印屏幕分辨率和个数信息：
+void printscreeninfo()
+{
+    QDesktopWidget *dwsktopwidget = QApplication::desktop();
+    QRect deskrect = dwsktopwidget-&gt;availableGeometry();
+    QRect screenrect = dwsktopwidget-&gt;screenGeometry();
+    QDesktopWidget *dwsktopwidget = QApplication::desktop();
+    QRect deskrect = dwsktopwidget-&gt;availableGeometry();
+    QRect screenrect = dwsktopwidget-&gt;screenGeometry();
+    int scrcount = dwsktopwidget-&gt;screenCount();
+    qCritical(&quot;screenrect.w==%s\n&quot;,qPrintable(QString::number(screenrect.width())));
+    qCritical(&quot;screenrect.h==%s\n&quot;,qPrintable(QString::number(screenrect.height())));
+    qCritical(&quot;deskrect.w==%s\n&quot;,qPrintable(QString::number(deskrect.width())));
+    qCritical(&quot;deskrect.h==%s\n&quot;,qPrintable(QString::number(deskrect.height())));
+    qCritical(&quot;scrcount==%s\n&quot;,qPrintable(QString::number(scrcount)));
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BFILL_PARENT%E4%B8%8EWRAP_CONTENT%E5%92%8CMATCH_PARENT%E4%BB%8B%E7%BB%8D/" title="Android之FILL_PARENT与WRAP_CONTENT和MATCH_PARENT介绍">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android-SDK-Manager-Proxy/" title="Android SDK Manager Proxy">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

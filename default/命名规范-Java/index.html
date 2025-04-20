@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>命名规范-Java</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>命名规范-Java </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>一、(Package)包的命名</p>
+
+<pre><code>Java包的名字都是由小写单词组成。但是由于Java面向对象编程的特性，每一名Java程序员都可以编写属于自己的Java包，为了保障每个 Java包命名的唯一性，在最新的Java编程规范中，要求程序员在自己定义的包的名称之前加上唯一的前缀。由于互联网上的域名称是不会重复的，所以程序员一般采用自己在互联网上的域名称作为自己程序包的唯一前缀。
+
+例如：    net.frontfree.javagroup
+</code></pre>
+
+<p>二、(Class)类的命名</p>
+
+<pre><code>类的名字必须由大写字母开头而单词中的其他字母均为小写；如果类名称由多个单词组成，则每个单词的首字母均应为大写例如TestPage；如果类名称中包含单词缩写，则这个所写词的每个字母均应大写，如：XMLExample,还有一点命名技巧就是由于类是设计用来代表对象的，所以在命名类时应尽量选择名词。
+
+例如：    Circle
+</code></pre>
+
+<p>三、方法的命名</p>
+
+<pre><code>方法的名字的第一个单词应以小写字母作为开头，后面的单词则用大写字母开头。
+
+例如：    sendMessge
+</code></pre>
+
+<p>四、参数的命名</p>
+
+<pre><code>参数的命名规范和方法的命名规范相同，而且为了避免阅读程序时造成迷惑，请在尽量保证参数名称为一个单词的情况下使参数的命名尽可能明确。
+</code></pre>
+
+<p>五、Javadoc注释</p>
+
+<pre><code>Java除了可以采用我们常见的注释方式之外，Java语言规范还定义了一种特殊的注释，也就是我们所说的Javadoc注释，它是用来记录我们代码中的API的。Javadoc注释是一种多行注释，以/**开头，而以*/结束，注释可以包含一些HTML标记符和专门的关键词。使用Javadoc 注释的好处是编写的注释可以被自动转为在线文档，省去了单独编写程序文档的麻烦。
+
+　　例如：
+　　/**
+　　*    This    is    an    example    of
+　　*    Javadoc
+　　*
+　　*    @author    darchon
+　　*    @version    0.1,    10/11/2002
+　　*/
+
+在每个程序的最开始部分，一般都用Javadoc注释对程序的总体描述以及版权信息，之后在主程序中可以为每个类、接口、方法、字段添加 Javadoc注释，每个注释的开头部分先用一句话概括该类、接口、方法、字段所完成的功能，这句话应单独占据一行以突出其概括作用，在这句话后面可以跟随更加详细的描述段落。在描述性段落之后还可以跟随一些以Javadoc注释标签开头的特殊段落，例如上面例子中的@auther和@version，这些段落将在生成文档中以特定方式显示。
+</code></pre>
+
+<p>六、变量命名</p>
+
+<pre><code>变量命名应该采用首字母小写，其他字母首字母大写的方式。
+
+　　· Static    Final    变量的名字应该都大写，并且指出完整含义。
+　　· 如果需要对变量名进行缩写时，一定要注意整个代码中缩写规则的一致性。例如，如果在代码的某些区域中使用intCnt，而在另一些区域中又使用intCount，就会给代码增加不必要的复杂性。建议变量名中尽量不要出现缩写。
+　　· 通过在结尾处放置一个量词，就可创建更加统一的变量，它们更容易理解，也更容易搜索。例如，请使用 strCustomerFirst和strCustomerLast，而不要使用strFirstCustomer和strLastCustomer。常用的量词后缀有：First（一组变量中的第一个）、Last（一组变量中的最后一个）、Next（一组变量中的下一个变量）、Prev（一组变量中的上一个）、Cur（一组变量中的当前变量）。
+　　· 为每个变量选择最佳的数据类型，这样即能减少对内存的需求量，加快代码的执行速度，又会降低出错的可能性。用于变量的数据类型可能会影响该变量进行计算所产生的结果。在这种情况下，编译器不会产生运行期错误，它只是迫使该值符合数据类型的要求。这类问题极难查找。
+　　· 尽量缩小变量的作用域。如果变量的作用域大于它应有的范围，变量可继续存在，并且在不再需要该变量后的很长时间内仍然占用资源。它们的主要问题是，任何类中的任何方法都能对它们进行修改，并且很难跟踪究竟是何处进行修改的。占用资源是作用域涉及的一个重要问题。对变量来说，尽量缩小作用域将会对应用程序的可靠性产生巨大的影响。
+</code></pre>
+
+<p>七、关于常量的命名方法</p>
+
+<pre><code>在JAVA代码中，无论什么时候，均提倡应用常量取代数字、固定字符串。也就是说，程序中除0，1以外，尽量不应该出现其他数字。常量可以集中在程序开始部分定义或者更宽的作用域内，名字应该都使用大写字母，并且指出该常量完整含义。如果一个常量名称由多个单词组成，则应该用下划线“_”来分割这些单词如：NUM_DAYS_IN_WEEK、MAX_VALUE。
+</code></pre>
+
+<p>八、推荐的命名</p>
+
+<pre><code>1、类名推荐
+
+当要区别接口和实现类的时候，可以在类的后面加上“Impl”。例如： interface Container ,class ContainerImpl
+class Container3PImpl
+class ContainerYICTImpl
+
+2、Exception类名推荐
+
+Exception类最好能用“Exception”做为类命名的结尾。例如：
+DataNotFoundException
+InvalidArgumentException
+
+3、抽象类名推荐
+
+抽象类最好能用“Abstract”做为类命名的开头。例如：
+AbstractBeanDefinition
+AbstractBeanFactory
+
+4、Test类名推荐
+
+Test类最好能用“Test”做为类命名的结尾。例如：
+ContainerTest
+
+5、工厂类方法推荐
+
+工厂方法最好能把该方法做要创建的对象类型描述出来。例如：
+public Container createContainer();
+public Location newLocation();
+
+· 虽然为一个设计低劣的程序添加注释不会使其变成好的程序，但是如果按照编程规范编写程序并且为程序添加良好的注释却可以帮助你编写出设计完美，运行效率高且易于理解的程序，尤其是在多人合作完成同一项目时编程规范就变得更加重要。俗话说“磨刀不误砍柴工”，花费一点时间去适应一下Java编程规范是有好处的。
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%9C%A8Golang%E4%B8%AD%E8%8E%B7%E5%8F%96%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%A3%81%E7%9B%98%E5%86%85%E5%AD%98%E5%8D%A0%E7%94%A8/" title="在Golang中获取系统的磁盘内存占用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83-Golang/" title="命名规范-Golang">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#java-ref">java <span>7</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

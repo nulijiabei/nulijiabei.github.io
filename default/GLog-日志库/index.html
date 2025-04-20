@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>GLog-日志库</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>GLog-日志库 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Google Glog 是一个C++语言的应用级日志记录框架，提供了C++风格的流操作和各种助手宏。</p>
+
+<p>代码位于谷歌代码“google-glog”项目</p>
+
+<hr />
+
+<p>安装</p>
+
+<pre><code>// 下载地址
+https://code.google.com/p/google-glog/downloads/list
+
+// 安装
+./configure ; make ; make install
+
+// Lib
+LIBS += -lglog
+</code></pre>
+
+<hr />
+
+<p>示例</p>
+
+<pre><code>#include &lt;iostream&gt;
+#include &lt;glog/logging.h&gt;
+
+using namespace std;
+
+// 日志支持类型
+// INFO = GLOG_INFO
+// WARNING = GLOG_WARNING,
+// ERROR = GLOG_ERROR
+// FATAL = GLOG_FATAL;
+
+int main(int argc,char *argv[])
+{
+    // 输出日志到文件
+    // 如果不设置输出文件,则默认输出到/tmp/下
+    google::InitGoogleLogging(argv[0]);
+
+    // 设置 google::INFO 级别的日志存储路径和文件名前缀
+    // google::SetLogDestination(google::INFO,LOGDIR&quot;/INFO_&quot;);
+    // 设置 google::WARNING 级别的日志存储路径和文件名前缀
+    // google::SetLogDestination(google::WARNING,LOGDIR&quot;/WARNING_&quot;);
+    // 设置 google::ERROR 级别的日志存储路径和文件名前缀
+    // google::SetLogDestination(google::ERROR,LOGDIR&quot;/ERROR_&quot;);
+    // 设置 google::FATAL 级别的日志存储路径和文件名前缀
+    // google::SetLogDestination(google::FATAL,LOGDIR&quot;/FATAL_&quot;);
+
+    // 缓冲日志输出，默认为30秒，此处改为立即输出
+    FLAGS_logbufsecs =0;
+
+    // 最大日志大小为 100MB
+    FLAGS_max_log_size =100;
+
+    // 当磁盘被写满时，停止日志输出
+    FLAGS_stop_logging_if_full_disk = true;
+
+    // 设置文件名扩展，如平台？或其它需要区分的信息
+    google::SetLogFilenameExtension(&quot;91_&quot;);
+
+    // 设置级别高于 google::INFO 的日志同时输出到屏幕
+    google::SetStderrLogging(google::INFO);
+
+    // 设置输出到屏幕的日志显示相应颜色
+    FLAGS_colorlogtostderr=true;
+
+    // 当条件满足时输出日志
+    LOG_IF(INFO, 20 &gt; 10) &lt;&lt; &quot;OK&quot;;
+
+    // 输出信息
+    LOG(INFO)    &lt;&lt; &quot;log message...&quot; &lt;&lt; endl;
+    LOG(WARNING) &lt;&lt; &quot;log message...&quot; &lt;&lt; endl;
+    LOG(ERROR)   &lt;&lt; &quot;log message...&quot; &lt;&lt; endl;
+    LOG(FATAL)   &lt;&lt; &quot;log message...&quot; &lt;&lt; endl;
+
+    // 输出结束
+    google::ShutdownGoogleLogging();
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Asio%E5%90%8C%E6%AD%A5Socket%E5%A4%84%E7%90%86/" title="Asio同步Socket处理">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Boost-%E7%BB%84%E4%BB%B6%E5%BA%93%E7%BC%96%E8%AF%91%E6%96%B9%E6%B3%95/" title="Boost-组件库编译方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-10-09</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

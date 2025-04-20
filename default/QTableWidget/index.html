@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>QTableWidget</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>QTableWidget </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>#include &quot;mainwindow.h&quot;
+#include &quot;ui_mainwindow.h&quot;
+#include &lt;QtGui&gt;
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui-&gt;setupUi(this);
+
+    ui-&gt;runButton-&gt;setFlat(true);
+    ui-&gt;runTableWidget-&gt;setHidden(true);
+    connect(ui-&gt;runButton, SIGNAL(clicked()), this ,SLOT(runShowTable()));
+
+    ui-&gt;evoButton-&gt;setFlat(true);
+    ui-&gt;evoTableView-&gt;setHidden(true);
+    connect(ui-&gt;evoButton, SIGNAL(clicked()), this ,SLOT(evoShowTable()));
+
+    ui-&gt;sysButton-&gt;setFlat(true);
+    ui-&gt;sysTableView-&gt;setHidden(true);
+    connect(ui-&gt;sysButton, SIGNAL(clicked()), this ,SLOT(sysShowTable()));
+
+    ui-&gt;mbrButton-&gt;setFlat(true);
+    ui-&gt;mbrTableWidget-&gt;setHidden(true);
+    connect(ui-&gt;mbrButton, SIGNAL(clicked()), this ,SLOT(mbrShowTable()));
+
+    ui-&gt;patchButton-&gt;setFlat(true);
+    ui-&gt;patchTableWidget-&gt;setHidden(true);
+    connect(ui-&gt;patchButton, SIGNAL(clicked()), this ,SLOT(patchShowTable()));
+
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::allHidden()
+{
+    ui-&gt;runTableWidget-&gt;setHidden(true);
+    ui-&gt;evoTableView-&gt;setHidden(true);
+    ui-&gt;sysTableView-&gt;setHidden(true);
+    ui-&gt;mbrTableWidget-&gt;setHidden(true);
+    ui-&gt;patchTableWidget-&gt;setHidden(true);
+}
+
+void MainWindow::runShowTable()
+{
+
+    allHidden();
+    ui-&gt;runTableWidget-&gt;setColumnCount(5);
+    ui-&gt;runTableWidget-&gt;setRowCount(100);
+//    ui-&gt;runTableWidget-&gt;horizontalHeader()-&gt;setStretchLastSection(true);
+    ui-&gt;runTableWidget-&gt;horizontalHeader()-&gt;setResizeMode(QHeaderView::Stretch);
+
+    QStringList header;
+    header&lt;&lt; &quot;指派&quot; &lt;&lt; &quot;系统&quot; &lt;&lt; &quot;进化&quot; &lt;&lt; &quot;分区表&quot; &lt;&lt; &quot;补丁&quot;;
+    ui-&gt;runTableWidget-&gt;setHorizontalHeaderLabels(header);
+    ui-&gt;runTableWidget-&gt;setItem(0,0,new QTableWidgetItem(&quot;Janxxxxxxxxxxxxxxxxx&quot;));
+    ui-&gt;runTableWidget-&gt;setItem(1,0,new QTableWidgetItem(&quot;Feb&quot;));
+    ui-&gt;runTableWidget-&gt;setItem(2,0,new QTableWidgetItem(&quot;Mar&quot;));
+    ui-&gt;runTableWidget-&gt;show();
+}
+
+void MainWindow::evoShowTable()
+{
+    allHidden();
+    ui-&gt;evoTableView-&gt;show();
+}
+
+void MainWindow::sysShowTable()
+{
+    allHidden();
+    ui-&gt;sysTableView-&gt;show();
+}
+
+void MainWindow::mbrShowTable()
+{
+    allHidden();
+    ui-&gt;mbrTableWidget-&gt;show();
+}
+
+void MainWindow::patchShowTable()
+{
+    allHidden();
+    ui-&gt;patchTableWidget-&gt;show();
+}
+</code></pre>
+
+<hr />
+
+<pre><code>table-&gt;setSelectionMode(QAbstractItemView::SingleSelection)  
+table.horizontalHeader()-&gt;setResizeMode(QheaderView::Fixed);  
+table.horizontalHeader()-&gt;setStretchLastSection(true);  
+table.setEditTrigger(QAbstractItemView::NoEditTriggers);  
+table.setShowGrid(false);  
+</code></pre>
+
+<p>1.QTableWidget不能在mainwindow中随主窗口的大小变化？</p>
+
+<pre><code>解决：在表格外部添加布局。
+代码：tableWidget = new QTableWidget;
+      tableWidget -&gt;setObjectName(QString::fromUtf8(&quot;tableWidget&quot;));
+      QVBoxLayout *verticalLayout;
+      verticalLayout-&gt;addWidget(tableWidget );
+</code></pre>
+
+<p>2.将表格变为禁止编辑：</p>
+
+<pre><code>tableWidget-&gt;setEditTriggers(QAbstractItemView::NoEditTriggers);
+（参数含义：QAbstractItemView.NoEditTriggers--不能对表格内容进行修改
+        QAbstractItemView.CurrentChanged--任何时候都能对单元格修改
+        QAbstractItemView.DoubleClicked--双击单元格
+        QAbstractItemView.SelectedClicked--单击已选中的内容 
+        QAbstractItemView.EditKeyPressed--
+        QAbstractItemView.AnyKeyPressed--按下任意键就能修改
+        QAbstractItemView.AllEditTriggers--以上条件全包括）
+</code></pre>
+
+<p>3.设置表格为整行选择</p>
+
+<pre><code>  tableWidget-&gt;setSelectionBehavior(QAbstractItemView::SelectRows);  //整行选中的方式
+  （参数含义：AbstractItemView.SelectItems--选中单个单元格
+          QAbstractItemView.SelectRows--选中一行
+          QAbstractItemView.SelectColumns--选中一列）
+</code></pre>
+
+<p>4.单个选中和多个选中的设置：</p>
+
+<pre><code>  tableWidget-&gt;setSelectionMode(QAbstractItemView::ExtendedSelection);  //设置为可以选中多个目标
+ （参数含义：QAbstractItemView.NoSelection--不能选择
+         QAbstractItemView.SingleSelection--选中单个目标
+         QAbstractItemView.MultiSelection--选中多个目标
+  QAbstractItemView.ExtendedSelection/QAbstractItemView.ContiguousSelection 
+  的区别不明显，主要功能是正常情况下是单选，但按下Ctrl或Shift键后，可以多选）
+</code></pre>
+
+<p>5.表格表头的显示与隐藏</p>
+
+<pre><code>  对于水平或垂直方法的表头，可以用以下方式进行 隐藏/显示 的设置：
+  tableWidget-&gt;verticalHeader()-&gt;setVisible(false);   //隐藏列表头  
+  tableWidget-&gt;horizontalHeader()-&gt;setVisible(false); //隐藏行表头  
+  注意：需要 #include &lt;QHeaderView&gt;
+</code></pre>
+
+<p>6.对表头文字的字体、颜色进行设置</p>
+
+<pre><code>  //获得水平方向表头的Item对象
+  QTableWidgetItem *columnHeaderItem0 = tableWidget-&gt;horizontalHeaderItem(0);
+  columnHeaderItem0-&gt;setFont(QFont(&quot;Helvetica&quot;)); //设置字体  
+  columnHeaderItem0-&gt;setBackgroundColor(QColor(0,60,10)); //设置单元格背景颜色  
+  columnHeaderItem0-&gt;setTextColor(QColor(200,111,30)); //设置文字颜色
+  注意：需要 #include &lt;QHeaderView&gt;
+</code></pre>
+
+<p>7.在单元格里加入控件：</p>
+
+<pre><code>   QComboBox *comBox = new QComboBox();
+   comBox-&gt;addItem(&quot;Y&quot;);
+   comBox-&gt;addItem(&quot;N&quot;);
+   tableWidget-&gt;setCellWidget(0,2,comBox); 
+</code></pre>
+
+<p>8.单元格中添加图片：</p>
+
+<pre><code>  tableWidget-&gt;setItem(row, 0, new QTableWidgetItem(QIcon(&quot;:/new/images/kingdemo.ico&quot;),tr(&quot;&quot;)));
+</code></pre>
+
+<p>9.设置单元格字体颜色、背景颜色和字体字符：</p>
+
+<pre><code>  QTableWidgetItem *item = new QTableWidgetItem(&quot;Apple&quot;);
+  item-&gt;setBackgroundColor(QColor(0,60,10));
+  item-&gt;setTextColor(QColor(200,111,100));
+  item-&gt;setFont(QFont(&quot;Helvetica&quot;));
+  tableWidget-&gt;setItem(0,3,item);
+  另：如果需要对所有的单元格都使用这种字体，则可以使用  tableWidget-&gt;setFont(QFont(&quot;Helvetica&quot;));
+</code></pre>
+
+<p>10.设置单元格内文字的对齐方式</p>
+
+<pre><code> 水平对齐方式有：
+ Constant Value Description
+ Qt.AlignLeft 0x0001 Aligns with the left edge.
+ Qt.AlignRight 0x0002 Aligns with the right edge.
+ Qt.AlignHCenter 0x0004 Centers horizontally in the available space.
+ Qt.AlignJustify 0x0008 Justifies the text in the available space.
+ 垂直对齐方式：
+ Constant Value Description
+ Qt.AlignTop 0x0020 Aligns with the top.
+ Qt.AlignBottom 0x0040 Aligns with the bottom.
+ Qt.AlignVCenter 0x0080 Centers vertically in the available space.
+ 如果两种都要设置，只要用 Qt.AlignHCenter |  Qt.AlignVCenter 的方式即可
+</code></pre>
+
+<p>11.合并单元格：</p>
+
+<pre><code>tableWidget-&gt;setSpan(0, 0, 3, 1)  
+# 其参数为： 要改变单元格的1行数、2列数，要合并的3行数、4列数
+</code></pre>
+
+<p>12.设置单元格的大小</p>
+
+<pre><code>首先，可以指定某个行或者列的大小
+tableWidget-&gt;setColumnWidth(3,200);
+tableWidget-&gt;setRowHeight(3,60);
+
+还可以将行和列的大小设为与内容相匹配
+tableWidget-&gt;resizeColumnsToContents();
+tableWidget-&gt;resizeRowsToContents();
+</code></pre>
+
+<p>13.获得单击单元格的内容</p>
+
+<pre><code>// 信号的槽函数，就可以获得鼠标单击到的单元格指针，进而获得其中的文字信息
+通过实现 itemClicked (QTableWidgetItem *)
+connect(tableWidget,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
+    this,
+    SLOT(getItem(QTreeWidgetItem*,int)));
+//将itemClicked信号与函数getItem绑定
+</code></pre>
+
+<p>14.QTableWidget要调整表格行宽主要涉及以下函数</p>
+
+<pre><code>tableWidget-&gt;horizontalHeader()-&gt;setResizeMode(QHeaderView::Stretch);//使列完全填充并平分
+tableWidget-&gt;resizeColumnsToContents(); //根据内容调整列宽
+tableWidget-&gt;resizeColumnToContents(int col);//根据内容自动调整给定列宽
+tableWidget-&gt;horizontalHeader()-&gt;setResizeMode//把给定列设置为给定模式
+主要模式有Stretch和Fixed
+</code></pre>
+
+<p>15.添加表头内容：</p>
+
+<pre><code>方法一：
+QStringList header;
+header&lt;&lt;&quot;&quot;&lt;&lt;tr(&quot;1&quot;)&lt;&lt;tr(&quot;2&quot;)&lt;&lt;tr(&quot;3&quot;);
+
+方法二：
+tableWidget-&gt;setHorizontalHeaderLabels(QStringList()&lt;&lt;tr(&quot;1&quot;)&lt;&lt;tr(&quot;2&quot;)&lt;&lt;tr(&quot;3&quot;));
+</code></pre>
+
+<p>16.清除：</p>
+
+<pre><code>tableWidget-&gt;clear();//清除所有可见数据（包括表头），行还在
+tableWidget-&gt;clearContents();//只清除表中数据，不清除表头内容
+tableWidget-&gt;setRowCount(0)；//连行也清除掉
+</code></pre>
+
+<p>15.一些零碎的知识点代码：</p>
+
+<pre><code>int row = tableWidget-&gt;rowCount();//获取表格中当前总行数
+tableWidget-&gt;setRowCount(row+1);//添加一行
+tableWidget-&gt;removeRow(row);//清除已有的行列
+Int row1 = tableWidget-&gt;currentItem()-&gt;row();//当前选中行
+bool focus = tableWidget-&gt;isItemSelected(tableWidget-&gt;currentItem());//判断是否选中一行
+QString proName = tableWidget-&gt;item(row, col)-&gt;text();//获取某一格内容
+setShowGrid(true);//显示表格线
+verticalHeader()-&gt;setVisible(false);//隐藏左边垂直
+QHeaderView *headerView = horizontalHeader();
+headerView-&gt;setMovable(false);//去除表头的移动
+headerView-&gt;resizeSection(0,284);//设置第一列宽
+headerView-&gt;resizeSection(1,127);//设置第二列宽
+headerView-&gt;setResizeMode(QHeaderView::Fixed);//列表不能移动
+headerView-&gt;setClickable(false);//不响应鼠标单击
+setEditTriggers(QTableWidget::NoEditTriggers);//不能编辑
+setSelectionBehavior(QTableWidget::SelectRows);//一次选中一行
+setSelectionMode(QAbstractItemView::SingleSelection);//只能单选
+
+setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);//去掉水平滚动条
+setVerticalScrollMode(QAbstractItemView::ScrollPerItem);//垂直滚动条按项移动
+setAutoScroll(false);//去掉自动滚动
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/openSUSE-%E6%BA%90/" title="openSUSE-源">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/QListView%E5%92%8CQListWidget/" title="QListView和QListWidget">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-11</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

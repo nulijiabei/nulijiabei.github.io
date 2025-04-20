@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Java面向对象之继承</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Java面向对象之继承 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>继承 (extends)</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>扩展(子类)父类的功能
+
+不允许继承多个类, 但是可以多层继承
+
+子类不能直接访问父类的私有资源
+
+父类的构造方法先执行子类构造后执行
+
+重写需方法名相同，返回类型相同，参数相同
+
+被子类重写的方法不能拥有比父类更严格的访问权限
+
+private(当前类) &lt; default(整个包) &lt; public(可访问)
+
+super 强行调用父类的对象使用或方法执行
+
+重载，方法名称相同，参数的类型或个数不同
+    发生在一个类中，对权限没有要求
+
+重写，方法名称，参数类型和个数，返回值类型，全部相同
+    不能拥有比父类更加严格的权限，发生在继承中
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>class Person {
+
+    public Person() {
+    System.out.println(&quot;父类构造先执行&quot;);
+    }
+
+    public void tell() {
+
+    }
+
+    // 公共
+    public String name;
+
+    // 公共
+    public String age;
+
+    public String getAge() {
+    return age;
+    }
+
+    public String getName() {
+    return name;
+    }
+
+}
+
+class JD extends Person {
+
+    public JD() {
+    System.out.println(&quot;子类构造后执行&quot;);
+    }
+
+    // 重载
+    public void Print() {
+
+    }
+
+    // 重载
+    public void Print(String name) {
+
+    }
+
+    // 继承了父类的公共对象
+    // ...
+
+    // 私有，不可以子类访问
+    private String phone;
+
+    public String getPhone() {
+    return phone;
+    }
+
+    // 子类可以直接修改父类的公共对象
+    public void reSetName(String name) {
+    // super 关键字作用
+    super.name = name;
+    }
+
+    // 重写方法
+    public void tell() {
+    // 如果不强制调用父类重写方法，默认是不会调用的
+    // 强制调用父类方法
+    super.tell();
+    System.out.println(&quot;重写父类方法&quot;);
+    }
+
+}
+
+public class Demo {
+
+    public void main() {
+    JD jd = new JD();
+    jd.getAge();
+    jd.getName();
+    jd.getPhone();
+    }
+
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BSwipeLayout%E5%AE%9E%E7%8E%B0View%E4%BE%A7%E6%BB%91%E8%8F%9C%E5%8D%95/" title="Android之SwipeLayout实现View侧滑菜单">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Java%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E4%B9%8B%E5%A4%9A%E6%80%81/" title="Java面向对象之多态">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#java-ref">java <span>7</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

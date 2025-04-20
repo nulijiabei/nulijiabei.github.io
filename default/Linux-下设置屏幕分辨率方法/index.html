@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux-下设置屏幕分辨率方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux-下设置屏幕分辨率方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Linxu下设置屏幕分辨率方法</p>
+
+<p>设置分辨率方法</p>
+
+<p>通常情况下在Linux下屏幕分辨的设置方法有两种：</p>
+
+<p>一种是通过图形界面的方式进行设置，但是功能比较单一，不支持自定义设置。</p>
+
+<p>另一种是通过命令的形式进行设置，正常情况下可以通过xrandr命令进行设置。</p>
+
+<hr />
+
+<p>xrandr 命令行可以很方便地切换双屏，常用方式如下：</p>
+
+<pre><code>xrandr
+</code></pre>
+
+<p>查询当前显示设备状态</p>
+
+<pre><code>xrandr --output VGA --same-as LVDS –auto
+</code></pre>
+
+<p>打开外接显示器(最高分辨率)，与笔记本液晶屏幕显示同样内容（克隆）</p>
+
+<pre><code>xrandr --output VGA --same-as LVDS --mode  1024x768
+</code></pre>
+
+<p>打开外接显示器(分辨率为1024x768)，与笔记本液晶屏幕显示同样内容（克隆）</p>
+
+<pre><code>xrandr --output VGA --right-of LVDS --auto
+</code></pre>
+
+<p>打开外接显示器(最高分辨率)，设置为右侧扩展屏幕</p>
+
+<pre><code>xrandr --output VGA --off
+</code></pre>
+
+<p>关闭外接显示器</p>
+
+<pre><code>xrandr --output VGA --auto --output LVDS --off
+</code></pre>
+
+<p>打开外接显示器，同时关闭笔记本液晶屏幕（只用外接显示器工作）</p>
+
+<pre><code>xrandr --output VGA --off --output LVDS --auto
+</code></pre>
+
+<p>关闭外接显示器，同时打开笔记本液晶屏幕 (只用笔记本液晶屏)</p>
+
+<p>（最后两种情况请小心操作，不要误把两个屏幕都关掉了。。。。）</p>
+
+<p>分辨率强制设置方法</p>
+
+<p>当外接显示设备无法正常识别时，可以通过手动指定的方式进行设置，设置方法如下：</p>
+
+<p>1、用cvt命令获取给定分辨率的xrandr所需参数。例如：获取1440x900如下所示。</p>
+
+<pre><code>#cvt 1440 900
+结果如下：
+# 1440x900 59.89 Hz (CVT 1.30MA) hsync: 55.93 kHz; pclk: 106.50 MHz
+Modeline &quot;1440x900_60.00&quot; 106.50  1440 1528 1672 1904  900 903 909 934 -hsync +vsync
+Modeline后面的值在下边要用。
+</code></pre>
+
+<p>2、执行xrandr命令查看显示设备对于命名信息。</p>
+
+<pre><code>#xrandr
+得到显示器名称，如：VGA1、笔记本为LVDS1等，以此类推，不一定都一样。
+</code></pre>
+
+<p>3、用xrandr创建一个新的显示模式。</p>
+
+<pre><code>#xrandr --newmode &quot;1440x900_60.00&quot;  106.50  1440 15281672 1904  900 903 909 934 -hsync +vsync
+参数就是cvt结果中Modeline后面的那一堆，根据自己的参数调整。
+</code></pre>
+
+<p>4、查看新添加的显示模式。</p>
+
+<pre><code>#xrandr
+就可以看到新加的那个设置。
+</code></pre>
+
+<p>5、用xrandr添加一个新的显示模式。</p>
+
+<pre><code>#sudo xrandr --addmode VGA1 &quot;1440x900_60.00&quot;
+</code></pre>
+
+<p>6、使用新添加的显示模式。</p>
+
+<pre><code>#xrandr --output VGA1 --mode 1440x900_60.00 --same-as LVDS1
+打开外接显示器,分辨率设为1440x900，--same-as LVDS代表显示和LVDS1显示内容一样（即：镜面屏幕）。
+</code></pre>
+
+<p>注意事项：</p>
+
+<pre><code>1. 在使用1440x900_60.00参数时，要写全，必须一致。
+2. VGA1、LVDS1、HDMI-0等可以根据xrandr或者xrandr -q命令查询。
+3. 通过xrandr命令配置的效果不能够在关机后保存，要保留效果，可以将相关的配置命令写在脚步中，在系统启动时执行。
+</code></pre>
+
+<p>一个简单的示例如见附录“一种保存xrandr配置方法”。附录：一种保存xrandr配置方法</p>
+
+<p>1、创建一个自启动脚本，添加如下代码：</p>
+
+<pre><code>#!/bin/bash
+xrandr--newmode &quot;1440x900_60.00&quot;  106.50  1440 1528 16721904  900 903 909 934 -hsync +vsync;
+xrandr--addmode VGA1 &quot;1440x900_60.00&quot;;
+xrandr--output LVDS1 --mode 1366x768
+xrandr--output VGA1 --mode 1440x900_60.00;
+xrandr--output VGA1 --right-of LVDS1;
+</code></pre>
+
+<p>2、增加该脚本可执行权限，如命名为xrandr-config.sh。</p>
+
+<pre><code>#chmod a+x ./xrandr-config.sh
+</code></pre>
+
+<p>3、将该脚本设为开机启动，方法有两种：</p>
+
+<pre><code>   第一种方法：在/etc/rc.d/rc.local中追加入上述脚本执行命令，如：
+1）打开rc.local文件。
+    #vim/etc/rc.d/rc.local
+2）在rc.local中添加如下内容。
+    /root/xrandr-config.sh
+第二种方法：可通过图形化的界面来设置，方法如下。
+开始菜单》控制面板》启动应用程序》添加
+</code></pre>
+
+<p>可能存在的缺点：</p>
+
+<p>登录进去之后会有“无法应用原保存的显示器配置”的提示（在使用xorg.conf时），不影响正常使用</p>
+
+<p>因为xranr-config.sh文件已配置正确（该项暂未确认）。</p>
+
+<pre><code>LVDS 1280x800
+VGA 1280x1024
+</code></pre>
+
+<p>如果上下放：</p>
+
+<pre><code>xrandr --output VGA --auto
+xrandr --output VGA --above LVDS
+</code></pre>
+
+<p>那么gnome上下两个面板就分别在VGA顶部和LVDS底部,如果左右放：</p>
+
+<pre><code>xrandr --output VGA --right-of LVDS
+</code></pre>
+
+<p>那么gnome的上面面板会延长到占满LVDS+VGA</p>
+
+<p>而且窗口最大化就会占据LVDS+VGA的整个桌面,怎么设置能让面板不扩展到另外的显示器呢？</p>
+
+<p>还要使得窗口最大化时只占满当前显示器,也就是VGA出来的是一个空屏幕。。。。。</p>
+
+<p>代码:</p>
+
+<pre><code>xrandr --output LVDS --mode 1280x768 --output VGA --mode 1280x1024 \ --above LVDS
+</code></pre>
+
+<p>xrandr 介紹</p>
+
+<pre><code>xrandr指令可以用來改變X環境的桌面大小和螢幕頻率.
+把桌面解析度調成1024×768:
+$ xrandr -s 1024x768
+把螢幕頻率調成75Hz
+$ xrandr -r 75
+列出目前環境支援的解析度和頻率
+$ xrandr -q
+它列出的訊息, 每行的第一個數字可以用來指定給 -s 參數, 假設有一行這麼寫
+20 640 x 480 ( 347mm x 260mm ) 75
+那麼下
+$ xrandr -s 20
+時, 就會把螢幕調成 640×480 大小, 頻率75Hz
+如果有數個X環境同時運作的話, 可以用 -d 參數去調整別的X環境, -d 後面加的是像 :0 :1 :2 這樣, 例如:
+$ xrandr -s 800x600 -d :0
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Linux-%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BA%E8%AF%A6%E7%BB%86%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B/" title="Linux-启动时显示详细启动过程">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8B%E8%B7%AF-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1/" title="Golang之路-定时任务">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-03</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

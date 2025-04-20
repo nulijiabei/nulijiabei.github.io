@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang之Reflect使用介绍</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang之Reflect使用介绍 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>reflect</h3>
+
+<blockquote>
+</blockquote>
+
+<p>reflect库的godoc在<a href="http://golang.org/pkg/reflect/">http://golang.org/pkg/reflect/</a></p>
+
+<blockquote>
+</blockquote>
+
+<p>reflect包有两个数据类型我们必须知道，一个是Type，一个是Value。</p>
+
+<blockquote>
+</blockquote>
+
+<p>Type就是定义的类型的一个数据类型，Value是值的类型</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+
+import (
+    &quot;fmt&quot;
+    &quot;reflect&quot;
+)
+
+type MyStruct struct {
+    name string
+}
+
+func (this *MyStruct) GetName(str string) string {
+    this.name = str
+    return this.name
+}
+
+func main() {
+
+    // 备注: reflect.Indirect -&gt; 如果是指针则返回 Elem()
+    // 首先，reflect包有两个数据类型我们必须知道，一个是Type，一个是Value。
+    // Type就是定义的类型的一个数据类型，Value是值的类型
+
+    // 对象
+    s := &quot;this is string&quot;
+
+    // 获取对象类型 (string)
+    fmt.Println(reflect.TypeOf(s))
+
+    // 获取对象值 (this is string)
+    fmt.Println(reflect.ValueOf(s))
+
+    // 对象
+    var x float64 = 3.4
+
+    // 获取对象值 (&lt;float64 Value&gt;)
+    fmt.Println(reflect.ValueOf(x))
+
+    // 对象
+    a := &amp;MyStruct{name: &quot;nljb&quot;}
+
+    // 返回对象的方法的数量 (1)
+    fmt.Println(reflect.TypeOf(a).NumMethod())
+
+    // 遍历对象中的方法
+    for m := 0; m &lt; reflect.TypeOf(a).NumMethod(); m++ {
+        method := reflect.TypeOf(a).Method(m)
+        fmt.Println(method.Type)         // func(*main.MyStruct) string
+        fmt.Println(method.Name)         // GetName
+        fmt.Println(method.Type.NumIn()) // 参数个数
+        fmt.Println(method.Type.In(1))   // 参数类型
+    }
+
+    // 获取对象值 (&lt;*main.MyStruct Value&gt;)
+    fmt.Println(reflect.ValueOf(a))
+
+    // 获取对象名称
+    fmt.Println(reflect.Indirect(reflect.ValueOf(a)).Type().Name())
+
+    // 参数
+    i := &quot;Hello&quot;
+    v := make([]reflect.Value, 0)
+    v = append(v, reflect.ValueOf(i))
+
+    // 通过对象值中的方法名称调用方法 ([nljb]) (返回数组因为Go支持多值返回)
+    fmt.Println(reflect.ValueOf(a).MethodByName(&quot;GetName&quot;).Call(v))
+
+    // 通过对值中的子对象名称获取值 (nljb)
+    fmt.Println(reflect.Indirect(reflect.ValueOf(a)).FieldByName(&quot;name&quot;))
+
+    // 是否可以改变这个值 (false)
+    fmt.Println(reflect.Indirect(reflect.ValueOf(a)).FieldByName(&quot;name&quot;).CanSet())
+
+    // 是否可以改变这个值 (true)
+    fmt.Println(reflect.Indirect(reflect.ValueOf(&amp;(a.name))).CanSet())
+
+    // 不可改变 (false)
+    fmt.Println(reflect.Indirect(reflect.ValueOf(s)).CanSet())
+
+    // 可以改变
+    // reflect.Indirect(reflect.ValueOf(&amp;s)).SetString(&quot;jbnl&quot;)
+    fmt.Println(reflect.Indirect(reflect.ValueOf(&amp;s)).CanSet())
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>获取 Struct 对象的 Tag</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>type Home struct {
+    i int `nljb:&quot;100&quot;`
+}
+
+func main() {
+    home := new(Home)
+    home.i = 5
+    rcvr := reflect.ValueOf(home)
+    typ := reflect.Indirect(rcvr).Type()
+    fmt.Println(typ.Kind().String())
+    x := typ.NumField()
+    for i := 0; i &lt; x; i++ {
+        nljb := typ.Field(0).Tag.Get(&quot;nljb&quot;)
+        fmt.Println(nljb)
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>反射使用案例</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package server
+
+import (
+    &quot;fmt&quot;
+    &quot;net/http&quot;
+    &quot;reflect&quot;
+    &quot;strings&quot;
+)
+
+type Server struct {
+    name    string
+    rcvr    reflect.Value
+    typ     reflect.Type
+    methods map[string]*Method
+}
+
+type Method struct {
+    method reflect.Method
+    json   bool
+}
+
+func NewServer() *Server {
+    server := new(Server)
+    server.methods = make(map[string]*Method)
+    return server
+}
+
+func (this *Server) Start(port string) error {
+    return http.ListenAndServe(port, this)
+}
+
+func (this *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    for mname, mmethod := range this.methods {
+        if strings.ToLower(&quot;/&quot;+this.name+&quot;.&quot;+mname) == r.URL.Path {
+            if mmethod.json {
+                returnValues := mmethod.method.Func.Call(
+                    []reflect.Value{this.rcvr, reflect.ValueOf(w), reflect.ValueOf(r)})
+                content := returnValues[0].Interface()
+                if content != nil {
+                    w.WriteHeader(500)
+                    ...
+                }
+            } else {
+                mmethod.method.Func.Call(
+                    []reflect.Value{this.rcvr, reflect.ValueOf(w), reflect.ValueOf(r)})
+            }
+        }
+    }
+}
+
+/*
+    func (this *Hello) JsonHello(r *http.Request) {}
+    func (this *Hello) Hello(w http.ResponseWriter, r *http.Request) {}
+*/
+func (this *Server) Register(rcvr interface{}) error {
+    this.typ = reflect.TypeOf(rcvr)
+    this.rcvr = reflect.ValueOf(rcvr)
+    this.name = reflect.Indirect(this.rcvr).Type().Name()
+    if this.name == &quot;&quot; {
+        return fmt.Errorf(&quot;no service name for type &quot;, this.typ.String())
+    }
+    for m := 0; m &lt; this.typ.NumMethod(); m++ {
+        method := this.typ.Method(m)
+        mtype := method.Type
+        mname := method.Name
+        if strings.HasPrefix(mname, &quot;Json&quot;) {
+            if mtype.NumIn() != 2 {
+                return fmt.Errorf(&quot;method %s has wrong number of ins: %d&quot;, mname, mtype.NumIn())
+            }
+            arg := mtype.In(1)
+            if arg.String() != &quot;*http.Request&quot; {
+                return fmt.Errorf(&quot;%s argument type not exported: %s&quot;, mname, arg)
+            }
+            this.methods[mname] = &amp;Method{method, true}
+        } else {
+            if mtype.NumIn() != 3 {
+                return fmt.Errorf(&quot;method %s has wrong number of ins: %d&quot;, mname, mtype.NumIn())
+            }
+            reply := mtype.In(1)
+            if reply.String() != &quot;http.ResponseWriter&quot; {
+                return fmt.Errorf(&quot;%s argument type not exported: %s&quot;, mname, reply)
+            }
+            arg := mtype.In(2)
+            if arg.String() != &quot;*http.Request&quot; {
+                return fmt.Errorf(&quot;%s argument type not exported: %s&quot;, mname, arg)
+            }
+            this.methods[mname] = &amp;Method{method, false}
+        }
+    }
+    return nil
+}
+
+// ... //
+
+type Hello struct {
+}
+
+func (this *Hello) Print(w http.ResponseWriter, r *http.Request) map[string]interface{} {
+    w.Write([]byte(&quot;print&quot;))
+    return nil
+}
+
+func (this *Hello) Hello(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte(&quot;hello&quot;))
+}
+
+func (this *Hello) JsonHello(r *http.Request) {
+}
+
+func main() {
+
+    server := NewServer()
+    fmt.Println(server.Register(new(Hello)))
+    server.Start(&quot;:8080&quot;)
+
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E4%B8%8A%E6%8B%89%E9%9D%A2%E6%9D%BF%E5%BA%93-AndroidSlidingUpPanel/" title="Android之上拉面板库-AndroidSlidingUpPanel">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8BRPC%E4%BB%8B%E7%BB%8D/" title="Golang之RPC介绍">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-05-27</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

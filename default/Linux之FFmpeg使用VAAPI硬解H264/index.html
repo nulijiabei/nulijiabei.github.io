@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux之FFmpeg使用VAAPI硬解H264</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux之FFmpeg使用VAAPI硬解H264 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Linux之FFmpeg使用VAAPI硬解H264</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// FFmpeg 请使用最新的 4.4.2 旧版本 3.x 不支持 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 注意：如果使用的是 iHD 的驱动那直接就 h264_qsv 吧 ...
+// 检查驱动是否正常 ...
+$ vainfo
+libva info: VA-API version 0.39.4
+libva info: va_getDriverName() returns 0
+libva info: Trying to open /usr/lib/dri/i965_drv_video.so
+libva info: Found init function __vaDriverInit_0_39
+libva info: va_openDriver() returns 0
+vainfo: VA-API version: 0.39 (libva 1.7.3)
+vainfo: Driver version: Intel i965 driver for Intel(R) Skylake - 1.7.3
+vainfo: Supported profile and entrypoints
+      VAProfileMPEG2Simple            : VAEntrypointVLD
+      VAProfileMPEG2Simple            : VAEntrypointEncSlice
+      VAProfileMPEG2Main              : VAEntrypointVLD
+      VAProfileMPEG2Main              : VAEntrypointEncSlice
+      VAProfileH264ConstrainedBaseline: VAEntrypointVLD
+      VAProfileH264ConstrainedBaseline: VAEntrypointEncSlice
+      VAProfileH264ConstrainedBaseline: VAEntrypointEncSliceLP
+      VAProfileH264Main               : VAEntrypointVLD
+      VAProfileH264Main               : VAEntrypointEncSlice
+      VAProfileH264Main               : VAEntrypointEncSliceLP
+      VAProfileH264High               : VAEntrypointVLD
+      VAProfileH264High               : VAEntrypointEncSlice
+      VAProfileH264High               : VAEntrypointEncSliceLP
+      VAProfileH264MultiviewHigh      : VAEntrypointVLD
+      VAProfileH264MultiviewHigh      : VAEntrypointEncSlice
+      VAProfileH264StereoHigh         : VAEntrypointVLD
+      VAProfileH264StereoHigh         : VAEntrypointEncSlice
+      VAProfileVC1Simple              : VAEntrypointVLD
+      VAProfileVC1Main                : VAEntrypointVLD
+      VAProfileVC1Advanced            : VAEntrypointVLD
+      VAProfileNone                   : VAEntrypointVideoProc
+      VAProfileJPEGBaseline           : VAEntrypointVLD
+      VAProfileJPEGBaseline           : VAEntrypointEncPicture
+      VAProfileVP8Version0_3          : VAEntrypointVLD
+      VAProfileVP8Version0_3          : VAEntrypointEncSlice
+      VAProfileHEVCMain               : VAEntrypointVLD
+      VAProfileHEVCMain               : VAEntrypointEncSlice
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 官方文档 ...
+http://trac.ffmpeg.org/wiki/Hardware/VAAPI
+http://trac.ffmpeg.org/wiki/Hardware/QuickSync
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 解决方案, 官方案例
+https://github.com/FFmpeg/FFmpeg/blob/release/4.1/doc/examples/hw_decode.c
+/*
+ * Copyright (c) 2017 Jun Zhao
+ * Copyright (c) 2017 Kaixuan Liu
+ *
+ * HW Acceleration API (video decoding) decode sample
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the &quot;Software&quot;), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+/**
+ * @file
+ * HW-Accelerated decoding example.
+ *
+ * @example hw_decode.c
+ * This example shows how to do HW-accelerated decoding with output
+ * frames from the HW video surfaces.
+ */
+
+#include &lt;stdio.h&gt;
+
+#include &lt;libavcodec/avcodec.h&gt;
+#include &lt;libavformat/avformat.h&gt;
+#include &lt;libavutil/pixdesc.h&gt;
+#include &lt;libavutil/hwcontext.h&gt;
+#include &lt;libavutil/opt.h&gt;
+#include &lt;libavutil/avassert.h&gt;
+#include &lt;libavutil/imgutils.h&gt;
+
+static AVBufferRef *hw_device_ctx = NULL;
+static enum AVPixelFormat hw_pix_fmt;
+static FILE *output_file = NULL;
+
+static int hw_decoder_init(AVCodecContext *ctx, const enum AVHWDeviceType type)
+{
+    int err = 0;
+
+    if ((err = av_hwdevice_ctx_create(&amp;hw_device_ctx, type,
+                      NULL, NULL, 0)) &lt; 0) {
+    fprintf(stderr, &quot;Failed to create specified HW device.\n&quot;);
+    return err;
+    }
+    ctx-&gt;hw_device_ctx = av_buffer_ref(hw_device_ctx);
+
+    return err;
+}
+
+static enum AVPixelFormat get_hw_format(AVCodecContext *ctx,
+                    const enum AVPixelFormat *pix_fmts)
+{
+    const enum AVPixelFormat *p;
+
+    for (p = pix_fmts; *p != -1; p++) {
+    if (*p == hw_pix_fmt)
+        return *p;
+    }
+
+    fprintf(stderr, &quot;Failed to get HW surface format.\n&quot;);
+    return AV_PIX_FMT_NONE;
+}
+
+static int decode_write(AVCodecContext *avctx, AVPacket *packet)
+{
+    AVFrame *frame = NULL, *sw_frame = NULL;
+    AVFrame *tmp_frame = NULL;
+    uint8_t *buffer = NULL;
+    int size;
+    int ret = 0;
+
+    ret = avcodec_send_packet(avctx, packet);
+    if (ret &lt; 0) {
+    fprintf(stderr, &quot;Error during decoding\n&quot;);
+    return ret;
+    }
+
+    while (1) {
+    if (!(frame = av_frame_alloc()) || !(sw_frame = av_frame_alloc())) {
+        fprintf(stderr, &quot;Can not alloc frame\n&quot;);
+        ret = AVERROR(ENOMEM);
+        goto fail;
+    }
+
+    ret = avcodec_receive_frame(avctx, frame);
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+        av_frame_free(&amp;frame);
+        av_frame_free(&amp;sw_frame);
+        return 0;
+    } else if (ret &lt; 0) {
+        fprintf(stderr, &quot;Error while decoding\n&quot;);
+        goto fail;
+    }
+
+    if (frame-&gt;format == hw_pix_fmt) {
+        /* retrieve data from GPU to CPU */
+        if ((ret = av_hwframe_transfer_data(sw_frame, frame, 0)) &lt; 0) {
+        fprintf(stderr, &quot;Error transferring the data to system memory\n&quot;);
+        goto fail;
+        }
+        tmp_frame = sw_frame;
+    } else
+        tmp_frame = frame;
+
+    size = av_image_get_buffer_size(tmp_frame-&gt;format, tmp_frame-&gt;width,
+                    tmp_frame-&gt;height, 1);
+    buffer = av_malloc(size);
+    if (!buffer) {
+        fprintf(stderr, &quot;Can not alloc buffer\n&quot;);
+        ret = AVERROR(ENOMEM);
+        goto fail;
+    }
+    ret = av_image_copy_to_buffer(buffer, size,
+                      (const uint8_t * const *)tmp_frame-&gt;data,
+                      (const int *)tmp_frame-&gt;linesize, tmp_frame-&gt;format,
+                      tmp_frame-&gt;width, tmp_frame-&gt;height, 1);
+    if (ret &lt; 0) {
+        fprintf(stderr, &quot;Can not copy image to buffer\n&quot;);
+        goto fail;
+    }
+
+    if ((ret = fwrite(buffer, 1, size, output_file)) &lt; 0) {
+        fprintf(stderr, &quot;Failed to dump raw data.\n&quot;);
+        goto fail;
+    }
+
+    fail:
+    av_frame_free(&amp;frame);
+    av_frame_free(&amp;sw_frame);
+    av_freep(&amp;buffer);
+    if (ret &lt; 0)
+        return ret;
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    AVFormatContext *input_ctx = NULL;
+    int video_stream, ret;
+    AVStream *video = NULL;
+    AVCodecContext *decoder_ctx = NULL;
+    AVCodec *decoder = NULL;
+    AVPacket packet;
+    enum AVHWDeviceType type;
+    int i;
+
+    if (argc &lt; 4) {
+    fprintf(stderr, &quot;Usage: %s &lt;device type&gt; &lt;input file&gt; &lt;output file&gt;\n&quot;, argv[0]);
+    return -1;
+    }
+
+    type = av_hwdevice_find_type_by_name(argv[1]);
+    if (type == AV_HWDEVICE_TYPE_NONE) {
+    fprintf(stderr, &quot;Device type %s is not supported.\n&quot;, argv[1]);
+    fprintf(stderr, &quot;Available device types:&quot;);
+    while((type = av_hwdevice_iterate_types(type)) != AV_HWDEVICE_TYPE_NONE)
+        fprintf(stderr, &quot; %s&quot;, av_hwdevice_get_type_name(type));
+    fprintf(stderr, &quot;\n&quot;);
+    return -1;
+    }
+
+    /* open the input file */
+    if (avformat_open_input(&amp;input_ctx, argv[2], NULL, NULL) != 0) {
+    fprintf(stderr, &quot;Cannot open input file '%s'\n&quot;, argv[2]);
+    return -1;
+    }
+
+    if (avformat_find_stream_info(input_ctx, NULL) &lt; 0) {
+    fprintf(stderr, &quot;Cannot find input stream information.\n&quot;);
+    return -1;
+    }
+
+    /* find the video stream information */
+    ret = av_find_best_stream(input_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &amp;decoder, 0);
+    if (ret &lt; 0) {
+    fprintf(stderr, &quot;Cannot find a video stream in the input file\n&quot;);
+    return -1;
+    }
+    video_stream = ret;
+
+    for (i = 0;; i++) {
+    const AVCodecHWConfig *config = avcodec_get_hw_config(decoder, i);
+    if (!config) {
+        fprintf(stderr, &quot;Decoder %s does not support device type %s.\n&quot;,
+            decoder-&gt;name, av_hwdevice_get_type_name(type));
+        return -1;
+    }
+    if (config-&gt;methods &amp; AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &amp;&amp;
+        config-&gt;device_type == type) {
+        hw_pix_fmt = config-&gt;pix_fmt;
+        break;
+    }
+    }
+
+    if (!(decoder_ctx = avcodec_alloc_context3(decoder)))
+    return AVERROR(ENOMEM);
+
+    video = input_ctx-&gt;streams[video_stream];
+    if (avcodec_parameters_to_context(decoder_ctx, video-&gt;codecpar) &lt; 0)
+    return -1;
+
+    decoder_ctx-&gt;get_format  = get_hw_format;
+
+    if (hw_decoder_init(decoder_ctx, type) &lt; 0)
+    return -1;
+
+    if ((ret = avcodec_open2(decoder_ctx, decoder, NULL)) &lt; 0) {
+    fprintf(stderr, &quot;Failed to open codec for stream #%u\n&quot;, video_stream);
+    return -1;
+    }
+
+    /* open the file to dump raw data */
+    output_file = fopen(argv[3], &quot;w+&quot;);
+
+    /* actual decoding and dump the raw data */
+    while (ret &gt;= 0) {
+    if ((ret = av_read_frame(input_ctx, &amp;packet)) &lt; 0)
+        break;
+
+    if (video_stream == packet.stream_index)
+        ret = decode_write(decoder_ctx, &amp;packet);
+
+    av_packet_unref(&amp;packet);
+    }
+
+    /* flush the decoder */
+    packet.data = NULL;
+    packet.size = 0;
+    ret = decode_write(decoder_ctx, &amp;packet);
+    av_packet_unref(&amp;packet);
+
+    if (output_file)
+    fclose(output_file);
+    avcodec_free_context(&amp;decoder_ctx);
+    avformat_close_input(&amp;input_ctx);
+    av_buffer_unref(&amp;hw_device_ctx);
+
+    return 0;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 文档 ...
+https://www.jianshu.com/p/3ea9ef713211
+https://my.oschina.net/u/4416603/blog/3239100/print
+
+// Golang 封装的 FFmepg
+https://github.com/ailumiyana/streaming/blob/master/vaapi_qsv_test/qsv-test.go
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>apt-get install libva-dev
+apt-get install build-essential
+apt-get install pkg-config
+./configure --prefix=/usr/local --enable-version3 --disable-static --enable-shared --enable-vaapi --disable-x86asm
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/OrangePi%E4%B9%8BAndroid_7.0%E8%8E%B7%E5%8F%96Root%E6%9D%83%E9%99%90/" title="OrangePi之Android_7.0获取Root权限">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/ubuntu%E4%B9%8B%E5%8F%96%E6%B6%88uuid%E4%BB%8Esdx%E5%90%AF%E5%8A%A8/" title="ubuntu之取消uuid从sdx启动">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-04-29</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#linux-ref">linux <span>7</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

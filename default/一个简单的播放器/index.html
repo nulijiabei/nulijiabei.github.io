@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>一个简单的播放器</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>一个简单的播放器 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>// 简单了解，写了一个播放器
+#include&lt;iostream&gt;
+extern &quot;C&quot; {
+#include &lt;libavcodec/avcodec.h&gt;
+#include &lt;libavformat/avformat.h&gt;
+#include &lt;libswscale/swscale.h&gt;
+#include &lt;SDL/SDL.h&gt;
+#include &lt;SDL/SDL_image.h&gt;
+#include &lt;SDL/SDL_thread.h&gt;
+}
+
+using namespace std;
+
+int main(int argc, char* argv[]) {
+
+    // 注册了所有的文件格式和编解码的库，它们将被自动的使用在被打开的合适格式的文件上
+    av_register_all();
+
+    // AVFormatContext是FFMpeg格式转换过程中实现输入和输出功能、保存相关数据的主要结构。
+    // 每一个输入和输出文件，都在如下定义的指针数组全局变量中有对应的实体。
+    AVFormatContext *pFormatCtx;
+
+    // 其中负责申请一个AVFormatContext结构的内存,并进行简单初始化
+    // avformat_free_context()可以用来释放该结构里的所有东西以及该结构本身
+    // 也是就说使用 avformat_alloc_context()分配的结构,需要使用avformat_free_context()来释放
+    // 有些版本中函数名可能为: av_alloc_format_context();
+    pFormatCtx = avformat_alloc_context();
+
+    // 视频文件
+    char filepath[] = &quot;kaoya.mp4&quot;;
+
+    // avformat_open_input 解析文件头
+    // Open an input stream and read the header
+    if (avformat_open_input(&amp;pFormatCtx, filepath, NULL, NULL) != 0) {
+    printf(&quot;Can't open the file\n&quot;);
+    return -1;
+    }
+
+    // 调用 avformat_find_stream_info 解析文件中的流并得到流中一些必须的信息
+    // Retrieve stream information
+    if (avformat_find_stream_info(pFormatCtx, NULL) &lt; 0) {
+    printf(&quot;Couldn't find stream information.\n&quot;);
+    return -1;
+    }
+
+    // output file information
+    cout &lt;&lt; &quot;文件信息----------------------------------&quot; &lt;&lt; endl;
+    av_dump_format(pFormatCtx, 0, filepath, 0);
+    cout &lt;&lt; &quot;--------------------------------------------&quot; &lt;&lt; endl;
+
+    // --------------------------------------------------------- //
+
+    //Find the first video stream
+    int i, videoIndex = -1;
+
+    // 视音频流的个数
+    for (i = 0; i &lt; pFormatCtx-&gt;nb_streams; i++) {
+    if (pFormatCtx-&gt;streams[i]-&gt;codec-&gt;codec_type == AVMEDIA_TYPE_VIDEO) {
+        videoIndex = i;
+        break;
+    }
+    }
+
+    // 不存在则返回
+    if (videoIndex == -1)
+    return -1;
+
+    // --------------------------------------------------------- //
+
+    // 这是一个描述编解码器上下文的数据结构，包含了众多编解码器需要的参数信息
+    AVCodecContext *pCodecCtx;
+
+    // AVCodec是存储编解码器信息的结构体
+    AVCodec *pCodec;
+
+    // Get a pointer to the codec context for the video stream
+    // 流中关于编解码器的信息就是被我们叫做&quot;codec context&quot;（编解码器上下文）
+    // 的东西。这里面包含了流中所使用的关于编解码器的所有信息
+    pCodecCtx = pFormatCtx-&gt;streams[videoIndex]-&gt;codec;
+
+    //Find the decoder for the video stream
+    pCodec = avcodec_find_decoder(pCodecCtx-&gt;codec_id);
+    if (pCodec == NULL) {
+    printf(&quot;Unsupported codec!\n&quot;);
+    return -1;
+    }
+
+    //Open codec
+    if (avcodec_open2(pCodecCtx, pCodec, NULL) &lt; 0) {
+    printf(&quot;Could not open codec.\n&quot;);
+    return -1;
+    }
+
+    //allocate video frame and set its fileds to default value
+    AVFrame *pFrame, *pFrameYUV;
+    pFrame = av_frame_alloc();
+    pFrameYUV = av_frame_alloc();
+
+    //即使我们申请了一帧的内存，当转换的时候，我们仍然需要一个地方来放置原始
+    //的数据。我们使用avpicture_get_size 来获得我们需要的大小， 然后手工申请
+    //内存空间：
+    uint8_t *out_buffer;
+    int numBytes;
+    numBytes = avpicture_get_size(PIX_FMT_YUV420P, pCodecCtx-&gt;width,
+        pCodecCtx-&gt;height);
+
+    //av_malloc 是ffmpeg 的malloc，用来实现一个简单的malloc 的包装，这样来保
+    //证内存地址是对齐的（4 字节对齐或者2 字节对齐）。它并不能保 护你不被内
+    //存泄漏，重复释放或者其它malloc 的问题所困扰。
+    out_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
+
+    //Assign appropriate parts of buffer to image planes in pFrameYUV
+    //Note that pFrameYUV is an AVFrame, but AVFrame is a superset of AVPicture
+    avpicture_fill((AVPicture*) pFrameYUV, out_buffer, PIX_FMT_YUV420P,
+        pCodecCtx-&gt;width, pCodecCtx-&gt;height);
+
+    //----------------SDL--------------------------------------//
+
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER)) {
+    printf(&quot;Could not initialize SDL -%s\n&quot;, SDL_GetError());
+    exit(1);
+    }
+
+    SDL_Surface *screen;
+    screen = SDL_SetVideoMode(pCodecCtx-&gt;width, pCodecCtx-&gt;height, 24, 0);
+    if (!screen) {
+    fprintf(stderr, &quot;SDL: could not set video mode - exiting\n&quot;);
+    exit(1);
+    }
+
+    SDL_Overlay *bmp;
+    // Allocate a place to put our YUV image on that screen
+    bmp = SDL_CreateYUVOverlay(pCodecCtx-&gt;width, pCodecCtx-&gt;height,
+    SDL_YV12_OVERLAY, screen);
+
+    SDL_Rect rect;
+    rect.x = 0, rect.y = 0;
+    rect.w = pCodecCtx-&gt;width;
+    rect.h = pCodecCtx-&gt;height;
+
+    //*************************************************************//
+
+    //通过读取包来读取整个视频流，然后把它解码成帧，最后转换格式并且保存
+    int frameFinished;
+
+    AVPacket packet;
+    av_new_packet(&amp;packet, numBytes);
+
+    int ret;
+    // Convert the image into YUV format that SDL uses
+    static struct SwsContext *img_convert_ctx;
+    img_convert_ctx = sws_getContext(pCodecCtx-&gt;width, pCodecCtx-&gt;height,
+        pCodecCtx-&gt;pix_fmt, pCodecCtx-&gt;width, pCodecCtx-&gt;height,
+        PIX_FMT_YUV420P,
+        SWS_BICUBIC, NULL, NULL, NULL);
+
+    // Read the next frame of a stream
+    while (av_read_frame(pFormatCtx, &amp;packet) &gt;= 0) {
+
+    // Is this a packet from the video stream?
+    if (packet.stream_index == videoIndex) {
+
+        // decode video frame of size packet.size from packet.data into picture
+        ret = avcodec_decode_video2(pCodecCtx, pFrame, &amp;frameFinished,
+            &amp;packet);
+
+        // Did we get a video frame?
+        if (ret &gt;= 0) {
+
+        // Convert the image from its native format to YUV
+        if (frameFinished) {
+
+            SDL_LockYUVOverlay(bmp);
+
+            AVPicture pict;
+            pict.data[0] = bmp-&gt;pixels[0];
+            pict.data[1] = bmp-&gt;pixels[2];
+            pict.data[2] = bmp-&gt;pixels[1];
+
+            pict.linesize[0] = bmp-&gt;pitches[0];
+            pict.linesize[1] = bmp-&gt;pitches[2];
+            pict.linesize[2] = bmp-&gt;pitches[1];
+
+            sws_scale(img_convert_ctx,
+                (const uint8_t* const *) pFrame-&gt;data,
+                pFrame-&gt;linesize, 0, pCodecCtx-&gt;height, pict.data,
+                pict.linesize);
+
+            SDL_UnlockYUVOverlay(bmp);
+
+            SDL_DisplayYUVOverlay(bmp, &amp;rect);
+
+        }
+        }
+    }
+
+    av_free_packet(&amp;packet);
+
+    SDL_Event event;
+    SDL_PollEvent(&amp;event);
+    switch (event.type) {
+    case SDL_QUIT:
+        SDL_Quit();
+        exit(0);
+        break;
+    default:
+        break;
+    }
+    }
+
+    av_frame_free(&amp;pFrame);
+    av_frame_free(&amp;pFrameYUV);
+    avcodec_close(pCodecCtx);
+    avformat_close_input(&amp;pFormatCtx);
+
+    return 0;
+
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F%E6%89%93%E5%8C%85%E6%96%B9%E5%BC%8F/" title="内存系统打包方式">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/x-go-binding/" title="x-go-binding">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-03</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

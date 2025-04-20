@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之网络框架volley和async的使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之网络框架volley和async的使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>volley和async</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>什么是Voley?汉语译过来就是:齐射;迸发的意思。
+
+可以看出来,Voley特别适合数据量 不大但是通信频繁的场景。
+
+Voley是GoogleI/O2013上Google官方发布的一款Android平台上的网络通信库。
+
+以前的网络请求,要考虑开启线程、内存泄漏、性能等等复杂的问题。
+
+但是Voley框架已 经帮我们把这些问题处理好了,对外提供了相应的完善的请求API,我们只需要按照要求使 用即可。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Async-http是一款国外的开源框架,作者是loopj。是基于ApacheHtpClient库的。
+
+可以方便快速高效的进行网络数据请求和发送,文件下载和上传。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>也就是，网络小数据请求使用Voley，当下载或上传文件时使用Async-http
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>补充</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>注意：
+
+使用JsonObjectRequest或继承自JsonObjectRequest类的对象提交一个post请求时
+
+如果有参数需要提交,就必须以JSONObject的json串方式提交.
+
+否则通过重写getParams()方法的方式提交不管用，getParams()方法中提交post参数只适用于Request对象。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>volley</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>/**
+ * 
+ * Volley是Android平台网络通信库：更快。更简单。更健壮 
+ * 
+ * volley提供的功能： 
+ * 1.JSON、图片（异步） 
+ * 2.网络请求的排序
+ * 3.网络请求的优先级处理 
+ * 4.缓存 
+ * 5.多级别的取消请求
+ * 6.与Activity生命周期联动
+ * 
+ * 获取Volley git clone
+ * https://android.googlesource.com/platform/frameworks/volley
+ * 
+ */
+
+public class MainActivity extends Activity {
+
+    private ImageView iv1;
+    private NetworkImageView iv2;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        init();
+        getJSONVolley();
+    }
+
+    public void init() {
+        iv1 = (ImageView) findViewById(R.id.iv);
+        iv2 = (NetworkImageView) findViewById(R.id.imageView1);
+        loadImageVolley();
+        NetWorkImageViewVolley();
+    }
+
+    // 获取json字符串
+    public void getJSONVolley() {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        String JSONDateUrl = &quot;http://www.wwtliu.com/jsondata.html&quot;;
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                Request.Method.GET, JSONDateUrl, null,
+                new Response.Listener&lt;JSONObject&gt;() {
+                    public void onResponse(JSONObject response) {
+                        System.out.println(&quot;response=&quot; + response);
+                    }
+                }, new Response.ErrorListener() {
+                    public void onErrorResponse(
+                            com.android.volley.VolleyError arg0) {
+                        System.out.println(&quot;对不起，有问题&quot;);
+                    }
+                });
+        requestQueue.add(jsonObjectRequest);
+    }
+
+    // http://localhost/lesson-img.png
+    public void loadImageVolley() {
+        String imageurl = &quot;http://10.0.0.52/lesson-img.png&quot;;
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        final LruCache&lt;String, Bitmap&gt; lurcache = new LruCache&lt;String, Bitmap&gt;(
+                20);
+        ImageCache imageCache = new ImageCache() {
+
+            @Override
+            public void putBitmap(String key, Bitmap value) {
+                lurcache.put(key, value);
+            }
+
+            @Override
+            public Bitmap getBitmap(String key) {
+
+                return lurcache.get(key);
+            }
+        };
+        ImageLoader imageLoader = new ImageLoader(requestQueue, imageCache);
+        ImageListener listener = imageLoader.getImageListener(iv1,
+                R.drawable.ic_launcher, R.drawable.ic_launcher);
+        imageLoader.get(imageurl, listener);
+    }
+
+    public void NetWorkImageViewVolley(){
+        String imageUrl = &quot;http://10.0.0.52/lesson-img.png&quot;;
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        final LruCache&lt;String, Bitmap&gt; lruCache = new LruCache&lt;String, Bitmap&gt;(20);
+        ImageCache imageCache = new ImageCache() {
+
+            @Override
+            public void putBitmap(String key, Bitmap value) {
+                lruCache.put(key, value);
+            }
+
+            @Override
+            public Bitmap getBitmap(String key) {
+                return lruCache.get(key);
+            }
+        };
+        ImageLoader imageLoader = new ImageLoader(requestQueue, imageCache);
+        iv2.setTag(&quot;url&quot;);
+        iv2.setImageUrl(imageUrl, imageLoader);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// MyApplication.java
+public class MyApplication extends Application {
+    public static RequestQueue queue;
+
+    @Override
+    public void onCreate() {
+        // TODO Auto-generated method stub
+        super.onCreate();
+        queue = Volley.newRequestQueue(getApplicationContext());
+    }
+
+    public static RequestQueue getHttpQueue() {
+        return queue;
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>/**
+ * 1、Volley的Get和Post请求方式的使用
+ * 
+ * 2、Volley的网络请求队列建立和取消队列请求及Activity周期关联
+ * 
+ * @author Administrator
+ * 
+ */
+
+public class MainActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        // volley_Get();
+        volley_Post();
+    }
+
+    @Override
+    protected void onStop() {
+        // TODO Auto-generated method stub
+        super.onStop();
+        MyApplication.getHttpQueue().cancelAll(&quot;abcPost&quot;);
+        MyApplication.getHttpQueue().cancelAll(&quot;abcGet&quot;);
+    }
+
+    private void volley_Post() {
+        String url = &quot;http://apis.juhe.cn/mobile/get?&quot;;
+        StringRequest request = new StringRequest(Method.POST, url,
+                new Listener&lt;String&gt;() {
+
+                    @Override
+                    public void onResponse(String arg0) {
+                        Toast.makeText(MainActivity.this, arg0,
+                                Toast.LENGTH_LONG).show();
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError arg0) {
+                        Toast.makeText(MainActivity.this, &quot;网络请求失败&quot;,
+                                Toast.LENGTH_LONG).show();
+                    }
+                }) {
+            @Override
+            protected Map&lt;String, String&gt; getParams() throws AuthFailureError {
+                HashMap&lt;String, String&gt; map = new HashMap&lt;String, String&gt;();
+                map.put(&quot;phone&quot;, &quot;13666666666&quot;);
+                map.put(&quot;key&quot;, &quot;335adcc4e891ba4e4be6d7534fd54c5d&quot;);
+                return map;
+            }
+        };
+        request.setTag(&quot;abcPost&quot;);
+        MyApplication.getHttpQueue().add(request);
+    }
+
+    private void volley_Get() {
+        String url = &quot;http://apis.juhe.cn/mobile/get?phone=13666666666&amp;key=335adcc4e891ba4e4be6d7534fd54c5d&quot;;
+        StringRequest request = new StringRequest(Method.GET, url,
+                new Listener&lt;String&gt;() {
+
+                    @Override
+                    public void onResponse(String arg0) {
+                        Toast.makeText(MainActivity.this, arg0,
+                                Toast.LENGTH_LONG).show();
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError arg0) {
+                        Toast.makeText(MainActivity.this, &quot;网络请求失败&quot;,
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+        request.setTag(&quot;abcGet&quot;);
+        MyApplication.getHttpQueue().add(request);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>async</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public abstract class NetCallBack extends AsyncHttpResponseHandler {
+
+    @Override
+    public void onStart() {
+        Log.i(&quot;info&quot;, &quot;请求开始，弹出进度条框&quot;);
+        super.onStart();
+    }
+
+    @Override
+    public void onSuccess(String arg0) {
+        Log.i(&quot;info&quot;, &quot;请求成功，隐藏进度条框：&quot; + arg0);
+        onMySuccess(arg0);
+        super.onSuccess(arg0);
+    }
+
+    @Override
+    public void onFailure(Throwable arg0) {
+        Log.i(&quot;info&quot;, &quot;请求失败，隐藏进度条框：&quot; + arg0);
+        super.onFailure(arg0);
+        onMyFailure(arg0);
+    }
+
+    public abstract void onMySuccess(String result);
+
+    public abstract void onMyFailure(Throwable arg0);
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class RequestUtils {
+    public static AsyncHttpClient client = new AsyncHttpClient();
+
+    public static void ClientGet(String url, NetCallBack cb) {
+        client.get(url, cb);
+    }
+
+    public static void ClientPost(String url, RequestParams params,
+            NetCallBack cb) {
+        client.post(url, params, cb);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>/**
+ * 1. Android-async-http的Get和Post请求方式的使用
+ * 
+ * 2.Android-async-http回调逻辑的二次封装
+ * 
+ * @author Administrator
+ * 
+ */
+public class MainActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        // asynchttpGet();
+        asynchttpPost();
+    }
+
+    private void asynchttpPost() {
+        String url = &quot;http://apis.juhe.cn/mobile/get?&quot;;
+        RequestParams params = new RequestParams();
+        params.put(&quot;phone&quot;, &quot;13666666666&quot;);
+        params.put(&quot;key&quot;, &quot;335adcc4e891ba4e4be6d7534fd54c5d&quot;);
+        RequestUtils.ClientPost(url, params, new NetCallBack() {
+
+            @Override
+            public void onMySuccess(String result) {
+                Toast.makeText(MainActivity.this, result, Toast.LENGTH_LONG)
+                        .show();
+            }
+
+            @Override
+            public void onMyFailure(Throwable arg0) {
+                Toast.makeText(MainActivity.this, &quot;请求失败&quot;, Toast.LENGTH_LONG)
+                        .show();
+            }
+        });
+    }
+
+    private void asynchttpGet() {
+        AsyncHttpClient client = new AsyncHttpClient();
+        String url = &quot;http://apis.juhe.cn/mobile/get?phone=13666666666&amp;key=335adcc4e891ba4e4be6d7534fd54c5d&quot;;
+        client.get(url, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(String arg0) {
+                // TODO Auto-generated method stub
+                super.onSuccess(arg0);
+                Toast.makeText(MainActivity.this, arg0, Toast.LENGTH_LONG)
+                        .show();
+            }
+
+            @Override
+            public void onFailure(Throwable arg0) {
+                Toast.makeText(MainActivity.this, &quot;网络请求失败&quot;, Toast.LENGTH_LONG)
+                        .show();
+                super.onFailure(arg0);
+            }
+        });
+    }
+
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E4%BB%8E%E5%85%B6%E5%AE%83%E7%BA%BF%E7%A8%8B%E8%AE%BF%E9%97%AEUI%E7%BA%BF%E7%A8%8B/" title="Android之从其它线程访问UI线程">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/openSUSE%E4%B9%8BBroadwell-U%E7%9A%84Graphics%E9%A9%B1%E5%8A%A8%E6%96%B9%E6%B3%95/" title="openSUSE之Broadwell-U的Graphics驱动方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-07-24</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

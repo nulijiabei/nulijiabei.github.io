@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之抽象工厂方法模式</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之抽象工厂方法模式 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>抽象工厂方法模式</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>虽然抽象工厂方法模式的类繁多，但是，主要还是分为四类
+
+AbstractFactory 抽象工厂角色
+    它声明了一组用于创建一种产品的方法，每一个方法对应一种产品
+ConcreteFactory 具体工厂角色
+    它实现了在抽象工厂中定义的创建产品的方法，生成一组具体产品
+    这些产品构成了一个产品种类，每一个产品都位于某个产品等级结构中
+AbstractProduct 抽象产品角色
+    它为每种产品舍生命接口
+ConcreteProduct 具体产品角色
+    它定义具体工厂生产的具体产品对象，实现抽象产品接口中声明业务方法
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 抽象车厂类    
+public abstract class CarFactory {
+
+    // 生产轮胎
+    public abstract ITire createTire();
+
+    // 生产发动机
+    public abstract IEngine createEngine();
+
+    // 生产制动系统
+    public abstract IBrake createBrake();
+
+}   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 轮胎相关类
+public interface ITire {
+    // 轮胎
+    void tire();
+}
+
+// 普通轮胎
+public class NormalTire implements ITire {
+    @Override
+    public void tire() {
+        System.out.println(&quot;普通轮胎&quot;);
+    ｝
+}
+
+// 越野轮胎
+public class SUVTire implements ITire {
+    @Override
+    public void tire() {
+        System.out.println(&quot;越野轮胎&quot;);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 发动机相关类
+public interface IEngine {
+    // 发动机
+    void engine();
+}
+
+// 国产发动机
+public class DomesticEngine implements IEngine {
+    @Override
+    public void engine() {
+        System.out.println(&quot;国产发动机&quot;);
+    }
+}
+
+// 进口发动机
+public class ImportEngine implements IEngine {
+    @Override
+    public void engine() {
+        System.out.println(&quot;进口发动机&quot;);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 制动系统相关类
+public interface IBrake {
+    // 制动系统
+    void brake();
+}
+
+// 普通制动
+public class NormalBrake implements IBrake {
+    @Override
+    public void brake() {
+        System.out.println(&quot;普通制动&quot;);
+    }
+}
+
+// 高级制动
+public class SeniorBrake implements IBrake {
+    @Override
+    public void brake() {
+        System.out.println(&quot;高级制动&quot;);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Q3 工厂类
+public class Q3Factory entends CarFactory {
+    @Override
+    public ITire createTire() {
+        // Q3 使用普通轮胎
+        return new NormalTire();        
+    }
+    @Override
+    public IEngine createEngine() {
+        // Q3 使用普通发动机
+        return new DomesticEngine();
+    }
+    @Override
+    public IEngine createBrake() {
+        // Q3 使用普通制动
+        return new NormalBrake();
+    }
+}
+
+// Q5 工厂类
+public class Q5Factory entends CarFactory {
+    @Override
+    public ITire createTire() {
+        // Q5 使用越野轮胎
+        return new SUVTire();       
+    }
+    @Override
+    public IEngine createEngine() {
+        // Q5 使用进口发动机
+        return new ImportEngine();
+    }
+    @Override
+    public IEngine createBrake() {
+        // Q5 使用高级制动
+        return new SeniorBrake();
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class Client {
+    public static void main(String[] args) {
+        CarFctory factoryQ3 = new Q3Factory();
+        factoryQ3.createTire().tire();
+        factoryQ3.createEngine().engine();
+        factoryQ3.createBrake().brake();
+        CarFctory factoryQ5 = new Q5Factory();
+        factoryQ5.createTire().tire();
+        factoryQ5.createEngine().engine();
+        factoryQ5.createBrake().brake();
+    }
+}   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8BGo1.5%E7%94%9F%E6%88%90C%E5%8A%A8%E6%80%81%E5%BA%93/" title="Golang之Go1.5生成C动态库">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/" title="Android之工厂方法模式">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-02-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

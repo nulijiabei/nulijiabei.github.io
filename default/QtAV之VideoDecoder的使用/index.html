@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>QtAV之VideoDecoder的使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>QtAV之VideoDecoder的使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>VideoDecoder是QtAV的解码器</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>本文主要目的是介绍，如何独立使用 VideoDecoder 解码 &hellip; 自定义绘制输出 ..</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>VideoDecoder 支持 &quot;FFmpeg&quot;, &quot;CUDA&quot;, &quot;VDA&quot;, &quot;VAAPI&quot;, &quot;DXVA&quot;, &quot;Cedarv&quot; 解码方式
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>VideoDecoder解码（官方案例）</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>请关注文中注释部分</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>#include &lt;QCoreApplication&gt;
+#include &lt;QtDebug&gt;
+#include &lt;QtCore/QDateTime&gt;
+#include &lt;QtCore/QQueue&gt;
+#include &lt;QtCore/QStringList&gt;
+#include &lt;QtAV/AVDemuxer.h&gt;
+#include &lt;QtAV/VideoDecoder.h&gt;
+#include &lt;QtAV/Packet.h&gt;
+
+using namespace QtAV;
+
+int main(int argc, char *argv[])
+{
+    // ---------------------------------
+    // QCoreApplication 只能出现在主线程中 ...
+    // ---------------------------------
+    QCoreApplication a(argc, argv);
+    QString file = QString::fromLatin1(&quot;test.avi&quot;);
+    int idx = a.arguments().indexOf(QLatin1String(&quot;-f&quot;));
+    if (idx &gt; 0)
+        file = a.arguments().at(idx + 1);
+    // ---------------------------------
+    // 使用那种解码器 FFmpeg 默认软解
+    // &quot;FFmpeg&quot;, &quot;CUDA&quot;, &quot;VDA&quot;, &quot;VAAPI&quot;, &quot;DXVA&quot;, &quot;Cedarv&quot;
+    // ---------------------------------
+    QString decName = QString::fromLatin1(&quot;FFmpeg&quot;);
+    idx = a.arguments().indexOf(QLatin1String(&quot;-vc&quot;));
+    if (idx &lt; 0)
+        idx = a.arguments().indexOf(QLatin1String(&quot;-vd&quot;));
+    if (idx &gt; 0)
+        decName = a.arguments().at(idx + 1);
+
+    QString opt;
+    QVariantHash decopt;
+    idx = decName.indexOf(QLatin1String(&quot;:&quot;));
+    if (idx &gt; 0) {
+        opt = decName.right(decName.size() - idx -1);
+        decName = decName.left(idx);
+        QStringList opts(opt.split(QString::fromLatin1(&quot;;&quot;)));
+        QVariantHash subopt;
+        foreach (QString o, opts) {
+            idx = o.indexOf(QLatin1String(&quot;:&quot;));
+            subopt[o.left(idx)] = o.right(o.size() - idx - 1);
+        }
+        decopt[decName] = subopt;
+    }
+    qDebug() &lt;&lt; decopt;
+
+    VideoDecoder *dec = VideoDecoder::create(decName.toLatin1().constData());
+    if (!dec) {
+        fprintf(stderr, &quot;Can not find decoder: %s\n&quot;, decName.toUtf8().constData());
+        return 1;
+    }
+    // -------------------------------------------------------------
+    // 自动释放 ...
+    QScopedPointer&lt;VideoDecoder&gt; decoder;
+    decoder.reset(dec);
+    // -------------------------------------------------------------
+    if (!decopt.isEmpty())
+        dec-&gt;setOptions(decopt);
+    AVDemuxer demux;
+    demux.setMedia(file);
+    if (!demux.load()) {
+        qWarning(&quot;Failed to load file: %s&quot;, file.toUtf8().constData());
+        return 1;
+    }
+    dec-&gt;setCodecContext(demux.videoCodecContext());
+    // -------------------------------------------------------------
+    // 请注意这里是官方对 open 与 close 的要求，不是线程安全的，最好使用锁 ...
+    /*!
+    * default is open FFmpeg codec context
+    * codec config must be done before open
+    * NOTE: open() and close() are not thread safe. You'd better call them in the same thread.
+    */
+    // ---------------------------------------------------------------
+    dec-&gt;open();
+    int count = 0;
+    int vstream = demux.videoStream();
+    QQueue&lt;qint64&gt; t;
+    qint64 t0 = QDateTime::currentMSecsSinceEpoch();
+    while (!demux.atEnd()) {
+        if (!demux.readFrame())
+            continue;
+        if (demux.stream() != vstream)
+            continue;
+        const Packet pkt = demux.packet();
+        if (dec-&gt;decode(pkt)) {
+            VideoFrame frame = dec-&gt;frame(); // why is faster to call frame() for hwdec? no frame() is very slow for VDA
+            // ---------------------------------
+            // 使用前最好判断一下，帧的正确性 ...
+            if (!frame.isValid()) {
+                continue;
+            }
+            // 注意：此处将帧保存 ... 备用 ... 缓存帧数不要太多 ... 1080P(10+-) 4k(5-) 等 ... 以免显存不足
+            // 比如: frames 需自定义，frames 读写需加锁 ...
+            for (;;) {
+                 if (frames.size &lt; 5) {
+                    break;
+                }
+                QThread::msleep(10);
+            }
+            frames.push(frame);
+            // ---------------------------------
+            Q_UNUSED(frame);
+            count++;
+            const qint64 now = QDateTime::currentMSecsSinceEpoch();
+            const qint64 dt = now - t0;
+            t.enqueue(now);
+            printf(&quot;decode count: %d, elapsed: %lld, fps: %.1f/%.1f\r&quot;, count, dt, count*1000.0/dt, t.size()*1000.0/(now - t.first()));fflush(0);
+            if (t.size() &gt; 10)
+                t.dequeue();
+        }
+    }
+    // ---------------------------------
+    // 解码器释放部分 ...
+    dec-&gt;flush();
+    demux.setInterruptStatus(-1);
+    demux.unload();
+    // setCodecContext 相当于 close 需要加锁
+    decoder-&gt;setCodecContext(0);
+    decoder.reset(0);
+    // ---------------------------------
+    return 0;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>如何使用 VideoFrame</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>三种使用VideoFrame思路</em></strong></p>
+
+<ul>
+<li>OpenGL 渲染 VideoFrame 帧</li>
+<li>SDL 绘制 VideoFrame 帧（需转换格式）</li>
+<li>QImage 绘制 VideoFrame 帧（需转换格式）(效率低)</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<h3>QImage</h3>
+
+<pre><code>// 就不多介绍了 ... 
+QImage image = frame.toImage();
+QImage image = frame.toImage(QImage::Format_ARGB32);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>SDL</h3>
+
+<pre><code>// 事先需要将帧转为SDL需要输出的格式，例如：Format_YUV420P
+frame = frame.to(VideoFormat::PixelFormat::Format_YUV420P);
+
+// 将 VideoFrame 转为 AVPicture ...
+AVPicture* Decoder::convert(VideoFrame &amp;inFrame, int w, int h)
+{
+    AVPicture *pFrameYUV = new AVPicture();
+    AVPicture pFrame;
+    avpicture_fill(&amp;pFrame, (uint8_t*) inFrame.bits(), AV_PIX_FMT_YUV420P, w, h);
+    avpicture_alloc(pFrameYUV, AV_PIX_FMT_YUV420P, w, h);
+    av_picture_copy(pFrameYUV, &amp;pFrame, AV_PIX_FMT_YUV420P, w, h);
+    return pFrameYUV;
+}
+
+// 如何用SDL绘制一个AV_PIX_FMT_YUV420P的AVPicture就不用我多说了吧 ....
+SDL_UpdateTexture(texture, NULL, avp-&gt;data[0], avp-&gt;linesize[0]);
+SDL_RenderCopy(renderer, texture, NULL, rect);
+SDL_RenderPresent(renderer);
+
+// 注意：AVPicture 需要手动释放，但不能在 SDL_RenderPresent 前释放 ...
+// 建议：最后有个释放队列，绘制完的帧都从绘制队列移到释放队列 ...
+</code></pre>
+
+<h3>OpenGL</h3>
+
+<pre><code>// 不用多说, 看代码 ...
+
+// 使用 QtAV 的 OpenGLVideo 渲染 ...
+OpenGLVideo oglv;
+oglv.setOpenGLContext(QOpenGLContext::currentContext());
+oglv.setCurrentFrame(frame);
+oglv.setProjectionMatrixToRect(rectf);
+oglv.render();
+
+// 如果想使用自定义的OGL渲染VideoFrame那研究研究OpenGLVideo吧 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>结语</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>QtAV 如何如何好，我就不夸了 ... 但只能说是假开源 ... 代码一坨看得懂叫开源看不懂跟看不到一样 ..
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Qt%E4%B9%8B%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93QtAV%E7%9A%84%E7%BC%96%E8%AF%91/" title="Qt之第三方库QtAV的编译">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8BContext%E7%9A%84%E4%BD%BF%E7%94%A8/" title="Golang之Context的使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-10-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

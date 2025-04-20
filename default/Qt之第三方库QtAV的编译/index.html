@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Qt之第三方库QtAV的编译</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Qt之第三方库QtAV的编译 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>QtAV是基于Qt和FFmpeg多媒体播放库</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>官方网站: <a href="http://qtav.org">http://qtav.org</a></em></strong></p>
+
+<p><strong><em>项目地址：<a href="https://github.com/wang-bin/QtAV">https://github.com/wang-bin/QtAV</a></em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Hardware decoding suppprt: DXVA2, VAAPI, VDA/VideoToolbox, CedarX, CUDA(the 1st player support CUDA on linux?)
+OpenGL and ES2 support for almost all formats including Hi10P videos (The 1st player/library support 10bit in ES2? VLC, XBMC, mplayer does not support now)
+Real time preview
+Video capture in rgb and yuv format
+OSD and custom filters
+Filters in libavfilter, for example stero3d, blur
+Subtitle track select. Dynamic change FFmpeg and libass engine
+Play frame by frame
+Playback speed control
+Variant streams: locale file, http, rtsp etc. and your custom streams
+Audio channel, tracks and external audio tracks
+Dynamically change render engine when playing.
+Dynamically change video decoder
+Multiple video outputs for 1 player
+Video eq(software and OpenGL): brightness, contrast, saturation, hue
+QML support. Most playback APIs are compatible with QtMultimedia module
+Compatiblity: QtAV can be built with both Qt4 and Qt5, FFmpeg(&gt;=1.0) and Libav (&gt;=9.0). Latest FFmpeg release is recommended.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>FFmepg (编译需要）</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>事先需要下载对应平台的FFmpeg(https://ffmpeg.org)
+
+需要 FFmepg 的 Static 和 Dev ... 包 ...
+
+解压到系统目录，例如 E:\ffmepg
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Windows安装QtAV</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>直接通过 http://qtav.org 下载对应平台的安装包即可 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>Windows编译QtAV</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>注意：如果暂时不使用portaudio可以先不准备 ...
+
+
+GCC 环境编译: 在QT项目-构件-构件环境中添加：
+    设置 CPATH 到 E:\ffmpeg\include;
+    设置 LIBRARY_PATH 到 E:\ffmpeg\lib;
+
+MINGW 环境编译: 在QT项目-构件-构件环境中添加：
+    设置 INCLUDE 到 E:\ffmpeg\include;
+    设置 LIB 到 E:\ffmpeg\lib;
+
+当然：Debug 和 Release 按需求编译了
+
+在编译完成后，进入管理员权限的CMD终端
+
+例如: cd E:\QtAV\build-QtAV-Desktop_Qt_5_7_0_MinGW_32bit-Release
+
+安装: sdk_install.bat ... 即可
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>使用 &hellip;</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>#include &quot;widget.h&quot;  
+#include &lt;QApplication&gt;  
+#include &lt;QtAV/AVPlayer.h&gt;  
+#include &lt;QtAV/GLWidgetRenderer.h&gt;  
+int main(int argc, char *argv[])  
+{  
+    QApplication a(argc, argv);  
+    QtAV::GLWidgetRenderer renderer;  
+    renderer.show();  
+    QtAV::AVPlayer player;  
+    player.setRenderer(&amp;renderer);  
+    player.play(&quot;http://a.mp4&quot;);  
+    return a.exec();  
+}  
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" title="微信小程序学习笔记">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/QtAV%E4%B9%8BVideoDecoder%E7%9A%84%E4%BD%BF%E7%94%A8/" title="QtAV之VideoDecoder的使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-10-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之集成FFmpeg到SDL项目</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之集成FFmpeg到SDL项目 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Android之集成FFmpeg到SDL项目</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// FFmpeg 下载
+// 本教程使用 FFmpeg 4.2.2 &quot;Ada&quot; 下进行 ...
+http://ffmpeg.org/download.html#releases
+
+// 拷贝库文件(Android之NDK编译FFmpeg教程)
+// 拷贝 ffmpeg-4.2.2/include 至 jni/ffmpeg 
+// 拷贝 arm64-v8、armeabi-v7a、... 至 jni/ffmpeg/libs
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 修改 app\jni\src\Android.mk
+
+LOCAL_PATH := $(call my-dir)
+
+FFMPEG_PATH := ../FFMPEG
+
+include $(CLEAR_VARS)
+LOCAL_MODULE :=  libavutil
+LOCAL_SRC_FILES := ../ffmpeg/libs/$(TARGET_ARCH_ABI)/libavutil.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/$(FFMPEG_PATH)/include
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE :=  libswresample
+LOCAL_SRC_FILES := ../ffmpeg/libs/$(TARGET_ARCH_ABI)/libswresample.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/$(FFMPEG_PATH)/include
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE :=  libswscale
+LOCAL_SRC_FILES := ../ffmpeg/libs/$(TARGET_ARCH_ABI)/libswscale.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/$(FFMPEG_PATH)/include
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libavcodec
+LOCAL_SRC_FILES := ../ffmpeg/libs/$(TARGET_ARCH_ABI)/libavcodec.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/$(FFMPEG_PATH)/include
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libavformat
+LOCAL_SRC_FILES := ../ffmpeg/libs/$(TARGET_ARCH_ABI)/libavformat.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/$(FFMPEG_PATH)/include
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libavfilter
+LOCAL_SRC_FILES := ../ffmpeg/libs/$(TARGET_ARCH_ABI)/libavfilter.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/$(FFMPEG_PATH)/include
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := main
+SDL_PATH := ../SDL
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/$(SDL_PATH)/include
+# Add your application source files here...
+LOCAL_SRC_FILES := YourSourceHere.c
+LOCAL_SHARED_LIBRARIES := SDL2 SDL2_image
+LOCAL_SHARED_LIBRARIES += libavcodec libavfilter libavformat libavutil libswresample libswscale
+LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog
+include $(BUILD_SHARED_LIBRARY)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 修改 app\jni\src\YourSourceHere.c 
+
+#include &lt;android/log.h&gt;
+#include &quot;SDL.h&quot;
+#include &quot;SDL_image.h&quot;
+
+#include &lt;libavcodec/avcodec.h&gt;
+#include &lt;libavformat/avformat.h&gt;
+#include &lt;libswscale/swscale.h&gt;
+#include &lt;libavutil/imgutils.h&gt;
+
+#define LOG_TAG &quot;xplay&quot;
+
+#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG , LOG_TAG, __VA_ARGS__)
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO , LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN , LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR , LOG_TAG, __VA_ARGS__)
+
+int main(int argc, char *argv[]) {
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Event event;
+    //配置一个图像缩放的效果,linear效果更平滑,也叫抗锯齿
+    //SDL_setenv(SDL_HINT_RENDER_SCALE_QUALITY,&quot;linear&quot;,0);
+
+    // FFMPEG ...
+    LOGD(&quot;%s&quot;, av_version_info());
+
+    // 初始化SDL
+    IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+    if (SDL_Init(SDL_INIT_VIDEO) &lt; 0)
+    return 1;
+    // 创建一个窗口
+    window = SDL_CreateWindow(&quot;SDL_RenderClear&quot; , SDL_WINDOWPOS_CENTERED,
+                  SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_SHOWN);
+    // 创建一个渲染器
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    // 创建一个Surface，加载刚才下载的图片
+    SDL_Surface *jpg = IMG_Load(&quot;a1.jpg&quot;);
+//    SDL_Surface *bmp = SDL_LoadBMP(&quot;test.bmp&quot;);
+//    //设置图片中的白色为透明色
+//    SDL_SetColorKey(bmp, SDL_TRUE, 0xffffff);
+    // 创建一个Texture
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, jpg);
+    //清除所有事件
+    SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+    //进入主循环
+    while  (1) {
+    Uint32 a = SDL_GetTicks();
+    if  (SDL_PollEvent(&amp;event)) {
+        if  (event.type == SDL_QUIT || event.type == SDL_KEYDOWN || event.type == SDL_FINGERDOWN)
+        break;
+    }
+    //使用红色填充背景
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderClear(renderer);
+    // 将纹理布置到渲染器
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    // 刷新屏幕
+    SDL_RenderPresent(renderer);
+    Uint32 b = SDL_GetTicks();
+    LOGD(&quot;&gt;&gt;&gt; %d&quot;, b - a);
+    }
+    // 释放Surface
+    SDL_FreeSurface(jpg);
+    //  释放Texture
+    SDL_DestroyTexture(texture);
+    //释放渲染器
+    SDL_DestroyRenderer(renderer);
+    //释放窗口
+    SDL_DestroyWindow(window);
+    //延时
+    //SDL_Delay(8000);
+    //退出
+    SDL_Quit();
+    return  0;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/C%2B%2B%E4%B9%8B%E5%9C%A8Class%E4%B8%AD%E4%BD%BF%E7%94%A8Thread/" title="C++之在Class中使用Thread">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E4%BD%BF%E7%94%A8SDL%E6%92%AD%E6%94%BE%E5%9B%BE%E7%89%87/" title="Android之使用SDL播放图片">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-03-21</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

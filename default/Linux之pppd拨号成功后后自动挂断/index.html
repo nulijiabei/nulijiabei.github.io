@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux之pppd拨号成功后后自动挂断</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux之pppd拨号成功后后自动挂断 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Linux之pppd拨号成功后自动挂断</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Ubuntu 16.04 系统 
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 手动 PPPD 拨号 ...
+
+
+OK
+
++CSQ: 23,99
+
+OK
+ATQ0 V1 E1 S0=0 &amp;C1 &amp;D2 +FCLASS=0
+OK
+AT+CRSM=176,12258,0,0,10
++CRSM: 144,0,&quot;98681011180171850491&quot;
+23:44:16.054558 dial.go:103: ICCID &gt;&gt;&gt; /dev/shm/3g_iccid
+
+OK
+AT+CFUN=1
+OK
+AT+CGDCONT=1,&quot;IP&quot;,&quot;UNINET&quot;,,0,0
+OK
+ATDT*99#
+CONNECT
+Serial connection established.
+Using interface ppp0
+Connect: ppp0 &lt;--&gt; /dev/ttyUSB2
+PAP authentication succeeded
+Could not determine remote IP address: defaulting to 10.64.64.64
+local  IP address 10.112.218.220
+remote IP address 10.64.64.64
+primary   DNS address 202.106.195.68
+secondary DNS address 202.106.46.151
+Modem hangup // 自动挂断 .... &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+Connect time 0.5 minutes.
+Sent 846 bytes, received 532 bytes.
+Connection terminated.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// syslog 日志
+Aug  3 23:44:14 danoo-desktop pppd[3294]: pppd 2.4.7 started by root, uid 0
+Aug  3 23:44:15 danoo-desktop chat[3297]: abort on (NO CARRIER)
+Aug  3 23:44:15 danoo-desktop chat[3297]: abort on (NO DIALTONE)
+Aug  3 23:44:15 danoo-desktop chat[3297]: abort on (ERROR)
+Aug  3 23:44:15 danoo-desktop chat[3297]: abort on (NO ANSWER)
+Aug  3 23:44:15 danoo-desktop chat[3297]: abort on (BUSY)
+Aug  3 23:44:15 danoo-desktop chat[3297]: send (AT^M)
+Aug  3 23:44:15 danoo-desktop chat[3297]: expect (OK)
+Aug  3 23:44:15 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:15 danoo-desktop chat[3297]: OK
+Aug  3 23:44:15 danoo-desktop chat[3297]:  -- got it
+Aug  3 23:44:15 danoo-desktop chat[3297]: send (ATZ+CSQ^M)
+Aug  3 23:44:15 danoo-desktop chat[3297]: expect (OK)
+Aug  3 23:44:15 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:15 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:15 danoo-desktop chat[3297]: +CSQ: 23,99^M
+Aug  3 23:44:15 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:15 danoo-desktop chat[3297]: OK
+Aug  3 23:44:15 danoo-desktop chat[3297]:  -- got it
+Aug  3 23:44:15 danoo-desktop chat[3297]: send (ATQ0 V1 E1 S0=0 &amp;C1 &amp;D2 +FCLASS=0^M)
+Aug  3 23:44:15 danoo-desktop chat[3297]: expect (OK)
+Aug  3 23:44:15 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:15 danoo-desktop chat[3297]: ATQ0 V1 E1 S0=0 &amp;C1 &amp;D2 +FCLASS=0^M^M
+Aug  3 23:44:15 danoo-desktop chat[3297]: OK
+Aug  3 23:44:15 danoo-desktop chat[3297]:  -- got it
+Aug  3 23:44:15 danoo-desktop chat[3297]: send (AT+CRSM=176,12258,0,0,10^M)
+Aug  3 23:44:16 danoo-desktop chat[3297]: expect (OK)
+Aug  3 23:44:16 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: AT+CRSM=176,12258,0,0,10^M^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: +CRSM: 144,0,&quot;98681011180171850491&quot;^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: OK
+Aug  3 23:44:16 danoo-desktop chat[3297]:  -- got it
+Aug  3 23:44:16 danoo-desktop chat[3297]: send (AT+CFUN=1^M)
+Aug  3 23:44:16 danoo-desktop chat[3297]: expect (OK)
+Aug  3 23:44:16 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: AT+CFUN=1^M^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: OK
+Aug  3 23:44:16 danoo-desktop chat[3297]:  -- got it
+Aug  3 23:44:16 danoo-desktop chat[3297]: send (AT+CGDCONT=1,&quot;IP&quot;,&quot;UNINET&quot;,,0,0^M)
+Aug  3 23:44:16 danoo-desktop chat[3297]: expect (OK)
+Aug  3 23:44:16 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: AT+CGDCONT=1,&quot;IP&quot;,&quot;UNINET&quot;,,0,0^M^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: OK
+Aug  3 23:44:16 danoo-desktop chat[3297]:  -- got it
+Aug  3 23:44:16 danoo-desktop chat[3297]: send (ATDT*99#^M)
+Aug  3 23:44:16 danoo-desktop chat[3297]: expect (CONNECT)
+Aug  3 23:44:16 danoo-desktop chat[3297]: ^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: ATDT*99#^M^M
+Aug  3 23:44:16 danoo-desktop chat[3297]: CONNECT
+Aug  3 23:44:16 danoo-desktop chat[3297]:  -- got it
+Aug  3 23:44:16 danoo-desktop pppd[3294]: Serial connection established.
+Aug  3 23:44:16 danoo-desktop pppd[3294]: Using interface ppp0
+Aug  3 23:44:16 danoo-desktop pppd[3294]: Connect: ppp0 &lt;--&gt; /dev/ttyUSB2
+Aug  3 23:44:16 danoo-desktop NetworkManager[706]: nm_device_get_device_type: assertion 'NM_IS_DEVICE (self)' failed
+Aug  3 23:44:16 danoo-desktop NetworkManager[706]: &lt;info&gt;  [1533311056.6215] manager: (ppp0): new Generic device (/org/freedesktop/NetworkManager/Devices/6)
+Aug  3 23:44:16 danoo-desktop NetworkManager[706]: &lt;info&gt;  [1533311056.6410] devices added (path: /sys/devices/virtual/net/ppp0, iface: ppp0)
+Aug  3 23:44:16 danoo-desktop NetworkManager[706]: &lt;info&gt;  [1533311056.6411] device added (path: /sys/devices/virtual/net/ppp0, iface: ppp0): no ifupdown configuration found.
+Aug  3 23:44:17 danoo-desktop pppd[3294]: PAP authentication succeeded
+Aug  3 23:44:20 danoo-desktop pppd[3294]: Could not determine remote IP address: defaulting to 10.64.64.64
+Aug  3 23:44:20 danoo-desktop pppd[3294]: local  IP address 10.112.218.220
+Aug  3 23:44:20 danoo-desktop pppd[3294]: remote IP address 10.64.64.64
+Aug  3 23:44:20 danoo-desktop pppd[3294]: primary   DNS address 202.106.195.68
+Aug  3 23:44:20 danoo-desktop pppd[3294]: secondary DNS address 202.106.46.151
+Aug  3 23:44:22 danoo-desktop ntpd[1755]: Listen normally on 9 ppp0 10.112.218.220:123
+Aug  3 23:44:22 danoo-desktop ntpd[1755]: new interface(s) found: waking up resolver
+Aug  3 23:44:44 danoo-desktop ModemManager[683]: &lt;warn&gt;  (ttyUSB0): close blocked by driver for more than 7 seconds!
+Aug  3 23:44:45 danoo-desktop kernel: [  383.578029] usb 1-3: USB disconnect, device number 15
+Aug  3 23:44:45 danoo-desktop kernel: [  383.578867] generic ttyUSB0: generic converter now disconnected from ttyUSB0
+Aug  3 23:44:45 danoo-desktop kernel: [  383.578906] usbserial_generic 1-3:1.0: device disconnected
+Aug  3 23:44:45 danoo-desktop kernel: [  383.579319] generic ttyUSB2: generic converter now disconnected from ttyUSB2
+Aug  3 23:44:45 danoo-desktop kernel: [  383.579340] usbserial_generic 1-3:1.1: device disconnected
+Aug  3 23:44:45 danoo-desktop kernel: [  383.590752] generic ttyUSB3: generic converter now disconnected from ttyUSB3
+Aug  3 23:44:45 danoo-desktop kernel: [  383.590782] usbserial_generic 1-3:1.2: device disconnected
+Aug  3 23:44:45 danoo-desktop kernel: [  383.591157] generic ttyUSB4: generic converter now disconnected from ttyUSB4
+Aug  3 23:44:45 danoo-desktop kernel: [  383.591186] usbserial_generic 1-3:1.3: device disconnected
+Aug  3 23:44:45 danoo-desktop kernel: [  383.591619] generic ttyUSB5: generic converter now disconnected from ttyUSB5
+Aug  3 23:44:45 danoo-desktop kernel: [  383.591637] usbserial_generic 1-3:1.4: device disconnected
+Aug  3 23:44:45 danoo-desktop kernel: [  383.593423] generic ttyUSB6: generic converter now disconnected from ttyUSB6
+Aug  3 23:44:45 danoo-desktop kernel: [  383.593457] usbserial_generic 1-3:1.5: device disconnected
+Aug  3 23:44:45 danoo-desktop NetworkManager[706]: &lt;error&gt; [1533311085.5562] platform-linux: do-change-link[7]: failure changing link: failure 19 (No such device)
+Aug  3 23:44:45 danoo-desktop pppd[3294]: Modem hangup
+Aug  3 23:44:45 danoo-desktop NetworkManager[706]: &lt;warn&gt;  [1533311085.5562] device (ppp0): failed to disable userspace IPv6LL address handling
+Aug  3 23:44:45 danoo-desktop pppd[3294]: Connect time 0.5 minutes.
+Aug  3 23:44:45 danoo-desktop pppd[3294]: Sent 846 bytes, received 532 bytes.
+Aug  3 23:44:45 danoo-desktop pppd[3294]: Connection terminated.
+Aug  3 23:44:45 danoo-desktop ModemManager[683]: &lt;info&gt;  (tty/ttyUSB2): released by modem /sys/devices/pci0000:00/0000:00:14.0/usb1/1-3
+Aug  3 23:44:45 danoo-desktop ModemManager[683]: &lt;warn&gt;  (ttyUSB2) could not open serial device (2)
+Aug  3 23:44:45 danoo-desktop ModemManager[683]: &lt;warn&gt;  (ttyUSB3) could not open serial device (2)
+Aug  3 23:44:45 danoo-desktop ModemManager[683]: &lt;warn&gt;  (ttyUSB4) could not open serial device (2)
+Aug  3 23:44:45 danoo-desktop ModemManager[683]: &lt;info&gt;  (tty/ttyUSB0): released by modem /sys/devices/pci0000:00/0000:00:14.0/usb1/1-3
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 发现断开都是由 ModemManager -&gt; close blocked by driver for more than 7 seconds! 之后断开 ...
+// 所以尝试卸掉该软件后解决 sudo apt-get remove modemmanager
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>What is ModemManager?
+ModemManager is a DBus-activated daemon which controls mobile broadband (2G/3G/4G) devices and connections. Whether built-in devices, USB dongles, bluetooth-paired telephones, or professional RS232/USB devices with external power supplies, ModemManager is able to prepare and configure the modems and setup connections with them.
+
+1.x is the stable series of ModemManager using the improved /org/freedesktop/ModemManager1 interface.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 就是说这个一个管理守护程序，负责2g/3g/4g, RS232/USB等，如果手动执行pppd标号貌似没有得到它的授权 ... 给你干掉了 ... 猜的 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E4%BD%BF%E7%94%A8nmcli-network-manager%E7%AE%A1%E7%90%86wifi%E7%BD%91%E7%BB%9C/" title="使用nmcli-network-manager管理wifi网络">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E4%BF%AE%E6%94%B9Ubuntu%E5%90%AF%E5%8A%A8%E7%94%BB%E9%9D%A2%E4%B8%AD%E7%9A%84Logo/" title="修改Ubuntu启动画面中的Logo">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-08-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js之使用Vuex管理状态</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Vue.js之使用Vuex管理状态 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Vue.js之使用Vuex管理状态</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 之前介绍，父组件通过 prop 向子组件传递数据
+// 子组件通过自定义事件向父组件传递数据 ...
+
+// 然而，在实际项目中，经常会遇到多个组件需要访问同一数据的情况
+// 且都需要根据数据的变化做出响应，而这些组件之间可能并不是父子关系
+// 在这种情况下，就需要一个全局的状态管理方案 ... Vuex
+
+Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式
+// 它采用集中式存储来管理应用程序中所有组件的状态
+// 并以相应的规则保证状态以一种可预测的方式发生变化
+
+Vuex 也集成到了 Vue 的官方调试工具 vue-devtools 中
+// 提供了诸如零配置的 time-travel 调试、状态快照等高级功能
+
+// 安装
+npm install vuex
+
+// 在 Vue Cli 中使用 
+import Vue from 'vue'
+import Vuex from 'vuex'
+// 安装插件
+Vue.use(Vuex)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Vuex 使用单一状态树，也就是说，用一个对象包含了所有应用层级的状态
+// 作为唯一数据源 (single surce of truth) 而存在 ...
+
+1. Vuex 的状态存储是响应式的，当 Vue 组件从 store 中检索状态的时候，
+    如果 store 中的状态发生变化，那么组件也会相应地得到高效的更新
+2. 不能直接改变 store 中的状态，改变 store 中的状态的唯一途径就是
+    显示地提交 mutation 这可以确保每个状态更改都留下可跟踪的记录
+    从而能够启动一些工具来帮助我们更好地理解应用 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>在 Vue Cli 创建项目的时候可以选择创建时安装 Vuex 
+
+// 此时系统会生成 /src/store/index.js 来创建 store
+
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  state: {
+  },
+  mutations: {
+  },
+  actions: {
+  },
+  modules: {
+  }
+})
+
+// 并且在/src/main.js入口函数中安装
+
+import Vue from 'vue'
+import App from './App.vue'
+import router from './router'
+import store from './store'
+
+Vue.config.productionTip = false
+
+new Vue({
+  router,
+  store,
+  render: h =&gt; h(App)
+}).$mount('#app')
+
+// 这样就可以在子组件中通过 this.$store 来访问 store 了
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>注意：如果要在组件中展示 store 中的状态，应该使用计算属性来返回 store 的状态
+computed: {
+    count() {
+        return this.$store.state.count;
+    }
+}
+
+注意：通过提交 mutation 来更改 store 中的状态。
+// 在严格模式下，如果 store 中的状态改变不是由 mutation 函数引起的，则会抛出错误
+
+// 在创建 store 的时候，传入 strict: true 启动严格模式
+const store = new Vuex.Store({
+    strice: true,
+    // ....
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Vuex 中的 mutation 非常类似于事件：每个 mutation 都有一个字符串的事件类型和一个处理函数
+// 这个处理函数就是实际进行状态更改的地方，它接收 state 作为第一参数 ...
+
+// 我们不能直接调用一个 mutation 处理函数，mutations 选项更像是事件注册
+// 当触发一个类型为 increment 的 mutation 时，调用此函数 ...
+
+// 要调用一个 mutation 处理函数，需要用它的类型去调用 store.commit 方法
+store.commit('increment')
+
+// 例如：
+
+// store/index.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  state: {
+    count: 0
+  },
+  mutations: {
+    aaa(state) {
+      state.count += 1;
+    },
+  },
+  actions: {
+  },
+  modules: {
+  }
+})
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;button @click=&quot;handleClick&quot;&gt;You click me \{{ count }} times.&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  computed: {
+    count() {
+      return this.$store.state.count;
+    },
+  },
+  methods: {
+    handleClick() {
+      this.$store.commit(&quot;aaa&quot;);
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 上面已经介绍过更改 store 中的状态的唯一方式是提交 mutation 
+// 在使用 store.commit 方法提交 mutation 时，还可以传入额外的参数
+// 既 mutation 的载荷 (payload)
+
+// 代码如下：
+mutation: {
+    increment (state, n) {
+        state.count += n;
+    }
+}
+
+store.commit('increment', 10);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 载荷也可以是一个对象
+mutation: {
+    increment (state, payload) {
+        state.count += payload.amount;
+    }
+}
+
+store.commit('increment', {
+    amount: 10,
+});
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 提交 mutation 时，也可以使用包含 type 属性的对象
+store.commit({
+    type: 'increment',
+    amount: 10,
+});
+
+// 当使用对象风格提交时，整个对象将作为载荷传给 mutation 函数
+// 使用 type 属性包含 type 属性的对象时, 处理器保持不变 ...
+mutations: {
+    increment (state, playload) {
+        state.count += playload.amount;
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 可以使用 mapMutations 辅助函数将组建中的方法映射为 store.commit 调用
+
+import { mapMutations } form 'vuex'
+methods: mapMutations([
+    // 将 this.increment() 映射为 this.$store.commit('increment')
+    'increment',
+    // 将 this.incrementBy(amount) 映射为 this.$store.commit('incrementBy', amount)
+    'incrementBy',
+])
+
+// 除了使用字符串数组外，mapMutations 函数的参数也可以是一个对象
+import { mapMutations } form 'vuex'
+methods: mapMutations({
+    // 将 this.add() 映射为 this.$store.commit('increment')
+    add: 'increment',
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 大多情况下，组建还有自己的方法，在这种情况下可以使用 ECMAScript 6 的展开运算符
+// 提取 mapMutations 函数返回的对象属性，复制到 methods 选项中 ...
+import { mapMutations } from 'vuex'
+export default {
+    methods: {
+        ...MapMutations([
+            // 将 this.increment() 映射为 this.$store.commit('increment')
+            'increment',
+            // mapMutations 也支持载荷
+            // 将 this.incrementBy(amount) 映射为 this.$store.commit('incrementBy', amount)
+            'incrementBy',
+        ]),
+        ...mapMutations({
+            // 将 this.add() 映射为 this.$store.commit('increment')
+            add: 'increment',
+        })
+    }
+}
+
+// 例如：
+
+// store/index.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  state: {
+    count: 0
+  },
+  mutations: {
+    aaa(state) {
+      state.count += 1;
+    },
+  },
+  actions: {
+  },
+  modules: {
+  }
+})
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;button @click=&quot;add&quot;&gt;You click me \{{ count }} times.&lt;/button&gt;
+    &lt;button @click=&quot;aaa&quot;&gt;You click me \{{ count }} times.&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import { mapMutations } from &quot;vuex&quot;;
+export default {
+  computed: {
+    count() {
+      return this.$store.state.count;
+    },
+  },
+  methods: {
+    ...mapMutations({
+      // 将 this.aaa() 映射为 this.$store.commit('aaa')
+      // 也就是 @click='aaa' 时执行的是 this.$store.commit('aaa')
+      'aaa',
+    }),
+    ...mapMutations({
+      // 将 this.add() 映射为 this.$store.commit('aaa')
+      add: &quot;aaa&quot;,
+    }),
+  },
+};
+&lt;/script&gt;
+
+// 你可以调用 increment 方法，也可以调用 add 方法，来提交 increment mutation 
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 还可以使用常量来代替 mutation 的类型，可以把常量放到一个单独的JS文件中，
+// 有助于项目团队对 store 中所包含的 mutation 一目了然 ...
+
+// mutation-types.js
+export const INCREMENT = 'increment'
+
+// state.js
+import Vuex from 'vuex'
+import { INCREMENT } from './mutation-type'
+
+const store = new Vuex.Store({
+    state: {...},
+    mutations: {
+        [INCREMENT] (state) {
+            // mutate 状态
+        }
+    }
+})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 当一个组件需要使用多个 store 状态属性时，将这些状态都声明为计算属性就会有些重复和冗余
+// 为了解决这个问题，可以使用 mapState 辅助函数帮助我们生成计算属性 ...
+
+// 例如：
+
+// 在 store/index.js 定义：
+const store = new Vuex.Store({
+    state: {
+        count: 0,
+        message: 'Vue.js 从入门到实战',
+    },
+    ...
+})
+
+// Hello.vue 组件中使用 mapState 辅助函数生成计算属性
+import { mapMutations, mapState } from &quot;vuex&quot;;
+export default {
+    computed: mapState({
+        // 冒号前是计算属性名字，后是 store 中状态属性的名字 
+        count: 'count',
+        msg: 'message',
+    })
+}
+
+// 注意：上面代码等价于下面代码
+import { mapMutations } from &quot;vuex&quot;;
+export default {
+    computed: mapState({
+        count: function(state) {
+            return state.count;
+        },
+        msg: (state) =&gt; state.message;
+    })
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 注意：如果在计算属性中还要访问组件内的数据属性，那么就只能使用普通函数的方式
+&lt;script&gt;
+import { mapMutations, mapState } from &quot;vuex&quot;;
+export default {
+  data() {
+    return {
+      price: 99,
+    };
+  },
+  computed: mapState({
+    count: function (state) { 
+      return state.count + this.price;
+    },
+  }),
+};
+&lt;/script&gt;
+
+// 注意：之前介绍的写法是这样的 ...
+&lt;script&gt;
+import { mapMutations, mapState } from &quot;vuex&quot;;
+export default {
+  data() {
+    return {
+      price: 99,
+    };
+  },
+  computed: {
+     count() {
+       return this.$store.state.count + this.price;
+     },
+   },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如果计算属性的名字和store中状态属性的名字相同
+// 那么还可以进一步简化，直接给 mapState 函数传递一个字符串数组即可
+
+computed: mapState({
+    // 映射 this.count 为 store.state.count
+    'count',
+    // 映射 this.message 为 store.state.message
+    'message',
+})
+
+// 注意：之前介绍的写法是这样 ...
+import { mapMutations, mapState } from &quot;vuex&quot;;
+export default {
+    computed: mapState({
+        // 冒号前是计算属性名字，后是 store 中状态属性的名字 
+        count: 'count',
+        msg: 'message',
+    })
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 与 mapMutations 一样，mapState 函数返回的也是一个对象
+// 因此可以使用展开运算符将它和组件内的本地计算属性结合一起使用
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;button @click=&quot;aaa&quot;&gt;You click me \{{ count }} times.&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import { mapMutations, mapState } from &quot;vuex&quot;;
+export default {
+  data() {
+    return {
+      price: 99,
+    };
+  },
+  computed: {
+    ...mapState({
+      count: &quot;count&quot;,
+    }),
+  },
+  methods: {
+    ...mapMutations([&quot;aaa&quot;]),
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// getter 
+
+// 假如在 store 的状态中定义了一个图书数组
+// 在组件内需要得到正在销售的图书，于是定义了一个计算属性 sellingBooks 
+// 对 state 中的 books 进行过滤 ...
+
+// store/index.js
+...
+export default new Vuex.Store({
+  state: {
+    books: [
+      { id: 1, title: 'Vue.js 从入门到实战', isSold: false },
+      { id: 2, title: 'VC++ 深入详解', isSold: true },
+      { id: 3, title: 'Servlet/JSP 深入详解', isSold: true }
+    ]
+  },
+  ...
+})
+
+// Hello.vue
+&lt;script&gt;
+export default {
+  data() {
+    return {
+    };
+  },
+  computed: {
+    sellingBooks() {
+      return this.$store.state.books.filter((book) =&gt; book.isSold === true);
+    },
+  },
+};
+&lt;/script&gt;
+
+// 这没有什么问题，但如果多个组件都需要用到 sellingBooks 属性，那么应该怎么办呢？
+
+Vuex 允许我们在 store 中定义 getters (可以认为是 store 的计算属性) 
+// 与计算属性一样，getters 的返回值会根据它的依赖项被缓存起来
+// 且只有在它的依赖项发生改变时才会重新计算 ...
+
+// store/index.js
+... 
+export default new Vuex.Store({
+  state: {
+    books: [
+      { id: 1, title: 'Vue.js 从入门到实战', isSold: false },
+      { id: 2, title: 'VC++ 深入详解', isSold: true },
+      { id: 3, title: 'Servlet/JSP 深入详解', isSold: true }
+    ]
+  },
+  getters: {
+    sellingBooks(state) {
+      return state.books.filter(book =&gt; book.isSold === true)
+    }
+  }
+})
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in this.$store.getters.sellingBooks&quot; :key=&quot;book.id&quot;&gt;
+        \{{ book.title }}
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如果想简化上述 getter 在计算属性中的访问形式，可以使用 MapGetters 辅助函数
+// 这个辅助函数的用法和 mapMutations、mapState 类似 ...
+
+// 例如:
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in sellingBooks&quot; :key=&quot;book.id&quot;&gt;
+        \{{ book.title }}
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import { mapGetters } from &quot;vuex&quot;;
+export default {
+  data() {
+    return {};
+  },
+  computed: {
+    // 计算属性与 store 类型属性同名时使用数组作为参数
+    ...mapGetters([&quot;sellingBooks&quot;]),
+    // 将 this.sellingBooks() 映射为 this.$store.getters.sellingBooks()
+    ...mapGetters({
+      sellingBooks: &quot;sellingBooks&quot;,
+    }),
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// getter 还有更灵活的用法，通过让 getter 返回一个函数，来实现给 getter 传参
+getters: {
+    ...
+    getBookById: function(state) {
+        return function(id) {
+            return state.books.find(book =&gt; book.id === id);
+        }
+    }
+}
+
+&lt;p&gt;\{{$store.getters.getBookById(2)}}&lt;/p&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在定义 mutation 时，有一条重要的原则就是 mutation 必须是同步函数
+// 换句话说，在 mutation 处理函数中，不能存在异步调用 ...
+
+// 如果确实需要执行异步操作，那么应该使用 action 
+// action 类似于 mutation 不同之处在于：
+// 1. action 提交的是 mutation 而不是直接变更状态
+// 2. action 可以包含任意异步操作 ...
+
+const store = new Vuex.Store({
+    state: {
+        count: 0,
+    },
+    mutations: {
+        increment (state) {
+            state.count++;
+        }
+    },
+    actions: {
+        increment (context) {
+            context.commit('increment');
+        }
+    }
+})
+
+// action 处理函数接收一个与 store 实例具有相同方法和属性的 context 对象
+// 因此可以利用该对象调用 commit 方法来提交 mutation ... 
+// 或者通过 context.state 和 context.getters 来访问 state 和 getter
+// 设置可以用 context.dispatch 调用其他的 action 
+// 要注意的是：context 对象不是 store 实例本身 ...
+
+// action 同样支持载荷和对象方式进行分发
+store.dispatch('incrementAsync', 10);
+store.dispatch('incrementAsync', {
+    amount: 10,
+})
+store.dispatch({
+    type: 'incrementAsync',
+    amount: 10,
+})
+
+// 例子：
+
+// store/index.js
+...
+export default new Vuex.Store({
+  state: {
+    books: [
+      { id: 1, title: 'Vue.js 从入门到实战', isSold: false },
+      { id: 2, title: 'VC++ 深入详解', isSold: true },
+      { id: 3, title: 'Servlet/JSP 深入详解', isSold: true }
+    ]
+  },
+  mutations: {
+    add(state, book) {
+      this.state.books.push(book)
+    }
+  },
+  actions: {
+    add(context, book) {
+      let item = context.state.books.find(item =&gt; item.id === book.id)
+      if (!item) {
+        context.commit('add', book)
+      }
+    }
+  },
+  getters: {
+    sellingBooks(state) {
+      return state.books.filter(book =&gt; book.isSold === true)
+    }
+  }
+})
+...
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in sellingBooks&quot; :key=&quot;book.id&quot;&gt;
+        \{{ book.title }}
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;button @click=&quot;add&quot;&gt;添加&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import { mapGetters } from &quot;vuex&quot;;
+export default {
+  data() {
+    return {};
+  },
+  methods: {
+    add() {
+      // action 通过 store.dispatch 方法触发
+      this.$store.dispatch(&quot;add&quot;, {
+        id: 4,
+        title: &quot;努力加贝学习笔记&quot;,
+        isSold: true,
+      });
+    },
+  },
+  computed: {
+    ...mapGetters([&quot;sellingBooks&quot;]),
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// action 支持 mapActions 辅助函数将组建的方法映射为 store.dispatch 调用
+
+// store/index.js
+export default new Vuex.Store({
+  state: {
+    books: [
+      { id: 1, title: 'Vue.js 从入门到实战', isSold: false },
+      { id: 2, title: 'VC++ 深入详解', isSold: true },
+      { id: 3, title: 'Servlet/JSP 深入详解', isSold: true }
+    ]
+  },
+  mutations: {
+    add(state, book) {
+      this.state.books.push(book)
+    }
+  },
+  actions: {
+    add(context, book) {
+      let item = context.state.books.find(item =&gt; item.id === book.id)
+      if (!item) {
+        context.commit('add', book)
+      }
+    }
+  },
+  modules: {
+  },
+  getters: {
+    sellingBooks(state) {
+      return state.books.filter(book =&gt; book.isSold === true)
+    },
+  }
+})
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in sellingBooks&quot; :key=&quot;book.id&quot;&gt;
+        \{{ book.title }}
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;button @click=&quot;add(book)&quot;&gt;添加&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import { mapGetters, mapActions } from &quot;vuex&quot;;
+export default {
+  data() {
+    return {
+      book: {
+        id: 4,
+        title: &quot;努力加贝学习笔记&quot;,
+        isSold: true,
+      },
+    };
+  },
+  methods: {
+    ...mapActions([&quot;add&quot;]),
+  },
+  computed: {
+    ...mapGetters([&quot;sellingBooks&quot;]),
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// store.dispatch 可以处理被触发的 action 的处理函数返回的 Promise
+// 并且 store.dispatch 仍旧返回 Promise ...
+
+// Promise是什么？
+// Promise 意在让异步代码变得干净和直观，让异步代码变得井然有序。
+// Promise在设计上具有原子性，即只有三种状态：
+//      等待（Pending）、成功（Fulfilled）、失败（Rejected）
+// 在调用支持Promise的异步方法时，逻辑变得非常简单，在大规模的软件工程开发中具有良好的健壮性。
+
+// 创建Promise对象：
+// 要想给一个函数赋予Promise能力，就要先创建一个Promise对象，并将其作为函数值返回。
+// Promise对象要求传入一个函数，并带有resolve和reject参数。
+// 这是两个用于结束Promise等待的函数，对应的状态分别是成功和失败。
+
+
+// store/index.js
+export default new Vuex.Store({
+  state: {
+    books: [
+      { id: 1, title: 'Vue.js 从入门到实战', isSold: false },
+      { id: 2, title: 'VC++ 深入详解', isSold: true },
+      { id: 3, title: 'Servlet/JSP 深入详解', isSold: true }
+    ]
+  },
+  mutations: {
+    add(state, book) {
+      this.state.books.push(book)
+    }
+  },
+  actions: {
+    add(context, book) {
+      return new Promise((resolve) =&gt; {
+        let item = context.state.books.find(item =&gt; item.id === book.id)
+        if (!item) {
+          context.commit('add', book)
+        }
+        resolve();
+      })
+    }
+  },
+  modules: {
+  },
+  getters: {
+    sellingBooks(state) {
+      return state.books.filter(book =&gt; book.isSold === true)
+    },
+  }
+})
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in sellingBooks&quot; :key=&quot;book.id&quot;&gt;
+        \{{ book.title }}
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;button @click=&quot;add(book)&quot;&gt;添加&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import { mapGetters } from &quot;vuex&quot;;
+export default {
+  data() {
+    return {
+      book: {
+        id: 4,
+        title: &quot;努力加贝学习笔记&quot;,
+        isSold: true,
+      },
+    };
+  },
+  methods: {
+    add() {
+      // 在执行完成后输出成功 ...
+      this.$store
+        .dispatch(&quot;add&quot;, {
+          id: 4,
+          title: &quot;努力加贝学习笔记&quot;,
+          isSold: true,
+        })
+        .then(() =&gt; {
+          console.log(&quot;add data success&quot;);
+        });
+    },
+  },
+  computed: {
+    ...mapGetters([&quot;sellingBooks&quot;]),
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如果使用 async/await 则可以按如下方式组合 action 
+
+// 假设 getData() 和 getOtherData() 返回的是 Promise 
+actions: {
+    async actionA({ commit }) {
+        commit('gotData', await getData())
+    },
+    async actionB({ dispatch, commit }) {
+        await dispatch('actionA') // 等待 actionA 完成
+        commit('gotOtherData', await getOtherData())
+    }
+}
+
+// 一个 store.dispatch 在不同模块中可以触发多个 action 处理函数
+// 在这种情况下，只有当所有触发的处理函数完成后，返回的 Promise 才会执行
+
+// 提示：async/await 是 ECMAScript 2017 标准引入的用于执行异步任务的简化语法
+// 在函数前面添加关键字 async 表示该函数将以异步模式运行 ...
+// 关键字 await 在 async 函数内部使用，表示紧跟在后面的表达式需要等待结果 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>表单处理
+
+// 在表单控件上使用 v-model 指令来进行绑定数据，需要自定义 get 与 set ...
+
+// store/index.js
+...
+export default new Vuex.Store({
+  state: {
+    message: ''
+  },
+  mutations: {
+    updateMessage(state, msg) {
+      state.message = msg
+    }
+  },
+  ...
+})
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;input tyoe=&quot;text&quot; v-model=&quot;message&quot; /&gt;
+    &lt;p&gt;\{{ message }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  computed: {
+    message: {
+      get() {
+        return this.$store.state.message;
+      },
+      set(value) {
+        this.$store.commit(&quot;updateMessage&quot;, value);
+      },
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Vuex 使用单一状态树，应用程序的所有状态都包含在一个大的对象中
+// 当应用程序变得复杂时 store 对象就会变得非常臃肿 ...
+
+为了解决这个问题，Vuex 允许将 store 划分为多个模块=
+// 每个模块可以包含自己的 state、mutations、actions、getters 以及嵌套的子模块
+
+// store/modules/cart.js
+const cart = 
+{
+    state: { ... },
+    mutation: { ... },
+    actions: { ... },
+    getters: { ... }
+}
+
+// store/index.js
+...
+import cart from './modules/cart'
+export default new Vuex.Store({
+  modules: {
+    cart
+  }
+})
+...
+
+// 项目中对应的映射需要以下方式访问 ...
+store.state.cart // -&gt; cart 的状态
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>默认情况下，模块内部的 actions、mutations、getters 是注册在全局命名空间下的
+// 这使得多个模块能够对同一个 mutations 或 actions 做出响应 ...
+
+如果希望模块具有更高的封装度和复用性，则可以通过添加 
+// namespaced: true 的方式使其成为带命名空间的模块 ...
+
+注意：当模块被注册后 ...
+// 它的所有 mutations、actions 和 getters 都会根据模块注册的路径自动命名
+
+// store/modules/cart.js
+const state = {
+    count: 0
+};
+const mutations = {
+    add(state) {
+        state.count += 1
+    }
+};
+const actions = {
+
+};
+const getters = {
+
+};
+
+export default {
+    namespaced: true,
+    state,
+    mutations,
+    actions,
+    getters
+}
+
+// store/index.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+import cart from './modules/cart'
+export default new Vuex.Store({
+  modules: {
+    cart
+  }
+})
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;button @click=&quot;aaa&quot;&gt;You click me \{{ count }} times.&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import { mapState } from &quot;vuex&quot;;
+export default {
+  data() {
+    return {
+    };
+  },
+  computed: {
+    ...mapState('cart', ['count']),
+  },
+  methods: {
+    ...mapMutations([&quot;add&quot;]),
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 通过使用 createNamespacedHelpers 创建基于某个命名空间辅助函数。
+// 它返回一个对象，对象里有新的绑定在给定命名空间值上的组件绑定辅助函数
+
+// store/modules/cart.js
+const state = {
+    count: 0
+};
+const mutations = {
+    add(state) {
+        state.count += 1
+    }
+};
+const actions = {
+
+};
+const getters = {
+
+};
+
+export default {
+    namespaced: true,
+    state,
+    mutations,
+    actions,
+    getters
+}
+
+// store/index.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+import cart from './modules/cart'
+export default new Vuex.Store({
+  modules: {
+    cart
+  }
+})
+
+// Hello.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;button @click=&quot;add&quot;&gt;You click me \{{ count }} times.&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import { createNamespacedHelpers } from &quot;vuex&quot;;
+const { mapMutations, mapState } = createNamespacedHelpers(&quot;cart&quot;);
+export default {
+  data() {
+    return {};
+  },
+  computed: {
+    ...mapState([&quot;count&quot;]),
+  },
+  methods: {
+    ...mapMutations([&quot;add&quot;]),
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Qt%E4%B9%8BQWebEngine%E4%B8%8EJavaScript%E4%BA%A4%E4%BA%92/" title="Qt之QWebEngine与JavaScript交互">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Vue.js%E4%B9%8B%E4%BD%BF%E7%94%A8axios%E4%B8%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%80%9A%E4%BF%A1/" title="Vue.js之使用axios与服务器通信">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-11-24</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#javascript-ref">javascript <span>11</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

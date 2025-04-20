@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之EventBus的使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之EventBus的使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>EventBus</h3>
+
+<blockquote>
+</blockquote>
+
+<p>EventBus是一款针对Android优化的发布/订阅事件总线。</p>
+
+<blockquote>
+</blockquote>
+
+<p>主要功能是替代(Intent,Handler,BroadCast)在(Fragment,Activity,Service)线程之间传递消息.</p>
+
+<blockquote>
+</blockquote>
+
+<p>优点是开销小，代码更优雅。以及将发送者和接收者解耦。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>当在开发一些庞大的的项目时，模块比较多，这个时候为了避免耦合度和保证 APP 的效率</p>
+
+<blockquote>
+</blockquote>
+
+<p>会用到 EventBus 等类似的事件总线处理模型。</p>
+
+<blockquote>
+</blockquote>
+
+<p>这样可以简化一些数据传输操作，保证APP的简洁，做到高内聚、低耦合。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Android之EventBus的使用/EventBus-Publish-Subscribe.png" alt="" width="600" hight="200"></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>EventBus</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>源码: https://github.com/greenrobot/EventBus
+Gradle: compile 'de.greenrobot:eventbus:2.4.0'
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>基本用法</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 分订阅，注册，发布，取消注册
+EventBus.getDefault().register(this);
+EventBus.getDefault().register(new MyClass());
+
+// 三个参数分别是：消息订阅者（接收者），接收方法名，事件类
+EventBus.getDefault().register(this, &quot;setTextA&quot;, SetTextAEvent.class);
+
+// 取消注册
+EventBus.getDefault().unregister(this);
+EventBus.getDefault().unregister(new MyClass());
+
+// 订阅处理数据
+public void onEventMainThread{}
+public void onEvent(AnyEventType event){}
+onEventPostThread, onEventBackgroundThread, onEventAsync
+
+// 发布
+EventBus.getDefault().postSticky(new SecondActivityEvent(&quot;Message From SecondActivity&quot;));
+EventBus.getDefault().post(new ChangelmgEvent(1));
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Event</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class Event extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    // 注册
+    EventBus.getDefault().register(this);
+    }
+
+    // 发送
+    private void postData() {
+        String str = &quot;Hello World&quot;;
+        // 发送数据，可以是一个类型或者一个类
+        EventBus.getDefault().post(str);
+    }
+
+    // 接收
+    public void onEvent(String str) {}
+
+    // 接收
+    public void onEventMainThread(String str) {}
+
+    // 接收
+    public void onEventPostThread(String str) {}
+
+    // 接收
+    public void onEventBackgroundThread(String str) {}
+
+    // 接收
+    public void onEventAsync(String str) {}
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // 取消注册
+        EventBus.getDefault().unregister(this);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>使用方法</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>1、onEvent
+2、onEventMainThread
+3、onEventBackgroundThread
+4、onEventAsync
+
+这四种订阅函数都是使用onEvent开头的，它们的功能稍有不同,在介绍不同之前先介绍两个概念：
+
+告知观察者事件发生时通过EventBus.post函数实现，这个过程叫做事件的发布
+                    观察者被告知事件发生叫做事件的接收，是通过下面的订阅函数实现的。
+
+onEvent:
+    如果使用onEvent作为订阅函数，那么该事件在哪个线程发布出来的，onEvent就会在这个线程中运行
+    也就是说发布事件和接收事件线程在同一个线程。
+    使用这个方法时，在onEvent方法中不能执行耗时操作，如果执行耗时操作容易导致事件分发延迟。
+
+onEventMainThread:
+    如果使用onEventMainThread作为订阅函数，那么不论事件是在哪个线程中发布出来的，onEventMainThread都会在UI线程中执行
+    接收事件就会在UI线程中运行，这个在Android中是非常有用的，因为在Android中只能在UI线程中跟新UI
+    所以在onEvnetMainThread方法中是不能执行耗时操作的。
+
+onEventBackground:
+    如果使用onEventBackgrond作为订阅函数，那么如果事件是在UI线程中发布出来的
+    那么onEventBackground就会在子线程中运行，如果事件本来就是子线程中发布出来的
+    那么onEventBackground函数直接在该子线程中执行。
+
+onEventAsync：
+    使用这个函数作为订阅函数，那么无论事件在哪个线程发布，都会创建新的子线程在执行onEventAsync.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 使用重载机制进行收发不同对象
+public void onEventMainThread(FirstEvent event) {  
+    Log.d(&quot;harvic&quot;, &quot;onEventMainThread收到了消息：&quot; + event.getMsg());  
+}  
+
+public void onEventMainThread(SecondEvent event) {  
+    Log.d(&quot;harvic&quot;, &quot;onEventMainThread收到了消息：&quot; + event.getMsg());  
+}  
+
+public void onEvent(ThirdEvent event) {  
+    Log.d(&quot;harvic&quot;, &quot;OnEvent收到了消息：&quot; + event.getMsg());  
+}  
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8BRPC%E4%BB%8B%E7%BB%8D/" title="Golang之RPC介绍">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/mymysql%E4%B8%8Ego-mysql-driver%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83/" title="mymysql与go-mysql-driver性能比较">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-05-25</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

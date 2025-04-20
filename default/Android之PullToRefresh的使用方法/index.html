@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之PullToRefresh的使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之PullToRefresh的使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>PullToRefresh 是一套实现非常好的下拉刷新库</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 支持：
+1.ListView
+2.ExpandableListView
+3.GridView
+4.WebView
+...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>补充 setMode &hellip;</h3>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>BOTH:上拉刷新和下拉刷新都支持</li>
+<li>DISABLED：禁用上拉下拉刷新</li>
+<li>PULL_FROM_START:仅支持下拉刷新（默认）</li>
+<li>PULL_FROM_END：仅支持上拉刷新</li>
+<li>MANUAL_REFRESH_ONLY：只允许手动触发</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>android studio 导入 PullToRefresh</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下载
+https://github.com/chrisbanes/Android-PullToRefresh
+
+// 解压，得到 extras，sample，library(主要)
+Android-PullToRefresh-master -&gt; library
+
+// 在你项目的根目录创建一个lib目录
+[PATH]
+[app]
+    [src]
+    [res]
+    [build]
+    build.gradle
+    ...
+[build]
+[gradle]
+[lib]
+    // 将 library 重名名为 pull
+    [pull]
+        [src]
+        [res]
+        [build]
+        ... 
+build.gradle
+settings.gradle
+...
+
+// 修改 settings.gradle 
+include ':app', ':lib:pull'
+
+// 修改 [app]/build.gradle
+dependencies {
+    // Library
+    compile project(':lib:pull')
+}
+
+// 创建 [lib]/[pull]/build.gradle
+apply plugin: 'android-library'
+android {
+    compileSdkVersion 17
+    buildToolsVersion &quot;21.1.2&quot;
+
+    sourceSets {
+    main {
+        manifest.srcFile 'AndroidManifest.xml'
+        java.srcDirs = ['src']
+        resources.srcDirs = ['src']
+        aidl.srcDirs = ['aidl']
+        renderscript.srcDirs = ['src']
+        res.srcDirs = ['res']
+        assets.srcDirs = ['assets']
+    }
+    }
+}
+
+// 完成   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>使用 PullToRefresh 刷新 ListView</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>//  在 activity_main.xml 增加一个 PullToRefreshListView
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; &gt;
+
+    &lt;com.handmark.pulltorefresh.library.PullToRefreshListView
+    android:id=&quot;@+id/left_drawer&quot;
+    android:layout_width=&quot;240dp&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:layout_gravity=&quot;start&quot;
+    android:choiceMode=&quot;singleChoice&quot;
+    android:dividerHeight=&quot;1px&quot;
+    android:divider=&quot;#ff000000&quot;
+    android:background=&quot;#ffffffff&quot;
+    android:layout_alignParentTop=&quot;true&quot;
+    android:layout_alignParentEnd=&quot;true&quot;
+    android:layout_alignParentStart=&quot;true&quot; /&gt;
+&lt;/RelativeLayout&gt;
+
+// 在 MainActivity
+public class MainActivity extends Activity {
+
+    PullToRefreshListView lv;
+
+    private String[] mListTitle = {&quot;姓名&quot;, &quot;性别&quot;, &quot;年龄&quot;, &quot;居住地&quot;, &quot;邮箱&quot;};
+    private String[] mListStr = {&quot;雨松MOMO&quot;, &quot;男&quot;, &quot;25&quot;, &quot;北京&quot;,
+        &quot;xuanyusong@gmail.com&quot;};
+    ListView mListView = null;
+    ArrayList&lt;Map&lt;String, Object&gt;&gt; mData = new ArrayList&lt;Map&lt;String, Object&gt;&gt;();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    // 获取 PullToRefreshListView View
+    lv = (PullToRefreshListView) findViewById(R.id.left_drawer);
+
+    // ....
+    int lengh = mListTitle.length;
+    for (int i = 0; i &lt; lengh; i++) {
+        Map&lt;String, Object&gt; item = new HashMap&lt;String, Object&gt;();
+        item.put(&quot;title&quot;, mListTitle[i]);
+        item.put(&quot;text&quot;, mListStr[i]);
+        mData.add(item);
+    }
+
+    // ...
+    SimpleAdapter adapter = new SimpleAdapter(this, mData, android.R.layout.simple_list_item_2,
+         new String[]{&quot;title&quot;, &quot;text&quot;}, new int[]{android.R.id.text1, android.R.id.text2});
+
+    // 将 SimpleAdapter 设置到 PullToRefreshListView
+    lv.setAdapter(adapter);
+
+    // 刷新事件监听
+    lv.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener&lt;ListView&gt;() {
+        @Override
+        public void onRefresh(PullToRefreshBase&lt;ListView&gt; refreshView) {
+
+        // ...
+        new AsyncTask&lt;Void, Void, Void&gt;() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+
+            // 处理刷新任务
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void reslst)
+            {
+            // 更行内容，通知 PullToRefresh 刷新结束
+            lv.onRefreshComplete();
+            }
+
+        }.execute();
+
+        }
+    });
+
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>    // ---- 初始化（委托历史）----
+    mProxyListView = (PullToRefreshListView) views.get(1).findViewById(R.id.listView);
+    mProxyListView.getLoadingLayoutProxy(true, false).setPullLabel(&quot;下拉刷新&quot;);
+    mProxyListView.getLoadingLayoutProxy(true, false).setReleaseLabel(&quot;释放立即刷新&quot;);
+    mProxyListView.getLoadingLayoutProxy(true, false).setRefreshingLabel(&quot;正在刷新 ...&quot;);
+    mProxyListView.getLoadingLayoutProxy(false, true).setPullLabel(&quot;加载更多&quot;);
+    mProxyListView.getLoadingLayoutProxy(false, true).setReleaseLabel(&quot;释放立即加载&quot;);
+    mProxyListView.getLoadingLayoutProxy(false, true).setRefreshingLabel(&quot;正在加载 ...&quot;);
+    mProxyListView.getRefreshableView().setDivider(null);
+    mProxyListView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2&lt;ListView&gt;() {
+        @Override
+        public void onPullDownToRefresh(final PullToRefreshBase&lt;ListView&gt; pullToRefreshBase) {
+            // ...
+            updateProxy(false);
+            // ...
+            pullToRefreshBase.getRefreshableView().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    pullToRefreshBase.onRefreshComplete();
+                }
+            }, 1000);
+        }
+
+        @Override
+        public void onPullUpToRefresh(final PullToRefreshBase&lt;ListView&gt; pullToRefreshBase) {
+            // ...
+            updateProxy(true);
+            // ...
+            pullToRefreshBase.getRefreshableView().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    pullToRefreshBase.onRefreshComplete();
+                }
+            }, 1000);
+        }
+    });
+    // 设置空View
+    TextView empty_entrusts = Utils.getEmptyView(PreviewActivity.this, &quot;还没有委托历史数据 !&quot;);
+    ((ViewGroup) mProxyListView.getRefreshableView().getParent()).addView(empty_entrusts);
+    mProxyListView.getRefreshableView().setEmptyView(empty_entrusts);
+    // 自定义适配器
+    mProxyAdapter = new SuperBaseAdapter&lt;ProxyData&gt;(PreviewActivity.this, mProxyDatas) {
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ProxyData pd = mDatas.get(position);
+            SuperViewHolder mSuperViewHolder = SuperViewHolder.make(getApplication(),
+                                             R.layout.service_preview_proxy,
+                                             convertView, parent);
+            return mSuperViewHolder.getConvertView();
+        }
+    };
+    // 设置适配器
+    mProxyListView.getRefreshableView().setAdapter(mProxyAdapter);
+    // Click 监听
+    // mProxyListView.setOnItemClickListener(this);
+    // ---- SuperPagerAdapter -----
+    service_preview_pager.setAdapter(new SuperPagerAdapter(views));
+    service_preview_pager.setOnPageChangeListener(this);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BAsyncTask%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之AsyncTask的使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BListView%E4%B8%8EAdapter%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之ListView与Adapter使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-16</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

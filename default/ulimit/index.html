@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ulimit</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>ulimit </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>ulimint -a 用来显示当前的各种用户进程限制</p>
+
+<p>Linux对于每个用户，系统限制其最大进程数，为提高性能，可以根据设备资源情况</p>
+
+<p>设置个Linux用户的最大进程数，一些需要设置为无限制：</p>
+
+<pre><code>数据段长度：ulimit -d unlimited
+最大内存大小：ulimit -m unlimited
+堆栈大小：ulimit -s unlimited
+</code></pre>
+
+<p>我们在用这个命令的时候主要是为了产生core文件，就是程序运行发行段错误时的文件：</p>
+
+<pre><code>ulimit -c unlimited   
+</code></pre>
+
+<p>生成core文件</p>
+
+<pre><code>查看限制情况 ulimit -a
+可以看到如下信息
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 1024
+max locked memory       (kbytes, -l) 32
+max memory size         (kbytes, -m) unlimited
+open files                      (-n) 1024
+pipe size            (512 bytes, -p) 8
+POSIX message queues     (bytes, -q) 819200
+stack size              (kbytes, -s) 10240
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 4096
+virtual memory          (kbytes, -v) unlimited
+file locks                      (-x) unlimited
+而我们需要修改的是open files (-n) 1024的值
+于是命令就是limit -n 2048(随各自需要设置)
+</code></pre>
+
+<p>功能说明：控制shell程序的资源。</p>
+
+<p>语　　法：</p>
+
+<pre><code>ulimit [-aHS][-c &lt;core文件上限&gt;][-d &lt;数据节区大小&gt;][-f &lt;文件大小&gt;][-m &lt;内存大小&gt;][-n &lt;文件数目&gt;][-p &lt;缓冲区大小&gt;][-s &lt;堆叠大小&gt;][-t &lt;CPU时间&gt;][-u &lt;程序数目&gt;][-v &lt;虚拟内存大小&gt;]
+</code></pre>
+
+<p>补充说明：ulimit为shell内建指令，可用来控制shell执行程序的资源。</p>
+
+<p>参　　数：</p>
+
+<pre><code>   -a 　显示目前资源限制的设定。 
+   -c &lt;core文件上限&gt; 　设定core文件的最大值，单位为区块。 
+   -d &lt;数据节区大小&gt; 　程序数据节区的最大值，单位为KB。 
+   -f &lt;文件大小&gt; 　shell所能建立的最大文件，单位为区块。 
+   -H 　设定资源的硬性限制，也就是管理员所设下的限制。 
+   -m &lt;内存大小&gt; 　指定可使用内存的上限，单位为KB。 
+   -n &lt;文件数目&gt; 　指定同一时间最多可开启的文件数。 
+   -p &lt;缓冲区大小&gt; 　指定管道缓冲区的大小，单位512字节。 
+   -s &lt;堆叠大小&gt; 　指定堆叠的上限，单位为KB。 
+   -S 　设定资源的弹性限制。 
+   -t &lt;CPU时间&gt; 　指定CPU使用时间的上限，单位为秒。 
+   -u &lt;程序数目&gt; 　用户最多可开启的程序数目。 
+   -v &lt;虚拟内存大小&gt; 　指定可使用的虚拟内存上限，单位为KB。
+</code></pre>
+
+<p>1,说明:</p>
+
+<pre><code>ulimit用于shell启动进程所占用的资源.
+</code></pre>
+
+<p>2,类别:</p>
+
+<pre><code>shell内建命令
+</code></pre>
+
+<p>3,语法格式:</p>
+
+<pre><code>ulimit [-acdfHlmnpsStvw] [size]
+</code></pre>
+
+<p>4,参数介绍:</p>
+
+<pre><code>-H 设置硬件资源限制.
+-S 设置软件资源限制.
+-a 显示当前所有的资源限制.
+-c size:设置core文件的最大值.单位:blocks
+-d size:设置数据段的最大值.单位:kbytes
+-f size:设置创建文件的最大值.单位:blocks
+-l size:设置在内存中锁定进程的最大值.单位:kbytes
+-m size:设置可以使用的常驻内存的最大值.单位:kbytes
+-n size:设置内核可以同时打开的文件描述符的最大值.单位:n
+-p size:设置管道缓冲区的最大值.单位:kbytes
+-s size:设置堆栈的最大值.单位:kbytes
+-t size:设置CPU使用时间的最大上限.单位:seconds
+-v size:设置虚拟内存的最大值.单位:kbytes
+</code></pre>
+
+<p>5,简单实例:</p>
+
+<pre><code>1]在RH8的环境文件/etc/profile中,我们可以看到系统是如何配置ulimit的:
+
+CODE:
+#grep ulimit /etc/profile
+ulimit -S -c 0 &gt; /dev/null 2&gt;&amp;1
+
+这条语句设置了对软件资源和对core文件大小的设置
+
+2]如果我们想要对由shell创建的文件大小作些限制,如:
+
+CODE:
+#ll h
+-rw-r--r-- 1 lee lee 150062 7月 22 02:39 h
+#ulimit -f 100 #设置创建文件的最大块(一块=512字节)
+#cat h&gt;newh
+File size limit exceeded
+#ll newh
+-rw-r--r-- 1 lee lee 51200 11月 8 11:47 newh
+
+文件h的大小是150062字节,而我们设定的创建文件的大小是512字节x100块=51200字节
+当然系统就会根据你的设置生成了51200字节的newh文件.
+
+3]可以像实例1]一样,把你要设置的ulimit放在/etc/profile这个环境文件中
+</code></pre>
+
+<p>1,可以用ulimit -a查看一下栈的大小:</p>
+
+<pre><code>在内核2.6.20下， stack size 为8192 kbytes
+如果这里没有限制，就栈的大小就只受内存的限制。2G是上限。
+</code></pre>
+
+<p>2,文件 CORE</p>
+
+<pre><code>开启或关闭core文件的生成
+ulimit -c 可以查看是否打开此选项，若为0则为关闭；
+ulimit -c 0可手动关闭
+ulimit -c 1000 为设置core文件大小最大为1000k
+ulimit -c unlimited 设置core文件大小为不限制大小
+
+很多系统在默认的情况下是关闭生成core文件的，这个命令可以加到你的profile中去
+</code></pre>
+
+<p>1,说明:</p>
+
+<pre><code>ulimit用于shell启动进程所占用的资源.
+</code></pre>
+
+<p>2,类别:</p>
+
+<pre><code>shell内建命令
+</code></pre>
+
+<p>3,语法格式:</p>
+
+<pre><code>ulimit [-acdfHlmnpsStvw] [size]
+</code></pre>
+
+<p>4,参数介绍:</p>
+
+<pre><code>-H 设置硬件资源限制.
+-S 设置软件资源限制.
+-a 显示当前所有的资源限制.
+-c size:设置core文件的最大值.单位:blocks
+-d size:设置数据段的最大值.单位:kbytes
+-f size:设置创建文件的最大值.单位:blocks
+-l size:设置在内存中锁定进程的最大值.单位:kbytes
+-m size:设置可以使用的常驻内存的最大值.单位:kbytes
+-n size:设置内核可以同时打开的文件描述符的最大值.单位:n
+-p size:设置管道缓冲区的最大值.单位:kbytes
+-s size:设置堆栈的最大值.单位:kbytes
+-t size:设置CPU使用时间的最大上限.单位:seconds
+-v size:设置虚拟内存的最大值.单位:kbytes 5,简单实例: 
+</code></pre>
+
+<p>5.举例</p>
+
+<pre><code>在Linux下写程序的时候，如果程序比较大，经常会遇到“段错误”（segmentation fault）这样的问题，这主要就是由于Linux系统初始的堆栈大小（stack size）太小的缘故，一般为10M。我一般把stack size设置成256M，这样就没有段错误了！
+
+命令为：
+ulimit   -s 262140 
+
+如果要系统自动记住这个配置，就编辑/etc/profile文件，在 “ulimit -S -c 0 &gt; /dev/null 2&gt;&amp;1”行下，添加“ulimit   -s 262140”，保存重启系统就可以了！ 
+1]在RH8的环境文件/etc/profile中,我们可以看到系统是如何配置ulimit的:
+
+#grep ulimit /etc/profile
+ulimit -S -c 0 &gt; /dev/null 2&gt;&amp;1
+
+这条语句设置了对软件资源和对core文件大小的设置
+
+2]如果我们想要对由shell创建的文件大小作些限制,如:
+
+#ll h
+-rw-r--r-- 1 lee lee 150062 7月 22 02:39 h
+#ulimit -f 100 #设置创建文件的最大块(一块=512字节)
+#cat h&gt;newh
+File size limit exceeded
+#ll newh
+-rw-r--r-- 1 lee lee 51200 11月 8 11:47 newh
+
+文件h的大小是150062字节,而我们设定的创建文件的大小是512字节x100块=51200字节
+
+当然系统就会根据你的设置生成了51200字节的newh文件.
+
+3]可以像实例1]一样,把你要设置的ulimit放在/etc/profile这个环境文件中.
+
+用途,设置或报告用户资源极限。
+</code></pre>
+
+<p>语法</p>
+
+<pre><code>ulimit [ -H ] [ -S ] [ -a ] [ -c ] [ -d ] [ -f ] [ -m ] [ -n ] [ -s ] [ -t ] [ Limit ]
+</code></pre>
+
+<p>标志</p>
+
+<pre><code>-a     列出所有当前资源极限。
+-c     以 512 字节块为单位，指定核心转储的大小。
+-d     以 K 字节为单位指定数据区域的大小。
+-f     使用 Limit 参数时设定文件大小极限（以块计），或者在未指定参数时报告文件大小极限。缺省值为 -f 标志。
+-H     指定设置某个给定资源的硬极限。如果用户拥有 root 用户权限，可以增大硬极限。任何用户均可减少硬极限。
+-m     以 K 字节为单位指定物理存储器的大小。
+-n     指定一个进程可以拥有的文件描述符的数量的极限。
+-s     以 K 字节为单位指定堆栈的大小。
+-S     指定为给定的资源设置软极限。软极限可增大到硬极限的值。如果 -H 和 -S 标志均未指定，极限适用于以上二者。
+-t     指定每个进程所使用的秒数。
+</code></pre>
+
+<p>退出状态</p>
+
+<pre><code>返回以下退出值：
+0     成功完成。
+&gt;0     拒绝对更高的极限的请求，或发生错误。
+</code></pre>
+
+<p>示例,要将文件大小极限设置为 51,200 字节，输入：</p>
+
+<pre><code>ulimit -f 100
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83-Bash/" title="命名规范-Bash">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/exec.Command-status.ExitStatus/" title="exec.Command-status.ExitStatus">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

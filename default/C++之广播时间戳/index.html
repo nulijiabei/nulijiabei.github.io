@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>C++之广播时间戳</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>C++之广播时间戳 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>// Broadcast.h
+#ifndef BROADCAST_H
+#define BROADCAST_H
+
+class Broadcast
+{
+public:
+    Broadcast();
+public:
+    static void run();
+    void start();
+};
+
+#endif // BROADCAST_H
+</code></pre>
+
+<hr />
+
+<pre><code>// Broadcast.cpp
+#include &quot;include/Broadcast.h&quot;
+#include &quot;include/Context.h&quot;
+#include &quot;include/Utils.h&quot;
+#include &lt;boost/thread.hpp&gt;
+#include &lt;boost/asio.hpp&gt;
+#include &lt;boost/lexical_cast.hpp&gt;
+#include &lt;glog/logging.h&gt;
+#include &lt;boost/format.hpp&gt;
+
+using namespace std;
+using namespace boost;
+using namespace boost::asio;
+using boost::asio::ip::udp;
+using boost::asio::ip::address;
+
+Broadcast::Broadcast(){}
+
+void Broadcast::run()
+{
+    Broadcast broadcast;
+    broadcast.start();
+}
+
+void Broadcast::start()
+{
+    try
+    {
+    io_service ios;
+    boost::system::error_code error;
+    int port = Context::GetContext()-&gt;config-&gt;GetInt(&quot;config.broadcast_port&quot;, 55601);
+    udp::socket sock(ios, udp::endpoint(udp::v4(), port));
+    boost::asio::socket_base::broadcast option(true);
+    sock.set_option(option);
+    udp::endpoint destination(address::from_string(&quot;255.255.255.255&quot;), port);
+    while(true)
+    {
+        uint64_t nano = Utils::GetTimeNS();
+        string ns = lexical_cast&lt;string&gt;(nano);
+        sock.send_to(buffer(ns, ns.size()), destination, 0, error);
+        if(error)
+        {
+        LOG(ERROR) &lt;&lt; format(&quot;Broadcast:: %s&quot;) % boost::system::system_error(error).what() &lt;&lt; endl;
+        }
+        sleep(10);
+    }
+    }
+    catch (std::exception&amp; e)
+    {
+    LOG(ERROR) &lt;&lt; format(&quot;Broadcast:: %s&quot;) % e.what() &lt;&lt; endl;
+    abort();
+    }
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%B0%86Go%E7%BC%96%E8%AF%91%E6%88%90JavaScript%E4%B9%8BGopherJS%E5%B7%A5%E5%85%B7/" title="将Go编译成JavaScript之GopherJS工具">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Go-SSH-%E4%BD%BF%E7%94%A8/" title="Go-SSH-使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-12-01</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

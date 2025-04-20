@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Go之runtime.Caller与runtime.FuncForPC使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Go之runtime.Caller与runtime.FuncForPC使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>runtime.Caller与runtime.FuncForPC</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>func Caller(skip int) (pc uintptr, file string, line int, ok bool)
+// skip如果是0，返回当前调用Caller函数的函数名、文件、程序指针PC，1是上一层函数，以此类推
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+
+import (
+    &quot;log&quot;
+    &quot;runtime&quot;
+)
+
+func main() {
+    test()
+}
+
+func test() {
+    test2()
+}
+
+func test2() {
+
+    // 上2层函数信息
+    pc, file, line, ok := runtime.Caller(2)
+    // 是否获取成功
+    log.Println(ok)
+    // 函数指针
+    log.Println(pc)
+    // 所属文件
+    log.Println(file)
+    // 所属行
+    log.Println(line)
+    // 获取函数信息
+    f := runtime.FuncForPC(pc)
+    // 函数名
+    log.Println(f.Name())
+
+    // 当前函数信息
+    pc, file, line, ok = runtime.Caller(0)
+    log.Println(pc)
+    log.Println(file)
+    log.Println(line)
+    log.Println(ok)
+    f = runtime.FuncForPC(pc)
+    log.Println(f.Name())
+
+    // 上一层函数信息
+    pc, file, line, ok = runtime.Caller(1)
+    log.Println(pc)
+    log.Println(file)
+    log.Println(line)
+    log.Println(ok)
+    f = runtime.FuncForPC(pc)
+    log.Println(f.Name())
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>直接从函数指针获取函数名称所属文件</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+
+import (
+    &quot;log&quot;
+    &quot;reflect&quot;
+    &quot;runtime&quot;
+)
+
+type Demo struct {
+}
+
+func (this *Demo) Hello() {
+
+}
+
+func main() {
+    demo := new(Demo)
+    pc := reflect.ValueOf(demo.Hello).Pointer()
+    f := runtime.FuncForPC(pc)
+    log.Println(f.Name())
+    log.Println(f.FileLine(pc))
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8B%E4%B8%80%E4%B8%AA%E6%9C%89%E8%B6%A3%E7%9A%84%E9%97%AD%E5%8C%85%E9%97%AE%E9%A2%98/" title="Golang之一个有趣的闭包问题">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/OpenCV%E4%B9%8B-%E4%B8%A4%E5%B9%85%E7%9B%B8%E5%90%8C%E4%B8%8E%E4%B8%8D%E5%90%8C%E5%B0%BA%E5%AF%B8%E5%9B%BE%E5%83%8F%E8%9E%8D%E5%90%88/" title="OpenCV之-两幅相同与不同尺寸图像融合">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-03-02</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

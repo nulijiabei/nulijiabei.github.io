@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>GDB</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>GDB </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>GDB</p>
+
+<hr />
+
+<pre><code>r(run)
+</code></pre>
+
+<p>要想运行准备调试的程序，可使用run命令，在它后面可以跟随发给该程序的任何参数.</p>
+
+<p>如果你使用不带参数的run命令，gdb就再次使用你给予前一条run命令的参数，这是很有用的。</p>
+
+<p>利用set args 命令就可以修改发送给程序的参数，而使用show args 命令就可以查看其缺省参数的列表。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>attach PID
+</code></pre>
+
+<p>众所周知，GDB有附着（attach）到正在运行的进程的功能，即attach <pid>命令。</p>
+
+<p>因此我们可以利用该命令attach到子进程然后进行调试。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>gdb attach PID
+</code></pre>
+
+<p>同样可以命令行启动</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>info threads 
+</code></pre>
+
+<p>显示当前可调试的所有线程。</p>
+
+<p>每个线程会有一个GDB为其分配的ID，后面操作线程的时候会用到这个ID。</p>
+
+<p>前面有*的是当前调试的线程。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>thread ID 
+</code></pre>
+
+<p>切换当前调试的线程为指定ID的线程。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>bt(backtrace)
+</code></pre>
+
+<p>列出调用栈</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>启动GDB后，首先就是要设置断点，程序中断后才能调试。</p>
+
+<blockquote>
+</blockquote>
+
+<p>断点（BreakPoint）：</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>在代码的指定位置中断，这个是我们用得最多的一种。设置断点的命令是break，它通常有如下方式：
+// 在进入指定函数时停住
+break &lt;function&gt; 
+// 在指定行号停住。
+break &lt;linenum&gt;
+// 在当前行号的前面或后面的offset行停住。offiset为自然数。
+break +/-offset
+// 在源文件filename的linenum行处停住。
+break filename:linenum 
+// ...可以是上述的参数，condition表示条件，在条件成立时停住。
+// 比如在循环境体中，可以设置break if i=100，表示当i为100时停住程序。
+break ... if &lt;condition&gt; 
+
+可以通过info breakpoints [n]命令查看当前断点信息。此外，还有如下几个配套的常用命令：
+// 删除所有断点
+delete
+// 删除某个断点
+delete breakpoint [n]
+// 禁用某个断点
+disable breakpoint [n] 
+// 使能某个断点
+enable breakpoint [n]
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>在gdb中，和调试步进相关的命令主要有如下几条：</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 继续运行程序直到下一个断点（类似于VS里的F5）
+continue 
+// 逐过程步进，不会进入子函数（类似VS里的F10）
+next 
+// 逐语句步进，会进入子函数（类似VS里的F11）
+setp 
+// 运行至当前语句块结束
+until
+// 运行至函数结束并跳出，并打印函数的返回值（类似VS的Shift+F11）
+finish
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-Andlabs-GUI/" title="Golang-Andlabs-GUI">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Arduino-Hello-World/" title="Arduino Hello World">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-08-22</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

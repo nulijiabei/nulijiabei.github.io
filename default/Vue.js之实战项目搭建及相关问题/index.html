@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js之实战项目搭建及相关问题</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Vue.js之实战项目搭建及相关问题 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Vue之实战项目搭建及相关问题</h4>
+
+<blockquote>
+</blockquote>
+
+<h4>Visual Studio Code</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Visual Studio Code 安装    
+https://code.visualstudio.com/
+
+// 扩展插件
+EsLint —— 支持 JavaScript 语法规则和代码风格检查工具
+Vetur —— 支持 .vue 文件的语法高亮
+Prettier Code formatter —— 代码格式化
+Auto Close Tag —— 自动添加HTML/XML结束标签
+Auto Rename Tag —— 重命名HTML/XML标签时，开始标签和结束标签同步修改
+Path Intellisense —— 自动路劲补全
+HTML Snippets —— HTML5 代码提示 
+HTML CSS Support —— HTML CSS 代码提示
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 配置插件 
+// 文件 &gt; 首选项 &gt; 设置 &gt; 扩展 &gt; ESLint &gt; settings.json 
+{
+  ...
+  // Prettier —— 无尾随逗号
+  &quot;prettier.trailingComma&quot;: &quot;none&quot;,
+  // ESLint —— 增加支持
+  &quot;eslint.validate&quot;: [&quot;javascript&quot;, &quot;javascriptreact&quot;, &quot;html&quot;, &quot;vue&quot;],
+  // Editor —— 保存格式化
+  &quot;editor.codeActionsOnSave&quot;: {
+    &quot;source.fixAll.eslint&quot;: true
+  }
+  ...
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Vue Cli</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>npm install -g vue        # 安装 Vue
+npm install -g @vue/cli   # 安装 Vue Cli
+npm install -g yarn   # 安装 Yarn
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// .npmrc
+phantomjs_cdnurl=http://cnpmjs.org/downloads
+sass_binary_site=https://npm.taobao.org/mirrors/node-sass/
+registry=https://registry.npm.taobao.org
+
+// .yarnrc
+yarn config set sass_binary_site http://cdn.npm.taobao.org/dist/node-sass -g
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 创建项目
+vue create 项目名称
+
+Vue CLI v4.5.9
+? Please pick a preset: Manually select features
+? Check the features needed for your project: Choose Vue version, Babel, Router, Vuex, CSS Pre-processors, Linter
+? Choose a version of Vue.js that you want to start the project with 2.x
+? Use history mode for router? (Requires proper server setup for index fallback in production) No
+? Pick a CSS pre-processor (PostCSS, Autoprefixer and CSS Modules are supported by default): Sass/SCSS (with node-sass)
+? Pick a linter / formatter config: Prettier
+? Pick additional lint features: Lint on save
+? Where do you prefer placing config for Babel, ESLint, etc.? In dedicated config files
+? Save this as a preset for future projects? No
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 创建 vue.config.js 文件
+
+module.exports = {
+  devServer: {
+    port: 3333,
+    open: true
+  }
+};
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Vue 常用库</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Element UI 
+npm i element-ui -S
+https://element.eleme.cn/#/zh-CN/
+
+axios 
+npm install axios
+https://github.com/axios/axios
+
+qs
+npm install qs -S
+
+js-cookie 
+npm install js-cookie -S
+https://github.com/js-cookie/js-cookie
+
+mockjs 
+npm install mockjs
+http://mockjs.com
+
+vuedraggable
+npm i -S vuedraggable
+https://github.com/SortableJS/Vue.Draggable
+https://sortablejs.github.io/Vue.Draggable/#/simple
+
+element-resize-detector 元素调整大小检测器
+npm install element-resize-detector
+https://github.com/wnr/element-resize-detector
+
+Font Awesome 图标库
+npm install font-awesome -S
+http://www.fontawesome.com
+http://www.fontawesome.com.cn
+
+Base64 and Md5
+npm install --save js-base64
+npm install --save js-md5
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>JavaScript 数据类型</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>JS 有6种数据类型：String 字符串、Number 数值、 Boolean 布尔值、Null 空值、Undefined 未定义、Object 对象
+
+一、String
+
+    // 用引号括起来，单引号和双引号都可以，但是不能混搭。
+    var a = 'hello';
+    var b = &quot;world&quot;;
+
+    // 错误示例
+    var c = 'hello&quot;；
+
+二、Number
+
+
+    // 所有数值都是Number类型，包括整数和浮点数
+    var a = 123;
+    var b = 123.456;
+    // 可以使用typeof来检查一个变量的类型
+    console.log(typeof a); // number
+
+    var c = &quot;123&quot;;
+    console.log(typeof c); // string
+
+三、Boolean
+
+    // Boolean的布尔值只有两个，一个是true，一个是false
+    var bool = true;
+    console.log(bool); // true
+    console.log(typeof bool); // boolean
+
+四、Null
+
+    // Null类型的值只有一个,就是 null,专门用来表示为一个空的对象
+    var a = null ;
+    console.log(a); // null
+    console.log(typeof a); // object
+
+五、Undefined
+
+    // Undefined 类型的值只有一个，就是 undefined
+    var b;
+    console.log(b); //undefined 表示未定义，声明了未赋值
+    console.log(typeof b); // undefined     
+
+强制类型转换
+
+    var a = 123;
+    a = a.toString(); // &quot;123&quot;
+
+    var b = false
+    b = b.toString(); // &quot;false&quot;
+
+    var a = 123;
+    a = String(a); // &quot;123&quot;
+
+    var b = false
+    b = String(b); // &quot;false&quot;
+
+    a = Number(a); // number 123
+
+    var str = 'hello';
+    str = Number(str); // number NaN
+
+    a = &quot;123px&quot;;
+    a = parseInt(a); // 123
+
+    a = 'b1234ddd';
+    a = parseInt(a); // NaN
+
+    a = '123.456px';
+    a = parseFloat(a); // 123.456 
+
+    a = '123px';
+    a = parseFloat(a); // 123
+
+    ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>使用 Web Storage 存储键值</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>使用 Web Storage 存储键值对比存储 Cookie 方式更直观，而且容量更大
+它包含两种：localStorage 和 sessionStorage
+
+sessionStorage(临时存储)：为每一个数据源维持一个存储区域
+在浏览器打开期间存在，包括页面重新加载
+
+localStorage(长期存储)：与 sessionStorage 一样
+但是浏览器关闭后，数据依然会一直存在
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 保存
+localStorage.setItem('hou', JSON.stringify(info));
+localStorage.setItem('zheng', str);
+
+// 获取
+var data1 = JSON.parse(localStorage.getItem('hou'));
+var data2 = localStorage.getItem('zheng');
+
+// 删除
+localStorage.removeItem('hou');
+localStorage.clear();
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>关于跨域解决方案</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>关于跨域的解决方法，大部分可以分为 2 种 ...
+
+1. nginx 反向代理解决跨域
+2. 服务端设置 Response Header(响应头部)的 Access-Control-Allow-Origin
+
+// 服务端设置响应头部 ...
+func Cors() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        method := c.Request.Method
+        if origin := c.Request.Header.Get(&quot;Origin&quot;); origin != &quot;&quot; {
+            c.Header(&quot;Access-Control-Allow-Origin&quot;, &quot;*&quot;) // 可将将 * 替换为指定的域名
+            c.Header(&quot;Access-Control-Allow-Methods&quot;, &quot;POST, GET, OPTIONS, PUT, DELETE, UPDATE&quot;)
+            c.Header(&quot;Access-Control-Allow-Headers&quot;, &quot;Origin, X-Requested-With, Content-Type, Accept, Authorization&quot;)
+            c.Header(&quot;Access-Control-Expose-Headers&quot;, &quot;Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type&quot;)
+            c.Header(&quot;Access-Control-Allow-Credentials&quot;, &quot;true&quot;)
+        }
+        if method == &quot;OPTIONS&quot; {
+            c.AbortWithStatus(http.StatusNoContent)
+        }
+        c.Next()
+    }
+}
+
+func main() {
+    router := gin.Default()
+    router.Use(Cors())
+    ...
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>axios 与 vuex</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>在 axios .then 中修改 vuex 数据是使用 mutations 还是 actions 呢 ...
+要知道 axios .then 中的回调执行是在线程中完成的 ...
+
+注：mutation 里不应该异步操作数据, 所以有了 actions 选项
+
+mutations、actions 看起来很相似，可能会觉得不知道该用哪个
+    但是 Vuex 很像是一种与开发者的约定 ...
+    涉及改变数据的，就是用 mutations, 存在业务逻辑的，就用 actions 
+    至于将业务逻辑放在 action 里还是 Vue 组件里完成，需要根据场景
+
+简单说就是，如果占用线程时间的用 actions 不占用的 mutations 
+    也就是说，对于 vuex 赋值不管是不是在线程里面完成的
+    只要是不占用时间都是 mutations ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>vuex 严格模式</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 开启严格模式，仅需在创建 store 的时候传入 strict: true：
+const store = new Vuex.Store({
+  // ...
+  strict: true
+})
+
+// 为什么要开启严格模式
+在严格模式下，无论何时发生了状态变更且不是由 mutation 函数引起的
+将会抛出错误。这能保证所有的状态变更都能被调试工具跟踪到 ...
+
+// 不要在发布环境下启用严格模式！
+严格模式会深度监测状态树来检测不合规的状态变更
+请确保在发布环境下关闭严格模式，以避免性能损失
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>vuex state 被 v-model 双向绑定怎么办</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如果开启了严格模式，这样的修改会抛出一个错误 ...
+
+// 这里的 obj 是计算属性中返回的一个属于 Vuex store 的对象
+// 在用户输入时 v-model 会试图直接修改 obj.message ...
+&lt;input v-model=&quot;obj.message&quot;&gt;
+
+// 如何解决呢 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 方法一：给 &lt;input&gt; 中绑定 value 然后侦听 input 或者 change 事件
+
+// template
+&lt;input :value=&quot;message&quot; @input=&quot;updateMessage&quot;&gt;
+
+// script
+computed: {
+  ...mapState({
+    message: state =&gt; state.obj.message
+  })
+},
+methods: {
+  updateMessage(e) {
+    this.$store.commit('updateMessage', e.target.value)
+  }
+}
+
+// vuex
+mutations: {
+  updateMessage(state, message) {
+    state.obj.message = message
+  }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 方法二：双向绑定计算属性
+
+&lt;input v-model=&quot;message&quot;&gt;
+
+computed: {
+  message: {
+    get () {
+      return this.$store.state.obj.message
+    },
+    set (value) {
+      this.$store.commit('updateMessage', value)
+    }
+  }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>@click.stop 与 @click.prevent</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>@click.stop 阻止事件冒泡
+
+&lt;div id=&quot;app&quot;&gt;
+    &lt;div v-on:click=&quot;dodo&quot;&gt;
+        &lt;button v-on:click=&quot;doThis&quot;&gt;阻止单击事件继续传播&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+var app = new Vue({
+    el: &quot;#app&quot;,
+    data: {
+    name: &quot;Vue.js&quot;
+    },
+    methods: {
+    doThis: function () {
+        alert(&quot;noclick&quot;);
+    },
+    dodo: function () {
+        alert(&quot;dodo&quot;);
+    }
+    }
+});
+&lt;/script&gt;
+
+// 会先弹出 “noclick” 再弹出 “dodo”
+
+&lt;div id=&quot;app&quot;&gt;
+    &lt;div v-on:click=&quot;dodo&quot;&gt;
+    &lt;button v-on:click.stop=&quot;doThis&quot;&gt;阻止单击事件继续传播&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+var app = new Vue({
+    el: &quot;#app&quot;,
+    data: {
+    name: &quot;Vue.js&quot;
+    },
+    methods: {
+    doThis: function () {
+        alert(&quot;noclick&quot;);
+    },
+    dodo: function () {
+        alert(&quot;dodo&quot;);
+    }
+    }
+});
+&lt;/script&gt;
+
+// 只弹出 “noclick” 因为 @click.stop 阻止事件冒泡 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 阻止a标签跳转，仅执行函数test4
+&lt;a href=&quot;http://www.baidu.com&quot; @click.prevent=&quot;test4&quot;&gt;百度一下&lt;/a&gt;   
+// 阻止表单提交，仅执行函数test5
+&lt;form  action=&quot;/xxx&quot;   @submit.prevent=&quot;test5&quot;&gt; 
+     &lt;input type=&quot;submit&quot; value=&quot;注册&quot;&gt;
+&lt;/form&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>自动获得焦点 v-focus</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>&lt;el-input v-focus @blur=&quot;失去焦点时...&quot; /&gt; 
+
+export default {
+  directives: {
+    // 注册一个局部的自定义指令 v-focus
+    focus: {
+      // 指令的定义
+      inserted: function(el) {
+    // 聚焦元素
+    el.querySelector(&quot;input&quot;).focus();
+      }
+    }
+  },
+  ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>Vue 常见问题</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>  // axios 传输数据中包含数组时 gin 或 beego 等无法接收问题
+
+  // 解决办法就是 JSON.stringify 转换成字符串 ...
+
+  this.$utils
+.requestData(&quot;/api/ph/save&quot;, {
+  id: this.data.id,
+  type: this.data.type,
+  width: this.screenWidth,
+  height: this.screenHeight,
+  layers: JSON.stringify(this.screenLayers)
+})
+.then(data =&gt; {
+  console.log(data);
+});
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 多行换行 ...
+
+.m-wrapper {
+  width: 90px;
+  height: 48px;
+  word-break: break-all;
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    color: #fff;
+    text-align: center;
+  }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 删除 scoped 是定义局部使用，无法覆盖掉插件的样式
+&lt;script scoped&gt;
+
+// companyinfo 是自己定义的，后面的是原组件的样式
+// 自己定义 class 可以帮助寻找到 DOM
+companyinfo .el-breadcrumb__inner {
+    // 用！important 增加优先
+    color: blue !important;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Element UI 内置自定义指令 v-clickoutside 使用方法
+
+// 引入指令 
+import Clickoutside from 'element-ui/src/utils/clickoutside'
+
+// 声明指令
+export default {
+  directives: { Clickoutside },
+  data: function() {
+    return {
+    }
+  }
+}
+
+// 使用指令
+&lt;div v-clickoutside=&quot;handleClickOutside&quot;&gt;&lt;/div&gt;
+
+// 绑定函数
+methods: {
+    // 点击区域外
+    handleClickOutside() {}
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Vue 跳转页面传值
+
+// params 传参 
+// 相当于post请求, 页面跳转时参数不会在地址栏中显示
+    this.$router.push({
+           name:'',
+           params: { id:idParams }
+    })
+    接收参数：this.$route.params.id
+
+// query 传参 
+// 相当于get请求, 页面跳转时参数会在地址栏中显示
+    this.$router.push({
+           name:'',
+           query: { id:idParams }
+    })
+    接收参数：this.$route.query.id
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Vue 之 vue-router 同一个页面地址参数改变, 页面不刷新的问题
+
+解决办法有两种：
+
+1. 监听地址栏变化(watch)这是vue-router官方给出的解决办法
+
+watch: {
+    '$route' (to, from) {
+    this.getData(this.$route.query.id)
+    }
+}
+
+methods: {
+    async getData (id) {
+      // 按照id获取数据
+      const { data: { result } } = await this.$http.get('getShowList', {
+    params: { id }
+      })
+      this.dataList = result
+    }
+}
+
+2. 给router-view加个唯一的key，来保证路由切换时都会重新渲染触发钩子了
+
+&lt;template&gt;
+    &lt;div id=&quot;main&quot; class=&quot;app-main&quot;&gt;
+    &lt;transition :name=&quot;transitionName&quot;&gt;
+        &lt;router-view class=&quot;router-box&quot; :key=&quot;key&quot;&gt;&lt;/router-view&gt;
+    &lt;/transition&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+    export default {
+    computed:{
+        key(){
+        return this.$route.name ? 
+            this.$route.name+ +new Date() : 
+            this.$route+ +new Date()
+        }
+    }
+    };
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8B%E4%BD%BF%E7%94%A8Module%E5%88%9B%E5%BB%BAgin%E9%A1%B9%E7%9B%AE/" title="Golang之使用Module创建gin项目">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Vue.js%E4%B9%8B%E4%BD%BF%E7%94%A8transition%E5%AE%9E%E7%8E%B0%E8%BF%87%E6%B8%A1%E4%B8%8E%E5%8A%A8%E7%94%BB/" title="Vue.js之使用transition实现过渡与动画">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2021-01-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#javascript-ref">javascript <span>11</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

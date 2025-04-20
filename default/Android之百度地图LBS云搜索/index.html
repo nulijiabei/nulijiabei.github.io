@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之百度地图LBS云搜索</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之百度地图LBS云搜索 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>百度地图LBS云搜索</h3>
+
+<blockquote>
+</blockquote>
+
+<p>LBS.云是百度地图针对LBS开发者推出的平台级服务</p>
+
+<blockquote>
+</blockquote>
+
+<p>结合已有的地图API和SDK服务，通过开放服务端存储和计算能力，提供海量位置数据存储、检索、展示一体化解决方案。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>1，在百度开放平台创建应用，并且设置安全码
+    地址：http://lbsyun.baidu.com/apiconsole/key
+
+2，获取应用访问应用（AK）...
+    这里与兴趣点不同，同时需要服务器(AK)
+
+3，从百度开放平台下载SDK
+    地址：http://lbsyun.baidu.com/sdk/download
+
+4，基础SDK开发包：定位功能，基础地图，检索功能，LBS云检索
+    获取文件：BaiduLBS_Android.jar + armeabi（目录）
+
+5，将armeabi目录内文件拷贝到项目的../app/src/main/jniLibs/armeabi下
+    将BaiduLBS_Android.jar拷贝到../app/libs目录下，并导入项目（Studio默认自动导入)
+
+6，下载示例代码：http://lbsyun.baidu.com/sdk/download
+    找到：地图+检索+LBS云检索+工具+周边雷达（目录）
+    找到：/BaiduMapsApiDemo/src/baidumapsdk/demo（目录）
+    找到：CloudSearchActivity.java 文件就是LBS云搜索示例）
+
+7, 将 CloudSearchActivity.java 导入到项目
+    找到：示例项目中的 AndroidManifest.xml （文件）
+    取出：下面示例中的内容，拷贝到当前项目中 ...
+
+8，下面的：CloudSearchActivity.java 是我稍加修改的 CloudSearchActivity.java
+
+9，先做到可以正常运行官方示例（CloudSearchActivity.java）
+
+10，需要提醒的是，生成APK需要通过, Build/Generate Signed APK(Studio) 生成
+        否则程序的指纹信息无法与安全码进行匹配...
+
+// 百度地图仅LBS搜索还有着很多功能... 具体请看官方文档
+// http://developer.baidu.com/map/index.php?title=lbscloud/api/geosearch
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>云搜索具体介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>云搜索分为：云存储，云搜索
+云存储：将需要被搜索到的POI点存储到百度云数据中
+云搜索：通过设置的POI点ID及相关参数进行搜索，比如：坐标，标签等
+// 云存储地址：http://lbsyun.baidu.com/datamanager/datamanage
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>云搜索分为：本地搜索，周边搜索，矩形搜索，详情检索
+本地搜索：通过，城市+关键字+标签，在存储中搜索匹配数据
+周边搜索：通过，当前坐标+范围+标签，在存储中搜索匹配数据
+矩形搜索：通过，指定区域坐标+关键字+标签，在存储中搜索匹配数据
+// 官方文档：http://developer.baidu.com/map/index.php?title=lbscloud/api/geosearch
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在百度云存储数据进行设置
+</code></pre>
+
+<p><img src="/assets/media/Android之百度地图LBS云搜索/1.png" alt="" width="800" hight="450" ></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在手机地图中显示的效果
+</code></pre>
+
+<p><img src="/assets/media/Android之百度地图LBS云搜索/2.jpg" alt="" width="350" hight="600" ></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>LBS云搜索示例</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class CloudSearchActivity extends Activity implements CloudListener {
+    private static final String LTAG = CloudSearchActivity.class
+            .getSimpleName();
+    private MapView mMapView;
+    private BaiduMap mBaiduMap;
+
+    @Override
+    protected void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        setContentView(R.layout.activity_lbssearch);
+        CloudManager.getInstance().init(CloudSearchActivity.this);
+        mMapView = (MapView) findViewById(R.id.bmapView);
+        mBaiduMap = mMapView.getMap();
+        findViewById(R.id.regionSearch).setOnClickListener(
+                new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        /**
+                         * 本地检索是指可检索指定区域范围内的poi信息
+                         * 区域通过region参数来设定
+                         * 可以是全国范围也可以是小范围的如海淀区。
+                         * 检索时可通过tags参数指定检索类型；
+                         * 通过sortby参数对检索结果进行排序（支持多字段排序）；
+                         * filter参数可以完成对指定数据范围的筛选。
+                         */
+                        LocalSearchInfo info = new LocalSearchInfo();
+                        // AK 需要使用服务器AK
+                        info.ak = &quot;eU8VKgzQQSwVCAq1AXDRkHmq&quot;;
+                        // 指定LBS云可以搜索的坐标组ID
+                        info.geoTableId = 115616;
+                        // 在LBS云可以设置TAGS类型
+                        info.tags = &quot;公司&quot;;
+                        // 在指定的地区搜索geoTableId内符合的坐标
+                        info.q = &quot;海淀区&quot;;
+                        // 在指定的城市搜索geoTableId内符合的坐标
+                        info.region = &quot;北京市&quot;;
+                        // ...
+                        CloudManager.getInstance().localSearch(info);
+                    }
+                });
+        findViewById(R.id.nearbySearch).setOnClickListener(
+                new OnClickListener() {
+                    public void onClick(View v) {
+                        /**
+                         * 周边检索是指以一点为中心（中心点通过location参数指定）
+                         * 搜索中心点附近指定距离范围（搜索半径通过radius参数指定）内的POI点。
+                         * 检索时可通过tags参数指定检索的类型；
+                         * 通过sortby参数进行检索结果的排序（支持多字段排序）；
+                         * filter参数可以完成对指定数据范围的筛选。
+                         */
+                        NearbySearchInfo info = new NearbySearchInfo();
+                        // AK 需要使用服务器AK
+                        info.ak = &quot;eU8VKgzQQSwVCAq1AXDRkHmq&quot;;
+                        // 指定LBS云可以搜索的坐标组ID
+                        info.geoTableId = 115616;
+                        // 搜索的范围
+                        info.radius = 1000;
+                        // 搜索的类型
+                        info.tags = &quot;企业&quot;;
+                        // 搜索的起始坐标
+                        info.location = &quot;116.315047,40.043694&quot;;
+                        // ...
+                        CloudManager.getInstance().nearbySearch(info);
+                    }
+                });
+
+        findViewById(R.id.boundsSearch).setOnClickListener(
+                new OnClickListener() {
+                    public void onClick(View v) {
+                        /**
+                         * 矩形检索是指可检索指定矩形范围内的poi信息
+                         * 检索区域通过bounds参数设定的矩形的左下角和右上角的经纬度坐标来确定。
+                         * 检索时可通过tags参数指定检索类型；
+                         * 检索结果可通过sortby参数进行排序（支持多字段排序）；
+                         * 可通过filter参数筛选出指定的数据范围的结果。
+                         */
+                        BoundSearchInfo info = new BoundSearchInfo();
+                        info.ak = &quot;B266f735e43ab207ec152deff44fec8b&quot;;
+                        info.geoTableId = 31869;
+                        info.q = &quot;天安门&quot;;
+                        info.bound = &quot;116.401663,39.913961;116.406529,39.917396&quot;;
+                        CloudManager.getInstance().boundSearch(info);
+                    }
+                });
+        findViewById(R.id.detailsSearch).setOnClickListener(
+                new OnClickListener() {
+                    public void onClick(View v) {
+                        /**
+                         * 坐标点的详情信息
+                         */
+                        DetailSearchInfo info = new DetailSearchInfo();
+                        info.ak = &quot;eU8VKgzQQSwVCAq1AXDRkHmq&quot;;
+                        info.geoTableId = 115616;
+                        info.uid = 1128794574;
+                        CloudManager.getInstance().detailSearch(info);
+                    }
+                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMapView.onDestroy();
+        CloudManager.getInstance().destroy();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mMapView.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
+
+    public void onGetDetailSearchResult(DetailSearchResult result, int error) {
+        if (result != null) {
+            if (result.poiInfo != null) {
+                Toast.makeText(CloudSearchActivity.this, result.poiInfo.title,
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(CloudSearchActivity.this,
+                        &quot;status:&quot; + result.status, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public void onGetSearchResult(CloudSearchResult result, int error) {
+        if (result != null &amp;&amp; result.poiList != null
+                &amp;&amp; result.poiList.size() &gt; 0) {
+            Log.d(LTAG, &quot;onGetSearchResult, result length: &quot; + result.poiList.size());
+            mBaiduMap.clear();
+            BitmapDescriptor bd = BitmapDescriptorFactory.fromResource(R.drawable.icon_gcoding);
+            LatLng ll;
+            Builder builder = new Builder();
+            for (CloudPoiInfo info : result.poiList) {
+                ll = new LatLng(info.latitude, info.longitude);
+                OverlayOptions oo = new MarkerOptions().icon(bd).position(ll);
+                mBaiduMap.addOverlay(oo);
+                builder.include(ll);
+            }
+            LatLngBounds bounds = builder.build();
+            MapStatusUpdate u = MapStatusUpdateFactory.newLatLngBounds(bounds);
+            mBaiduMap.animateMapStatus(u);
+        }
+    }
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BE%E5%9D%90%E6%A0%87%E5%AE%9A%E4%BD%8D/" title="Android之百度地图坐标定位">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BE%E5%85%B4%E8%B6%A3%E7%82%B9%E6%90%9C%E7%B4%A2/" title="Android之百度地图兴趣点搜索">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-07-31</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

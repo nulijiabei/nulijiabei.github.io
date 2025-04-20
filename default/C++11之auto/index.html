@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>C++11之auto</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>C++11之auto </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <h3>在那些情况下要申明类型:</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>1,定义变量类型
+2,函数返回值，函数参数
+3,表达式返回变量类型
+</code></pre>
+
+<hr />
+
+<h3>auto关键字原理</h3>
+
+<blockquote>
+</blockquote>
+
+<p>在定义变量的时候必须申明类型，c++是强语言类型，在编译阶段需要知道类型，这样的好处是程序效率更高</p>
+
+<p>而动态语言不需要类型申明的需要自推导变量类型。</p>
+
+<p>使用了auto是不是c++效率会变慢？完全不是，因为在编译阶段编译器已经帮程序员推导好了变量的类型。</p>
+
+<p>前提条件是编译器可以根据当前的程序的状态推导出变量类型。</p>
+
+<p>只是编译器更加智能，我猜想编译时间岂不更长了。</p>
+
+<hr />
+
+<h3>auto关键字使用场景</h3>
+
+<blockquote>
+</blockquote>
+
+<p>场景一，申明普通变量</p>
+
+<pre><code>auto num = 10;   
+</code></pre>
+
+<p>场景二，函数返回值，如果没有auto，总是要巧那么长的返回值，有了auto关键字后，是不是心里感觉很爽。</p>
+
+<pre><code>vector&lt;string&gt; str_vec;  
+vector&lt;string&gt;::iterator it_old = str_vec.begin();  
+auto it_new  = str_vec.begin();  
+</code></pre>
+
+<p>场景三，申明函数返回值</p>
+
+<pre><code>auto add(int a, int b)-&gt;int {  
+     return a + b;  
+}  
+</code></pre>
+
+<hr />
+
+<h3>auto使用需要注意的几个问题</h3>
+
+<blockquote>
+</blockquote>
+
+<p>1、使用auto关键字的变量必须有初始值，编译器才能推导出变量类型。</p>
+
+<p>2、在传递const变量的时候，使用auto必须自己加const</p>
+
+<pre><code>const int a =10;  
+auto b = a;                // b的类型是int  
+const auto c = a;      // c 的类型是const int  
+</code></pre>
+
+<p>3、关于很奇葩的函数返回值</p>
+
+<p>auto关键字只能在函数的返回值使用auto关键字，并且在函数尾还需要标注返回类型</p>
+
+<p>这样看起来很奇葩，莫不如不用auto关键字，但我认为委员会的人没这么闲，上google查了下，有下面两条原因：</p>
+
+<pre><code>1、他们认为把返回值放在函数后面更好看（特别是返回值很长的时候）
+2、C++14将会把讨人烦得返回值去掉，编译器直接支持自推导。
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/C%2B%2B%E4%B8%AD%E4%BD%BF%E7%94%A8boost--property_tree%E8%A7%A3%E6%9E%90INI/" title="C++中使用boost::property_tree解析INI">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Jsoncpp%E8%A7%A3%E6%9E%90%E6%8B%BC%E8%A3%85%E6%95%B0%E7%BB%84/" title="Jsoncpp解析拼装数组">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-10-31</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

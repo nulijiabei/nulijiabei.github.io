@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之集成FFmpeg到APP项目</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之集成FFmpeg到APP项目 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Android之集成FFmpeg到APP项目</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 国内源 ...
+maven { url 'https://maven.aliyun.com/repository/google' }
+maven { url 'https://maven.aliyun.com/repository/jcenter' }
+maven { url 'http://maven.aliyun.com/nexus/content/groups/public' }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 环境 ...
+Android Studio 3.6.1
+SDK Platforms &gt; Android 10.0 (Q) API Level 29 Revision 4
+SDK Tools &gt;
+    Android SDK Build-Tools 30-rc1
+    NDK (Side by side)
+    CMake
+    Android Emulator
+    Android SDK Platform-Tools
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 准备工作：Android之NDK编译FFmpeg教程 
+// 编译生成以下文件 ...
+ffmpeg-4.2.2/android/armv7-a
+ffmpeg-4.2.2/android/armv8-a
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>1. 新建一个Android Native C++工程 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>2. 拷贝库文件到项目 ...
+2-1. 拷贝 armv7-a/lib 内 .so 文件到 MyApplication\app\src\main\cpp\libs\armeabi-v7a
+2-2. 拷贝 armv8-a/lib 内 .so 文件到 MyApplication\app\src\main\cpp\libs\arm64-v8a
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>3. 新建 MyApplication/appsrc/main/cpp 目录
+3-1. 拷贝 armv7-a/include 文件夹到 MyApplication/appsrc/main/cpp 
+3-2. 在 MyApplication\app\src\main\cpp 中新建 native-lib.cpp 内容如下 ...
+
+    #include &lt;jni.h&gt;
+    #include &lt;string&gt;
+    extern &quot;C&quot; {
+    #include &lt;libavcodec/avcodec.h&gt; //引入ffmpeg的包
+    }
+    extern &quot;C&quot; JNIEXPORT jstring JNICALL
+    Java_com_goodboy_myplay_MainActivity_stringFromJNI(
+        JNIEnv *env,
+        jobject /* this */) {
+        std::string hello = &quot;Hello from C++&quot;;
+        return env-&gt;NewStringUTF(av_version_info());//返回ffmpeg的版本
+    }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>4. 在 MyApplication\app 目录中新建 CMakeLists.txt 内容如下 ...
+
+    cmake_minimum_required(VERSION 3.4.1)
+
+    add_library( # Sets the name of the library.
+        native-lib
+        SHARED
+        src/main/cpp/native-lib.cpp)
+    include_directories(src/main/cpp/include)
+    set(CMAKE_CXX_FLAGS &quot;${CMAKE_CXX_FLAGS} -L${CMAKE_SOURCE_DIR}/src/main/cpp/libs/${ANDROID_ABI}&quot;)
+
+    find_library( # Sets the name of the path variable.
+        log-lib
+        log)
+
+
+    target_link_libraries( # Specifies the target library.
+        native-lib
+        avcodec avfilter avformat avutil swresample swscale
+        ${log-lib})
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>5. 修改 MyApplication\app\build.gradle 文件部分内容 ...
+
+
+    apply plugin: 'com.android.application'
+
+    android {
+        compileSdkVersion 29
+        buildToolsVersion &quot;29.0.3&quot;
+
+        defaultConfig {
+        applicationId &quot;com.danoo.xplay&quot;
+        minSdkVersion 21 
+        targetSdkVersion 29
+        versionCode 1
+        versionName &quot;1.0&quot;
+
+        testInstrumentationRunner &quot;androidx.test.runner.AndroidJUnitRunner&quot;
+
+        externalNativeBuild {
+            cmake {
+            cppFlags &quot;&quot;
+            abiFilters &quot;armeabi-v7a&quot;, &quot;arm64-v8a&quot;
+            }
+        }
+        }
+
+        sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/cpp/libs/']
+        }
+        }
+
+        buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        }
+
+        externalNativeBuild {
+        cmake {
+            path &quot;CMakeLists.txt&quot;
+            version &quot;3.10.2&quot;
+        }
+        }
+        ndkVersion = '20.0.5594570'
+
+    }
+
+    ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>6. 修改 MainActivity 文件 ...
+
+    public class MainActivity extends AppCompatActivity {
+
+        static {
+        System.loadLibrary(&quot;native-lib&quot;);
+        }
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+            Snackbar.make(view, &quot;Replace with your own action&quot;, Snackbar.LENGTH_LONG)
+                .setAction(&quot;Action&quot;, null).show();
+            Log.d(&quot;&gt;&gt;&gt;&quot;, stringFromJNI());
+            }
+        });
+        }
+
+        public native String stringFromJNI();
+    }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E4%BD%BF%E7%94%A8FFmpeg%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91/" title="Android之使用FFmpeg播放视频">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BNDK%E7%BC%96%E8%AF%91FFmpeg%E6%95%99%E7%A8%8B/" title="Android之NDK编译FFmpeg教程">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-03-14</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

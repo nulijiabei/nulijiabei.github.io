@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js之使用基于Gin的JwtBearer认证</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Vue.js之使用基于Gin的JwtBearer认证 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Vue之使用基于Gin的JwtBearer认证</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Jin 与 Jwt
+github.com/gin-gonic/gin
+github.com/dgrijalva/jwt-go
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Jwt 官方案例 - 创建 Token 
+
+// Create a new token object, specifying signing method and the claims
+// you would like it to contain.
+token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+    &quot;foo&quot;: &quot;bar&quot;,
+    &quot;nbf&quot;: time.Date(2015, 10, 10, 12, 0, 0, 0, time.UTC).Unix(),
+})
+
+// Sign and get the complete encoded token as a string using the secret
+tokenString, err := token.SignedString(hmacSampleSecret)
+
+fmt.Println(tokenString, err)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Jwt 官方案例 - 解析 Token
+
+// sample token string taken from the New example
+tokenString := &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJuYmYiOjE0NDQ0Nzg0MDB9.u1riaD1rW97opCoAuRCTy4w58Br-Zk-bh7vLiRIsrpU&quot;
+
+// Parse takes the token string and a function for looking up the key. The latter is especially
+// useful if you use multiple keys for your application.  The standard is to use 'kid' in the
+// head of the token to identify which key to use, but the parsed token (head and claims) is provided
+// to the callback, providing flexibility.
+token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+    // Don't forget to validate the alg is what you expect:
+    if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+        return nil, fmt.Errorf(&quot;Unexpected signing method: %v&quot;, token.Header[&quot;alg&quot;])
+    }
+
+    // hmacSampleSecret is a []byte containing your secret, e.g. []byte(&quot;my_secret_key&quot;)
+    return hmacSampleSecret, nil
+})
+
+if claims, ok := token.Claims.(jwt.MapClaims); ok &amp;&amp; token.Valid {
+    fmt.Println(claims[&quot;foo&quot;], claims[&quot;nbf&quot;])
+} else {
+    fmt.Println(err)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 增加自定义属性
+
+// 可以使用官方的 jwt.MapClaims 来全部重新定义内置属性
+// 也可以通过嵌套 jwt.StandardClaims 来增加自定义属性
+
+// Claims 接口
+type Claims interface {
+    // 包含 Valid() 都可以是 Claims 接口
+    Valid() error
+}
+
+// 创建 Token 
+func NewWithClaims(method SigningMethod, claims Claims) *Token {...}
+
+// 所以可以自定义 MyClaims ...
+type MyClaims struct {
+    Username string
+    jwt.StandardClaims // 嵌套
+}   
+
+// 标准 StandardClaims
+type StandardClaims struct {
+    Audience  string `json:&quot;aud,omitempty&quot;`
+    ExpiresAt int64  `json:&quot;exp,omitempty&quot;`
+    Id        string `json:&quot;jti,omitempty&quot;`
+    IssuedAt  int64  `json:&quot;iat,omitempty&quot;`
+    Issuer    string `json:&quot;iss,omitempty&quot;`
+    NotBefore int64  `json:&quot;nbf,omitempty&quot;`
+    Subject   string `json:&quot;sub,omitempty&quot;`
+}
+
+// StandardClaims 成员 ...
+func (c StandardClaims) Valid() error {...}
+
+// 这样就可以在标准的 StandardClaims 中增加自定义属性 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 第一步：创建与解码 Token
+
+package main
+
+import (
+    &quot;fmt&quot;
+    &quot;github.com/dgrijalva/jwt-go&quot;
+    &quot;time&quot;
+)
+
+// 密钥
+var secret = []byte(&quot;abcdefg&quot;)
+
+// 自定义结构
+type MyClaims struct {
+    Username string
+    jwt.StandardClaims
+}
+
+// 获取 Token
+func GenToken(username string) (string, error) {
+    // 创建结构
+    claims := MyClaims{
+        Username: username,
+        StandardClaims: jwt.StandardClaims{
+            // 过期时间
+            ExpiresAt: time.Now().Add(time.Hour * 3).Unix(),
+            // 指定token发行人
+            Issuer: &quot;nulijiabei&quot;,
+        },
+    }
+    // 创建一个新的令牌对象, 指定签名方法和, 您要包含的声明
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+    // 使用指定的 secret 签名并获得完整的编码后的字符串 token
+    return token.SignedString(secret)
+}
+
+// 解码 Token
+func ParseToken(tokenString string) (*MyClaims, error) {
+    token, err := jwt.ParseWithClaims(tokenString, &amp;MyClaims{}, func(token *jwt.Token) (interface{}, error) {
+        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+            return nil, fmt.Errorf(&quot;Unexpected signing method: %v&quot;, token.Header[&quot;alg&quot;])
+        }
+        return secret, nil
+    })
+    if err != nil {
+        return nil, err
+    }
+    if claims, ok := token.Claims.(*MyClaims); ok &amp;&amp; token.Valid {
+        return claims, nil
+    }
+    return nil, fmt.Errorf(&quot;Invalid Token&quot;)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 第二步：在 Gin 中通过中间件来进行 Token 验证
+
+// 主
+func main() {
+    router := gin.Default()
+    router.POST(&quot;/api/login&quot;, loginHandler)
+    router.POST(&quot;/api/home&quot;, JWTAuthMiddleware(), homeHandler)
+    router.Run()
+}
+
+// 返回数据结构 ...
+type QueryResult struct {
+    Code int         `json:&quot;code&quot;`
+    Data interface{} `json:&quot;data&quot;`
+}
+
+// 登录
+func loginHandler(c *gin.Context) {
+    username := c.PostForm(&quot;username&quot;)
+    password := c.PostForm(&quot;password&quot;)
+    result := new(QueryResult)
+    if username == &quot;admin&quot; &amp;&amp; password == &quot;admin&quot; {
+        tokenString, _ := GenToken(username)
+        result.Code = 200
+        result.Data = map[string]interface{}{
+            &quot;username&quot;: username,
+            &quot;token&quot;:    tokenString,
+        }
+    } else {
+        result.Code = 404
+        result.Data = &quot;验证失败&quot;
+    }
+    c.JSON(200, result)
+}
+
+// Home
+func homeHandler(c *gin.Context) {
+    result := new(QueryResult)
+    result.Code = 200
+    result.Data = &quot;欢迎访问&quot;
+    c.JSON(200, result)     
+}
+
+// JWTAuthMiddleware 基于JWT的认证中间件
+func JWTAuthMiddleware() func(c *gin.Context) {
+    return func(c *gin.Context) {
+        // 这里Token放在Header的Authorization中，并使用Bearer开头
+        authHeader := c.Request.Header.Get(&quot;Authorization&quot;)
+        if authHeader == &quot;&quot; {
+            result := new(QueryResult)
+            result.Code = 498
+            result.Data = &quot;Header Auth Error&quot;
+            c.JSON(http.StatusOK, result)
+            c.Abort()
+            return
+        }
+        // 按空格分割
+        parts := strings.SplitN(authHeader, &quot; &quot;, 2)
+        if !(len(parts) == 2 &amp;&amp; parts[0] == &quot;Bearer&quot;) {
+            result := new(QueryResult)
+            result.Code = 498
+            result.Data = &quot;Header Auth Error&quot;
+            c.JSON(http.StatusOK, result)
+            c.Abort()
+            return
+        }
+        // parts[1] 是获取到的 tokenString
+        // 我们使用之前定义好的解析JWT的函数来解析它
+        mc, err := ParseToken(parts[1])
+        if err != nil {
+            result := new(QueryResult)
+            result.Code = 498
+            result.Data = &quot;Invalid Token&quot;
+            c.JSON(http.StatusOK, result)
+            c.Abort()
+            return
+        }
+        // 将当前请求的 username 信息保存到请求的上下文
+        c.Set(&quot;username&quot;, mc.Username)
+        c.Next() // 后续的处理 ...
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 第三步：在 Vue 中如何使用 Token 
+
+// 1. 在 Vuex 中保存 token 
+this.$http.post(&quot;/api/login&quot;, this.form).then(res =&gt; {
+    res = res.data;
+    if (res.code === 200) {
+      // 注意：保存 Token 及前面加 &quot;Bearer &quot;
+      this.setToken(&quot;Bearer &quot; + res.data.token);
+    } else {
+      this.$message(res.data);
+    }
+});
+
+// 2. 在 Vue-Router 中检查 Token
+
+// 在路由守卫中检查 token ...
+router.beforeEach((to, from, next) =&gt; {
+  // 只有授权后才可以继续访问 ...
+  let token = store.state.user.token;
+  if (!token &amp;&amp; to.name !== &quot;login&quot;) {
+    next({ name: &quot;login&quot; });
+  } else {
+    next();
+  }
+});
+
+// 3. 在 axios 中 ...
+// 请求拦截器中获取并且写到 Token 进行请求 ...
+// 响应拦截器中检查 Token 类型错误, 并移除本地 Token 
+
+// 添加请求拦截器
+instance.interceptors.request.use(
+  config =&gt; {
+    if (config.method === &quot;post&quot;) config.data = qs.stringify(config.data);
+    config.headers.Authorization = store.state.user.token;
+    return config;
+  },
+  error =&gt; {
+    return Promise.reject(error);
+  }
+);
+
+// 添加响应拦截器
+instance.interceptors.response.use(
+  response =&gt; {
+    // 指定 Token 错误 code 为 498
+    if (response.data.code === 498) store.commit(&quot;user/clear&quot;);
+    return response;
+  },
+  error =&gt; {
+    return Promise.reject(error);
+  }
+);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Vue.js%E4%B9%8Basync%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Vue.js之async的使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/CSS%E4%B9%8BSCSS%E7%9A%84%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/" title="CSS之SCSS的使用介绍">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2021-01-25</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#javascript-ref">javascript <span>11</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

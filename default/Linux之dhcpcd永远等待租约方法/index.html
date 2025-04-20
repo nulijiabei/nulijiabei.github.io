@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux之dhcpcd永远等待租约方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux之dhcpcd永远等待租约方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>dhcpcd 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<p>dhcpcd 是一个符合RFC1541 标准的DHCP 客户端程序。</p>
+
+<p>它可以从相应的DHCP服务器获得IP 地址和其他信息</p>
+
+<p>可以自动配置网络，并可以按照RFC1541 标准进行超时重试。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>dhcpcd [-bdeknpqABDEGKLTV] [-c, --script script] [-f, --config file]
+    [-h, --hostname hostname] [-i, --vendorclassid vendorclassid]
+    [-l, --leasetime seconds] [-m, --metric metric]
+    [-o, --option option] [-r, --request address]
+    [-s, --inform address[/cidr]] [-t, --timeout seconds]
+    [-u, --userclass class] [-v, --vendor code, value]
+    [-y, --reboot seconds] [-z, --allowinterfaces pattern]
+    [-C, --nohook hook] [-F, --fqdn FQDN] [-I, --clientid clientid]
+    [-O, --nooption option] [-Q, --require option]
+    [-S, --static value] [-X, --blacklist address[/cidr]]
+    [-Z, --denyinterfaces pattern] [interface] [...]
+dhcpcd -k, --release [interface]
+dhcpcd -x, --exit [interface]
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>TIMEOUT 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<p>当系统启动时，没有接入网线，又需要连接网络时DHCP获取IP等网络信息.</p>
+
+<p>此时就需要使用TIMEOUT设置延时时间，否则会在30秒后为系统配置默认IP</p>
+
+<p>但是说明介绍，当TIMEOUT时间为0时，则会一直等待请求该租约地址</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>-t, --timeout seconds
+     Timeout after seconds, instead of the default 30.  A setting of 0
+     seconds causes dhcpcd to wait forever to get a lease.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>-b, --background
+     Background immediately.  This is useful for startup scripts which
+     don't disable link messages for carrier status.
+
+-c, --script script
+     Use this script instead of the default /libexec/dhcpcd-run-hooks.
+
+-d, --debug
+     Echo debug and informational messages to the console.  Subsequent
+     debug options stop dhcpcd from daemonising.
+
+-e, --reconfigure
+     dhcpcd will re-apply IP address, routing and run
+     dhcpcd-run-hooks(8) for each interface.  This is useful so that a
+     3rd party such as PPP or VPN can change the routing table and /
+     or DNS, etc and then instruct dhcpcd to put things back after-
+     wards.  dhcpcd does not read a new configuration when this hap-
+     pens - you should rebind if you need that functionality.
+
+-f, --config file
+     Specify a config to load instead of /etc/dhcpcd.conf.  dhcpcd
+     always processes the config file before any command line options.
+
+-h, --hostname hostname
+     By default, dhcpcd sends the current hostname to the DHCP server
+     so it can register in DNS.  You can use this option to specify
+     the hostname sent, or an empty string to stop any hostname from
+     being sent.
+
+-i, --vendorclassid vendorclassid
+     Override the vendorclassid field sent. The default is dhcpcd
+     &lt;version&gt;.  If not set then none is sent.
+
+-k, --release
+     This causes an existing dhcpcd process running on the interface
+     to release its lease, deconfigure the interface and then exit.
+     dhcpcd then waits until this process has exited.
+
+-l, --leasetime seconds
+     Request a specific lease time in seconds.  By default dhcpcd does
+     not request any lease time and leaves the it in the hands of the
+     DHCP server.
+
+-m, --metric metric
+     Metrics are used to prefer an interface over another one, lowest
+     wins.  dhcpcd will supply a default metic of 200 +
+     if_nametoindex(3).  An extra 100 will be added for wireless
+     interfaces.
+
+-o, --option option
+     Request the DHCP option variable for use in
+     /libexec/dhcpcd-run-hooks.
+
+-n, --rebind
+     Notifies an existing dhcpcd process running on the interface to
+     rebind it's lease.  dhcpcd will not re-configure itself or use
+     any other command line arguments.  dhcpcd will timeout the rebind
+     after 30 seconds at which point the lease will be expired and
+     dhcpcd will enter the discovery state to obtain a new lease.  Use
+     the -t, --timeout option to change this.  If dhcpcd is not run-
+     ning, then it starts up as normal.  This option used to be renew,
+     but rebind is more accurate as we need to broadcast the request
+     instead of unicasting.
+
+-p, --persistent
+     dhcpcd normally deconfigures the interface and configuration when
+     it exits.  Sometimes, this isn't desirable if for example you
+     have root mounted over NFS.  You can use this option to stop this
+     from happening.
+
+-r, --request [address]
+     dhcpcd normally sends a DHCP DISCOVER to find servers to offer an
+     address.  dhcpcd then requests the address used.  You can use
+     this option to skip the BROADCAST step and just request the
+     address.  The downside is if you request an address the DHCP
+     server does not know about or the DHCP server is not authorative,
+     it will remain silent.  In this situation, we go back to the init
+     state and DISCOVER again.  If no address is given then the first
+     address currently assigned to the interface is used.
+
+-s, --inform [address[/cidr]]
+     Behaves like -r, --request as above, but sends a DHCP INFORM
+     instead of a REQUEST.  This does not get a lease as such, just
+     notifies the DHCP server of the address in use.  You should also
+     include the optional cidr network number in-case the address is
+     not already configured on the interface.  dhcpcd remains running
+     and pretends it has an infinite lease.  dhcpcd will not de-con-
+     figure the interface when it exits.  If dhcpcd fails to contact a
+     DHCP server then it returns a failure instead of falling back on
+     IPv4LL.
+
+-t, --timeout seconds
+     Timeout after seconds, instead of the default 30.  A setting of 0
+     seconds causes dhcpcd to wait forever to get a lease.
+
+-u, --userclass class
+     Tags the DHCP message with the userclass class.  DHCP servers use
+     this give members of the class DHCP options other than the
+     default, without having to know things like hardware address or
+     hostname.
+
+-v, --vendor code,value
+     Add an enscapulated vendor option.  code should be between 1 and
+     254 inclusive.  Examples.
+
+     Set the vendor option 01 with an IP address.
+       dhcpcd -v 01,192.168.0.2 eth0
+     Set the vendor option 02 with a hex code.
+       dhcpcd -v 02,01:02:03:04:05 eth0
+     Do the above and set a third option with a string and not an IP
+     address.
+       dhcpcd -v 01,192.168.0.2 -v 02,01:02:03:04:05 -v
+       03,\&quot;192.168.0.2\&quot; eth0
+
+-x, --exit
+     This will signal an existing dhcpcd process running on the
+     interface to deconfigure the interface and exit.  dhcpcd then
+     waits until this process has exited.
+
+-y, --reboot seconds
+     Allow reboot seconds before moving to the discover phase if we
+     have an old lease to use.  The default is 10 seconds.  A setting
+     if 0 seconds causes dhcpcd to skip the reboot phase and go
+     straight into discover.
+
+-D, --duid
+     Generate an RFC 4361 compliant clientid.  This requires persis-
+     tent storage and not all DHCP servers work with it so it's not
+     enabled by default.  dhcpcd generates the DUID and stores in it
+     /etc/dhcpcd.duid This file should not be copied to other hosts.
+
+-E, --lastlease
+     If dhcpcd cannot obtain a lease, then try to use the last lease
+     acquired for the interface.  If the -p, --persistent option is
+     not given then the lease is used if it hasn't expired.
+
+-F, --fqdn fqdn
+     Requests that the DHCP server updates DNS using FQDN instead of
+     just a hostname.  Valid values for fqdn are disable, none, ptr
+     and both.  dhcpcd itself never does any DNS updates.  dhcpcd
+     encodes the FQDN hostname as specified in RFC1035.
+
+-I, --clientid clientid
+     Send the clientid.  If the string is of the format 01:02:03 then
+     it is encoded as hex.  For interfaces whose hardware address is
+     longer than 8 bytes, or if the clientid is an empty string then
+     dhcpcd sends a default clientid of the hardware family and the
+     hardware address.
+
+Restricting behaviour
+dhcpcd will try to do as much as it can by default.  However, there are
+sometimes situations where you don't want the things to be configured
+exactly how the the DHCP server wants.  Here are some options that deal
+with turning these bits off.
+
+-q, --quiet
+     Quiet dhcpcd on the command line, only warnings and errors will
+     be displayed.  The messages are still logged though.
+
+-z, --allowinterfaces pattern
+     When discovering interfaces, the interface name must match
+     pattern which is a space or comma separated list of patterns
+     passed to fnmatch(3).  If the same interface is matched in -Z,
+     --denyinterfaces then it is still denied.
+
+-A, --noarp
+     Don't request or claim the address by ARP.  This also disables
+     IPv4LL.
+
+-B, --nobackground
+     Don't run in the background when we acquire a lease.  This is
+     mainly useful for running under the control of another process,
+     such as a debugger or a network manager.
+
+-C, --nohook script
+     Don't run this hook script.  Matches full name, or prefixed with
+     2 numbers optionally ending with .sh.
+
+     So to stop dhcpcd from touching your DNS or MTU settings you
+     would do:-
+       dhcpcd -C resolv.conf -C mtu eth0
+
+-G, --nogateway
+     Don't set any default routes.
+
+-K, --nolink
+     Don't receive link messages for carrier status.  You should only
+     have to use this with buggy device drivers or running dhcpcd
+     through a network manager.
+
+-L, --noipv4ll
+     Don't use IPv4LL (aka APIPA, aka Bonjour, aka ZeroConf).
+
+-O, --nooption option
+     Don't request the specified option.  If no option given, then
+     don't request any options other than those to configure the
+     interface and routing.
+
+-Q, --require option
+     Requires the option to be present in all DHCP messages, otherwise
+     the message is ignored.  To enforce that dhcpcd only responds to
+     DHCP servers and not BOOTP servers, you can -Q dhcp_message_type.
+
+-S, --static value
+     Configures a static value.  If you set ip_address then dhcpcd
+     will not attempt to obtain a lease and just use the value for the
+     address with an infinite lease time.
+
+     Here is an example which configures a static address, routes and
+     dns.
+       dhcpcd -S ip_address=192.168.0.10/24 \
+       -S routers=192.168.0.1 \
+       -S domain_name_servers=192.168.0.1 \
+       eth0
+
+-T, --test
+     On receipt of OFFER messages just call /libexec/dhcpcd-run-hooks
+     with the reason of TEST which echo's the DHCP variables found in
+     the message to the console.  The interface configuration isn't
+     touched and neither are any configuration files.
+
+-V, --variables
+     Display a list of option codes and the associated variable for
+     use in dhcpcd-run-hooks(8).  Variables are prefixed with new_ and
+     old_ unless the option number is -.  Variables without an option
+     are part of the DHCP message and cannot be directly requested.
+
+-X, --blacklist address[/cidr]
+     Ignore all packets from address[/cidr].
+
+-Z, --denyinterfaces pattern
+     When discovering interfaces, the interface name must not match
+     pattern which is a space or comma separated list of patterns
+     passed to fnmatch(3).
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E8%93%9D%E7%89%99%E8%AE%BE%E5%A4%87%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之蓝牙设备的使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BVibrator%E6%8C%AF%E5%8A%A8%E5%99%A8%E7%9A%84%E4%BD%BF%E7%94%A8/" title="Android之Vibrator振动器的使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-25</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

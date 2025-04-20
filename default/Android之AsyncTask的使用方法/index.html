@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之AsyncTask的使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之AsyncTask的使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>AsyncTask,是android提供的轻量级的异步类</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>AsyncTask与Thread的区别是：
+    Thread不可以在线程中直接操作UI对象，而需要使用消息机制
+    AsyncTask可以在线程中直接操作UI对象，onPostExecute()
+    其实AsyncTask是Thread的一个高级封装，拆分了主线程与子线程
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>可以直接继承AsyncTask,在类中实现异步操作
+并提供接口反馈当前异步执行的程度(可以通过接口实现UI进度更新)
+最后反馈执行的结果给UI主线程.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>内部会创建一个进程作用域的线程池来管理要运行的任务
+也就就是说当你调用了 AsyncTask#execute()后，AsyncTask会把任务交给线程池
+由线程池来管理创建Thread和运行Therad。
+对于内部的线程 池不同版本的Android的实现方式是不一样的
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Params 启动任务执行的输入参数，比如HTTP请求的URL。
+// Progress 后台任务执行的百分比。
+// Result 后台执行任务最终返回的结果，比如String。
+new AsyncTask&lt;String, Void, String&gt;() {
+
+    // 后台执行，比较耗时的操作都可以放在这里。注意这里不能直接操作UI。
+    @Override
+    protected String doInBackground(String... params) {
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    return null;
+    }
+
+    // 这里是最终用户调用Excute时的接口，当任务执行之前开始调用此方法，可以在这里显示进度对话框。
+    @Override
+    protected void onPreExecute() {
+    super.onPreExecute();
+    }
+
+    // 相当于Handler 处理UI的方式，在这里面可以使用在 doInBackground 得到的结果处理操作UI。
+    // 此方法在主线程执行，任务执行的结果作为此方法的参数返回
+    @Override
+    protected void onPostExecute(String s) {
+    super.onPostExecute(s);
+    }
+
+    // 可以使用进度条增加用户体验度。
+    // 此方法在主线程执行，用于显示任务执行的进度。
+    @Override
+    protected void onProgressUpdate(Void... values) {
+    super.onProgressUpdate(values);
+    }
+
+    // 用户调用取消时，要做的操作
+    @Override
+    protected void onCancelled(String s) {
+    super.onCancelled(s);
+    }
+
+    // 用户调用取消时，要做的操作
+    @Override
+    protected void onCancelled() {
+    super.onCancelled();
+    }
+
+}.execute();
+
+// Thread
+new Thread() {
+    @Override
+    public void run() {
+    super.run();
+    }
+}.start();
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BSlidingMenu%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之SlidingMenu使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BPullToRefresh%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之PullToRefresh的使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-17</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

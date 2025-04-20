@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SDL2之stb_image代替sdl2_image方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>SDL2之stb_image代替sdl2_image方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>SDL2之stb_image代替sdl2_image方法</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// https://www.libsdl.org/projects/SDL_image/
+// 常用的 SDL Image 加载图片一般这样 ...
+SDL_Surface * image = IMG_Load(&quot;/home/danoo/aaa.png&quot;);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 使用 stb image 代替 sdl image 不再需要安装三方库
+// 直接把 stb_image.h 文件导入到项目中即可使用 ...
+https://github.com/nulijiabei/stb/blob/master/stb_image.h
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 同时也是官方推荐 ...
+// https://wiki.libsdl.org/SDL_CreateRGBSurfaceFrom
+
+// This example shows how to create a SDL_Surface* with the data loaded from an image
+// file with the stb_image.h library (https://github.com/nothings/stb/)
+
+// the color format you request stb_image to output,
+// use STBI_rgb if you don't want/need the alpha channel
+int req_format = STBI_rgb_alpha;
+int width, height, orig_format;
+unsigned char* data = stbi_load(&quot;./test.png&quot;, &amp;width, &amp;height, &amp;orig_format, req_format);
+if(data == NULL) {
+  SDL_Log(&quot;Loading image failed: %s&quot;, stbi_failure_reason());
+  exit(1);
+}
+
+// Set up the pixel format color masks for RGB(A) byte arrays.
+// Only STBI_rgb (3) and STBI_rgb_alpha (4) are supported here!
+Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+  int shift = (req_format == STBI_rgb) ? 8 : 0;
+  rmask = 0xff000000 &gt;&gt; shift;
+  gmask = 0x00ff0000 &gt;&gt; shift;
+  bmask = 0x0000ff00 &gt;&gt; shift;
+  amask = 0x000000ff &gt;&gt; shift;
+#else // little endian, like x86
+  rmask = 0x000000ff;
+  gmask = 0x0000ff00;
+  bmask = 0x00ff0000;
+  amask = (req_format == STBI_rgb) ? 0 : 0xff000000;
+#endif
+
+int depth, pitch;
+if (req_format == STBI_rgb) {
+  depth = 24;
+  pitch = 3*width; // 3 bytes per pixel * pixels per row
+} else { // STBI_rgb_alpha (RGBA)
+  depth = 32;
+  pitch = 4*width;
+}
+
+SDL_Surface* surf = SDL_CreateRGBSurfaceFrom((void*)data, width, height, depth, pitch,
+                         rmask, gmask, bmask, amask);
+
+if (surf == NULL) {
+  SDL_Log(&quot;Creating surface failed: %s&quot;, SDL_GetError());
+  stbi_image_free(data);
+  exit(1);
+}
+
+// ... do something useful with the surface ...
+// ...
+
+// when you don't need the surface anymore, free it..
+SDL_FreeSurface(surf);
+// .. *and* the data used by the surface!
+stbi_image_free(data);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B9%8Bhello_video%E5%BE%AA%E7%8E%AF%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91/" title="树莓派之hello_video循环播放视频">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B9%8B%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8%E7%94%BB%E9%9D%A2/" title="树莓派之自定义开机启动画面">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2019-01-09</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

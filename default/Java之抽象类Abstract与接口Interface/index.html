@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Java之抽象类Abstract与接口Interface</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Java之抽象类Abstract与接口Interface </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>final 完结器(最终)</h3>
+
+<blockquote>
+</blockquote>
+
+<p>final关键字在JAVA中被称为完结器，表示最终的意思.</p>
+
+<p>final能声明，类，方法，属性</p>
+
+<p>final声明的对象，不能够被继承</p>
+
+<p>final声明的方法，不能够被重写</p>
+
+<p>final声明的变量，会变成常量，不可以被修改</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 不能够被继承的类
+final class Hello {}
+
+class Hello {
+    // 不能够被继承的方法
+    public final void print() {
+    }
+    // 被变成常量的变量
+    final String HOME = &quot;bj&quot;;
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>抽象类和接口的区别</h3>
+
+<blockquote>
+</blockquote>
+
+<p>接口是公开的，里面不能有私有的方法或变量，是用于让别人使用的，而抽象类是可以有私有方法或私有变量的，</p>
+
+<blockquote>
+</blockquote>
+
+<p>实现接口的一定要实现接口里定义的所有方法，而实现抽象类可以有选择地重写需要用到的方法</p>
+
+<p>应用里，最顶级的是接口，然后是抽象类实现接口，最后才到具体类实现。</p>
+
+<p>口可以实现多重继承，而一个类只能继承一个超类，但可以通过继承多个接口实现多重继承</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>abstract class ClassName 抽象类</h3>
+
+<blockquote>
+</blockquote>
+
+<p>声明而未被实现的方法，必须使用abstract抽象关键字声明</p>
+
+<p>抽象类不能直接实例化，需要子类进行实例化</p>
+
+<p>抽象类被子类继承，子类(如果不是抽象类)，必需重写抽象类中的所有抽象方法</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>abstract class Abs {
+    public void hello() {
+    System.out.println(&quot;Hello&quot;);
+    }
+    // 抽象方法
+    public abstract void print();
+}
+
+class AbsDemo extends Abs {
+
+    // 子类必须复写抽象类中所有抽象方法
+    @Override
+    public void print() {
+    System.out.println(&quot;World&quot;);
+    }
+
+}
+
+public class xxx {
+
+    public void main() {
+    AbsDemo demo = new AbsDemo();
+    demo.hello();
+    demo.print();
+    }
+
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>interface InterfaceName 接口</h3>
+
+<blockquote>
+</blockquote>
+
+<p>接口内全部是由全局常量和公共抽象方法组成</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 接口 1
+interface Inter {
+    public static final int TAG = 100;
+
+    public boolean print();
+}
+
+// 接口 2
+interface Inter2 {
+    public static final int TAG2 = 100;
+
+    public boolean println2();
+}
+
+// 接口 3 继承 接口 1 + 2
+interface Inter3 extends Inter, Inter2 {
+}
+
+// 类 B 实现接口 3 = 1 + 2
+class B implements Inter3 {
+
+    @Override
+    public boolean print() {
+    System.out.print(&quot;Hello&quot;);
+    return false;
+    }
+
+    @Override
+    public boolean println() {
+    System.out.print(&quot;World&quot;);
+    return false;
+    }
+}
+
+// 类 A 实现接口 1 + 2
+class A implements Inter, Inter2 {
+
+    @Override
+    public boolean print() {
+    System.out.print(&quot;Hello&quot;);
+    return false;
+    }
+
+    @Override
+    public boolean println() {
+    System.out.print(&quot;World&quot;);
+    return false;
+    }
+}
+*/
+
+public class xxx {
+
+    public void main() {
+    A a = new A();
+    // Inter.TAG;
+    a.print();
+    a.println();
+    B b = new B();
+    b.print();
+    b.println();
+    }
+
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Java%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E4%B9%8B%E5%A4%9A%E6%80%81/" title="Java面向对象之多态">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Java%E4%B9%8BStatic%E5%85%A8%E5%B1%80%E5%B1%9E%E6%80%A7%E7%9A%84%E4%BD%BF%E7%94%A8/" title="Java之Static全局属性的使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-22</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#java-ref">java <span>7</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

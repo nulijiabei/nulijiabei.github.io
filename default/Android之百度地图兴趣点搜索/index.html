@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之百度地图兴趣点搜索</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之百度地图兴趣点搜索 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>百度地图兴趣点搜索</h3>
+
+<blockquote>
+</blockquote>
+
+<p>POI（Point of Interest），中文可以翻译为“兴趣点”。</p>
+
+<blockquote>
+</blockquote>
+
+<p>在地理信息系统中，一个POI可以是一栋房子、一个商铺、一个邮筒、一个公交站等。</p>
+
+<blockquote>
+</blockquote>
+
+<p>百度地图SDK提供三种类型的POI检索：周边检索、区域检索和城市内检索。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>1，在百度开放平台创建应用，并且设置安全码
+    地址：http://lbsyun.baidu.com/apiconsole/key
+
+2，获取应用访问应用（AK）...
+
+3，从百度开放平台下载SDK
+    地址：http://lbsyun.baidu.com/sdk/download
+
+4，基础SDK开发包：定位功能，基础地图，检索功能，LBS云检索
+    获取文件：BaiduLBS_Android.jar + armeabi（目录）
+
+5，将armeabi目录内文件拷贝到项目的../app/src/main/jniLibs/armeabi下
+    将BaiduLBS_Android.jar拷贝到../app/libs目录下，并导入项目（Studio默认自动导入)
+
+6，下载示例代码：http://lbsyun.baidu.com/sdk/download
+    找到：地图+检索+LBS云检索+工具+周边雷达（目录）
+    找到：/BaiduMapsApiDemo/src/baidumapsdk/demo（目录）
+    找到：PoiSearchDemo.java （文件就是兴趣点搜索示例）
+
+7, 将 PoiSearchDemo.java 导入到项目
+    找到：示例项目中的 AndroidManifest.xml （文件）
+    取出：下面示例中的内容，拷贝到当前项目中 ...
+
+8，下面的：PoiSearchActivity 是我稍加修改的 PoiSearchDemo
+
+9，这样通过指定：city（城市）和（searchkey）地址，就可以进行搜索了
+
+10，需要提醒的是，生成APK需要通过, Build/Generate Signed APK(Studio) 生成
+        否则程序的指纹信息无法与安全码进行匹配...
+
+// 百度地图仅POI搜索还有着很多功能... 具体请看官方文档
+// http://developer.baidu.com/map/index.php?title=androidsdk
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>&lt;application
+    ...
+    &lt;activity android:name=&quot;.PoiSearchDemo&quot; /&gt;
+    &lt;meta-data
+        android:name=&quot;com.baidu.lbsapi.API_KEY&quot;
+        android:value=&quot;OCEmzFbp7EA8LOFmUzzMkHnX&quot; /&gt;
+    &lt;service
+        android:name=&quot;com.baidu.location.f&quot;
+        android:enabled=&quot;true&quot;
+        android:process=&quot;:remote&quot; &gt;
+    &lt;/service&gt;
+    ...
+&lt;/application&gt;
+
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_NETWORK_STATE&quot; &gt;
+&lt;/uses-permission&gt;
+&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; &gt;
+&lt;/uses-permission&gt;
+&lt;uses-permission android:name=&quot;com.android.launcher.permission.READ_SETTINGS&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.WAKE_LOCK&quot; &gt;
+&lt;/uses-permission&gt;
+&lt;uses-permission android:name=&quot;android.permission.CHANGE_WIFI_STATE&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_WIFI_STATE&quot; /&gt;
+&lt;!-- SDK1.5需要android.permission.GET_TASKS权限判断本程序是否为当前运行的应用? --&gt;
+&lt;uses-permission android:name=&quot;android.permission.GET_TASKS&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; &gt;
+&lt;/uses-permission&gt;
+&lt;uses-permission android:name=&quot;android.permission.WRITE_SETTINGS&quot; /&gt;
+&lt;!-- 这个权限用于进行网络定位--&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 这个权限用于访问GPS定位--&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 用于访问wifi网络信息，wifi信息会用于进行网络定位--&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_WIFI_STATE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 获取运营商信息，用于支持提供运营商信息相关的接口--&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_NETWORK_STATE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位--&gt;
+&lt;uses-permission android:name=&quot;android.permission.CHANGE_WIFI_STATE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 用于读取手机当前的状态--&gt;
+&lt;uses-permission android:name=&quot;android.permission.READ_PHONE_STATE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 写入扩展存储，向扩展卡写入数据，用于写入离线定位数据--&gt;
+&lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;&gt;&lt;/uses-permission&gt;
+&lt;!-- 访问网络，网络定位需要上网--&gt;
+&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+&lt;!-- SD卡读取权限，用户写入离线定位数据--&gt;
+&lt;uses-permission android:name=&quot;android.permission.MOUNT_UNMOUNT_FILESYSTEMS&quot;&gt;&lt;/uses-permission&gt;
+&lt;!--允许应用读取低级别的系统日志文件 --&gt;
+&lt;uses-permission android:name=&quot;android.permission.READ_LOGS&quot;&gt;&lt;/uses-permission&gt;
+
+&lt;supports-screens
+    android:anyDensity=&quot;true&quot;
+    android:largeScreens=&quot;true&quot;
+    android:normalScreens=&quot;false&quot;
+    android:resizeable=&quot;true&quot;
+    android:smallScreens=&quot;true&quot; /&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 城市内检索
+mPoiSearch.searchInCity(...);
+// 范围内检索
+mPoiSearch.searchInBound(...);
+// 周边检索
+mPoiSearch.searchNearby(...);
+// POI 详情检索
+mPoiSearch.searchPoiDetail(...);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>官方演示（稍加修改)</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>/**
+ * poi搜索功能
+ */
+public class PoiSearchActivity extends FragmentActivity implements
+        OnGetPoiSearchResultListener, OnGetSuggestionResultListener {
+
+    /**
+     * city         城市
+     * searchkey    地址
+     */
+    private PoiSearch mPoiSearch = null;
+    private SuggestionSearch mSuggestionSearch = null;
+    private BaiduMap mBaiduMap = null;
+    /**
+     * 搜索关键字输入窗口
+     */
+    private AutoCompleteTextView keyWorldsView = null;
+    private ArrayAdapter&lt;String&gt; sugAdapter = null;
+    private int load_Index = 0;
+    /**
+     * 返回
+     */
+    private ImageView backing;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_poisearch);
+        // 返回
+        backing = (ImageView) findViewById(R.id.car_backing);
+        backing.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+        // 初始化搜索模块，注册搜索事件监听
+        mPoiSearch = PoiSearch.newInstance();
+        mPoiSearch.setOnGetPoiSearchResultListener(this);
+        mSuggestionSearch = SuggestionSearch.newInstance();
+        mSuggestionSearch.setOnGetSuggestionResultListener(this);
+        keyWorldsView = new AutoCompleteTextView(this);
+        // keyWorldsView = (AutoCompleteTextView) findViewById(R.id.searchkey);
+        sugAdapter = new ArrayAdapter&lt;String&gt;(this,
+                android.R.layout.simple_dropdown_item_1line);
+        keyWorldsView.setAdapter(sugAdapter);
+        mBaiduMap = ((SupportMapFragment) (getSupportFragmentManager()
+                .findFragmentById(R.id.map))).getBaiduMap();
+        // 获取搜索地址
+        Intent intent = getIntent();
+        String city = intent.getStringExtra(&quot;POI_SEARCH_CITY&quot;);
+        String key = intent.getStringExtra(&quot;POI_SEARCH_KEY&quot;);
+        // 自动搜索
+        searchButtonProcess(city, key);
+        /**
+         * 当输入关键字变化时，动态更新建议列表
+         */
+//        keyWorldsView.addTextChangedListener(new TextWatcher() {
+//
+//            @Override
+//            public void afterTextChanged(Editable arg0) {
+//
+//            }
+//
+//            @Override
+//            public void beforeTextChanged(CharSequence arg0, int arg1,
+//                                          int arg2, int arg3) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence cs, int arg1, int arg2,
+//                                      int arg3) {
+//                if (cs.length() &lt;= 0) {
+//                    return;
+//                }
+//                String city = ((EditText) findViewById(R.id.city)).getText()
+//                        .toString();
+//                /**
+//                 * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
+//                 */
+//                mSuggestionSearch
+//                        .requestSuggestion((new SuggestionSearchOption())
+//                                .keyword(cs.toString()).city(city));
+//            }
+//        });
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mPoiSearch.destroy();
+        mSuggestionSearch.destroy();
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    /**
+     * 影响搜索按钮点击事件
+     */
+    public void searchButtonProcess(String city, String searchkey) {
+//        EditText editCity = (EditText) findViewById(R.id.city);
+//        EditText editSearchKey = (EditText) findViewById(R.id.searchkey);
+//        mPoiSearch.searchInCity((new PoiCitySearchOption())
+//                .city(editCity.getText().toString())
+//                .keyword(editSearchKey.getText().toString())
+//                .pageNum(load_Index));
+            // 城市内检索
+            mPoiSearch.searchInCity((new PoiCitySearchOption())
+                    .city(city)
+                    .keyword(searchkey)
+                    .pageNum(load_Index));
+            // 范围内检索
+            mPoiSearch.searchInBound(...);
+            // 周边检索
+            mPoiSearch.searchNearby(...);
+            // POI 详情检索
+            mPoiSearch.searchPoiDetail(...);
+    }
+
+    public void goToNextPage(View v) {
+        load_Index++;
+        // searchButtonProcess();
+    }
+
+    public void onGetPoiResult(PoiResult result) {
+        if (result == null
+                || result.error == SearchResult.ERRORNO.RESULT_NOT_FOUND) {
+            Toast.makeText(PoiSearchActivity.this, &quot;未找到结果&quot;, Toast.LENGTH_LONG)
+                    .show();
+            return;
+        }
+        if (result.error == SearchResult.ERRORNO.NO_ERROR) {
+            mBaiduMap.clear();
+            PoiOverlay overlay = new MyPoiOverlay(mBaiduMap);
+            mBaiduMap.setOnMarkerClickListener(overlay);
+            overlay.setData(result);
+            overlay.addToMap();
+            overlay.zoomToSpan();
+            return;
+        }
+        if (result.error == SearchResult.ERRORNO.AMBIGUOUS_KEYWORD) {
+
+            // 当输入关键字在本市没有找到，但在其他城市找到时，返回包含该关键字信息的城市列表
+            String strInfo = &quot;在&quot;;
+            for (CityInfo cityInfo : result.getSuggestCityList()) {
+                strInfo += cityInfo.city;
+                strInfo += &quot;,&quot;;
+            }
+            strInfo += &quot;找到结果&quot;;
+            Toast.makeText(PoiSearchActivity.this, strInfo, Toast.LENGTH_LONG)
+                    .show();
+        }
+    }
+
+    public void onGetPoiDetailResult(PoiDetailResult result) {
+        if (result.error != SearchResult.ERRORNO.NO_ERROR) {
+            Toast.makeText(PoiSearchActivity.this, &quot;抱歉，未找到结果&quot;, Toast.LENGTH_SHORT)
+                    .show();
+        } else {
+            Toast.makeText(PoiSearchActivity.this, result.getName() + &quot;: &quot; + result.getAddress(), Toast.LENGTH_SHORT)
+                    .show();
+        }
+    }
+
+    @Override
+    public void onGetSuggestionResult(SuggestionResult res) {
+        if (res == null || res.getAllSuggestions() == null) {
+            return;
+        }
+        sugAdapter.clear();
+        for (SuggestionResult.SuggestionInfo info : res.getAllSuggestions()) {
+            if (info.key != null)
+                sugAdapter.add(info.key);
+        }
+        sugAdapter.notifyDataSetChanged();
+    }
+
+    private class MyPoiOverlay extends PoiOverlay {
+
+        public MyPoiOverlay(BaiduMap baiduMap) {
+            super(baiduMap);
+        }
+
+        @Override
+        public boolean onPoiClick(int index) {
+            super.onPoiClick(index);
+            PoiInfo poi = getPoiResult().getAllPoi().get(index);
+            // if (poi.hasCaterDetails) {
+            mPoiSearch.searchPoiDetail((new PoiDetailSearchOption())
+                    .poiUid(poi.uid));
+            // }
+            return true;
+        }
+    }
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>补充, 自定义位置图标及显示位置数量</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>百度地图在新版本中开放了 OverlayManager 和 PoiOverlay 
+
+自V3.6.0起，原内置覆盖物相关类代码开源
+
+（OverlayManager/PoiOverlay/TransitRouteOverlay/WalkingRouteOverlay/BusLineOverlay）
+
+源码可在BaiduMapsApiDemo工程中找到。
+
+// ...
+
+新增的聚合功能和内置覆盖物源码包com.baidu.mapapi.overlayutil开放
+
+包括: 
+
+    BusLineOverlay, 
+    DrivingRouteOverlay, 
+    OverlayManager, 
+    PoiOverlay, 
+    TransitRouteOverlay, 
+    WalkingRouteOverlay，
+
+开发者使用到这些功能可从官方Demo中src目录下获取源码，SDK中的jar包将不再包含这部分。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class PoiOverlay extends OverlayManager {
+
+    // 设置最大显示兴趣点数量
+    private static final int MAX_POI_SIZE = 1;
+
+    @Override
+    public final List&lt;OverlayOptions&gt; getOverlayOptions() {
+        if (mPoiResult == null || mPoiResult.getAllPoi() == null) {
+            return null;
+        }
+        List&lt;OverlayOptions&gt; markerList = new ArrayList&lt;OverlayOptions&gt;();
+        int markerSize = 0;
+        for (int i = 0; i &lt; mPoiResult.getAllPoi().size()
+                &amp;&amp; markerSize &lt; MAX_POI_SIZE; i++) {
+            if (mPoiResult.getAllPoi().get(i).location == null) {
+                continue;
+            }
+            markerSize++;
+            Bundle bundle = new Bundle();
+            bundle.putInt(&quot;index&quot;, i);
+// 默认设置
+//            markerList.add(new MarkerOptions()
+//                    .icon(BitmapDescriptorFactory.fromAssetWithDpi(&quot;Icon_mark&quot;
+//                            + markerSize + &quot;.png&quot;)).extraInfo(bundle)
+//                    .position(mPoiResult.getAllPoi().get(i).location));
+// 自定义设置
+            markerList.add(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.default_icon_baidu)).extraInfo(bundle)
+                    .position(mPoiResult.getAllPoi().get(i).location));
+
+        }
+        return markerList;
+    }
+
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BELBS%E4%BA%91%E6%90%9C%E7%B4%A2/" title="Android之百度地图LBS云搜索">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8B%E9%94%81%E5%92%8C%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84Map/" title="Golang之锁和线程安全的Map">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-07-30</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

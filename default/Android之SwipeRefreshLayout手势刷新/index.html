@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之SwipeRefreshLayout手势刷新</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之SwipeRefreshLayout手势刷新 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>SwipeRefreshLayout</h3>
+
+<blockquote>
+</blockquote>
+
+<p>SwipeRefreshLayout组件是由SDK提供，已经被用于一些Android自己的应用程序（比如Gmail）的实现。</p>
+
+<blockquote>
+</blockquote>
+
+<p>SwipeRefreshLayout组件只接受一个子组件：即需要刷新的那个组件。</p>
+
+<p>它使用一个侦听机制来通知拥有该组件的监听器有刷新事件发生</p>
+
+<p>换句话说我们的Activity必须实现通知的接口。</p>
+
+<p>该Activity负责处理事件刷新和刷新相应的视图。</p>
+
+<p>一旦监听者接收到该事件，就决定了刷新过程中应处理的地方。</p>
+
+<p>如果要展示一个“刷新动画”，它必须调用setRefrshing（true），否则取消动画就调用setRefreshing（false）。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// ...
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;android.support.v4.widget.SwipeRefreshLayout
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:id=&quot;@+id/proxy&quot;&gt;
+
+    &lt;FrameLayout
+    android:id=&quot;@+id/preference&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;&lt;/FrameLayout&gt;
+
+&lt;/android.support.v4.widget.SwipeRefreshLayout&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    final SwipeRefreshLayout swipeView = (SwipeRefreshLayout) findViewById(R.id.swipe);
+    final TextView rndNum = (TextView) findViewById(R.id.rndNum);
+    // PS: setColorScheme 已经被弃用，使用setColorSchemeResources()来设置颜色。
+    // swipeView.setColorScheme(android.R.color.holo_blue_dark,
+             android.R.color.holo_blue_light, 
+             android.R.color.holo_green_light, 
+             android.R.color.holo_green_light);
+    swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+    @Override
+    public void onRefresh() {
+        swipeView.setRefreshing(true);
+        Log.d(&quot;Swipe&quot;, &quot;Refreshing Number&quot;);
+        ( new Handler()).postDelayed(new Runnable() {
+        @Override
+        public void run() {
+            swipeView.setRefreshing(false);
+            double f = Math.random();
+            rndNum.setText(String.valueOf(f));
+        }
+        }, 3000);
+    }
+    });
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>补充</h3>
+
+<blockquote>
+</blockquote>
+
+<p>解决，下拉刷新时手势与其它下拉控件冲突问题</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// XML
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;com.example.nljb.surpass.MySwipeRefreshLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:id=&quot;@+id/fragment_preference&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;FrameLayout
+    android:id=&quot;@+id/preference&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;&lt;/FrameLayout&gt;
+
+&lt;/com.example.nljb.surpass.MySwipeRefreshLayout&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 控制下拉距离来实现大距离刷新，小距离忽略
+public class MySwipeRefreshLayout extends SwipeRefreshLayout {
+
+    private float mPrev;
+
+    public MySwipeRefreshLayout(Context context, AttributeSet attrs) {
+    super(context, attrs);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+
+    switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+        mPrev = MotionEvent.obtain(event).getY();
+        break;
+
+        case MotionEvent.ACTION_MOVE:
+        final float e = event.getY();
+        float diff = Math.abs(e - mPrev);
+        if (diff &lt; 200) {
+            return false;
+        }
+    }
+
+    return super.onInterceptTouchEvent(event);
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>下拉刷新时切换重影问题</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 这个没找到什么好办法
+// 网上说的设置背景之类的都无效
+// 解决办法时，当发现用户离开当前页面
+// 的意图时，停止刷新
+
+// Refresh
+public void startRefresh() {
+    refreshStatus = true;
+    layout.setRefreshing(true);
+}
+
+// Refresh
+public void stopRefresh() {
+    layout.setRefreshing(false);
+    refreshStatus = false;
+}
+
+// 比如我这里是，当用户点击侧滑箭头时停止刷新
+@Override
+public boolean onOptionsItemSelected(MenuItem item) {
+    int id = item.getItemId();
+    switch (id) {
+        // 判断是否为主按钮点击
+        case android.R.id.home:
+        // 拦截刷新状态
+        if (refreshStatus) {
+            // 停止刷新
+            stopRefresh();
+        }
+    }
+    return super.onOptionsItemSelected(item);
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BZXing%E4%BB%8E%E7%9B%B8%E5%86%8C%E6%89%AB%E6%8F%8F%E4%BA%8C%E7%BB%B4%E7%A0%81/" title="Android之ZXing从相册扫描二维码">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BWebSocket%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之WebSocket使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-07</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>3G-网卡适配</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>3G-网卡适配 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Content:</p>
+
+<p>一、查看上网卡信息</p>
+
+<pre><code># pacman -S usbutils
+</code></pre>
+
+<p>插入上网卡前后比对，我的信息如下</p>
+
+<pre><code>#lsusb
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 002: ID 8087:0020 Intel Corp. Integrated Rate Matching Hub
+Bus 002 Device 002: ID 8087:0020 Intel Corp. Integrated Rate Matching Hub
+Bus 001 Device 003: ID 04fc:2801 Sunplus Technology Co., Ltd 
+Bus 001 Device 004: ID 20b9:1682  
+Bus 002 Device 003: ID 192f:0916 Avago Technologies, Pte.
+
+# lsusb
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 002: ID 8087:0020 Intel Corp. Integrated Rate Matching Hub
+Bus 002 Device 002: ID 8087:0020 Intel Corp. Integrated Rate Matching Hub
+Bus 001 Device 003: ID 04fc:2801 Sunplus Technology Co., Ltd 
+Bus 001 Device 005: ID 05c6:1000 Qualcomm, Inc. Mass Storage Device
+Bus 002 Device 003: ID 192f:0916 Avago Technologies, Pte.
+</code></pre>
+
+<p>可以看出 Bus 001 Device 005: ID 05c6:1000 Qualcomm, Inc. Mass Storage Device 这个就是上网卡的信息了</p>
+
+<p>看到上网卡的 idVendor 05c6 和 idProduct 1000，格式是 idVendor:idProduct</p>
+
+<p>二、把上网卡从cd-rom设备转换到modem设备</p>
+
+<pre><code># pacman -S usb_modeswitch
+</code></pre>
+
+<p>安装好后到/etc/usb_modeswitch.d/目录运行</p>
+
+<pre><code>#head -n 2 * 就可以看到当前版本usb_modeswitch支持的3g上网卡的型号了
+
+# usb_modeswitch -c /etc/usb_modeswitch.setup
+</code></pre>
+
+<p>试试成功不，如果不成功，那么试试这个</p>
+
+<pre><code># usb_modeswitch -v 05c6 -p 1000 -M 5553424312345678000000000000061b000000020000000000000000000000 -R 1
+# modprobe usbserial vendor=0x05c6 product=0x1000
+# ls /dev/tty*
+</code></pre>
+
+<p>看能不能看的到ttyUSB0这些，如果有则继续，如果无请另寻它法</p>
+
+<p>三、开始拨号</p>
+
+<pre><code># pacman -S wvdial
+
+# wvdialconf
+</code></pre>
+
+<p>会自动生成 /etc/wvdial.conf</p>
+
+<p>再添加下面几行进去</p>
+
+<p>（电信cdma的例子，电话号码：#777 用户名：(或是card) 密码: vnet.mobi (或是card)）</p>
+
+<pre><code>Phone = #777
+Username = 
+Password = vnet.mobi
+Stupid Mode = 1
+
+#wvdial
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Date-%E5%91%BD%E4%BB%A4%E8%AE%BE%E7%BD%AE%E7%B3%BB%E7%BB%9F%E6%97%B6%E9%97%B4%E7%9A%84%E6%96%B9%E6%B3%95/" title="Date-命令设置系统时间的方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-%E7%BB%98%E5%9B%BE%E6%8A%80%E6%9C%AF-image-draw-%E5%8C%85%E4%BB%8B%E7%BB%8D/" title="Golang-绘图技术-image-draw-包介绍">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-10</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

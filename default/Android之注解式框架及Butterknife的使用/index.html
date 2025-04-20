@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之注解式框架及Butterknife的使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之注解式框架及Butterknife的使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>注解式框架</h3>
+
+<blockquote>
+</blockquote>
+
+<h3>什么是注解式开发:</h3>
+
+<pre><code>JDK1.5后支持注解方式,想用注解式开发,就要自定义注解
+
+结构:
+    @+注解名(也可以叫类名)+传递的属性值,key和value,
+    可设置目标范围:方法(Method)、属性(Filed)、类(Type)
+
+自定义注解要用到
+    @interface:用于定义注解;
+    @Target:用于描述注解的使用范围;
+    @Retention: 注解的生命周期,一般RetentionPolicy.RUNTIME
+
+在Android中使用一般是简化代码,提升开发效率,清晰简介
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>流的注解式框架有Dagger、ButerKnife、AndroidAnnotations。</h3>
+
+<pre><code>AndroidAnnotations是一个利用注解方式来简化代码结构,提高开发效率的开源框架。
+    一，配置麻烦,需要在项目清单里注册生成的子类。
+    二，反射机制会占用资源内存和耗时。
+
+ButerKnife用起来方便,配置简单,强大的View注入绑定和简单的常用方法注解。
+
+Dagger采用预编译技术,高效,但是对View绑定操作注解不是很方便。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>ButerKnife特点:</h3>
+
+<pre><code>强大方便的处理View绑定和Click事件,简化代码,提升开发效率
+
+方便的处理ListView的Adapter里的ViewHolder绑定问题 
+
+运行时不会影响APP效率,使用配置方便
+
+代码思路清晰,可读性强
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>View绑定:</h3>
+
+<pre><code>onCreate里注册:
+    ButerKnife.inject(this);
+
+Activity声明绑定控件,例如:
+    @InjectView(R.id.title)
+    TextView title;
+
+onclick等事件处理: 例如:
+    @OnClick(R.id.submit) 
+    public void sayHi(Button button){
+        button.setText(&quot;Hello!&quot;);   
+    }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>@InjectView(R.id.arc_progress)
+ArcProgress arcProgress;
+
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    // Init
+    ButterKnife.inject(this);
+}
+
+@OnClick(R.id.arc_progress)
+public void initProgress() {
+    // ...
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>用ListView展示一个列表数据，每个Item里含有一个Button，可以点击</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>@OnItemSelected(R.id.list_view)
+void onItemSelected(int position) {
+  // TODO ...
+}
+
+@OnItemSelected(value = R.id.maybe_missing, callback = NOTHING_SELECTED)
+void onNothingSelected() {
+  // TODO ...
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>@Override
+public View getView(final int position, View convertView, ViewGroup parent) {
+    ConfigViewHolder configViewHolder = null;
+    if (convertView == null) {
+        convertView = View.inflate(context, R.layout.adapter_config, null);
+        configViewHolder = new ConfigViewHolder(convertView);
+        convertView.setTag(configViewHolder);
+    } else {
+        configViewHolder = (ConfigViewHolder) convertView.getTag();
+    }
+    ......
+} 
+
+// ViewHolder
+class ConfigViewHolder {
+
+    @InjectView(R.id.item_status)
+    ImageView item_status;
+
+    @InjectView(R.id.item_description)
+    TextView item_description;
+
+    public ConfigViewHolder(View view) {
+        ButterKnife.inject(this, view);
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>在Fragegment中使用, 注解框架</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class FancyFragment extends Fragment {
+  @InjectView(R.id.button1) Button button1;
+  @InjectView(R.id.button2) Button button2;
+
+  @Override View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.fancy_fragment, container, false);
+    ButterKnife.inject(this, view);
+    // TODO Use &quot;injected&quot; views...
+    return view;
+  }
+}
+
+@Override void onDestroyView() {
+    super.onDestroyView();
+    ButterKnife.reset(this);
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>By default, both @InjectView and listener injections are required. An exception will be thrown if the target view cannot be found.
+
+To suppress this behavior and create an optional injection, add the @Optional annotation to the field or method.
+
+@Optional @InjectView(R.id.might_not_be_there) TextView mightNotBeThere;
+
+@Optional @OnClick(R.id.maybe_missing) void onMaybeMissingClicked() {
+  // TODO ...
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Custom views can bind to their own listeners by not specifying an ID.
+
+public class FancyButton extends Button {
+  @OnClick
+  public void onClick() {
+    // TODO do something!
+  }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>补充</h3>
+
+<blockquote>
+</blockquote>
+
+<p>butterknife-7.0.1 发布，有些使用方法变更</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>class ExampleActivity extends Activity {
+  @Bind(R.id.title) TextView title;
+  @Bind(R.id.subtitle) TextView subtitle;
+  @Bind(R.id.footer) TextView footer;
+
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.simple_activity);
+    ButterKnife.bind(this);
+    // TODO Use fields...
+  }
+}
+
+public void bind(ExampleActivity activity) {
+  activity.subtitle = (android.widget.TextView) activity.findViewById(2130968578);
+  activity.footer = (android.widget.TextView) activity.findViewById(2130968579);
+  activity.title = (android.widget.TextView) activity.findViewById(2130968577);
+}
+
+public class FancyFragment extends Fragment {
+  @Bind(R.id.button1) Button button1;
+  @Bind(R.id.button2) Button button2;
+
+  @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.fancy_fragment, container, false);
+    ButterKnife.bind(this, view);
+    // TODO Use fields...
+    return view;
+  }
+}
+
+public class MyAdapter extends BaseAdapter {
+  @Override public View getView(int position, View view, ViewGroup parent) {
+    ViewHolder holder;
+    if (view != null) {
+      holder = (ViewHolder) view.getTag();
+    } else {
+      view = inflater.inflate(R.layout.whatever, parent, false);
+      holder = new ViewHolder(view);
+      view.setTag(holder);
+    }
+
+    holder.name.setText(&quot;John Doe&quot;);
+    // etc...
+
+    return view;
+  }
+
+  static class ViewHolder {
+    @Bind(R.id.title) TextView name;
+    @Bind(R.id.job_title) TextView jobTitle;
+
+    public ViewHolder(View view) {
+      ButterKnife.bind(this, view);
+    }
+  }
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E7%9A%84Activity%E5%88%87%E6%8D%A2%E5%8A%A8%E7%94%BB%E7%89%B9%E6%95%88%E5%BA%93SwitchLayout/" title="Android的Activity切换动画特效库SwitchLayout">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8Blayout_weight%E4%BB%8B%E7%BB%8D/" title="Android之layout_weight介绍">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-06-24</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-Time</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-Time </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Go的time包是标准库中的包之一</p>
+
+<p>不用说，几乎是开发必须用到的包之一。</p>
+
+<p>time包的说明文档在：<a href="http://golang.org/pkg/time/">http://golang.org/pkg/time/</a></p>
+
+<p>看看godoc文档，最大的数据类型就是Time了，这个Time类型最微小可以表示到nanosecond（微毫秒，十亿份之一秒）</p>
+
+<p><img src="/assets/media/Golang-Time/1.jpg" alt="" width="600"></p>
+
+<p>Time的比较是使用Before,After和Equal方法。看一眼After：</p>
+
+<pre><code>func (t Time) After(u Time) bool
+</code></pre>
+
+<p>很好，返回的是bool类型，是我们所需要的。</p>
+
+<p>Sub方法返回的是两个时间点之间的时间距离，看上图看到它返回的是Duration结构，这个结构的具体类型和操作也在godoc中</p>
+
+<p>Add方法和Sub方法是相反的，获取t0和t1的时间距离d是使用Sub，将t0加d获取t1就是使用Add方法</p>
+
+<p>IsZero方法：Time的zero时间点是January 1, year 1, 00:00:00 UTC，这个函数判断一个时间是否是zero时间点</p>
+
+<p>Local，UTC，Ln是用来显示和计算地区时间的。</p>
+
+<p>下面从几个需求直接看time的使用1 请打出当前时间的时间戳，然后将时间戳格式为年月日时分秒的形式</p>
+
+<pre><code>package main
+
+import (
+    &quot;fmt&quot;
+    &quot;time&quot;
+)
+
+func main() {
+    //时间戳
+    t := time.Now().Unix()
+    fmt.Println(t)
+
+    //时间戳到具体显示的转化
+    fmt.Println(time.Unix(t, 0).String())
+
+    //带纳秒的时间戳
+    t = time.Now().UnixNano()
+    fmt.Println(t)
+    fmt.Println(&quot;------------------&quot;)
+
+    //基本格式化的时间表示
+    fmt.Println(time.Now().String())
+
+    fmt.Println(time.Now().Format(&quot;2006year 01month 02day&quot;))
+
+}
+</code></pre>
+
+<p>显示：</p>
+
+<p><img src="/assets/media/Golang-Time/2.jpg" alt="" width="600"></p>
+
+<p>特别是Format这个函数，可以好好使用</p>
+
+<p>输出当前星期几？</p>
+
+<pre><code>package main
+
+import (
+    &quot;fmt&quot;
+    &quot;time&quot;
+)
+
+func main() {
+    //时间戳
+    t := time.Now()
+    fmt.Println(t.Weekday().String())
+
+}
+</code></pre>
+
+<p><img src="/assets/media/Golang-Time/3.jpg" alt="" width="600"></p>
+
+<p>文档中对这个Weekday类型就没有说明!!没法，直接看代码可以看到：</p>
+
+<p><img src="/assets/media/Golang-Time/4.jpg" alt="" width="600"></p>
+
+<p>Weekday有一个String()方法</p>
+
+<p>好了，看到这里外带我们有一个推测：</p>
+
+<p>当一个结构中有定义String()函数的时候，fmt.Println()是会调用String的</p>
+
+<p>例子如下：</p>
+
+<pre><code>package main
+
+import (
+    &quot;fmt&quot;
+)
+
+type MyStruct struct{
+}
+
+func (d MyStruct)String() string {return &quot;mystruct&quot;}
+
+func main() {
+    me := new(MyStruct)
+    fmt.Println(me)
+
+}
+</code></pre>
+
+<p><img src="/assets/media/Golang-Time/5.jpg" alt="" width="600"></p>
+
+<p>Go的Time之旅结束！！</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0/" title="Golang-使用命令行参数">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/old_passwords/" title="old_passwords">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-15</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

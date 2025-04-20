@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>关于bind的使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>关于bind的使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>无连接的socket的客户端和服务端以及面向连接socket的服务端通过调用bind函数来配置本地信息。</p>
+
+<p>使用bind函数时，通过将my_addr.sin_port置为0，函数会自动为你选择一个未占用的端口来使用。</p>
+
+<p>Bind()函数在成功被调用时返回0；出现错误时返回&rdquo;-1&rdquo;并将errno置为相应的错误号。</p>
+
+<hr />
+
+<p>需要注意的是，在调用bind函数时一般不要将端口号置为小于1024的值</p>
+
+<p>因为1到1024是保留端口号，你可以选择大于1024中的任何一个没有被占用的端口号。</p>
+
+<hr />
+
+<p>有连接的socket客户端通过调用Connect函数在socket数据结构中保存本地和远端信息，无须调用bind()</p>
+
+<p>因为这种情况下只需知道目的机器的IP地址，而客户通过哪个端口与服务器建立连接并不需要关心</p>
+
+<p>socket执行体为你的程序自动选择一个未被占用的端口，并通知你的程序数据什么时候打开端口。</p>
+
+<hr />
+
+<p>总之：</p>
+
+<p>1.需要在建连前就知道端口的话，需要 bind</p>
+
+<p>2.需要通过指定的端口来通讯的话，需要 bind</p>
+
+<p>具体到上面那两个程序，本来用的是TCP，客户端就不用绑定端口了</p>
+
+<p>绑定之后只能运行一个client的程序属于自己人为设定的障碍</p>
+
+<p>而从服务器那边得到的客户机连接端口号（是系统自动分配的）</p>
+
+<p>与这边客户机绑定的端口号根本是不相关的，所以客户端绑定也就失去了意义。</p>
+
+<hr />
+
+<p>首先，服务器和客户端都可以bind，bind并不是服务器的专利。</p>
+
+<p>客户端进程bind端口: 由进程选择一个端口去连服务器</p>
+
+<p>（如果默认情况下，调用bind函数时，内核指定的端口是同一个，</p>
+
+<p>那么调用多个调用了bind（）的client程序，会出现端口被占用的错误）</p>
+
+<p>注意这里的端口是客户端的端口。如果不分配就表示交给内核去选择一个可用端口。</p>
+
+<p>客户端进程bind IP地址：相当于为发送出去的IP数据报分配了源IP地址</p>
+
+<p>但交给进程分配IP地址的时候（就是这样写明了bind IP地址的时候）</p>
+
+<p>这个IP地址必须是主机的一个接口，不能分配一个不存在的IP。</p>
+
+<p>如果不分配就表示由内核根据所用的输出接口来选择源IP地址。</p>
+
+<hr />
+
+<p>一般情况下客户端是不用调用bind函数的，一切都交给内核搞定，YES！</p>
+
+<p>服务端进程bind端口：基本是必须要做的事情</p>
+
+<p>比如一个服务器启动时（比如freebsd），它会一个一个的捆绑众所周知的端口来提供服务</p>
+
+<p>同样，如果bind了一个端口就表示我这个服务器会在这个端口提供一些“特殊服务”。</p>
+
+<p>服务端进程bind IP地址：</p>
+
+<p>目的是限制了服务端进程创建的socket只接受那些目的地为此IP地址的客户链接，一般一个服务器程序里都有</p>
+
+<p>servaddr.sin_addr.s_addr = htonl(INADDR_ANY); // 只是针对IP4，IP6代码不太一样</p>
+
+<p>这样一句话，意思就是：我不指定客户端的IP，随便连，来者不拒！</p>
+
+<p>总之只要你bind时候没有指定哪一项（置为0），内核会帮你选择。</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B/" title="系统启动过程">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/iostream%2Cfstream%2Csstream/" title="iostream,fstream,sstream">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

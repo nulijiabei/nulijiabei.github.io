@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang之RPC介绍</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang之RPC介绍 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>RPC</h3>
+
+<blockquote>
+</blockquote>
+
+<p>标准库的RPC</p>
+
+<blockquote>
+</blockquote>
+
+<p>RPC是远程调用的简称, 简单的说就是要像调用本地函数一样调用服务器的函数.</p>
+
+<blockquote>
+</blockquote>
+
+<p>Go语言的标准库已经提供了RPC框架和不同的RPC实现.</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>下面是一个服务器的例子</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>type Echo int
+
+func (t *Echo) Hi(args string, reply *string) error {
+    *reply = &quot;echo:&quot; + args
+    return nil
+}
+
+func main() {
+    rpc.Register(new(Echo))
+    rpc.HandleHTTP()
+    l, e := net.Listen(&quot;tcp&quot;, &quot;:1234&quot;)
+    if e != nil {
+    log.Fatal(&quot;listen error:&quot;, e)
+    }
+    http.Serve(l, nil)
+}
+
+其中 rpc.Register 用于注册RPC服务, 默认的名字是对象的类型名字(这里是Echo).
+
+如果需要指定特殊的名字, 可以用 rpc.RegisterName 进行注册.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>被注册对象的类型所有满足以下规则的方法会被导出到RPC服务接口:
+
+func (t *T) MethodName(argType T1, replyType *T2) error
+
+// 也就是一个方法带有两个参数(类或类型)，第一个是接收参数，第二个返回参数（类或类型的指针）+ error
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>被注册对应至少要有一个方法满足这个特征, 否则可能会注册失败.
+
+然后 rpc.HandleHTTP 用于指定 RPC 的传输协议, 这里是采用 http 协议作为RPC调用的载体.
+
+用户也可以用rpc.ServeConn接口, 定制自己的传输协议.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>客户端可以这样调用Echo.Hi接口:</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>func main() {
+    client, err := rpc.DialHTTP(&quot;tcp&quot;, &quot;127.0.0.1:1234&quot;)
+    if err != nil {
+    log.Fatal(&quot;dialing:&quot;, err)
+    }
+
+    var args = &quot;hello rpc&quot;
+    var reply string
+    err = client.Call(&quot;Echo.Hi&quot;, args, &amp;reply)
+    if err != nil {
+    log.Fatal(&quot;arith error:&quot;, err)
+    }
+    fmt.Printf(&quot;Arith: %d*%d=%d\n&quot;, args.A, args.B, reply)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>客户端先用rpc.DialHTTP和RPC服务器进行一个链接(协议必须匹配).
+
+然后通过返回的client对象进行远程函数调用. 
+
+函数的名字是由client.Call 第一个参数指定(是一个字符串).
+
+基于HTTP的RPC调用一般是在调试时使用, 默认可以通过浏览&quot;127.0.0.1:1234/debug/rpc&quot;页面查看RPC的统计信息.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>基于 JSON 的 RPC 调用</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Go的标准库还提供了一个&quot;net/rpc/jsonrpc&quot;包, 用于提供基于JSON编码的RPC支持.
+
+服务器部分只需要用rpc.ServeCodec指定json编码协议就可以了:
+
+func main() {
+    lis, err := net.Listen(&quot;tcp&quot;, &quot;:1234&quot;)
+    if err != nil {
+    return err
+    }
+    defer lis.Close()
+
+    srv := rpc.NewServer()
+    if err := srv.RegisterName(&quot;Echo&quot;, new(Echo)); err != nil {
+    return err
+    }
+
+    for {
+    conn, err := lis.Accept()
+    if err != nil {
+        log.Fatalf(&quot;lis.Accept(): %v\n&quot;, err)
+    }
+    go srv.ServeCodec(jsonrpc.NewServerCodec(conn))
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>客户端部分值需要用 jsonrpc.Dial 代替 rpc.Dial 就可以了:
+
+func main() {
+    client, err := jsonrpc.DialHTTP(&quot;tcp&quot;, &quot;127.0.0.1:1234&quot;)
+    if err != nil {
+    log.Fatal(&quot;dialing:&quot;, err)
+    }
+    ...
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>Go语言的RPC客户端是一个使用简单, 而且功能强大的RPC库.</p>
+
+<p>基于标准的RPC库我们可以方便的定制自己的RPC实现(传输协议和串行化协议都可以定制).</p>
+
+<p>以后有时间，我会分析一下RPC这个库，来了解一下具体的实现，而且内部使用了很多反射</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8BReflect%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D/" title="Golang之Reflect使用介绍">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BEventBus%E7%9A%84%E4%BD%BF%E7%94%A8/" title="Android之EventBus的使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-05-26</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

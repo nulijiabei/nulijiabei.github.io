@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang Android</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang Android </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>声明：本文转自(<a href="http://blog.nzlov.com/article/44/golang-android.html">http://blog.nzlov.com/article/44/golang-android.html</a>) , 感谢作者.</p>
+
+<hr />
+
+<p>随着Golang发布1.4正式版，Android下的开发也可以实现(go/mobile)了</p>
+
+<p>就等1.5版本的ios支持了，可以使用golang跨平台开发游戏了&hellip;</p>
+
+<hr />
+
+<h3>环境准备</h3>
+
+<hr />
+
+<h3>Ant</h3>
+
+<blockquote>
+</blockquote>
+
+<p>下载apache-ant并配置好环境变量。</p>
+
+<pre><code>$ANT_HOME=antpath //你的ant目录
+$PATH=$ANT_HOME/bin:$PATH
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>Android</h3>
+
+<blockquote>
+</blockquote>
+
+<p>下载SDK,android-ndk-r9d(这里之所以不用r10d是因为在测试时ndk源码出现问题，而r9d没有问题)。</p>
+
+<blockquote>
+</blockquote>
+
+<p>安装并配置环境变量。</p>
+
+<pre><code>$ANDROID_HOME=sdkpath //你的sdk目录
+$NDK_ROOT=ndkpath //你的ndk目录
+$PATH=$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$NDK_ROOT:$PATH
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>Go</h3>
+
+<p>1.下载Go，或者克隆。</p>
+
+<pre><code>Git
+$ git clone https://github.com/golang/go.git
+Hg(不推荐使用)
+$ hg clone https://code.google.com/p/go
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>2.配置环境变量</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>$GOOS=darwin
+$GOARCH=amd64
+$GOROOT=gopath //你的go源码目录
+$GOPATH=goworkpath //你的go工作目录
+$GOBIN=$GOPATH/bin
+$PATH=$GOBIN:$GOROOT/bin:$PATH
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>3.编译 使用console进入go源码目录执行</p>
+
+<pre><code>$cd $GOROOT/src
+$./all.bash
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>4.测试</p>
+
+<pre><code>$go version
+go version devel +082a237 Fri Dec 12 04:59:51 2014 +0000 darwin/amd64
+</code></pre>
+
+<hr />
+
+<h3>构建Golang Android环境</h3>
+
+<hr />
+
+<h3>Android NDK交叉环境构建</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>$$NDK_ROOT/build/tools/make-standalone-toolchain.sh --platform=android-9 \
+    --install-dir=$NDK_ROOT --system=darwin-x86_64
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>执行结果：</p>
+
+<pre><code>Auto-config: --toolchain=arm-linux-androideabi-4.6
+Copying prebuilt binaries...
+Copying sysroot headers and libraries...
+Copying libstdc++ headers and libraries...
+Copying files to: /Users/qipeng/program/android/android-ndk-r9d
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>Golang 交叉环境构建</p>
+
+<pre><code>$cd $GOROOT/src
+$CC_FOR_TARGET=$NDK_ROOT/bin/arm-linux-androideabi-gcc GOOS=android \
+    GOARCH=arm GOARM=7 CGO_ENABLED=1  ./make.bash
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>执行结果：</p>
+
+<pre><code>Installed Go for android/arm in /Users/qipeng/program/go
+Installed commands in /Users/qipeng/mac/workspace/go/bin
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>测试,使用官方(go/mobile)自带例子测试。</p>
+
+<pre><code>//由于gfw可能无法下载，可以翻墙也可以从Github上下载并move到golang.org/x/mobile下
+$go get golang.org/x/mobile
+$cd $GOPATH/src/golang.org/x/mobile/example/basic
+$./all.bash //最好连接你的手机并开启usb调试，这样编译完成后会直接在手机上运行。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Golang-Android/1.png" alt="" width="600"></p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Magic-System-Request-Key/" title="Magic System Request Key">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Bluez%E4%B9%8B%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Bluez之常用命令">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-12-29</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

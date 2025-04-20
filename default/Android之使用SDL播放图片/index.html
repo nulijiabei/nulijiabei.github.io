@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之使用SDL播放图片</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之使用SDL播放图片 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Android之使用SDL播放图片</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下载 SDL version 2.0.12 (stable)
+// SDL2-2.0.12.zip - GPG signed
+https://www.libsdl.org/download-2.0.php
+
+// 下载 SDL_image 2.0
+// SDL2_image-2.0.5.zip
+https://www.libsdl.org/projects/SDL_image/
+
+解压 SDL2-2.0.12.zip 至 E:/SDL2-2.0.12
+复制 E:/SDL2-2.0.12/android-project 至 E:\android-project
+复制 E:/SDL2-2.0.12 至 E:\android-project\app\jni\sdl
+解压 SDL2_image-2.0.5.zip 至 E:\android-project\app\jni\sdl_image
+移除 E:/SDL2-2.0.12/android-project/app/jni/CMakeLists.txt
+移除 E:/SDL2-2.0.12/android-project/app/jni/src/CMakeLists.txt
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 使用 android studio 打开 E:\android-project 项目
+
+// 配置 local.properties 中 NDK 路径
+sdk.dir=D\:\\Android\\SDK
+
+// 使用的 NDK 版本
+Pkg.Desc = Android NDK
+Pkg.Revision = 20.1.5948944
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在 app\jni\src 下新建 YourSourceHere.c 
+
+#include &lt;android/log.h&gt;
+#include &quot;SDL.h&quot;
+#include &quot;SDL_image.h&quot;
+
+#define LOG_TAG &quot;xplay&quot;
+
+#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG , LOG_TAG, __VA_ARGS__)
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO , LOG_TAG, __VA_ARGS__)
+#define LOGW(...) __android_log_print(ANDROID_LOG_WARN , LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR , LOG_TAG, __VA_ARGS__)
+
+int main(int argc, char *argv[]) {
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Event event;
+    //配置一个图像缩放的效果,linear效果更平滑,也叫抗锯齿
+    //SDL_setenv(SDL_HINT_RENDER_SCALE_QUALITY,&quot;linear&quot;,0);
+    // 初始化SDL
+    IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+    if (SDL_Init(SDL_INIT_VIDEO) &lt; 0)
+    return 1;
+    // 创建一个窗口
+    window = SDL_CreateWindow(&quot;SDL_RenderClear&quot; , SDL_WINDOWPOS_CENTERED,
+                  SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_SHOWN);
+    // 创建一个渲染器
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    // 创建一个Surface，加载刚才下载的图片
+    SDL_Surface *jpg = IMG_Load(&quot;a1.jpg&quot;);
+//    SDL_Surface *bmp = SDL_LoadBMP(&quot;test.bmp&quot;);
+//    //设置图片中的白色为透明色
+//    SDL_SetColorKey(bmp, SDL_TRUE, 0xffffff);
+    // 创建一个Texture
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, jpg);
+    //清除所有事件
+    SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+    //进入主循环
+    while  (1) {
+    Uint32 a = SDL_GetTicks();
+    if  (SDL_PollEvent(&amp;event)) {
+        if  (event.type == SDL_QUIT || event.type == SDL_KEYDOWN || event.type == SDL_FINGERDOWN)
+        break;
+    }
+    //使用红色填充背景
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderClear(renderer);
+    // 将纹理布置到渲染器
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    // 刷新屏幕
+    SDL_RenderPresent(renderer);
+    Uint32 b = SDL_GetTicks();
+    LOGD(&quot;&gt;&gt;&gt; %d&quot;, b - a);
+    }
+    // 释放Surface
+    SDL_FreeSurface(jpg);
+    //  释放Texture
+    SDL_DestroyTexture(texture);
+    //释放渲染器
+    SDL_DestroyRenderer(renderer);
+    //释放窗口
+    SDL_DestroyWindow(window);
+    //延时
+    //SDL_Delay(8000);
+    //退出
+    SDL_Quit();
+    return  0;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 修改 app\jni\src\Android.mk
+
+LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := main
+
+SDL_PATH := ../SDL
+
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/$(SDL_PATH)/include
+
+# Add your application source files here...
+LOCAL_SRC_FILES := YourSourceHere.c
+
+LOCAL_SHARED_LIBRARIES := SDL2 SDL2_image
+
+LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog
+
+include $(BUILD_SHARED_LIBRARY)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 创建目录 app\src\main\assets
+// 向目录拷贝一张 a1.jpg 图片
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 更改 org.libsdl.app 为 com.nljb.xplay
+// 新建目录 app\src\main\java\com\danoo\xplay 
+// 在目录中新建一个空白的 MainActivity.java
+
+package com.nljb.xplay;
+
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+
+public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 修改 AndroidManifest.xml 中 org.libsdl.app 为 com.nljb.xplay
+
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;com.nljb.xplay&quot;
+    android:installLocation=&quot;auto&quot;&gt;
+    &lt;!-- OpenGL ES 2.0 --&gt;
+    &lt;uses-feature android:glEsVersion=&quot;0x00020000&quot; /&gt; &lt;!-- Touchscreen support --&gt;
+    &lt;uses-feature
+    android:name=&quot;android.hardware.touchscreen&quot;
+    android:required=&quot;false&quot; /&gt; &lt;!-- Game controller support --&gt;
+    &lt;uses-feature
+    android:name=&quot;android.hardware.bluetooth&quot;
+    android:required=&quot;false&quot; /&gt;
+    &lt;uses-feature
+    android:name=&quot;android.hardware.gamepad&quot;
+    android:required=&quot;false&quot; /&gt;
+    &lt;uses-feature
+    android:name=&quot;android.hardware.usb.host&quot;
+    android:required=&quot;false&quot; /&gt; &lt;!-- External mouse input events --&gt;
+    &lt;uses-feature
+    android:name=&quot;android.hardware.type.pc&quot;
+    android:required=&quot;false&quot; /&gt; &lt;!-- Audio recording support --&gt;
+    &lt;!-- if you want to capture audio, uncomment this. --&gt;
+    &lt;!--
+ &lt;uses-feature
+    android:name=&quot;android.hardware.microphone&quot;
+    android:required=&quot;false&quot; /&gt;
+    --&gt;
+    &lt;!-- Allow writing to external storage --&gt;
+    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; /&gt; &lt;!-- Allow access to Bluetooth devices --&gt;
+    &lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt; &lt;!-- Allow access to the vibrator --&gt;
+    &lt;uses-permission android:name=&quot;android.permission.VIBRATE&quot; /&gt;
+
+    &lt;application
+    android:allowBackup=&quot;true&quot;
+    android:hardwareAccelerated=&quot;true&quot;
+    android:icon=&quot;@mipmap/ic_launcher&quot;
+    android:label=&quot;@string/app_name&quot;
+    android:theme=&quot;@android:style/Theme.NoTitleBar.Fullscreen&quot;&gt;
+    &lt;activity android:name=&quot;.MainActivity&quot;&gt;&lt;/activity&gt;
+    &lt;!--
+     Example of setting SDL hints from AndroidManifest.xml:
+    &lt;meta-data android:name=&quot;SDL_ENV.SDL_ACCELEROMETER_AS_JOYSTICK&quot; android:value=&quot;0&quot;/&gt;
+    --&gt;
+    &lt;activity
+        android:name=&quot;org.libsdl.app.SDLActivity&quot;
+        android:alwaysRetainTaskState=&quot;true&quot;
+        android:configChanges=&quot;orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation&quot;
+        android:label=&quot;@string/app_name&quot;
+        android:launchMode=&quot;singleInstance&quot;&gt;
+        &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+
+        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+        &lt;/intent-filter&gt;
+        &lt;!-- Drop file event --&gt;
+        &lt;!--
+        &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.VIEW&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;data android:mimeType=&quot;*/*&quot; /&gt;
+        &lt;/intent-filter&gt;
+        --&gt;
+    &lt;/activity&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 修改 build.gradle
+applicationId &quot;com.danoo.xplay&quot;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E9%9B%86%E6%88%90FFmpeg%E5%88%B0SDL%E9%A1%B9%E7%9B%AE/" title="Android之集成FFmpeg到SDL项目">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Windows%E4%BD%BF%E7%94%A8WSL%E5%A4%87%E4%BB%BDLinux%E5%AD%90%E7%B3%BB%E7%BB%9F/" title="Windows使用WSL备份Linux子系统">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-03-20</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

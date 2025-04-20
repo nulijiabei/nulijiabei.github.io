@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之ActionBar使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之ActionBar使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>ActionBar</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 同时隐藏图标与标题，TABS将覆盖标题栏.
+public class MainActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    getMenuInflater().inflate(R.menu.menu_main, menu);
+    // 获取 ActionBar
+    final ActionBar actionBar = getActionBar();
+    // 隐藏 ActionBar 标题
+    actionBar.setDisplayShowTitleEnabled(false);
+    // 隐藏 ActionBar 图标
+    actionBar.setDisplayShowHomeEnabled(false);
+    // 将应用程序图标设置为可点击
+    actionBar.setHomeButtonEnabled(true);
+    // 将应用程序图标设置为可点击，并在图标上添加向左箭头
+    actionBar.setDisplayHomeAsUpEnabled(true);
+    // MenuItem.SHOW_AS_ACTION_ALWAYS 总是将该MenuItem显示在ActionBar上
+    // MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW 将该Action View折叠成普通菜单项
+    // MenuItem.SHOW_AS_ACTION_IF_ROOM 当ActionBar位置足够时才显示在ActionBar上
+    // MenuItem.SHOW_AS_ACTION_NEVER 不将该MenuItem显示在ActionBar上
+    // MenuItem.SHOW_AS_ACTION_WITH_TEXT 将该MenuItem显示在ActionBar上，并显示该菜单的文本
+    menu.add(0, 0x101, 0, &quot;普通菜单&quot;).setIcon(R.mipmap.ic_launcher).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+    menu.add(0, 0x102, 0, &quot;普通菜单&quot;).setIcon(R.mipmap.ic_launcher).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+    // 返回
+    return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle action bar item clicks here. The action bar will
+    // automatically handle clicks on the Home/Up button, so long
+    // as you specify a parent activity in AndroidManifest.xml.
+    int id = item.getItemId();
+
+    //noinspection SimplifiableIfStatement
+    if (id == R.id.action_settings) {
+        return true;
+    }
+
+    switch (id)
+    {
+        // 判断是否为主按钮点击
+        case android.R.id.home:
+        Toast.makeText(getApplicationContext(), &quot;欢迎&quot;, Toast.LENGTH_SHORT).show();
+        break;
+        case 0x101:
+        Toast.makeText(getApplicationContext(), &quot;欢迎&quot;, Toast.LENGTH_SHORT).show();
+        break;
+    }
+
+    return super.onOptionsItemSelected(item);
+    }
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>ActionBar 之 ActionBar.TabListener</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class MainActivity extends Activity implements  ActionBar.TabListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    //getMenuInflater().inflate(R.menu.menu_main, menu);
+    // 获取 ActionBar
+    final ActionBar actionBar = getActionBar();
+    // 隐藏 ActionBar 标题
+    actionBar.setDisplayShowTitleEnabled(false);
+    // 隐藏 ActionBar 图标
+    // actionBar.setDisplayShowHomeEnabled(false);
+    // ActionBar TABS 模式
+    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+    actionBar.addTab(actionBar.newTab().setText(&quot;第一页&quot;).setTabListener((ActionBar.TabListener) MainActivity.this));
+    actionBar.addTab(actionBar.newTab().setText(&quot;第二页&quot;).setTabListener((ActionBar.TabListener) MainActivity.this));
+    actionBar.addTab(actionBar.newTab().setText(&quot;第三页&quot;).setTabListener((ActionBar.TabListener) MainActivity.this));
+    // 返回
+    return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle action bar item clicks here. The action bar will
+    // automatically handle clicks on the Home/Up button, so long
+    // as you specify a parent activity in AndroidManifest.xml.
+    int id = item.getItemId();
+
+    //noinspection SimplifiableIfStatement
+    if (id == R.id.action_settings) {
+        return true;
+    }
+
+    return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+    // 自定义的 Fragment
+    Fragment1 fragment;
+    // 获取 TAB 编号，0, 1, 2, 3, .....
+    if (tab.getPosition() == 1) {
+        fragment = new Fragment1();
+        // 传参
+        Bundle args = new Bundle();
+        args.putString(&quot;key&quot;, &quot;value&quot;);
+        fragment.setArguments(args);
+        FragmentTransaction f = getFragmentManager().beginTransaction();
+        // 替换，也可以 ADD 
+        f.replace(R.id.xxx, fragment);
+        f.commit();
+    }
+    }
+
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+    }
+
+    @Override
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+    }
+
+    // 创建了一个(Fragment)并返回(Fragment)的(Layout)
+    public static class Fragment1 extends Fragment {
+
+    public Fragment1() {
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                 Bundle savedInstanceState) {
+        // 初始化 View
+        View rootView = inflater.inflate(R.layout.fragment_blank, container, false);
+        TextView text = (TextView) rootView.findViewById(R.id.text);
+        // 获取传值
+        Bundle args = getArguments();
+        text.setText(args.getString(&quot;key&quot;));
+        return rootView;
+    }
+    }
+
+}
+
+// R.layout.fragment_blank
+&lt;FrameLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+    android:id=&quot;@+id/xxx&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; android:paddingLeft=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingRight=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingTop=&quot;@dimen/activity_vertical_margin&quot;
+    android:paddingBottom=&quot;@dimen/activity_vertical_margin&quot; tools:context=&quot;.MainActivity&quot;&gt;
+
+    &lt;TextView android:text=&quot;@string/hello_world&quot; android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot; /&gt;
+
+&lt;/FrameLayout&gt;
+
+// R.layout.activity_main
+&lt;FrameLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot; android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; tools:context=&quot;com.example.nljb.nljb.BlankFragment&quot;&gt;
+
+    &lt;!-- TODO: Update blank fragment layout --&gt;
+    &lt;TextView android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;
+    android:text=&quot;@string/hello_blank_fragment&quot; /&gt;
+
+&lt;/FrameLayout&gt;
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>ActionBar 之 ActionBar.OnNavigationListener</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class MainActivity extends Activity implements  ActionBar.OnNavigationListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    //getMenuInflater().inflate(R.menu.menu_main, menu);
+    // 获取 ActionBar
+    final ActionBar actionBar = getActionBar();
+    // 隐藏 ActionBar 标题
+    actionBar.setDisplayShowTitleEnabled(false);
+    // 隐藏 ActionBar 图标
+    actionBar.setDisplayShowHomeEnabled(false);
+    // ActionBar LIST 模式
+    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+    actionBar.setListNavigationCallbacks(
+        new ArrayAdapter&lt;String&gt;(MainActivity.this,
+            android.R.layout.simple_list_item_1,
+            android.R.id.text1, new String[]
+            {&quot;第一页&quot;, &quot;第二页&quot;, &quot;第三页&quot;}), this);
+    return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle action bar item clicks here. The action bar will
+    // automatically handle clicks on the Home/Up button, so long
+    // as you specify a parent activity in AndroidManifest.xml.
+    int id = item.getItemId();
+
+    //noinspection SimplifiableIfStatement
+    if (id == R.id.action_settings) {
+        return true;
+    }
+
+    return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+    // 获取选择
+    return false;
+    }
+
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>ActionBar 自定义</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class MainActivity extends Activity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    // 自定义actionbar的布局
+    setActionBarLayout(R.layout.menu);
+    }
+
+    //
+    public void setActionBarLayout(int layoutId) {
+    // 获取 ActionBar
+    ActionBar actionBar = getActionBar();
+    if (null != actionBar) {
+        // 隐藏 ActionBar 图标
+        actionBar.setDisplayShowHomeEnabled(false);
+        // 使自定义的普通View能在title栏显示
+        actionBar.setDisplayShowCustomEnabled(true);
+        // 载入 Layout
+        View v = this.getLayoutInflater().inflate(layoutId, null);
+        // 设置 Layout
+        ActionBar.LayoutParams layout = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.MATCH_PARENT);
+        // 将 Layout 赋值 ActionBar
+        actionBar.setCustomView(v, layout);
+    }
+    }
+
+    public void onClick(View v) {
+    switch (v.getId()) {
+        case R.id.menuBtnId: {
+        Toast.makeText(getApplicationContext(), &quot;欢迎&quot;, Toast.LENGTH_SHORT).show();
+        }
+        break;
+        case R.id.noteBtnId: {
+        Toast.makeText(getApplicationContext(), &quot;欢迎&quot;, Toast.LENGTH_SHORT).show();
+        }
+        break;
+        case R.id.downloadBtnId: {
+        Toast.makeText(getApplicationContext(), &quot;欢迎&quot;, Toast.LENGTH_SHORT).show();
+        }
+        break;
+        case R.id.editBtnId: {
+        Toast.makeText(getApplicationContext(), &quot;欢迎&quot;, Toast.LENGTH_SHORT).show();
+        }
+        break;
+        default: {
+        }
+        break;
+    }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    // getMenuInflater().inflate(R.menu.menu_main, menu);
+    // 返回
+    return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle action bar item clicks here. The action bar will
+    // automatically handle clicks on the Home/Up button, so long
+    // as you specify a parent activity in AndroidManifest.xml.
+    int id = item.getItemId();
+    //noinspection SimplifiableIfStatement
+    if (id == R.id.action_settings) {
+        return true;
+    }
+    return super.onOptionsItemSelected(item);
+    }
+
+}
+
+// R.layout.menu 自定义的布局文件
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;63.0dp&quot;
+    android:id=&quot;@+id/actionbarLayoutId&quot;
+    android:background=&quot;@drawable/actionbar_background&quot;&gt;
+    &lt;ImageButton
+    android:id=&quot;@+id/menuBtnId&quot;
+    android:layout_marginLeft=&quot;12.0dp&quot;
+    android:layout_marginTop=&quot;12.0dp&quot;
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:background=&quot;@drawable/menu&quot;
+    android:contentDescription=&quot;@string/app_name&quot;
+    android:onClick=&quot;onClick&quot;
+    /&gt;
+    &lt;ImageButton 
+    android:id=&quot;@+id/noteBtnId&quot;
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_marginTop=&quot;12.0dp&quot;
+    android:background=&quot;@drawable/notes&quot;
+    android:contentDescription=&quot;@string/app_name&quot;
+    android:layout_marginRight=&quot;12.0dp&quot;
+    android:layout_alignParentRight=&quot;true&quot;
+    android:onClick=&quot;onClick&quot;
+    /&gt;
+    &lt;ImageButton 
+    android:id=&quot;@+id/editBtnId&quot;
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_marginTop=&quot;12.0dp&quot;
+    android:background=&quot;@drawable/edit&quot;
+    android:layout_toLeftOf=&quot;@id/noteBtnId&quot;
+    android:layout_marginRight=&quot;12.0dp&quot;
+    android:contentDescription=&quot;@string/app_name&quot;
+    android:onClick=&quot;onClick&quot;
+    /&gt;
+    &lt;ImageButton 
+    android:id=&quot;@+id/downloadBtnId&quot;
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_marginTop=&quot;12.0dp&quot;
+    android:background=&quot;@drawable/download&quot;
+    android:layout_toLeftOf=&quot;@id/editBtnId&quot;
+    android:layout_marginRight=&quot;12.0dp&quot;
+    android:contentDescription=&quot;@string/app_name&quot;
+    android:onClick=&quot;onClick&quot;
+    /&gt;
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E4%BD%BF%E7%94%A8Animation%E8%AE%BE%E7%BD%AEView%E5%8A%A8%E7%94%BB/" title="Android之使用Animation设置View动画">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BFragment%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之Fragment使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-12</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

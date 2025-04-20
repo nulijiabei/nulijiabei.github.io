@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之万能适配器Adapter的使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之万能适配器Adapter的使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>万能适配器</h3>
+
+<blockquote>
+</blockquote>
+
+<p>万能适配器共有两个部分：SuperViewHolder 和 SuperBaseAdapter<T></p>
+
+<blockquote>
+</blockquote>
+
+<h3>万能的ViewHolder</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class SuperViewHolder {
+
+    private SparseArray&lt;View&gt; mViews;
+
+    private View mConvertView;
+
+    private int mPosition;
+
+    public SuperViewHolder(Context context, ViewGroup parent, int layoutId, int position) {
+        mPosition = position;
+        mViews = new SparseArray&lt;&gt;();
+        mConvertView = LayoutInflater.from(context).inflate(layoutId, parent, false);
+        mConvertView.setTag(this);
+    }
+
+    public static SuperViewHolder make(Context context, int layoutId, View convertView, ViewGroup parent, int position) {
+        if (convertView == null) {
+            return new SuperViewHolder(context, parent, layoutId, position);
+        } else {
+            SuperViewHolder superViewHolder = (SuperViewHolder) convertView.getTag();
+            superViewHolder.mPosition = position;
+            return superViewHolder;
+        }
+    }
+
+    public &lt;T extends View&gt; T getView(int viewId) {
+        View view = mViews.get(viewId);
+        if (view == null) {
+            view = mConvertView.findViewById(viewId);
+            mViews.put(viewId, view);
+        }
+        return (T) view;
+    }
+
+    public int getPosition() {
+        return mPosition;
+    }
+
+    public View getConvertView() {
+        return mConvertView;
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>万能的SuperBaseAdapter<T></h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public abstract class SuperBaseAdapter&lt;T&gt; extends BaseAdapter {
+
+    protected Context mContext;
+
+    protected List&lt;T&gt; mDatas;
+
+    public SuperBaseAdapter(Context context, List&lt;T&gt; datas) {
+        mContext = context;
+        mDatas = datas;
+    }
+
+    @Override
+    public int getCount() {
+        return mDatas.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return mDatas.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public abstract View getView(int position, View convertView, ViewGroup parent);
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>结合使用 SuperViewHolder 和 SuperBaseAdapter<T></h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>class CalendarBaseAdapter extends SuperBaseAdapter&lt;String&gt; {
+
+    public CalendarBaseAdapter(Context context, List&lt;String&gt; datas) {
+        super(context, datas);
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        SuperViewHolder superViewHolder = SuperViewHolder.make(mContext, R.layout.item_calendar, convertView, parent, position);
+        ((TextView)superViewHolder.getView(R.id.calendar_time)).setText(mDatas.get(position));
+        return superViewHolder.getConvertView();
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>补充问题</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 焦点抢占
+关于在ListView的Item里增加(例CheckBox对象)造成Item无法点击问题
+
+此问题是因为CheckBox对象抢占了Item的焦点，造成Item无法点击的
+
+只需要在将CheckBox对象android:focusable属性值设置为false即可
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 复用导致内容错乱
+比如: 当Item中使用CheckBox时点击第一个则其它CheckBox也被选中了
+      这是因为使用的是同一个CheckBox对象的缘故 ...
+
+解决: 这样就需要记录CheckBox对象的状态来判断CheckBox是否被选中
+      可以通过position来作为ID，来记录CheckBox状态是True或False
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E9%97%AA%E7%83%81%E5%8F%91%E5%85%89%E5%AD%97%E4%BD%93%E6%95%88%E6%9E%9C/" title="Android之闪烁发光字体效果">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BAnimation%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之Animation的使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-08-24</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

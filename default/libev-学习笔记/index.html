@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>libev-学习笔记</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>libev-学习笔记 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>针对(ev_io)分析理解</p>
+
+<p>Libev是一个event loop:向libev注册感兴趣的events</p>
+
+<p>比如Socket可读事件,libev会对所注册的事件的源进行管理,并在事件发生时触发相应的程序。</p>
+
+<hr />
+
+<pre><code>// ev_default_loop,初始化一个不是线程安全的loop
+// ev_loop_new,初始化一个线程安全但不能捕捉信号和子进程的监视
+struct ev_loop *loop = ev_default_loop(0);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 建立一个(ev_io)结构
+struct ev_io ev;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 其中(libev)定义了如下类型的:
+ev_io
+ev_timer
+ev_periodic
+ev_signal
+ev_child
+ev_stat
+ev_idle
+ev_prepare and ev_check
+ev_embed
+ev_fork
+ev_cleanup
+ev_async
+</code></pre>
+
+<hr />
+
+<pre><code>// 初始化 
+ev_io_init(ev, cb, fd, events);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 其中,(ev)为(ev_io)结构
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 当标准输入上有可读取的数据时，将调用下面这个回调函数
+// 其中,(cb)为回调:
+void cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 其中,(fd)为文件描述符(STDIN_FILENO)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 其中,(events)为(EV_READ)-(EV_IO),也可以为以下类型:
+
+/* eventmask, revents, events... */
+enum {
+  EV_UNDEF    = (int)0xFFFFFFFF, /* guaranteed to be invalid */
+  EV_NONE     =            0x00, /* no events */
+  EV_READ     =            0x01, /* ev_io detected read will not block */
+  EV_WRITE    =            0x02, /* ev_io detected write will not block */
+  EV__IOFDSET =            0x80, /* internal use only */
+  EV_IO       =         EV_READ, /* alias for type-detection */
+  EV_TIMER    =      0x00000100, /* timer timed out */
+#if EV_COMPAT3
+  EV_TIMEOUT  =        EV_TIMER, /* pre 4.0 API compatibility */
+#endif
+  EV_PERIODIC =      0x00000200, /* periodic timer timed out */
+  EV_SIGNAL   =      0x00000400, /* signal was received */
+  EV_CHILD    =      0x00000800, /* child/pid had status change */
+  EV_STAT     =      0x00001000, /* stat data changed */
+  EV_IDLE     =      0x00002000, /* event loop is idling */
+  EV_PREPARE  =      0x00004000, /* event loop about to poll */
+  EV_CHECK    =      0x00008000, /* event loop finished poll */
+  EV_EMBED    =      0x00010000, /* embedded event loop needs sweep */
+  EV_FORK     =      0x00020000, /* event loop resumed in child */
+  EV_CLEANUP  =      0x00040000, /* event loop resumed in child */
+  EV_ASYNC    =      0x00080000, /* async intra-loop signal */
+  EV_CUSTOM   =      0x01000000, /* for use by user code */
+  EV_ERROR    = (int)0x80000000  /* sent when an error occurs */
+};
+</code></pre>
+
+<hr />
+
+<pre><code>// 执行
+ev_io_start(loop, ev);
+</code></pre>
+
+<hr />
+
+<pre><code>// 守护
+while (1)
+{
+    // 开始事件循环
+    ev_loop(loop, 0);
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// 而且还可以在回调函数内增加事件
+void cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
+{
+
+    // ------------------------ //
+    // (ev_io)结构创建说明
+
+    // 一,全局使用一个(ev_io)
+    struct ev_io ev;
+
+    // 二,对每次子事件分配不同的(ev_io)
+    ev_io *ev = new(ev_io);
+
+    // ------------------------ //
+
+    // 错误处理
+    if(EV_ERROR &amp; revents)
+    return;
+
+    ev_io_init(ev, cb, fd, events);
+    ev_io_start(loop, ev);
+
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// 针对Libev实现Socket事件,阻塞方式
+#include &lt;iostream&gt;
+#include &lt;ev.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+
+using namespace std;
+
+#define PORT 9999
+#define BUFFER_SIZE 1024
+
+// accept,事件的回调
+void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
+
+// read,事件的回调
+void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
+
+// 上帝在此
+int main()
+{
+
+    /* ev_default_loop,初始化一个不是线程安全的loop
+       ev_loop_new,初始化一个线程安全但不能捕捉信号和子进程的监视 */
+    struct ev_loop *loop = ev_default_loop(0);
+
+    // STDIN_FILENO
+    int sd;
+
+    // IO,事件
+    struct ev_io socket_accept;
+
+    // ----------------------------------------------- //
+
+    // 地址结构,socket
+    struct sockaddr_in addr;
+
+    // 建立,socekt
+    if( (sd = socket(PF_INET, SOCK_STREAM, 0)) &lt; 0 )
+    {
+    printf(&quot;socket error&quot;);
+    return -1;
+    }
+
+    // ----------------------------------------------- //
+
+    // 置零
+    bzero(&amp;addr, sizeof(addr));
+
+    // 地址族
+    addr.sin_family = AF_INET;
+
+    /* 必须要采用网络数据格式
+       普通数字可以用htons()函数转换成网络数据格式的数字 */
+    addr.sin_port = htons(PORT);
+
+    /* IP,地址结构
+       INADDR_ANY,就是指定地址为0.0.0.0的地址 */
+    addr.sin_addr.s_addr = INADDR_ANY;
+
+    // ----------------------------------------------- //
+
+    // 绑定
+    if (bind(sd, (struct sockaddr*) &amp;addr, sizeof(addr)) != 0)
+    {
+    printf(&quot;bind error&quot;);
+    return -1;
+    }
+
+    // 建立监听,及设置请求连接队列的最大长度,用于限制排队请求的个数
+    if (listen(sd, 5) &lt; 0)
+    {
+    printf(&quot;listen error&quot;);
+    return -1;
+    }
+
+    // ----------------------------------------------- /
+
+    // 开始监听了io事件
+    ev_io_init(&amp;socket_accept, accept_cb, sd, EV_IO);
+    ev_io_start(loop, &amp;socket_accept);
+
+    // 循环
+    while (1)
+    {
+    // 开始事件循环
+    ev_loop(loop, 0);
+    }
+
+    // 返回
+    return 0;
+
+}
+
+// accept 事件的回调
+void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents)
+{
+
+    // 地址结构,socket
+    struct sockaddr_in client_addr;
+
+    // 地址结构长度,socket
+    socklen_t client_len = sizeof(client_addr);
+
+    // STDIN_FILENO
+    int client_sd;
+
+    // 分派客户端的ev_io结构
+    ev_io *w_client = new(ev_io);
+
+    // libev,错误处理
+    if(EV_ERROR &amp; revents)
+    {
+    printf(&quot;error event in accept&quot;);
+    return;
+    }
+
+    // accept,普通写法
+    client_sd = accept(watcher-&gt;fd, (struct sockaddr *)&amp;client_addr, &amp;client_len);
+    if (client_sd &lt; 0)
+    {
+    printf(&quot;accept error&quot;);
+    return;
+    }
+
+    printf(&quot;someone connected.\n&quot;);
+
+    // 开始监听读事件了,有客户端信息就会被监听到
+    ev_io_init(w_client, read_cb, client_sd, EV_IO);
+    ev_io_start(loop, w_client);
+
+
+}
+
+// read 事件的回调
+void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents){
+
+    // 缓冲区
+    char buffer[BUFFER_SIZE];
+
+    // 命令区
+    char command[BUFFER_SIZE];
+
+    // 读取到的字节数
+    ssize_t read;
+
+    // libev,错误处理
+    if(EV_ERROR &amp; revents)
+    {
+    printf(&quot;error event in read&quot;);
+    return;
+    }
+
+    // 铁人三项
+    bool iCmdBegin = false; // 命令状态
+    int index = 0;          // 命令下标
+    string cmdType;         // 命令类型
+
+    // xxx
+    while(1) {
+
+    // 最后记得置零
+    bzero(buffer, BUFFER_SIZE);
+
+    // 读取本次输入数据
+    read = recv(watcher-&gt;fd, buffer, BUFFER_SIZE, 0);
+
+    // 分析数据
+    for(int i=0;i &lt; read ;i++){
+
+        // 寻找事件
+        if(buffer[i] == '#'){
+        cout &lt;&lt; &quot;find #&quot; &lt;&lt; (int)buffer[i-1]&lt;&lt; endl;
+        // 事件开始
+        iCmdBegin = true;
+        // 继续
+        continue;
+        }
+
+        // 事件末尾
+        if(iCmdBegin &amp;&amp; buffer[i] == '\n') {
+
+        cout &lt;&lt; &quot;find -&gt;&quot; &lt;&lt; cmdType &lt;&lt; endl;
+
+        printf(&quot;get the message:\n%s\n&quot;,command);
+
+        // 处理
+        if (cmdType.compare(&quot;End\r&quot;) == 0){
+            cout&lt;&lt; &quot;#End&quot; &lt;&lt; endl;
+            // 播放事件
+        }
+
+        if (cmdType.compare(&quot;Close\r&quot;) == 0){
+            cout &lt;&lt; &quot;#Close&quot; &lt;&lt; endl;
+            // 断开连接
+            close(watcher-&gt;fd);
+            // 每一次事件都必须用对应的停止函数，手动停止
+            ev_io_stop(loop, watcher);
+            // 释放内存
+            delete(watcher);
+            // 跳出
+            return;
+        }
+
+        if (cmdType.compare(&quot;Quit\r&quot;) == 0){
+            cout &lt;&lt; &quot;#Quit&quot; &lt;&lt; endl;
+            // 断开连接
+            close(watcher-&gt;fd);
+            // 每一次事件都必须用对应的停止函数，手动停止
+            ev_io_stop(loop, watcher);
+            // 释放内存
+            delete(watcher);
+            // 跳出
+            return;
+        }
+
+        // 重置
+        iCmdBegin = false;
+        cmdType = &quot;&quot;;
+        index = 0;
+        bzero(command, BUFFER_SIZE);
+
+        // 返回
+        continue;
+        }
+
+        // 状态
+        if(iCmdBegin) {
+        // 事件
+        cmdType += buffer[i];
+        } else {
+        // 命令
+        command[index] = buffer[i];
+        // 增加
+        index++;
+        }
+
+    }
+
+    // 原信息返回,也可以自己写信息,都一样.
+    // send(watcher-&gt;fd, buffer, read, 0);
+
+    }
+
+}
+</code></pre>
+
+<hr />
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/delete%E5%92%8Cdelete%5B%5D%E5%8C%BA%E5%88%AB/" title="delete和delete[]区别">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E5%B0%BD%E9%87%8F%E7%94%A8new%E5%92%8Cdelete%E4%BB%A3%E6%9B%BFmalloc%E5%92%8Cfree/" title="尽量用new和delete代替malloc和free">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-21</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

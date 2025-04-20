@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之在Layout中自定义View</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之在Layout中自定义View </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>在Layout中自定义View</h3>
+
+<blockquote>
+</blockquote>
+
+<p>经常会看到在XML文件中调用别人的View就可以显示出各种奇妙的页面</p>
+
+<blockquote>
+</blockquote>
+
+<p>简单的学习了一下，下面说一下如何自定义一个View, 并设置背景色</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 第一步，创建一个继承自View的类
+public class MyView extends View {
+
+    //  背景颜色
+    private int background;
+
+    // 默认背景颜色
+    private final int default_background = Color.rgb(66, 145, 241);
+
+    // 构造
+    public MyView(Context context) {
+    // 这里确保每一级都会被触发
+    this(context, null);
+    }
+
+    // 构造
+    public MyView(Context context, AttributeSet attrs) {
+    // 这里确保每一级都会被触发
+    this(context, attrs, R.attr.MyViewStyle);
+    }
+
+    // 构造
+    public MyView(Context context, AttributeSet attrs, int defStyle) {
+    // 执行父类构造
+    super(context, attrs, defStyle);
+    // 初始化
+    final TypedArray attributes = context.getTheme().obtainStyledAttributes(attrs, R.styleable.MyView, defStyle, 0);
+    // 获取设置的背景颜色
+    background = attributes.getColor(R.styleable.MyView_background, default_background);
+    // 设置
+    this.setBackgroundColor(background);
+    }
+
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// 第二步，在XML-Layout中使用
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:background=&quot;@drawable/guide_0&quot;
+    android:orientation=&quot;vertical&quot;&gt;
+
+    // 这里使用的就是自定义的View
+    &lt;com.example.nljb.surpass.MyView
+    // 可以使用自定义的View的设置参数
+    app:background=&quot;#ffff5633&quot;
+    // 可以使用继承自View的设置参数
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;50dp&quot;/&gt;
+
+&lt;/RelativeLayout&gt;   
+</code></pre>
+
+<hr />
+
+<pre><code>// 第三步，自定义View的参数(第一步已经讲了如何使用)
+// values/attrs
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;resources&gt;
+
+    &lt;declare-styleable name=&quot;MyView&quot;&gt;
+    // format 类型有很多 ...
+    &lt;attr name=&quot;background&quot; format=&quot;color&quot;/&gt;
+        // &lt;attr name=&quot;...&quot; format=&quot;integer&quot;/&gt;
+        // &lt;attr name=&quot;...&quot; format=&quot;dimension&quot;/&gt;
+        // &lt;attr name=&quot;...&quot; format=&quot;enum&quot;&gt;
+            //  &lt;enum name=&quot;...&quot; value=&quot;0&quot;/&gt;
+            //  &lt;enum name=&quot;...&quot; value=&quot;1&quot;/&gt;
+        // &lt;/attr&gt;
+    // &lt;attr name=&quot;...&quot; format=&quot;string&quot;/&gt;
+    // &lt;attr name=&quot;...&quot; format=&quot;boolean&quot;/&gt;
+    ...
+    &lt;/declare-styleable&gt;
+
+    &lt;declare-styleable name=&quot;Themes&quot;&gt;
+    &lt;attr name=&quot;MyViewStyle&quot; format=&quot;reference&quot;/&gt;
+    &lt;/declare-styleable&gt;
+&lt;/resources&gt;
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E7%9F%A9%E9%98%B5%E8%AE%BE%E8%AE%A1%E5%9B%BE%E6%A0%B7/" title="矩阵设计图样">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BSwipeLayout%E5%AE%9E%E7%8E%B0View%E4%BE%A7%E6%BB%91%E8%8F%9C%E5%8D%95/" title="Android之SwipeLayout实现View侧滑菜单">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-28</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

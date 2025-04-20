@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之里氏替换原则</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之里氏替换原则 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>里氏替换原则</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 里氏替换原则全称是 Liskov Substitution Principle
+// 缩写是，LSP 
+
+// 面向对象的豫园的三大特点是：继承、封装、多态
+// 里氏替换原则就是依赖于继承、多态这两大特性
+
+// 所有引用基类的地方必须能透明地使用其子类的对象
+// 只要父类能出现的地方子类就可以出现
+// 而且替换为子类也不会产生任何错误或异常
+// 使用者可能根本就不需要知道是父类还是子类
+// 反过来就不行了，有子类出现的地方，父类未必可行
+
+public class Window {
+
+    // 传入View类型
+    public void show(View view) {   
+        // 所有View类型都拥有draw方法
+        view.draw();
+    }
+
+}
+
+// 抽象类
+public abstract class View {
+
+    // 所有继承 Viwe 的类都必须实现 draw
+    public abstract void draw();
+
+    // 所有子类共享该方法        
+    public void measure(int width, int height) {
+        // ...
+    }
+
+}
+
+// 继承 View
+public class Button extends View {
+
+    // 继承 abstract 必须实现 draw
+    public void draw() {
+        // ... 不同的绘制
+    }
+
+}
+
+// 继承 View
+public class TextView extends View {
+
+    // 继承 abstract 必须实现 draw
+    public void draw() {
+        // ... 不同的绘制
+    }
+
+}
+
+// Window 依赖于View, 而View定义了一个视图抽象
+// measure 是各个子类共享的方法
+// 子类通过覆写Viwe的draw方法实现具有各自特色的功能 
+// 任何继承自View类的子类都可以设置给show方法
+// 就是所说的里氏替换原则 ...
+
+// 继承的优点:
+    (1) 代码重用，减少创建类的成本，每个子类都拥有父类方法属性
+    (2) 子类与父类基本相似，但又与父类有所区别
+    (3) 提高代码的可扩展性
+// 继承的缺点:
+    (1) 继承是侵入的，只要继承就必须拥有父亲的所有属性和方法
+    (2) 可能造成子类冗余，灵活度降低，因为子类必须拥有父类的属性和方法
+
+// 接着上面的 ImageLoader 来说明：
+    既 MemoryCache、DiskCache、DoubleCache 
+    都可以替换ImageCache的工作，并且能够保证行为的正确性
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E4%BE%9D%E8%B5%96%E5%80%92%E7%BD%AE%E5%8E%9F%E5%88%99/" title="Android之依赖倒置原则">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E5%8D%95%E4%B8%80%E5%8E%9F%E5%88%99%E4%B8%8E%E5%BC%80%E9%97%AD%E5%8E%9F%E5%88%99/" title="Android之单一原则与开闭原则">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-02-02</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

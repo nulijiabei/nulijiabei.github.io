@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux ACPI 启动参数</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux ACPI 启动参数 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>    acpi=           [HW,ACPI,X86]
+                    Advanced Configuration and Power Interface
+                    Format: { force | off | strict | noirq | rsdt }
+                    force -- enable ACPI if default was off
+                    off -- disable ACPI if default was on
+                    noirq -- do not use ACPI for IRQ routing
+                    strict -- Be less tolerant of platforms that are not
+                            strictly ACPI specification compliant.
+                    rsdt -- prefer RSDT over (default) XSDT
+                    copy_dsdt -- copy DSDT to memory
+                    See also Documentation/power/pm.txt, pci=noacpi
+    acpi_apic_instance=     [ACPI, IOAPIC]
+                    Format: &lt;int&gt;
+                    2: use 2nd APIC table, if available
+                    1,0: use 1st APIC table
+                    default: 0
+    acpi_backlight= [HW,ACPI]
+                    acpi_backlight=vendor
+                    acpi_backlight=video
+                    If set to vendor, prefer vendor specific driver
+                    (e.g. thinkpad_acpi, sony_acpi, etc.) instead
+                    of the ACPI video.ko driver.
+    acpi.debug_layer=       [HW,ACPI,ACPI_DEBUG]
+    acpi.debug_level=       [HW,ACPI,ACPI_DEBUG]
+                    Format: &lt;int&gt;
+                    CONFIG_ACPI_DEBUG must be enabled to produce any ACPI
+                    debug output.  Bits in debug_layer correspond to a
+                    _COMPONENT in an ACPI source file, e.g.,
+                        #define COMPONENT ACPIPCI_COMPONENT
+                    Bits in debug_level correspond to a level in
+                    ACPI_DEBUG_PRINT statements, e.g.,
+                        ACPI_DEBUG_PRINT((ACPI_DB_INFO, ...
+                    The debug_level mask defaults to &quot;info&quot;.  See
+                    Documentation/acpi/debug.txt for more information about
+                    debug layers and levels.
+                    Enable processor driver info messages:
+                        acpi.debug_layer=0x20000000
+                    Enable PCI/PCI interrupt routing info messages:
+                        acpi.debug_layer=0x400000
+                    Enable AML &quot;Debug&quot; output, i.e., stores to the Debug
+                    object while interpreting AML:
+                        acpi.debug_layer=0xffffffff acpi.debug_level=0x2
+                    Enable all messages related to ACPI hardware:
+                        acpi.debug_layer=0x2 acpi.debug_level=0xffffffff
+                    Some values produce so much output that the system is
+                    unusable.  The &quot;log_buf_len&quot; parameter may be useful
+                    if you need to capture more output.
+    acpi_display_output=    [HW,ACPI]
+                    acpi_display_output=vendor
+                    acpi_display_output=video
+                    See above.
+    acpi_irq_balance [HW,ACPI]
+                    ACPI will balance active IRQs
+                    default in APIC mode
+    acpi_irq_nobalance [HW,ACPI]
+                    ACPI will not move active IRQs (default)
+                    default in PIC mode
+    acpi_irq_isa=   [HW,ACPI] If irq_balance, mark listed IRQs used by ISA
+                    Format: &lt;irq&gt;,&lt;irq&gt;...
+    acpi_irq_pci=   [HW,ACPI] If irq_balance, clear listed IRQs for
+                    use by PCI
+                    Format: &lt;irq&gt;,&lt;irq&gt;...
+    acpi_no_auto_ssdt       [HW,ACPI] Disable automatic loading of SSDT
+    acpi_os_name=   [HW,ACPI] Tell ACPI BIOS the name of the OS
+                    Format: To spoof as Windows 98: =&quot;Microsoft Windows&quot;
+    acpi_osi=       [HW,ACPI] Modify list of supported OS interface strings
+                    acpi_osi=&quot;string1&quot;      # add string1 -- only one string
+                    acpi_osi=&quot;!string2&quot;     # remove built-in string2
+                    acpi_osi=               # disable all strings
+    acpi_pm_good    [X86]
+                    Override the pmtimer bug detection: force the kernel
+                    to assume that this machine's pmtimer latches its value
+                    and always returns good values.
+    acpi_sci=       [HW,ACPI] ACPI System Control Interrupt trigger mode
+                    Format: { level | edge | high | low }
+    acpi_serialize  [HW,ACPI] force serialization of AML methods
+    acpi_skip_timer_override [HW,ACPI]
+                    Recognize and ignore IRQ0/pin2 Interrupt Override.
+                    For broken nForce2 BIOS resulting in XT-PIC timer.
+    acpi_sleep=     [HW,ACPI] Sleep options
+                    Format: { s3_bios, s3_mode, s3_beep, s4_nohwsig,
+                              old_ordering, s4_nonvs, sci_force_enable }
+                    See Documentation/power/video.txt for information on
+                    s3_bios and s3_mode.
+                    s3_beep is for debugging; it makes the PC's speaker beep
+                    as soon as the kernel's real-mode entry point is called.
+                    s4_nohwsig prevents ACPI hardware signature from being
+                    used during resume from hibernation.
+                    old_ordering causes the ACPI 1.0 ordering of the _PTS
+                    control method, with respect to putting devices into
+                    low power states, to be enforced (the ACPI 2.0 ordering
+                    of PTS is used by default).
+                    nonvs prevents the kernel from saving/restoring the
+                    ACPI NVS memory during suspend/hibernation and resume.
+                    sciforce_enable causes the kernel to set SCI_EN directly
+                    on resume from S1/S3 (which is against the ACPI spec,
+                    but some broken systems don't work without it).
+    acpi_use_timer_override [HW,ACPI]
+                    Use timer override. For some broken Nvidia NF5 boards
+                    that require a timer override, but don't have HPET
+    acpi_enforce_resources= [ACPI]
+                    { strict | lax | no }
+                    Check for resource conflicts between native drivers
+                    and ACPI OperationRegions (SystemIO and SystemMemory
+                    only). IO ports and memory declared in ACPI might be
+                    used by the ACPI subsystem in arbitrary AML code and
+                    can interfere with legacy drivers.
+                    strict (default): access to resources claimed by ACPI
+                    is denied; legacy drivers trying to access reserved
+                    resources will fail to bind to device using them.
+                    lax: access to resources claimed by ACPI is allowed;
+                    legacy drivers trying to access reserved resources
+                    will bind successfully but a warning message is logged.
+                    no: ACPI OperationRegions are not marked as reserved,
+                    no further checks are performed.
+</code></pre>
+
+<hr />
+
+<pre><code>[HW,ACPI,X86-64,i386]
+acpi={force|off|ht|strict|noirq}
+// ACPI的总开关
+</code></pre>
+
+<p>force表示强制启用；off表示强制禁用；</p>
+
+<p>noirq表示不要将ACPI用于IRQ路由；</p>
+
+<p>ht表示只运行足够的ACPI来支持超线程；</p>
+
+<p>strict表示降低对不严格遵循ACPI规格的平台的兼容性。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>acpi_sleep={s3_bios,s3_mode}
+// ACPI休眠选项。
+</code></pre>
+
+<p>在从S3状态(挂起到内存)恢复的时候，硬件需要被正确的初始化。</p>
+
+<p>这对大多数硬件都不成问题，除了显卡之外，因为显卡是由BIOS初始化的</p>
+
+<p>内核无法获取必要的恢复信息(仅存在于BIOS中，内核无法读取)。</p>
+
+<p>这个选项允许内核以两种方式尝试使用ACPI子系统来恢复显卡的状态。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>[HW,ACPI]
+acpi_sci={level|edge|high|low}
+// ACPI系统控制终端触发器模式
+// (System Control Interrupt trigger mode)。
+
+[HW,ACPI]
+acpi_irq_balance
+// 使ACPI对中断请求进行平衡，在APIC模式下为默认值
+
+acpi_irq_nobalance
+// ACPI不对中断请求进行平衡(默认)，PIC模式下为默认值
+
+// acpi_irq_pci=&lt;irq&gt;,&lt;irq&gt;...
+// 如果启用了irq_balance则将列出的中断号标记为已经被PCI子系统使用，可用于屏蔽某些中断。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>[HW,ACPI]
+acpi_os_name=
+</code></pre>
+
+<p>告诉ACPI BIOS操作系统的名称。
+常常用来哄骗某些老旧的BIOS以为运行的是Windows系统。比如&rdquo;Microsoft 2001&rdquo;表示WinXP，&rdquo;Microsoft Windows&rdquo;表示Win98。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>[HW,ACPI]
+acpi_serialize
+</code></pre>
+
+<p>强制串行化ACPI机器语言(ACPI Machine Language)方法，操作系统使用这种语言与BIOS打交道。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>[HW,ACPI]
+acpi_use_timer_override
+</code></pre>
+
+<p>对于某些有毛病的 Nvidia NF5 主板需要使用此选项才能正常使用，不过此时 HPET 将失效。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>[IA-32,X86-64]
+acpi_pm_good 
+</code></pre>
+
+<p>跳过pmtimer的bug检测，强制内核假设这台机器的pmtimer没有毛病。用于解决某些有缺陷的BIOS。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>[KNL,ACPI]
+memmap=nn[KMG]#ss[KMG]
+</code></pre>
+
+<p>将从ss开始的nn长度的内存区域标记为ACPI数据。</p>
+
+<pre><code>memmap=nn[KMG]$ss[KMG]
+</code></pre>
+
+<p>将从ss开始的nn长度的内存区域标记为&rdquo;保留&rdquo;。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>[ACPI]
+pnpacpi=off
+</code></pre>
+
+<p>禁用ACPI的即插即用功能，而使用PNPBIOS来代替。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>[HW,ACPI]
+processor.max_cstate={0|1|2|3|4|5|6|7|8|9}
+</code></pre>
+
+<p>无视ACPI表报告的值，强制制定CPU的最大C-state值。</p>
+
+<p>这里的数字必须是一个有效的C-state值</p>
+
+<p>比如Yonah处理器支持&rdquo;0-4&rdquo;五个级别：C0为正常状态，其他则为不同的省电模式(数字越大表示CPU休眠的程度越深/越省电)。
+&ldquo;9&rdquo;表示超越所有的DMI黑名单限制。你的CPU的 95%的时间应该处于最深度的idle状态。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>processor.nocst
+</code></pre>
+
+<p>不使用_CST方法来侦测C-state值，而是使用传统的FADT方法。</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Linux-GPIO/" title="Linux-GPIO">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-%E6%97%8B%E8%BD%AC-%E6%8B%89%E4%BC%B8-%E6%94%BE%E5%A4%A7-%E7%BC%A9%E5%B0%8F-%E5%9B%BE%E7%89%87/" title="Golang-旋转-拉伸-放大-缩小-图片">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-08-12</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

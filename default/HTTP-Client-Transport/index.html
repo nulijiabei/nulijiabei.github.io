@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>HTTP-Client-Transport</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>HTTP-Client-Transport </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<p><em>RoundTripper接口中包含RoundTrip方法，Transport结构中同样包含RoundTrip方法</em></p>
+
+<p><em>这样一来，接口声明的对象可以接受所有包含RoundTrip方法的接口 &hellip; 仅开放共有方法 &hellip;</em></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 为什么[Client]结构定义了[RoundTripper]却使用[&amp;http.Transport]赋值
+http.Client{
+    Transport: &amp;http.Transport{
+...
+
+// Client 结构
+type Client struct {
+    // Transport specifies the mechanism by which individual
+    // HTTP requests are made.
+    // If nil, DefaultTransport is used.
+    Transport RoundTripper
+...
+
+// type Transport
+//   func (t *Transport) CancelRequest(req *Request)
+//   func (t *Transport) CloseIdleConnections()
+//   func (t *Transport) RegisterProtocol(scheme string, rt RoundTripper)
+//   func (t *Transport) RoundTrip(req *Request) (*Response, error)
+// Transport 结构
+type Transport struct {
+...
+
+// RoundTripper 竟然是个接口
+type RoundTripper interface {
+    // RoundTrip executes a single HTTP transaction, returning
+    // the Response for the request req.  RoundTrip should not
+    // attempt to interpret the response.  In particular,
+    // RoundTrip must return err == nil if it obtained a response,
+    // regardless of the response's HTTP status code.  A non-nil
+    // err should be reserved for failure to obtain a response.
+    // Similarly, RoundTrip should not attempt to handle
+    // higher-level protocol details such as redirects,
+    // authentication, or cookies.
+    //
+    // RoundTrip should not modify the request, except for
+    // consuming and closing the Body. The request's URL and
+    // Header fields are guaranteed to be initialized.
+    RoundTrip(*Request) (*Response, error)
+}
+...
+
+// 接口中实现的方法是属于[Transport]的
+func (t *Transport) RoundTrip(req *Request) (resp *Response, err error)
+...
+</code></pre>
+
+<p>所以&hellip;.</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+
+import (
+    &quot;log&quot;
+)
+
+// 比如说你定义了一个接口
+type Start interface {
+    // 包含了一个Run方法
+    Run()
+}
+
+// 不同结构包含相同方法
+// A
+type A struct {
+}
+
+func (this *A) Run() {
+    log.Println(&quot;A&quot;)
+}
+
+// B
+type B struct {
+}
+
+func (this *B) Run() {
+    log.Println(&quot;B&quot;)
+}
+
+// C
+type C struct {
+}
+
+func (this *C) Run() {
+    log.Println(&quot;C&quot;)
+}
+
+// 使用 ...
+func MainStart(this Start) {
+    this.Run()
+}
+
+func main() {
+    MainStart(new(A))
+    MainStart(new(B))
+    MainStart(new(C))
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Linux-ALSA-%E9%85%8D%E7%BD%AE/" title="Linux ALSA 配置">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-%E8%AF%BB%E5%8F%96%E6%96%87%E4%BB%B6%E4%BF%A1%E6%81%AF-FileInfo-and-MD5/" title="Golang-读取文件信息-FileInfo-and-MD5">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

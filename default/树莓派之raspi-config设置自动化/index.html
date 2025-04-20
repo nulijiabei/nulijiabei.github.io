@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>树莓派之raspi-config设置自动化</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>树莓派之raspi-config设置自动化 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>树莓派之raspi-config设置自动化</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>https://github.com/RPi-Distro/raspi-config
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>/* Command strings */
+#define GET_CAN_EXPAND  &quot;sudo raspi-config nonint get_can_expand&quot;
+#define EXPAND_FS       &quot;sudo raspi-config nonint do_expand_rootfs&quot;
+#define GET_HOSTNAME    &quot;sudo raspi-config nonint get_hostname&quot;
+#define SET_HOSTNAME    &quot;sudo raspi-config nonint do_hostname %s&quot;
+#define GET_BOOT_CLI    &quot;sudo raspi-config nonint get_boot_cli&quot;
+#define GET_AUTOLOGIN   &quot;sudo raspi-config nonint get_autologin&quot;
+#define SET_BOOT_CLI    &quot;sudo raspi-config nonint do_boot_behaviour B1&quot;
+#define SET_BOOT_CLIA   &quot;sudo raspi-config nonint do_boot_behaviour B2&quot;
+#define SET_BOOT_GUI    &quot;sudo raspi-config nonint do_boot_behaviour B3&quot;
+#define SET_BOOT_GUIA   &quot;sudo raspi-config nonint do_boot_behaviour B4&quot;
+#define GET_BOOT_WAIT   &quot;sudo raspi-config nonint get_boot_wait&quot;
+#define SET_BOOT_WAIT   &quot;sudo raspi-config nonint do_boot_wait %d&quot;
+#define GET_SPLASH      &quot;sudo raspi-config nonint get_boot_splash&quot;
+#define SET_SPLASH      &quot;sudo raspi-config nonint do_boot_splash %d&quot;
+#define GET_OVERSCAN    &quot;sudo raspi-config nonint get_overscan&quot;
+#define SET_OVERSCAN    &quot;sudo raspi-config nonint do_overscan %d&quot;
+#define GET_CAMERA      &quot;sudo raspi-config nonint get_camera&quot;
+#define SET_CAMERA      &quot;sudo raspi-config nonint do_camera %d&quot;
+#define GET_SSH         &quot;sudo raspi-config nonint get_ssh&quot;
+#define SET_SSH         &quot;sudo raspi-config nonint do_ssh %d&quot;
+#define GET_VNC         &quot;sudo raspi-config nonint get_vnc&quot;
+#define SET_VNC         &quot;sudo raspi-config nonint do_vnc %d&quot;
+#define GET_SPI         &quot;sudo raspi-config nonint get_spi&quot;
+#define SET_SPI         &quot;sudo raspi-config nonint do_spi %d&quot;
+#define GET_I2C         &quot;sudo raspi-config nonint get_i2c&quot;
+#define SET_I2C         &quot;sudo raspi-config nonint do_i2c %d&quot;
+#define GET_SERIAL      &quot;sudo raspi-config nonint get_serial&quot;
+#define GET_SERIALHW    &quot;sudo raspi-config nonint get_serial_hw&quot;
+#define SET_SERIAL      &quot;sudo raspi-config nonint do_serial %d&quot;
+#define GET_1WIRE       &quot;sudo raspi-config nonint get_onewire&quot;
+#define SET_1WIRE       &quot;sudo raspi-config nonint do_onewire %d&quot;
+#define GET_RGPIO       &quot;sudo raspi-config nonint get_rgpio&quot;
+#define SET_RGPIO       &quot;sudo raspi-config nonint do_rgpio %d&quot;
+#define GET_PI_TYPE     &quot;sudo raspi-config nonint get_pi_type&quot;
+#define GET_OVERCLOCK   &quot;sudo raspi-config nonint get_config_var arm_freq /boot/config.txt&quot;
+#define SET_OVERCLOCK   &quot;sudo raspi-config nonint do_overclock %s&quot;
+#define GET_GPU_MEM     &quot;sudo raspi-config nonint get_config_var gpu_mem /boot/config.txt&quot;
+#define GET_GPU_MEM_256 &quot;sudo raspi-config nonint get_config_var gpu_mem_256 /boot/config.txt&quot;
+#define GET_GPU_MEM_512 &quot;sudo raspi-config nonint get_config_var gpu_mem_512 /boot/config.txt&quot;
+#define GET_GPU_MEM_1K  &quot;sudo raspi-config nonint get_config_var gpu_mem_1024 /boot/config.txt&quot;
+#define SET_GPU_MEM     &quot;sudo raspi-config nonint do_memory_split %d&quot;
+#define GET_HDMI_GROUP  &quot;sudo raspi-config nonint get_config_var hdmi_group /boot/config.txt&quot;
+#define GET_HDMI_MODE   &quot;sudo raspi-config nonint get_config_var hdmi_mode /boot/config.txt&quot;
+#define SET_HDMI_GP_MOD &quot;sudo raspi-config nonint do_resolution %d %d&quot;
+#define GET_WIFI_CTRY   &quot;sudo raspi-config nonint get_wifi_country&quot;
+#define SET_WIFI_CTRY   &quot;sudo raspi-config nonint do_wifi_country %s&quot;
+#define CHANGE_PASSWD   &quot;(echo \&quot;%s\&quot; ; echo \&quot;%s\&quot; ; echo \&quot;%s\&quot;) | passwd&quot;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/ffmpeg-android-jni%E7%AB%AF%E8%B0%83%E7%94%A8mediaCodec%E5%AE%9E%E7%8E%B0%E7%A1%AC%E8%A7%A3%E7%A0%81/" title="ffmpeg android jni端调用mediaCodec实现硬解码">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E5%9C%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B8%8A%E8%B0%83%E8%AF%95ESP8266%E6%A8%A1%E5%9D%97/" title="在树莓派上调试ESP8266模块">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-04-01</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#pi-ref">pi <span>19</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

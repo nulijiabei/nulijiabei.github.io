@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux-date-命令使用技巧</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux-date-命令使用技巧 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>[root@localhost ~]# date --set &quot;1/1/09 00:01&quot; &lt;== （月/日/年时:分:秒）
+[root@localhost ~]# date 012501012009.30 &lt;== 月日时分年.秒
+Linux查看日期时间命令 date 把系统时间设置为以下时间： date -s 2010-04-07 date -s 10:20:33
+</code></pre>
+
+<hr />
+
+<p>date命令</p>
+
+<pre><code>　　date命令的功能是显示和设置系统日期和时间。 
+　　该命令的一般格式为： date [选项] 显示时间格式（以+开头，后面接格式） 
+　　date 设置时间格式 
+　　命令中各选项的含义分别为： 
+　　-d datestr, --date datestr 显示由datestr描述的日期 
+　　-s datestr, --set datestr 设置datestr 描述的日期 
+　　-u, --universal 显示或设置通用时间 
+</code></pre>
+
+<p>时间域</p>
+
+<pre><code>　　% H 小时（00..23） 
+　　% I 小时（01..12） 
+　　% k 小时（0..23） 
+　　% l 小时（1..12） 
+　　% M 分（00..59） 
+　　% p 显示出AM或PM 
+　　% r 时间（hh：mm：ss AM或PM），12小时 
+　　% s 从1970年1月1日00：00：00到目前经历的秒数 
+　　% S 秒（00..59） 
+　　% T 时间（24小时制）（hh:mm:ss） 
+　　% X 显示时间的格式（％H:％M:％S） 
+　　% Z 时区 日期域 
+　　% a 星期几的简称（ Sun..Sat） 
+　　% A 星期几的全称（ Sunday..Saturday） 
+　　% b 月的简称（Jan..Dec） 
+　　% B 月的全称（January..December） 
+　　% c 日期和时间（ Mon Nov 8 14：12：46 CST 1999） 
+　　% d 一个月的第几天（01..31） 
+　　% D 日期（mm／dd／yy） 
+　　% h 和%b选项相同 
+　　% j 一年的第几天（001..366） 
+　　% m 月（01..12） 
+　　% w 一个星期的第几天（0代表星期天） 
+　　% W 一年的第几个星期（00..53，星期一为第一天） 
+　　% x 显示日期的格式（mm/dd/yy） 
+　　% y 年的最后两个数字（ 1999则是99） 
+　　% Y 年（例如：1970，1996等） 
+　　需要特别说明的是，只有超级用户才能用date命令设置时间，一般用户只能用date命令显示时间。 
+　　例1：用指定的格式显示时间。 
+　　$ date ‘+This date now is =&gt;%x ，time is now =&gt;%X ，thank you !' 
+　　This date now is =&gt;11/12/99 ，time is now =&gt;17:53:01 ，thank you ! 
+　　例2：用预定的格式显示当前的时间。 
+　　# date 
+　　Fri Nov 26 15：20：18 CST 1999 
+　　例3：设置时间为下午14点36分。 
+　　# date -s 14:36:00 
+　　Fri Nov 26 14：15：00 CST 1999 
+　　例4：设置时间为1999年11月28号。 
+　　# date -s 991128 
+　　Sun Nov 28 00：00：00 CST 1999 
+    例5：设置一天前
+    date --date &quot;1 days ago&quot; +&quot;%Y-%m-%d&quot;
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Linux-%E4%B8%8B%E5%BC%BA%E5%88%B6Copy%E6%96%87%E4%BB%B6/" title="Linux-下强制Copy文件">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux-ALSA-%E9%85%8D%E7%BD%AE/" title="Linux ALSA 配置">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

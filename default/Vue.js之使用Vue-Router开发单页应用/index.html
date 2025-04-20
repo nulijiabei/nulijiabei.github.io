@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js之使用Vue-Router开发单页应用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Vue.js之使用Vue-Router开发单页应用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Vue.js之使用Vue-Router开发单页应用</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>传统的Web应用程序中
+    不同页面间的跳转都是向服务器发起请求，服务器处理请求后向浏览器推送页面
+在单页应用程序中
+    不同视图（组件的模版）的内容都是在同一个页面中渲染，页面间跳转都是在浏览器端完成
+    这就需要用到前端路由，在Vue.js中，可以使用官方的路由管理器Vue Router。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// CDN 方式来引用 Vue Router·
+&lt;script src=&quot;https://unpkg.com/vue-router/dist/vue-router.js&quot;&gt;&lt;/script&gt;
+
+// 使用模块化开发，则使用NPM安装方式
+npm install vue-router
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>单页应用全屏化</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在 Vue 中为 id 属性值为 app 的 div 元素设置样式
+
+// public/index.html
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1.0&quot;&gt;
+  &lt;link rel=&quot;icon&quot; href=&quot;&lt;%= BASE_URL %&gt;favicon.ico&quot;&gt;
+  &lt;title&gt;&lt;%= htmlWebpackPlugin.options.title %&gt;&lt;/title&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+  &lt;noscript&gt;
+    &lt;strong&gt;We're sorry but &lt;%= htmlWebpackPlugin.options.title %&gt; doesn't work properly without JavaScript enabled.
+      Please enable it to continue.&lt;/strong&gt;
+  &lt;/noscript&gt;
+  &lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+  &lt;!-- built files will be auto injected --&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;
+
+// App.vue
+&lt;style&gt;
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+&lt;/style&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>HTML 页面使用路由</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>1. 使用 router-link 组件设置导航链接
+// 默认会被渲染为一个&lt;a&gt;标签
+
+&lt;router-link to=&quot;/news&quot;&gt;新闻&lt;/router-link&gt;
+&lt;router-link to=&quot;/books&quot;&gt;图书&lt;/router-link&gt;   
+&lt;router-link to=&quot;/videos&quot;&gt;视频&lt;/router-link&gt;
+
+2. 指定组件在何处渲染，这是通过&lt;router-view&gt;指定的
+&lt;router-view&gt;&lt;/router-view&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>模块化开发使用路由</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在 App.vue 中设置导航链接和渲染的位置
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;div id=&quot;nav&quot;&gt;
+      &lt;router-link to=&quot;/news&quot;&gt;新闻&lt;/router-link&gt; |
+      &lt;router-link to=&quot;/books&quot;&gt;图书&lt;/router-link&gt; |
+      &lt;router-link to=&quot;/videos&quot;&gt;视频&lt;/router-link&gt;
+    &lt;/div&gt;
+    &lt;router-view /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;App&quot;,
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+
+// 在 components(全局组件) 目录下新建 XXX.vue 文件
+// 在 views(页面级组件) 目录下新建 XXX.vue 文件
+
+// components/News.vue
+&lt;template&gt;
+  &lt;div&gt;新闻页面&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {};
+&lt;/script&gt;
+
+// components/Books.vue
+&lt;template&gt;
+  &lt;div&gt;图书页面&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {};
+&lt;/script&gt;
+
+// components/Videos.vue
+&lt;template&gt;
+  &lt;div&gt;视频页面&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {};
+&lt;/script&gt;
+
+// 在 router/index.js 文件中配置路由信息
+
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import News from '@/components/News.vue'
+import Books from '@/components/Books.vue'
+import Videos from '@/components/Videos.vue'
+
+Vue.use(VueRouter)
+
+const routes = [
+  {
+    path: '/news',
+    component: News
+  },
+  {
+    path: '/books',
+    component: Books
+  },
+  {
+    path: '/videos',
+    component: Videos
+  },
+]
+
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes
+})
+
+export default router
+
+// 在程序入口 main.js 文件中，向 Vue 根实例注入 VueRouter 实例
+
+import Vue from 'vue'
+import App from './App.vue'
+import router from './router'
+
+Vue.config.productionTip = false
+
+new Vue({
+  router,
+  render: h =&gt; h(App),
+}).$mount('#app')
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>动态路由匹配</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在实际项目开发时，经常需要把匹配某种模式的路由映射到同一个组件
+// 例如有一个Book组件，对于所有ID各不同的图书，都使用这个组件来渲染
+// 这可以使用路段中的动态段来实现
+// 动态段使用冒号(:)标记，如/book/:id，既/book/1、/book/2、/book/foo
+// 都将映射到相同的路由
+// 当匹配到一个路由时，动态的值将被保存到this.$route.params中，可以在组件内使用
+
+// Book.vue
+&lt;template&gt;
+  &lt;div&gt;图书ID：\{{ $route.params.id }}&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {};
+&lt;/script&gt;
+
+// router/index.js
+...
+import Book from '@/components/Book.vue'
+{
+    path: '/book/:id',
+    component: BOOK
+}
+...
+
+// App.vue
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;div id=&quot;nav&quot;&gt;
+      &lt;router-link to=&quot;/book/1&quot;&gt;图书一&lt;/router-link&gt; |
+      &lt;router-link to=&quot;/book/2&quot;&gt;图书二&lt;/router-link&gt;
+    &lt;/div&gt;
+    &lt;router-view /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;App&quot;,
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>查询参数</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// URL中带有查询参数的形式为/book?id=1，这在传统的Web应用程序中很常见
+// 根据查询参数向服务端请求数据，在单页应用程序开发中，也支持路径中的查询参数
+
+// Book.vue
+&lt;template&gt;
+  &lt;div&gt;图书ID：\{{ $route.query.id }}&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {};
+&lt;/script&gt;
+
+// router/index.js
+...
+import Book from '@/components/Book.vue'
+{
+    path: '/book',
+    component: BOOK
+}
+...
+
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;div id=&quot;nav&quot;&gt;
+      &lt;router-link to=&quot;/book/?id=1&quot;&gt;图书一&lt;/router-link&gt; |
+      &lt;router-link to=&quot;/book/?id=2&quot;&gt;图书二&lt;/router-link&gt;
+    &lt;/div&gt;
+    &lt;router-view /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  name: &quot;App&quot;,
+  data() {
+    return {};
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>嵌套路由</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在实际的应用场景中，一个界面UI通常由多层嵌套的组件组合而成
+// URL中的各段也按某种结构对应嵌套的各层组件 ...
+
+// 说明：在books组件中嵌套book组件，并使用动态段传递book.id
+
+// 在 assets 目录下新建一个 books.js 文件，里面是图书数据
+
+// assets/books.js
+export default [
+    { id: 1, title: 'Vue.js 无难事', desc: '前端框架经典图书' },
+    { id: 2, title: 'VC++ 深入详解', desc: '畅销10多年的图书' },
+    { id: 3, title: 'Servlet/JSP 深入详解', desc: '经典JSP图书' }
+]
+
+// Books.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;图书列表&lt;/h3&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in books&quot; :key=&quot;book.id&quot;&gt;
+        &lt;router-link :to=&quot;'/book/' + book.id&quot;&gt;\{{ book.title }}&lt;/router-link&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;!-- Book 组件在这里渲染 --&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Books from &quot;@/assets/books&quot;;
+export default {
+  data() {
+    return {
+      books: Books,
+    };
+  },
+};
+&lt;/script&gt;
+
+// router/index.js
+{
+    path: '/books',
+    component: Books,
+    children: [
+      { path: '/book/:id', component: Book }
+    ]
+},
+
+// Book.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;p&gt;图书ID：\{{ book.id }}&lt;/p&gt;
+    &lt;p&gt;书名：\{{ book.title }}&lt;/p&gt;
+    &lt;p&gt;说明：\{{ book.desc }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Books from &quot;@/assets/books&quot;;
+export default {
+  data() {
+    return {
+      book: {},
+    };
+  },
+  created() {
+    this.book = Books.find((item) =&gt; item.id == this.$route.params.id);
+  },
+  watch: {
+    $route(to) {
+      this.book = Books.find((item) =&gt; item.id == to.params.id);
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 注意：可以使用immediate选项，将监听器函数在开始后立即执行，这样就不需要created钩子了
+watch: {
+    $route: {
+      handler: function (to) {
+        this.book = Books.find((item) =&gt; item.id == to.params.id);
+      },
+      immediate: true,
+    },
+},
+...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>命名路由</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 有时通过一个名称来标识路由会更方便，特别是在链路到路由，或者是执行导航时。
+// 可以在创建Router实例的时候，在routes选项中为路由设置名称 ...
+
+// router/index.js
+...
+const routes = [
+  {
+    path: '/',
+    // 重定向，指向目标路径
+    redirect: {
+      name: 'news'
+    }
+  },
+  {
+    path: '/news',
+    name: 'news',
+    component: News
+  },
+  {
+    path: '/books',
+    name: 'books',
+    component: Books,
+    children: [
+      { path: '/book/:id', name: 'book', component: Book }
+    ]
+  },
+]
+...
+
+// App.vue 在设置导航链接时使用命名路由
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;div id=&quot;nav&quot;&gt;
+      &lt;router-link :to=&quot;{ name: 'news' }&quot;&gt;新闻&lt;/router-link&gt; |
+      &lt;router-link :to=&quot;{ name: 'books' }&quot;&gt;图书&lt;/router-link&gt;
+    &lt;/div&gt;
+    &lt;router-view /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+// Books.vue 修改 Books.vue 也使用命名路由
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;图书列表&lt;/h3&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in books&quot; :key=&quot;book.id&quot;&gt;
+        &lt;router-link :to=&quot;{ name: 'book', params: { id: book.id } }&quot;&gt;\{{ book.title }}&lt;/router-link&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;!-- Book 组件在这里渲染 --&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Books from &quot;@/assets/books&quot;;
+export default {
+  data() {
+    return {
+      books: Books,
+    };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>命名视图</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 注意：有时需要同时(同级)显示多个视图，而不是嵌套展示
+
+// 运行项目，可以看到当单机一个图书链接时，图书的详情在Books同级显示了
+
+// /router/index.js
+const routes = [
+  {
+    path: '/',
+    redirect: {
+      name: 'news',
+    }
+  },
+  {
+    path: '/news',
+    name: 'news',
+    component: News,
+  },
+  {
+    path: '/books',
+    name: 'books',
+    component: Books,
+  },
+  {
+    path: '/book/:id',
+    name: 'book',
+    components: {
+      bookDetail: Book,
+    }
+  },
+]
+
+// App.vue
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;div id=&quot;nav&quot;&gt;
+      &lt;router-link :to=&quot;{ name: 'news' }&quot;&gt;新闻&lt;/router-link&gt; |
+      &lt;router-link :to=&quot;{ name: 'books' }&quot;&gt;图书&lt;/router-link&gt;
+    &lt;/div&gt;
+    &lt;router-view /&gt;
+    &lt;router-view name=&quot;bookDetail&quot;&gt;&lt;/router-view&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+// Books.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;图书列表&lt;/h3&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in books&quot; :key=&quot;book.id&quot;&gt;
+        &lt;router-link :to=&quot;{ name: 'book', params: { id: book.id } }&quot;&gt;\{{
+          book.title
+        }}&lt;/router-link&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;!-- Book 组件在这里渲染 --&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Books from &quot;@/assets/books&quot;;
+export default {
+  data() {
+    return {
+      books: Books,
+    };
+  },
+};
+&lt;/script&gt;
+
+// Book.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;p&gt;图书ID：\{{ book.id }}&lt;/p&gt;
+    &lt;p&gt;书名：\{{ book.title }}&lt;/p&gt;
+    &lt;p&gt;说明：\{{ book.desc }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Books from &quot;@/assets/books&quot;;
+export default {
+  data() {
+    return {
+      book: {},
+    };
+  },
+  created() {
+    this.book = Books.find((item) =&gt; item.id == this.$route.params.id);
+  },
+  watch: {
+    $route(to) {
+      this.book = Books.find((item) =&gt; item.id == to.params.id);
+    },
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>编程式导航</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 除了使用&lt;router-link&gt;创建&lt;a&gt;标签来定义导航链接外
+// 还可以使用router的实例方法，通过编写代码来导航
+
+// 要导航到不同的URL，可以使用Router实例的push方法
+router.push(location, onComplete?, onAbort?)
+
+// 字符串
+router.push('home')
+// 对象
+router.push({ path: 'home' })
+// 命名路由
+router.push({ name: 'user', params: { userId: '123' })
+// 带查询参数，结果是 /register?plan=private
+router.push({ path: 'register', query: { plan: 'private' }})
+
+// App.vue
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;div id=&quot;nav&quot;&gt;
+      &lt;router-link :to=&quot;{ name: 'news' }&quot;&gt;新闻&lt;/router-link&gt; |
+      &lt;router-link :to=&quot;{ name: 'books' }&quot;&gt;图书&lt;/router-link&gt;
+    &lt;/div&gt;
+    &lt;router-view /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+// router/index.js
+const routes = [
+  {
+    path: '/',
+    redirect: {
+      name: 'news'
+    }
+  },
+  {
+    path: '/news',
+    name: 'news',
+    component: News,
+  },
+  {
+    path: '/books',
+    name: 'books',
+    component: Books,
+  },
+  {
+    path: '/book/:id',
+    name: 'book',
+    component: Book,
+  },
+]
+
+// Books.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;图书列表&lt;/h3&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in books&quot; :key=&quot;book.id&quot;&gt;
+        &lt;a
+          href=&quot;#&quot;
+          @click.prevent=&quot;goRoute({ name: 'book', params: { id: book.id } })&quot;
+          &gt;\{{ book.title }}
+        &lt;/a&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Books from &quot;@/assets/books&quot;;
+export default {
+  data() {
+    return {
+      books: Books,
+    };
+  },
+  methods: {
+    goRoute(location) {
+      if (location.params.id != this.$route.params.id)
+        this.$router.push(location);
+    },
+  },
+};
+&lt;/script&gt;
+
+// Book.vue
+&lt;template&gt;
+    &lt;div&gt;
+        &lt;p&gt;\{{ this.$route.params.id }}&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+
+}
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>导航守卫</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 已经介绍过一个组件内的导航守卫：beforeRouteUpdate 
+// vue-router 提供的导航守卫主要用于在导航的过程中
+// 重定向或者取消路由，或者添加权限验证、数据获取等业务逻辑
+
+// 导航守卫分为三类：全局守卫、路由独享守卫、组件内守卫
+// 可以用于路由导航过程中的不同阶段 ...
+
+// 每一个导航守卫都有三个参数：to、from、next(除 router.afterEach 外)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>全局守卫</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 全局守卫分为：全局前置守卫、全局解析守卫、全局后置钩子
+
+// 当一个导航触发时，全局前置守卫按照创建的顺序调用。
+// 守卫可以是异步解析执行，此时导航在所有守卫解析完之前一直处于挂起状态
+
+// 1. 全局前置守卫使用 router.beforeEach 注册
+// 2. 全局解析守卫使用 router.beforeResolve 注册
+// 3. 全局后置钩子使用 router.afterEach 注册
+// 3.1 与守卫不同的是，全局后置钩子不接受next函数，也不会改变导航
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>登录验证</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// $router 是VueRouter的一个对象，通过Vue.use(VueRouter)和VueRouter构造的对象
+// 这个对象中是一个全局的对象，他包含了所有的路由包含了许多关键的对象和属性。
+
+// $route 是一个跳转的路由对象，每一个路由都会有一个route对象
+// 是一个局部的对象，可以获取对应的 name,path,params,query 等
+
+// App.vue
+&lt;template&gt;
+  &lt;div id=&quot;app&quot;&gt;
+    &lt;div id=&quot;nav&quot;&gt;
+      &lt;router-link :to=&quot;{ name: 'news' }&quot;&gt;新闻&lt;/router-link&gt; |
+      &lt;router-link :to=&quot;{ name: 'login' }&quot;&gt;登录&lt;/router-link&gt;
+    &lt;/div&gt;
+    &lt;router-view /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+// News.vue
+&lt;template&gt;
+  &lt;div&gt;新闻页面&lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {};
+&lt;/script&gt;
+
+// Login.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;\{{ info }}&lt;/h3&gt;
+    &lt;table&gt;
+      &lt;caption&gt;
+        用户登录
+      &lt;/caption&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;&lt;label&gt;用户名：&lt;/label&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;input type=&quot;text&quot; v-model.trim=&quot;username&quot; /&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td&gt;&lt;label&gt;密码：&lt;/label&gt;&lt;/td&gt;
+          &lt;td&gt;&lt;input type=&quot;password&quot; v-model.trim=&quot;password&quot; /&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td cols=&quot;2&quot;&gt;
+            &lt;input type=&quot;submit&quot; value=&quot;登录&quot; @click.prevent=&quot;login&quot; /&gt;
+            &lt;input type=&quot;submit&quot; value=&quot;注销&quot; @click.prevent=&quot;logout&quot; /&gt;
+          &lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  data() {
+    return {
+      username: &quot;nulijiabei&quot;,
+      password: &quot;1234&quot;,
+      info: &quot;&quot;,
+    };
+  },
+  methods: {
+    logout() {
+      sessionStorage.setItem(&quot;isAuth&quot;, false);
+      this.username = &quot;&quot;;
+      this.password = &quot;&quot;;
+      this.info = &quot;用户名或密码错误&quot;;
+    },
+    login() {
+      if (&quot;nulijiabei&quot; == this.username &amp;&amp; &quot;1234&quot; == this.password) {
+        sessionStorage.setItem(&quot;isAuth&quot;, true);
+        this.info = &quot;&quot;;
+        let queryParam = this.$route.query.redirect;
+        if (queryParam) {
+          this.$router.replace(queryParam);
+        } else {
+          this.$router.replace(&quot;/&quot;);
+        }
+      } else {
+        sessionStorage.setItem(&quot;isAuth&quot;, false);
+        this.username = &quot;&quot;;
+        this.password = &quot;&quot;;
+        this.info = &quot;用户名或密码错误&quot;;
+      }
+    },
+  },
+};
+&lt;/script&gt;
+
+// router/index.js
+const routes = [
+  {
+    path: '/',
+    redirect: {
+      name: 'news'
+    }
+  },
+  {
+    path: '/news',
+    name: 'news',
+    component: News,
+  },
+  {
+    path: '/books',
+    name: 'books',
+    component: Books,
+  },
+  {
+    path: '/book/:id',
+    name: 'book',
+    component: Book,
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login,
+  },
+]
+
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes
+})
+
+router.beforeEach((to, from, next) =&gt; {
+  if (to.path == '/login') {
+    next();
+  } else if (sessionStorage.isAuth === &quot;true&quot;) {
+    next();
+  } else {
+    router.push({
+      name: 'login',
+      query: { redirect: to.fullPath }
+    })
+  }
+})
+...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>页面标题</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 因为在单页应用程序中，实际只有一个页面，因此在页面切换时，标题不会发生改变
+// 在定义路由时，在routes配置中的每个路由对象都可以使用一个meta字段，在该字段中设置标题
+
+// router/index.js
+const routes = [
+  {
+    path: '/',
+    redirect: {
+      name: 'news'
+    }
+  },
+  {
+    path: '/news',
+    name: 'news',
+    component: News,
+    meta: {
+      title: '新闻'
+    }
+  },
+  {
+    path: '/books',
+    name: 'books',
+    component: Books,
+    meta: {
+      title: '图书'
+    }
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login,
+    meta: {
+      title: '登录'
+    }
+  },
+]
+
+...
+
+router.afterEach((to) =&gt; {
+  document.title = to.meta.title
+})
+
+...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>路由独享守卫</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 路由独立的守卫是在routes配置的路由对象中直接定义的beforeEnter守卫
+// 独享守卫只在该组件上生效，在全局前置守卫调用之后，在进入路由组件之间调用
+
+// router/index.js
+const routes = [
+  {
+    path: '/news',
+    name: 'news',
+    component: News,
+    beforeEach:(to,from,next) =&gt; {
+      // ...
+    }
+    meta: {
+      title: '新闻'
+    }
+  }
+]
+...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>组件内守卫</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 组件内守卫有三个：beforeRouteUpdate、beforeRouteEnter、beforeRouteLeave
+
+// 注意：beforeRouteEnter 守卫不能访问 this 因为该守卫是在导航确认之前被调用
+// 不过：beforeRouteEnter 有一个特权，就是它的 next 函数支持回调，而其它则不行
+
+// beforeRouteLeave 守卫通常用来防止用户在还未保存修改前突然离开
+// 可以通过next(false)取消导航 ...
+
+// assets/books.js
+export default [
+    { id: 1, title: 'Vue.js 无难事', desc: '前端框架经典图书' },
+    { id: 2, title: 'VC++ 深入详解', desc: '畅销10多年的图书' },
+    { id: 3, title: 'Servlet/JSP 深入详解', desc: '经典JSP图书' }
+]
+
+// Books.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;h3&gt;图书列表&lt;/h3&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;book in books&quot; :key=&quot;book.id&quot;&gt;
+        &lt;router-link :to=&quot;'/book/' + book.id&quot;&gt;\{{ book.title }}&lt;/router-link&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;!-- Book 组件在这里渲染 --&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Books from &quot;@/assets/books&quot;;
+export default {
+  data() {
+    return {
+      books: Books,
+    };
+  },
+};
+&lt;/script&gt;
+
+// router/index.js
+{
+    path: '/books',
+    component: Books,
+    children: [
+      { path: '/book/:id', component: Book }
+    ]
+},
+
+// Book.vue
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;p&gt;图书ID：\{{ book.id }}&lt;/p&gt;
+    &lt;p&gt;书名：\{{ book.title }}&lt;/p&gt;
+    &lt;p&gt;说明：\{{ book.desc }}&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import Books from &quot;@/assets/books&quot;;
+export default {
+  data() {
+    return {
+      book: {},
+    };
+  },
+  beforeRouteEnter(to, form, next) {
+    next((vm) =&gt; {
+      vm.book = Books.find((item) =&gt; item.id == to.params.id);
+    });
+  },
+  beforeRouteUpdate(to, from, next) {
+    this.book = Books.find((item) =&gt; item.id == to.params.id);
+    next();
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>延迟加载路由</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 当应用变得复杂后，路由组建也会增多
+// 而Webpack的打包机制会将应用程序中所有 JS 打包成一个文件
+// 这个文件可能相当大，影响页面的加载效率 ...
+// 为此，可以结合Vue的异步组建和Webpack的代码分割功能，实现路由的延迟加载
+
+const routes = [
+  {
+    path: '/',
+    redirect: {
+      name: 'news'
+    }
+  },
+  {
+    path: '/news',
+    name: 'news',
+    component: () =&gt; import('@/components/News.vue'),
+    meta: {
+      title: '新闻'
+    }
+  },
+  {
+    path: '/books',
+    name: 'books',
+    component: () =&gt; import('@/components/Books.vue'),
+    meta: {
+      title: '图书'
+    }
+  }
+]
+...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Vue.js%E4%B9%8B%E4%BD%BF%E7%94%A8axios%E4%B8%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%80%9A%E4%BF%A1/" title="Vue.js之使用axios与服务器通信">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Vue.js%E4%B9%8B%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%AE%9E%E6%88%98/" title="Vue.js之从入门到实战">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-11-20</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#javascript-ref">javascript <span>11</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

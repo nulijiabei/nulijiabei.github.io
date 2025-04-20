@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>在Ubuntu中使用Overlayroot来只读根文件系统</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>在Ubuntu中使用Overlayroot来只读根文件系统 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<p><strong><em>了解一下 overlayroot 和 overlayfs &hellip; 后续有时间深入研究一下 &hellip; 转发了往上找到的一篇文章</em></strong></p>
+
+<p><strong><em><a href="http://www.tuicool.com/articles/NNJbq2V">http://www.tuicool.com/articles/NNJbq2V</a> (原文更加清晰明了)</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>In certain situations, it is desirable to have a read-only root filesystem . This prevents any changes from occurring on the root filesystem that may alter system behavior, and it allows a simple reboot to restore a system to its pristine state. Examples of such applications include kiosks and embedded devices. Using overlayroot on Ubuntu makes creating a read-only root filesystem quick and easy.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Motivation</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Let us imagine that we have an embedded Linux device that needs to run a particular program. The program does not need to store any data (except perhaps some logs), and we want to protect the system against any changes. If the program or any system processes make filesystem modifications, we want to toss them out and return to the original state. We want a robust system that will run our program, but be restored to it’s ‘factory’ state with a power-cycle.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Background</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Overlayroot is a package for Ubuntu which utilizes OverlayFS , a union filesystem implementation. OverlayFS presents a unified view of two different filesystems; the presented filesystem is the result of overlaying one filesystem over another.
+
+In OverlayFS, there is an ‘upper’ filesystem and a ‘lower’ filesystem . If a particular object exists in both the upper filesystem and the lower filesystem, the object from the upper filesystem is presented, and the object from the lower filesystem is hidden. If the object is a directory, the contents of the directory on the upper and lower filesystems are merged and presented.
+
+With overlayroot, the lower filesystem is a read-only mount of the root filesystem, and the upper filesystem is a read-write mount of another block device. That block device can be tmpfs , a standard block device, or an encrypted block device (à la dmcrypt ).
+
+All changes made on top of the root filesystem are stored elsewhere and do not affect the root filesystem. Depending on the block device chosen, those changes can persist across reboots. While the root filesystem will not be affected, the view presented by OverlayFS will include any changes stored in the upper filesystem.
+
+https://en.wikipedia.org/wiki/OverlayFS
+https://en.wikipedia.org/wiki/UnionFS
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/filesystems/overlayfs.txt
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Situation</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>For our embedded Linux device, we are not interested in preserving any changes to the root filesystem. Any data that we want to preserve will be stored on a separate filesystem dedicated to data storage.
+
+Here is our filesystem structure:
+
+/dev/sda1 on /
+/dev/sda2 on /data
+
+We want to mount / using overlayroot so that we have a read-write filesystem available but not persist any changes to / , and we want to mount /data normally so that our program can write out and persist log files.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Solution</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Overlayroot has been available since Ubuntu 12.10, and has been back-ported to 12.04 LTS. It is quick to install:
+
+apt-get install overlayroot
+
+The configuration file is stored at /etc/overlayroot.conf , and contains a wealth of in-line documention.
+
+The only item to change is the overlayroot variable. By default, it is blank:
+
+overlayroot=;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Start Simple</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Since we want to use tmpfs mode for overlayroot, we set the variable accordingly.
+
+overlayroot=tmpfs
+
+The other modes (specifying a device, or crypt ) are documented in overlayroot.conf , with some nice diagrams on the post introducing overlayroot .
+
+http://blog.dustinkirkland.com/2012/08/introducing-overlayroot-overlayfs.html
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Add Swap</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>By default, overlayroot disables swap. This can be re-enabled by providing another option to the configuration:
+
+overlayroot=tmpfs:swap=1
+
+(The default value for swap is).
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Don’t Recurse</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>By default, overlayroot will mount all filesystems under / in the specified mode. This can be prevented by adding another option to the configuration:
+
+overlayroot=tmpfs:swap=1,recurse=0
+
+Note that swap=1 and recurse=0 are separated by a comma, not a colon.
+
+(The default value for recurse is 1).
+
+This will prevent overlayroot from overlaying a read-write tmpfs on top of a read-only /data filesystem. All of / will be protected from any modifications, except /data , which is what we want.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>The Result</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>After making changes to overlayroot.conf and rebooting, the root filesystem should now be mounted as a read-write tmpfs overlaying the read-only / filesystem.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Running mount , we should see something like:
+
+overlayroot on / type overlayfs (rw,lowerdir=/media/root-ro/,upperdir=/media/root-rw)
+proc on /proc type proc (rw)
+none on /proc/sys/fs/binfmt_misc type binfmt_misc (rw,noexec,nosuid,nodev)
+none on /sys type sysfs (rw,noexec,nosuid,nodev)
+none on /sys/fs/fuse/connections type fusectl (rw)
+devtmpfs on /dev type devtmpfs (rw,mode=0755)
+none on /dev/pts type devpts (rw,noexec,nosuid,gid=5,mode=0620)
+none on /run type tmpfs (rw,noexec,nosuid,size=10%,mode=0755)
+none on /run/lock type tmpfs (rw,noexec,nosuid,nodev,size=5242880)
+none on /run/shm type tmpfs (rw,nosuid,nodev)
+/dev/sda1 on /media/root-ro type ext4 (ro)
+tmpfs-root on /media/root-rw type tmpfs (rw,relatime)
+/dev/sda2 on /data type ext4 (rw)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Note how the root filesystem is of type overlayfs with specified upper and lower filesystems that correspond to the read-write tmpfs and read-only mounts listed.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Disabling Overlayroot</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Once overlayroot is enabled, it is no longer possible to make changes to the root filesystem. This introduces problems if we legitimately need to make changes (such as for updates, tweaks, etc.). Fortunately, we can override any overlayroot configuration by passing overlayroot=disabled to the kernel at boot. This can be done as a one-off operation as needed, or can be set up as an alternate boot configuration in a boot loader such as GRUB.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>For example, with GRUB2, something like the following could be used:
+
+menuentry 'Ubuntu, with Linux 3.5.0-54-generic (Writable)' --class ubuntu --class gnu-linux --class gnu --class os {
+    recordfail
+    gfxmode $linux_gfx_mode
+    insmod gzio
+    insmod part_msdos
+    insmod ext2
+    set root='(hd0,msdos1)'
+    search --no-floppy --fs-uuid --set=root 28adfe9d-c122-479a-ab81-de57d16516dc
+    linux   /vmlinuz-3.5.0-54-generic root=/dev/mapper/faramir-root ro overlayroot=disabled
+    initrd  /initrd.img-3.5.0-54-generic
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Conclusion</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Overlayroot makes the process of mounting the root filesystem as read-only on Ubuntu very easy. Prior to the availability of overlayroot packages, custom scripts were added to the initramfs configuration . These scripts were often fragile, and not always compatible across versions of Ubuntu. With the availability of OverlayFS and overlayroot, creating robust kiosks and embedded Linux devices with rollback capabilities is now extremely easy.
+
+https://help.ubuntu.com/community/aufsRootFileSystemOnUsbFlash
+https://help.ubuntu.com/community/aufsRootFileSystemOnUsbFlash
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Linux-Integration-Services/" title="Linux Integration Services">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Qt%E4%B9%8B%E5%AE%B9%E5%99%A8%E9%81%8D%E5%8E%86%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/" title="Qt之容器遍历使用教程">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2017-05-12</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

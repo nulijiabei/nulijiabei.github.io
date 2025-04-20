@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Asio之Buffer篇</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Asio之Buffer篇 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>使用read_until() 和 async_read_until() 读取line-based</p>
+
+<p>（使用&rdquo;\r\n&rdquo;或者其它自定义字符序列作为分隔符）</p>
+
+<p>数据时需要boost::asio::streambuf来缓存读取到的数据。</p>
+
+<hr />
+
+<h3>示例：</h3>
+
+<pre><code>boost::asio::streambuf sb;
+...
+std::size_t n = boost::asio::read_until(sock, sb, '\n');
+boost::asio::streambuf::const_buffers_type bufs = sb.data();
+std::string line(
+    boost::asio::buffers_begin(bufs),
+    boost::asio::buffers_begin(bufs) + n);
+</code></pre>
+
+<hr />
+
+<h3>按行读取:</h3>
+
+<pre><code>    boost::system::error_code error;
+    boost::asio::streambuf content;
+    istream content_stream(&amp;content);
+    char _buffer[8192];
+    while(true)
+    {
+        bzero(_buffer, 8192);
+        size_t n = read_until(*_sock, content, &quot;\n&quot;, error);
+        content_stream.getline(_buffer, n);
+        if(error)
+        {
+    ...
+    }
+    ...
+}
+</code></pre>
+
+<hr />
+
+<h3>例子:</h3>
+
+<pre><code>//
+// sync_client.cpp
+// ~~~~~~~~~~~~~~~
+//
+// Copyright (c) 2003-2011 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+
+#include &lt;iostream&gt;
+#include &lt;istream&gt;
+#include &lt;ostream&gt;
+#include &lt;string&gt;
+#include &lt;boost/asio.hpp&gt;
+
+using boost::asio::ip::tcp;
+
+int main(int argc, char* argv[])
+{
+  try
+  {
+    if (argc != 3)
+    {
+      std::cout &lt;&lt; &quot;Usage: sync_client &lt;server&gt; &lt;path&gt;\n&quot;;
+      std::cout &lt;&lt; &quot;Example:\n&quot;;
+      std::cout &lt;&lt; &quot;  sync_client www.boost.org /LICENSE_1_0.txt\n&quot;;
+      return 1;
+    }
+
+    boost::asio::io_service io_service;
+
+    // Get a list of endpoints corresponding to the server name.
+    tcp::resolver resolver(io_service);
+    tcp::resolver::query query(argv[1], &quot;http&quot;);
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+
+    // Try each endpoint until we successfully establish a connection.
+    tcp::socket socket(io_service);
+    boost::asio::connect(socket, endpoint_iterator);
+
+    // Form the request. We specify the &quot;Connection: close&quot; header so that the
+    // server will close the socket after transmitting the response. This will
+    // allow us to treat all data up until the EOF as the content.
+    boost::asio::streambuf request;
+    std::ostream request_stream(&amp;request);
+    request_stream &lt;&lt; &quot;GET &quot; &lt;&lt; argv[2] &lt;&lt; &quot; HTTP/1.0\r\n&quot;;
+    request_stream &lt;&lt; &quot;Host: &quot; &lt;&lt; argv[1] &lt;&lt; &quot;\r\n&quot;;
+    request_stream &lt;&lt; &quot;Accept: */*\r\n&quot;;
+    request_stream &lt;&lt; &quot;Connection: close\r\n\r\n&quot;;
+
+    // Send the request.
+    boost::asio::write(socket, request);
+
+    // Read the response status line. The response streambuf will automatically
+    // grow to accommodate the entire line. The growth may be limited by passing
+    // a maximum size to the streambuf constructor.
+    boost::asio::streambuf response;
+    boost::asio::read_until(socket, response, &quot;\r\n&quot;);
+
+    // Check that response is OK.
+    std::istream response_stream(&amp;response);
+    std::string http_version;
+    response_stream &gt;&gt; http_version;
+    unsigned int status_code;
+    response_stream &gt;&gt; status_code;
+    std::string status_message;
+    std::getline(response_stream, status_message);
+    if (!response_stream || http_version.substr(0, 5) != &quot;HTTP/&quot;)
+    {
+      std::cout &lt;&lt; &quot;Invalid response\n&quot;;
+      return 1;
+    }
+    if (status_code != 200)
+    {
+      std::cout &lt;&lt; &quot;Response returned with status code &quot; &lt;&lt; status_code &lt;&lt; &quot;\n&quot;;
+      return 1;
+    }
+
+    // Read the response headers, which are terminated by a blank line.
+    boost::asio::read_until(socket, response, &quot;\r\n\r\n&quot;);
+
+    // Process the response headers.
+    std::string header;
+    while (std::getline(response_stream, header) &amp;&amp; header != &quot;\r&quot;)
+      std::cout &lt;&lt; header &lt;&lt; &quot;\n&quot;;
+    std::cout &lt;&lt; &quot;\n&quot;;
+
+    // Write whatever content we already have to output.
+    if (response.size() &gt; 0)
+      std::cout &lt;&lt; &amp;response;
+
+    // Read until EOF, writing data to output as we go.
+    boost::system::error_code error;
+    while (boost::asio::read(socket, response,
+      boost::asio::transfer_at_least(1), error))
+      std::cout &lt;&lt; &amp;response;
+    if (error != boost::asio::error::eof)
+      throw boost::system::system_error(error);
+  }
+  catch (std::exception&amp; e)
+  {
+    std::cout &lt;&lt; &quot;Exception: &quot; &lt;&lt; e.what() &lt;&lt; &quot;\n&quot;;
+  }
+
+  return 0;
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/C%2B%2B0x%E4%B9%8B%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/" title="C++0x之右值引用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Program-received-signal-SIGPIPE%2C-Broken-pipe./" title="Program received signal SIGPIPE, Broken pipe.">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-10-16</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之Fragment使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之Fragment使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>备注</h3>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>Layout 占位供 Fragment 使用介绍</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 当需要使用 Fragment 替换当前 View 里面某一个区域的时候
+// 就需要使用一个 Layout 进行布局，并占位，然后通过 ID 进行
+// Fragment 的 add 或 replace 或 rm 等操作 ...
+&lt;android.support.v4.widget.DrawerLayout
+android:id=&quot;@+id/drawer_layout&quot;
+android:layout_width=&quot;match_parent&quot;
+android:layout_height=&quot;match_parent&quot;&gt;
+&lt;!-- The main content view --&gt;
+// 这个就是 Layout 占位
+&lt;FrameLayout
+    android:id=&quot;@+id/main&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; /&gt;
+&lt;!-- The navigation drawer --&gt;
+&lt;ListView
+    android:id=&quot;@+id/left_drawer&quot;
+    android:layout_width=&quot;200dp&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:layout_gravity=&quot;start&quot;
+    android:background=&quot;#f5f5f5f5&quot;
+    android:choiceMode=&quot;singleChoice&quot;
+    android:divider=&quot;#ffe0e0e0&quot;
+    android:dividerHeight=&quot;1dp&quot; /&gt;
+&lt;/android.support.v4.widget.DrawerLayout&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 这里就是向占位的 Layout 内替换一个 Fragment (其实不是替换Layout而是替换其内部的Fragment)
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+transaction.replace(R.id.main,new Fragment());
+transaction.commit();   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>Fragment 不使用占位介绍</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 一个完整的 LinearLayout 需要被 Fragment 替换的
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:id=&quot;@+id/main&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:orientation=&quot;horizontal&quot;
+    android:padding=&quot;10dp&quot;&gt;
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 直接用 Fragment 替换整个 Layout (其实不是替换Layout而是替换其内部的Fragment)
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+transaction.replace(R.id.main,new Fragment());
+transaction.commit();
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Fragment 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 对话框界面
+DialogFragment
+// 实现列表界面
+ListFragment
+// 选项设置界面
+PreferenceFragment
+// WebView界面
+WebViewFragment
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Fragment 可以被 add 或者 rm 或 replace 到 Layout 中 ...
+public class MainActivity extends Activity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        MyFragment fragment = new MyFragment();
+        FragmentTransaction ft = getFragmentManager().beginTransaction() ;
+        ft.add(R.id.framelayout, fragment);
+        ft.commit() ;
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 主要有三点
+1，有个主(FrameLayout)供你添加或替换(Fragment)
+2，有几个(Fragment)供你添加到(FrameLayout)
+3，有个事件触发(Fragment)间的添加或者替换(Fragment)
+
+// Fragment生命周期的核心函数
+// 从fragment运行起来到恢复状态(跟用户紧密相关的)有：
+onAttach(Activity) 
+// 当Fragment关联activity时调用onAttach（Activity）。
+onCreate(Bundle) 
+// 第一次创建Fragment的时候调用onCreate（Bundle）。
+onCreateView(LayoutInflater, ViewGroup, Bundle) 
+// 创建一个跟Fragment关联的视图层级。
+onActivityCreated(Bundle) 
+// 函数告诉Fragment跟它关联的activity已经完成Activity.onCreaate。
+onStart() 
+// 函数可以让用户看见Fragment（条件是Activity已经启动）。
+onResume() 
+// 使Fragment跟用户交互（条件是Activity已经恢复了）
+// 当一个Fragment不再使用，它必须经历一系列反向回调：
+onPause() 
+// 不论因为Activity被暂停或者Fragment的操作正在修改导致Fragment不再和用户交互。
+onStop() 
+// 不论因为Activity已经停止或者Fragment的操作正在修改导致用户不能看见Fragment。
+onDestroyView() 
+// Fragment清理和它关联的View的资源。
+onDestroy()
+// 清理Fragment的状态。
+onDetach()
+// 在Fragment不再和Activity关联之前调用onDetach()。    
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 一，主(FrameLayout)
+// activity_main.xml
+&lt;FrameLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot; android:id=&quot;@+id/container&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;
+    tools:context=&quot;.MainActivity&quot; tools:ignore=&quot;MergeRootFrame&quot; &gt;
+
+    // 这个主(FrameLayout)已经有个内置的(Fragment)了
+    &lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot; android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; android:paddingLeft=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingRight=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingTop=&quot;@dimen/activity_vertical_margin&quot;
+    android:paddingBottom=&quot;@dimen/activity_vertical_margin&quot;
+    tools:context=&quot;.MainActivity$PlaceholderFragment&quot;&gt;
+
+    &lt;Button
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:text=&quot;New Button&quot;
+        android:id=&quot;@+id/button&quot;
+        android:layout_below=&quot;@+id/textView&quot;
+        android:layout_alignParentLeft=&quot;true&quot;
+        android:layout_marginTop=&quot;173dp&quot; /&gt;
+
+    &lt;/RelativeLayout&gt;
+
+&lt;/FrameLayout&gt;
+
+// 二，主类
+// MainActivity.class
+public class MainActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    // 这里将一个(Fragment)添加到(FrameLayout)中
+    if (savedInstanceState == null) {
+        getFragmentManager().beginTransaction()
+            // 添加
+            .add(R.id.container, new PlaceholderFragment())
+            .commit();
+    }
+    Button button = (Button) findViewById(R.id.button);
+    button.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+        // Bundle 存值
+        Bundle bundle = new Bundle();
+        bundle.putString(&quot;key&quot;, &quot;value&quot;);
+        // Fragment 对象
+        Fragment fr = new Fragment1();
+        // 保存
+        fr.setArguments(bundle);
+        // 这里将一个(Fragment)替换到(FrameLayout)中的(Fragment)
+        getFragmentManager().beginTransaction()
+            // 替换
+            .replace(R.id.container, fr)
+            .commit();
+        }
+    });
+    }
+
+    // 创建了一个(Fragment)并返回(Fragment)的(xLayout)
+    public static class PlaceholderFragment extends Fragment {
+
+    public PlaceholderFragment() {
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                 Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        return rootView;
+    }
+    }
+
+   // 创建了一个(Fragment)并返回(Fragment)的(Layout)
+   public static class Fragment1 extends Fragment {
+
+    public Fragment1() {
+    }
+
+    String val;
+    Button button;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                 Bundle savedInstanceState) {
+        // 获取传过来的值
+        val  = getArguments().getString(&quot;key&quot;);
+        Log.i(&quot;info&quot;, val);
+        // 初始化 View
+        View rootView = inflater.inflate(R.layout.fragment, container, false);
+        // 获取 Button
+        button = (Button) rootView.findViewById(R.id.button2);
+        // 监听 Button 事件
+        button.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // 将值设置为按钮名
+            button.setText(val);
+        }
+        });
+
+        return rootView;
+    }
+    }
+
+// 三，两个(Layout)
+// fragment.xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;Switch
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:text=&quot;New Switch&quot;
+    android:id=&quot;@+id/switch1&quot; /&gt;
+
+    // 加个按钮，上面演示了如何使用该按钮
+    &lt;Button
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:text=&quot;New Button&quot;
+    android:id=&quot;@+id/button2&quot; /&gt;
+
+&lt;/LinearLayout&gt;
+
+// fragment_main.xml
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot; android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; android:paddingLeft=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingRight=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingTop=&quot;@dimen/activity_vertical_margin&quot;
+    android:paddingBottom=&quot;@dimen/activity_vertical_margin&quot;
+    tools:context=&quot;.MainActivity$PlaceholderFragment&quot;&gt;
+
+    &lt;TextView android:text=&quot;@string/hello_world&quot; android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:id=&quot;@+id/textView&quot; /&gt;
+
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>ListFragment 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<h3>FragmentManager 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<h3>FragmentTransaction 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>FragmentManager能够实现管理activity中fragment. 通过调用activity的getFragmentManager()取得它的实例.
+FragmentManager可以做如下一些事情:
+    1、使用findFragmentById() (用于在activity layout中提供一个UI的fragment)或findFragmentByTag()
+       (适用于有或没有UI的fragment)获取activity中存在的fragment
+    2、将fragment从后台堆栈中弹出, 使用 popBackStack() (模拟用户按下BACK 命令).
+    3、使用addOnBackStackChangeListener()注册一个监听后台堆栈变化的listener.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// FragmentTransaction：
+// FragmentTransaction对fragment进行添加,移除,替换,以及执行其他动作。
+// 从 FragmentManager 获得一个FragmentTransaction的实例 :
+FragmentManager fragmentManager = getFragmentManager(); 
+FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+// 每一个事务都是同时要执行的一套变化.可以在一个给定的事务中设置你想执行的所有变化
+// 使用诸如 add(), remove(), 和 replace().然后, 要给activity应用事务, 必须调用 commit().
+// 在调用commit()之前, 你可能想调用 addToBackStack(),将事务添加到一个fragment事务的back stack.
+//  这个back stack由activity管理, 并允许用户通过按下 BACK 按键返回到前一个fragment状态.
+
+// Create new fragment and transaction  
+Fragment newFragment = new ExampleFragment();  
+FragmentTransaction transaction = getFragmentManager().beginTransaction();  
+// Replace whatever is in the fragment_container view with this fragment,  
+// and add the transaction to the back stack  
+transaction.replace(R.id.fragment_container, newFragment);  
+transaction.addToBackStack(null);  
+// Commit the transaction  
+transaction.commit();
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>FragmentManager（碎片管理器），用来管理当前Activity中所有的Fragment</p>
+
+<blockquote>
+</blockquote>
+
+<p>每次替换或者添加后，都要commit一样，才能算一个完整的事务，这里用了Fragment嵌套</p>
+
+<p>如果你是嵌套了Fragment，那么使用FragmentManager的一定要注意你当前的Fragment是属于嵌套的还是顶层的Fragment</p>
+
+<p>如果是顶层Fragment，那么你调用FragmentManager的时候，应该这样写getActivity().getSupportFragmentManager()</p>
+
+<p>如果是嵌套的fragment那么应该这样写getChildFragmentManager()</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// activity_main.xml
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:orientation=&quot;horizontal&quot;
+    tools:context=&quot;.MainActivity&quot; &gt;
+
+    &lt;LinearLayout
+    android:id=&quot;@+id/left&quot;
+    android:layout_width=&quot;0dp&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:layout_weight=&quot;1&quot;
+    android:background=&quot;#CCCCCC&quot;
+    android:orientation=&quot;vertical&quot; &gt;
+
+    &lt;Button
+        android:id=&quot;@+id/button&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:text=&quot;显示列表&quot; /&gt;
+    &lt;/LinearLayout&gt;
+
+    &lt;LinearLayout
+    android:id=&quot;@+id/center&quot;
+    android:layout_width=&quot;0dp&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:layout_weight=&quot;2&quot;
+    android:background=&quot;#CCDDFF&quot;
+    android:orientation=&quot;vertical&quot; &gt;
+    &lt;/LinearLayout&gt;
+
+&lt;/LinearLayout&gt;
+
+
+// Activity
+public class MainActivity extends Activity {
+
+    private Button button;
+    private FragmentManager manager;
+    private FragmentTransaction transaction;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    manager = getFragmentManager();
+
+    button = (Button) findViewById(R.id.button);
+    /**
+     * 点击Activity中的该按钮，Activity会在布局中间添加ArticleListFragment，并显示列表数据。
+     */
+    button.setOnClickListener(new View.OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+        transaction = manager.beginTransaction();
+        ArticleListFragment articleListFragment = new ArticleListFragment();
+        Bundle a = new Bundle();
+        a.putString(&quot;key&quot;, &quot;center&quot;);
+        articleListFragment.setArguments(a);
+        transaction.add(R.id.center, articleListFragment, &quot;center&quot;);
+        transaction.commit();
+        }
+    });
+    }
+}
+
+// ListFragment
+public class ArticleListFragment extends ListFragment {
+
+    private ArrayAdapter&lt;String&gt; adapter;
+    private List&lt;String&gt; data;
+    private FragmentManager manager;
+    private FragmentTransaction transaction;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    String k = (String) getArguments().get(&quot;key&quot;);
+    data = new ArrayList&lt;String&gt;();
+    for (int i = 0; i &lt; 30; i++) {
+        data.add(k + i);
+    }
+    manager = getFragmentManager();
+    adapter = new ArrayAdapter&lt;String&gt;(getActivity(),
+        android.R.layout.simple_list_item_1, data);
+    // 设置一个 Adapter
+    setListAdapter(adapter);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+    super.onListItemClick(l, v, position, id);
+    // 获取单机的 Item
+    String str = adapter.getItem(position);
+    // 从 FragmentManager 获得一个FragmentTransaction的实例 :
+    // FragmentManager fragmentManager = getFragmentManager();
+    // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+    // transaction.add(); transaction.replace(); transaction.remove();
+    transaction = manager.beginTransaction();
+    }
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BActionBar%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之ActionBar使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E7%9B%91%E5%90%AC%E8%BF%94%E5%9B%9E%E9%94%AE%E7%94%A8%E6%B3%95/" title="Android之监听返回键用法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-11</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

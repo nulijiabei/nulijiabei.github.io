@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之PreferenceFragment使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之PreferenceFragment使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>PreferenceFragment</h3>
+
+<blockquote>
+</blockquote>
+
+<p>Android应用程序通常要提供首选项，以允许用户定制应用程序。</p>
+
+<p>例如，可以允许用户保存那些用于访问Web资源的登录凭据, 等等。</p>
+
+<p>在Android中，可以使用PreferenceActivity基类为用户显示一个用于编辑首选项的活动。</p>
+
+<p>在Android 3.0和更高版本中，可以使用PreferenceFragment类实现相同的功能。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// XML
+// 新建 (res/xml/preferences.xml)
+&lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; &gt;
+    &lt;CheckBoxPreference
+    android:key=&quot;child_checkbox_preference&quot;
+    android:summary=&quot;这是一个可见的子类&quot;
+    android:title=&quot;子类复选框首选项&quot;
+    android:summaryOn=&quot;已开启&quot;
+    android:summaryOff=&quot;已关闭&quot;
+    android:onClick=&quot;onClick&quot;/&gt;
+&lt;/PreferenceScreen&gt;     
+
+// Activit
+public class MainActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+            // 替换 Fragment
+    getFragmentManager().beginTransaction()
+            .replace(R.id.xxx, new MyPreference())
+            .commit();
+    }
+
+  // PreferenceFragment
+  class MyPreference extends PreferenceFragment {
+
+    // 监听 Preference Click
+    @Override
+    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+        Log.i(&quot;INFO&quot;, preference.getKey());
+        // 也可以通过 KEY 获取
+        // findPreference(&quot;child_checkbox_preference&quot;)
+        if (preference.getKey().equals(&quot;child_checkbox_preference&quot;)) {
+        CheckBoxPreference child_checkbox_preference = (CheckBoxPreference) preference;
+        Toast.makeText(MainActivity.this, String.valueOf(child_checkbox_preference.isChecked()), Toast.LENGTH_SHORT).show();
+        }
+        return super.onPreferenceTreeClick(preferenceScreen, preference);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        // TODO Auto-generated method stub
+        super.onCreate(savedInstanceState);
+        // 添加 Preferences XML
+        addPreferencesFromResource(R.xml.preferences);
+        // 选项监听 ...
+        // findPreference(&quot;child_checkbox_preference&quot;).setOnPreferenceClickListener(...);
+        // 选项监听 当 Preference 的值发生改变时触发该事件，true则以新值更新控件的状态，false 则 不保存
+        findPreference(&quot;child_checkbox_preference&quot;).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+            // 返回 false 修改不会生效
+            return false;
+        }
+        });
+        /*
+        // 获取 Preferences Manager
+        PreferenceManager manager = getPreferenceManager();
+        // 获取 选项状态
+        CheckBoxPreference child_checkbox_preference = (CheckBoxPreference) manager.findPreference(&quot;child_checkbox_preference&quot;);
+        // ...
+        Toast.makeText(MainActivity.this, String.valueOf(child_checkbox_preference.isChecked()), Toast.LENGTH_SHORT).show();
+        */
+    }
+    public void onClick() {
+        Toast.makeText(MainActivity.this, &quot;成功&quot;, Toast.LENGTH_SHORT).show();
+    }
+    }
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Android之PreferenceFragment使用方法/1.png" alt="" width="600"></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;  
+&lt;PreferenceScreen  
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;  
+
+    &lt;PreferenceCategory  
+        android:title=&quot;显示一排偏好&quot;&gt;  
+    &lt;CheckBoxPreference  
+        android:key=&quot;checkbox_preference&quot;  
+        android:title=&quot;开关偏好&quot;  
+        android:summary=&quot;这是一个开关按钮&quot; /&gt;  
+    &lt;/PreferenceCategory&gt;  
+    &lt;PreferenceCategory  
+        android:title=&quot;基于对话框的偏好&quot;&gt;  
+    &lt;EditTextPreference  
+        android:key=&quot;edittext_preference&quot;  
+        android:title=&quot;文本输入偏好&quot;  
+        android:summary=&quot;使用一个文本框对话框&quot;  
+        android:dialogTitle=&quot;输入你的宠物&quot; /&gt;  
+    &lt;ListPreference  
+        android:key=&quot;list_preference&quot;  
+        android:title=&quot;列表偏好&quot;  
+        android:summary=&quot;使用一个列表对话框&quot;  
+        android:entries=&quot;@array/entries_list_preference&quot;  
+        android:entryValues=&quot;@array/entryvalues_list_preference&quot;  
+        android:dialogTitle=&quot;选择一个&quot; /&gt;  
+    &lt;/PreferenceCategory&gt;  
+    &lt;PreferenceCategory  
+        android:title=&quot;启动偏好&quot;&gt;  
+    &lt;PreferenceScreen  
+        android:key=&quot;screen_preference&quot;  
+        android:title=&quot;屏幕&quot;  
+        android:summary=&quot;显示另一个偏好屏幕&quot;&gt;  
+
+        &lt;!-- You can place more preferences here that will be shown on the next screen. --&gt;  
+
+        &lt;CheckBoxPreference  
+            android:key=&quot;next_screen_checkbox_preference&quot;  
+            android:title=&quot;开关偏好&quot;  
+            android:summary=&quot;另一个屏幕上的偏好&quot; /&gt;  
+    &lt;/PreferenceScreen&gt;  
+
+    &lt;PreferenceScreen  
+        android:title=&quot;意图偏好&quot;  
+        android:summary=&quot;通过意图启动一个Activity&quot;&gt;  
+        &lt;intent android:action=&quot;android.intent.action.VIEW&quot;  
+            android:data=&quot;http://www.android.com&quot; /&gt;  
+    &lt;/PreferenceScreen&gt;  
+    &lt;/PreferenceCategory&gt;  
+    &lt;PreferenceCategory  
+        android:title=&quot;偏好属性&quot;&gt;  
+    &lt;CheckBoxPreference  
+        android:key=&quot;parent_checkbox_preference&quot;  
+        android:title=&quot;父开关&quot;  
+        android:summary=&quot;这是一个父开关&quot; /&gt;  
+    &lt;CheckBoxPreference  
+        android:key=&quot;child_checkbox_preference&quot;  
+        android:dependency=&quot;parent_checkbox_preference&quot;  
+        android:layout=&quot;?android:attr/preferenceLayoutChild&quot;  
+        android:title=&quot;子开关&quot;  
+        android:summary=&quot;这是一个子开关&quot; /&gt;  
+    &lt;/PreferenceCategory&gt;  
+&lt;/PreferenceScreen&gt;  
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>补充</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>    &lt;SwitchPreference
+    android:summaryOff=&quot;已关闭&quot;
+    android:summaryOn=&quot;已开启&quot;
+    android:title=&quot;无线状态(WIFI)&quot; /&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>补充 + 动态修改 PreferenceFragment 内容</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// preferences_evolver_fragment
+&lt;PreferenceScreen xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:key=&quot;evolver_screen_preference&quot;&gt;
+&lt;/PreferenceScreen&gt;
+
+// EvolverPreference
+public class EvolverPreference extends PreferenceFragment {
+
+    // 标签
+    private static final String TAG = &quot;EvolverPreference&quot;;
+
+    // PreferenceScreen
+    PreferenceScreen evolver_screen_preference = null;
+
+    // Handler 消息处理
+    private Handler handler = new Handler() {
+    @Override
+    public void handleMessage(Message msg) {
+        switch (msg.what) {
+        case 0x1001:
+            JSONObject json = (JSONObject) msg.obj;
+            try {
+            JSONObject params = json.getJSONObject(&quot;params&quot;);
+            evolver_screen_preference.removeAll();
+            for (Iterator iter = params.keys(); iter.hasNext(); ) {
+                String key = (String) iter.next();
+                JSONObject software = params.getJSONObject(key);
+                Preference preference = new Preference(getActivity());
+                preference.setTitle(software.getString(&quot;name&quot;));
+                preference.setSummary(&quot;版本：&quot; + software.getString(&quot;version&quot;) + &quot; - &quot; + software.getString(&quot;date&quot;));
+                evolver_screen_preference.addItemFromInflater(preference);
+            }
+            } catch (JSONException e) {
+            e.printStackTrace();
+            }
+        }
+    }
+    };
+
+    // 获取 Handler
+    public Handler getHandler() {
+    return handler;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    addPreferencesFromResource(R.xml.preferences_evolver_fragment);
+    evolver_screen_preference = (PreferenceScreen) getPreferenceManager().findPreference(&quot;evolver_screen_preference&quot;);
+    }
+
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BSharedPreferences%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之SharedPreferences使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BZXing%E6%89%AB%E6%8F%8F%E4%BA%8C%E7%BB%B4%E7%A0%81/" title="Android之ZXing扫描二维码">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-18</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

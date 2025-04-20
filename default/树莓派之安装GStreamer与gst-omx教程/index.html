@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>树莓派之安装GStreamer与gst-omx教程</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>树莓派之安装GStreamer与gst-omx教程 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>树莓派之安装GStreamer与gst-omx教程</h4>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在最新的 GStreamer 1.18.x 使用 meson 进行编译
+
+// 下载 GStreamer 提供的 Build 工具
+https://github.com/GStreamer/gst-build
+
+// 下载 Meson 工具
+https://github.com/mesonbuild/meson
+
+// 安装 ninja build ...
+https://github.com/martine/ninja.git
+或：apt-get install ninja-build
+
+// Build  ...
+cd gst-build
+../meson.py build
+ninja -C build
+ninja -C build/ install
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 改 gitlab.gnome.org 或 gitlab.freedesktop.org 为 github.com
+../gst-build/subprojects/xxx.wrap 
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 默认扩展插件位置 ...
+/usr/local/lib/aarch64-linux-gnu/gstreamer-1.0
+
+// 查询扩展插件 ...
+gst-inspect-1.0 --gst-plugin-path=/usr/local/lib/gstreamer-1.0 | grep mpp
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>sudo apt-get install -y build-essential autotools-dev automake autoconf \
+            libtool autopoint libxml2-dev zlib1g-dev libglib2.0-dev \
+            pkg-config bison flex python git gtk-doc-tools libasound2-dev \
+            libgudev-1.0-dev libxt-dev libvorbis-dev libcdparanoia-dev \
+            libpango1.0-dev libtheora-dev libvisual-0.4-dev iso-codes \
+            libgtk-3-dev libraw1394-dev libiec61883-dev libavc1394-dev \
+            libv4l-dev libcairo2-dev libcaca-dev libspeex-dev libpng-dev \
+            libshout3-dev libjpeg-dev libaa1-dev libflac-dev libdv4-dev \
+            libtag1-dev libwavpack-dev libpulse-dev libsoup2.4-dev libbz2-dev \
+            libcdaudio-dev libdc1394-22-dev ladspa-sdk libass-dev \
+            libcurl4-gnutls-dev libdca-dev libdvdnav-dev \
+            libexempi-dev libexif-dev libfaad-dev libgme-dev libgsm1-dev \
+            libiptcdata0-dev libkate-dev libmimic-dev libmms-dev \
+            libmodplug-dev libmpcdec-dev libofa0-dev libopus-dev \
+            librsvg2-dev librtmp-dev \
+            libsndfile1-dev libsoundtouch-dev libspandsp-dev libx11-dev \
+            libxvidcore-dev libzbar-dev libzvbi-dev liba52-0.7.4-dev \
+            libcdio-dev libdvdread-dev libmad0-dev libmp3lame-dev \
+            libmpeg2-4-dev libopencore-amrnb-dev libopencore-amrwb-dev \
+            libsidplay1-dev libtwolame-dev libx264-dev
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>Distributor ID: Raspbian
+Description:    Raspbian GNU/Linux 9.4 (stretch)
+Release:    9.4
+Codename:   stretch
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code># /etc/apt/sources.list
+deb http://mirrors.aliyun.com/raspbian/raspbian/ stretch main contrib non-free rpi
+# Uncomment line below then 'apt-get update' to enable 'apt-get source'
+deb-src http://mirrors.aliyun.com/raspbian/raspbian/ stretch main contrib non-free rpi
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>################# COMPILE GSTREAMER 1.10 ############
+
+
+# Update and Upgrade the Pi, otherwise the build may fail due to inconsistencies
+
+sudo apt-get update &amp;&amp; sudo apt-get upgrade -y
+
+# Get the required libraries
+sudo apt-get install -y build-essential autotools-dev automake autoconf \
+            libtool autopoint libxml2-dev zlib1g-dev libglib2.0-dev \
+            pkg-config bison flex python git gtk-doc-tools libasound2-dev \
+            libgudev-1.0-dev libxt-dev libvorbis-dev libcdparanoia-dev \
+            libpango1.0-dev libtheora-dev libvisual-0.4-dev iso-codes \
+            libgtk-3-dev libraw1394-dev libiec61883-dev libavc1394-dev \
+            libv4l-dev libcairo2-dev libcaca-dev libspeex-dev libpng-dev \
+            libshout3-dev libjpeg-dev libaa1-dev libflac-dev libdv4-dev \
+            libtag1-dev libwavpack-dev libpulse-dev libsoup2.4-dev libbz2-dev \
+            libcdaudio-dev libdc1394-22-dev ladspa-sdk libass-dev \
+            libcurl4-gnutls-dev libdca-dev libdirac-dev libdvdnav-dev \
+            libexempi-dev libexif-dev libfaad-dev libgme-dev libgsm1-dev \
+            libiptcdata0-dev libkate-dev libmimic-dev libmms-dev \
+            libmodplug-dev libmpcdec-dev libofa0-dev libopus-dev \
+            librsvg2-dev librtmp-dev libschroedinger-dev libslv2-dev \
+            libsndfile1-dev libsoundtouch-dev libspandsp-dev libx11-dev \
+            libxvidcore-dev libzbar-dev libzvbi-dev liba52-0.7.4-dev \
+            libcdio-dev libdvdread-dev libmad0-dev libmp3lame-dev \
+            libmpeg2-4-dev libopencore-amrnb-dev libopencore-amrwb-dev \
+            libsidplay1-dev libtwolame-dev libx264-dev
+
+cd $HOME
+mkdir packages
+cd packages/
+mkdir gstreamer-1.10
+cd gstreamer-1.10
+
+
+git clone https://github.com/GStreamer/gstreamer
+cd gstreamer
+git checkout -t origin/1.10
+./autogen.sh
+make
+sudo make install
+cd ..
+
+
+git clone https://github.com/GStreamer/gst-plugins-base
+cd gst-plugins-base
+git checkout -t origin/1.10
+./autogen.sh
+make
+sudo make install
+cd ..
+
+
+git clone https://github.com/GStreamer/gst-plugins-good
+cd gst-plugins-good
+git checkout -t origin/1.10
+./autogen.sh
+make
+sudo make install
+cd ..
+
+
+git clone https://github.com/GStreamer/gst-plugins-ugly
+cd gst-plugins-ugly
+git checkout -t origin/1.10
+./autogen.sh
+make
+sudo make install
+cd ..
+
+
+git clone https://github.com/GStreamer/gst-libav
+cd gst-libav
+git checkout -t origin/1.10
+./autogen.sh
+make
+sudo make install
+cd ..
+
+
+git clone https://github.com/GStreamer/gst-plugins-bad
+
+# Install libusb-1.0 to enable  uvch264src
+sudo apt-get install libusb-1.0
+
+cd gst-plugins-bad
+git checkout -t origin/1.10
+export LD_LIBRARY_PATH=/usr/local/lib/ path
+LDFLAGS='-L/opt/vc/lib' CPPFLAGS='-I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux' ./autogen.sh
+make CFLAGS+=&quot;-Wno-error&quot;
+sudo make install
+cd ..
+
+################# COMPILE GST-OMX ##########
+
+
+git clone https://github.com/GStreamer/gst-omx
+cd gst-omx
+git checkout -t origin/1.10
+LDFLAGS='-L/opt/vc/lib' CPPFLAGS='-I/opt/vc/include -I/opt/vc/include/IL -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux' ./autogen.sh --with-omx-target=rpi
+make CFLAGS+=&quot;-Wno-error&quot;
+sudo make install
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Hardware-accelerated video playback on the Raspberry Pi</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>https://wiki.matthiasbock.net/index.php/Hardware-accelerated_video_playback_on_the_Raspberry_Pi
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// add the following line to /etc/apt/sources.list
+deb http://vontaene.de/raspbian-updates/ . main
+
+apt-get update
+apt-get install libgstreamer1.0-0-dbg gstreamer1.0-tools libgstreamer-plugins-base1.0-0 \
+  gstreamer1.0-plugins-good gstreamer1.0-plugins-bad-dbg gstreamer1.0-omx gstreamer1.0-alsa
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>gst-launch-1.0 playbin uri=big_buck_bunny.avi
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B9%8B%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8%E7%94%BB%E9%9D%A2/" title="树莓派之自定义开机启动画面">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B8%AD%E6%89%8B%E5%8A%A8%E7%BC%96%E8%AF%91sdl_image%E6%97%A0%E6%B3%95%E5%8A%A0%E8%BD%BDjpeg%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" title="树莓派中手动编译sdl_image无法加载jpeg解决方案">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-11-26</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#pi-ref">pi <span>19</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之表单验证框架</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之表单验证框架 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Android Saripaar</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>下载地址：https://github.com/ragunathjawahar/android-saripaar
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Saripaar特性：
+
+    使用Annotation标注的生命性规则
+    可扩展性
+    支持同步/异步验证，无线担心线程问题
+    使用简单，只需下载 jar包，放到项目的libs目录下即可
+    使用规则来隔离验证逻辑
+    兼容其他Annotation框架，例如  AndroidAnnotations, RoboGuice,
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 使用android-saripaar提供的Annotation来标注验证规则
+
+@Required(order = 1)
+@Email(order = 2)
+private EditText emailEditText;
+
+@Password(order = 3)
+@TextRule(order = 4, minLength = 6, message = &quot;Enter at least 6 characters.&quot;)
+private EditText passwordEditText;
+
+@ConfirmPassword(order = 5)
+private EditText confirmPasswordEditText;
+
+@Checked(order = 6, message = &quot;You must agree to the terms.&quot;)
+private CheckBox iAgreeCheckBox;
+
+// 每个规则都是顾名思义的，其中 order 属性 是必须的，用来告诉Saripaar这些输入规则的验证顺序。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 初始化一个Validator
+public void onCreate() {
+    super.onCreate();
+    // Code…
+
+    validator = new Validator(this);
+    validator.setValidationListener(this);
+
+    // More code…
+}
+
+// 需要一个Validator 和 ValidationListener。后者用来接收验证结果通知。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 实现一个ValidationListener
+public class RegistrationActivity implements ValidationListener {
+
+    public void onValidationSucceeded() {
+        Toast.makeText(this, &quot;Yay! we got it right!&quot;, Toast.LENGTH_SHORT).show();
+    }
+
+    public void onValidationFailed(View failedView, Rule&lt;?&gt; failedRule) {
+        String message = failedRule.getFailureMessage();
+
+        if (failedView instanceof EditText) {
+            failedView.requestFocus();
+            ((EditText) failedView).setError(message);
+        } else {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+}
+
+// onValidationSucceeded() - 当所有验证规则都通过时调用该函数
+// onValidationFailed(View, Rule&lt;?&gt;) - 当验证失败时调用该函数，View为失败的控件，Rule为具体的规则.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 发起验证 
+registerButton.setOnClickListener(new OnClickListener() {
+    public void onClick(View v) {
+        validator.validate();
+    }
+});
+
+// Validator.validate() 发起验证，并通过 ValidationListener 来通知验证结果。
+// 调用函数 Validator.validateAsync()  可以在一个AsyncTask中发起验证。
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8B%E4%BC%A0%E5%8F%82%E5%92%8C%E4%BC%A0%E5%BC%95%E7%94%A8%E4%BB%8B%E7%BB%8D/" title="Golang之传参和传引用介绍">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E4%BB%8E%E5%85%B6%E5%AE%83%E7%BA%BF%E7%A8%8B%E8%AE%BF%E9%97%AEUI%E7%BA%BF%E7%A8%8B/" title="Android之从其它线程访问UI线程">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-07-28</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

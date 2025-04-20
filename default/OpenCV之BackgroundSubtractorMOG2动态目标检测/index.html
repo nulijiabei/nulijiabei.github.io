@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>OpenCV之BackgroundSubtractorMOG2动态目标检测</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>OpenCV之BackgroundSubtractorMOG2动态目标检测 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>OpenCV之BackgroundSubtractorMOG2动态目标检测</h4>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// OpenCV3 与 OpenCV2 一些区别 ...
+Ptr&lt;BackgroundSubtractor&gt; bg_model = createBackgroundSubtractorMOG2();
+bg_model-&gt;apply(img, fgmask);
+
+// ------------------------------------ //
+//  params.minThreshold = 20;//二值化的起始阈值
+//  params.maxThreshold = 180;//二值化的终止阈值
+//  params.thresholdStep = 10;//二值化的阈值步长
+//  params.minConvexity = 0.5f;//斑点的最小凸度 默认0.95f
+//  params.minInertiaRatio = 0.03f;//斑点的最小惯性率 默认0.1f
+//  params.minArea = 120;//斑点的最小面积
+//  params.maxArea = 5000;//斑点的最大面积
+//  params.blobColor = 255;//检测白色
+//  重复的最小次数，只有属于灰度图像斑点的那些二值图像斑点数量大于该值时，该灰度图像斑点才被认为是特征点
+//  params.minRepeatability = 2;
+//  最小的斑点距离，不同二值图像的斑点间距离小于该值时，被认为是同一个位置的斑点，否则是不同位置上的斑点
+//  params.minDistBetweenBlobs = 10;
+// ------------------------------------ //
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// OpenCV2使用BackgroundSubtractorMOG2动态目标检测
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;opencv2/core/core.hpp&gt;
+#include &lt;opencv2/highgui/highgui.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char *argv[])
+{
+    // --------------------------------------------------
+    namedWindow(&quot;image&quot;, WINDOW_AUTOSIZE);
+    namedWindow(&quot;foreground&quot;, WINDOW_AUTOSIZE);
+    namedWindow(&quot;background&quot;, WINDOW_AUTOSIZE);
+    // --------------------------------------------------
+    VideoCapture m_cap(&quot;/home/danoo/xxx.avi&quot;);
+    // --------------------------------------------------
+    BackgroundSubtractorMOG2 m_mog;
+    SimpleBlobDetector::Params m_params;
+    m_params.filterByArea = true;
+    m_params.minArea = 1;
+    m_params.blobColor = 255;
+    SimpleBlobDetector m_detector(m_params);
+    Ptr&lt;SimpleBlobDetector&gt; m_blob = m_detector.create(&quot;SimpleBlob&quot;);
+    // --------------------------------------------------
+    Mat frame;
+    Mat foreground;
+    // Mat background;
+    while(m_cap.read(frame))
+    {
+    // 运动前景检测
+    m_mog(frame, foreground, 0.001);
+    // 腐蚀
+    cv::erode(foreground, foreground, cv::Mat());
+    // 膨胀
+    cv::dilate(foreground, foreground, cv::Mat());
+    // 返回当前背景图像
+    // m_mog.getBackgroundImage(background);
+    // -------------------------------------------------------------- //
+    // 特征点检测
+    vector&lt;KeyPoint&gt; key_points;
+    m_blob-&gt;detect(foreground, key_points);
+    // -------------------------------------------------------------- //
+    // 检测到特征点 ...
+    // key_points.size()
+    // -------------------------------------------------------------- //
+    imshow(&quot;image&quot;, frame);
+    imshow(&quot;foreground&quot;, foreground);
+    // -------------------------------------------------------------- //
+    cv::waitKey(20);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>整合foreground到frame图像</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 初始化 Mat - 识别区域尺寸
+Mat channel = Mat::zeros(foreground.rows, foreground.cols, CV_8UC3);
+// 通道数组 ...
+vector&lt;cv::Mat&gt; channels;
+channels.push_back(foreground);
+channels.push_back(foreground);
+channels.push_back(foreground);
+// 将多个数组组合合并成一个多通道的数组
+cv::merge(channels, channel);
+// 重定义尺寸 ...
+// cv::resize(channel, channel, Size(frame.cols, frame.rows), 0, 0, cv::INTER_LINEAR);
+Mat roi = frame(rect);
+// 实现图片的线性融合 - 数组有相同的尺寸和相同的信道数
+addWeighted(channel, 0.5, roi, 0.5, 0, roi);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;opencv2/core/core.hpp&gt;
+#include &lt;opencv2/highgui/highgui.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char *argv[])
+{
+    // --------------------------------------------------
+    namedWindow(&quot;foreground&quot;, WINDOW_AUTOSIZE);
+    // --------------------------------------------------
+    VideoCapture m_cap(&quot;/home/danoo/xxx.avi&quot;);
+    // --------------------------------------------------
+    BackgroundSubtractorMOG2 m_mog;
+    SimpleBlobDetector::Params m_params;
+    m_params.filterByArea = true;
+    m_params.minArea = 1;
+    m_params.blobColor = 255;
+    SimpleBlobDetector m_detector(m_params);
+    Ptr&lt;SimpleBlobDetector&gt; m_blob = m_detector.create(&quot;SimpleBlob&quot;);
+    // --------------------------------------------------
+    Mat frame;
+    Mat foreground;
+    // Mat background;
+    while(m_cap.read(frame))
+    {
+    // 运动前景检测
+    m_mog(frame, foreground, 0.001);
+    // 腐蚀
+    cv::erode(foreground, foreground, cv::Mat());
+    // 膨胀
+    cv::dilate(foreground, foreground, cv::Mat());
+    // 返回当前背景图像
+    // m_mog.getBackgroundImage(background);
+    // -------------------------------------------------------------- //
+    // 特征点检测
+    vector&lt;KeyPoint&gt; key_points;
+    m_blob-&gt;detect(foreground, key_points);
+    // -------------------------------------------------------------- //
+    // 检测到特征点 ...
+    // key_points.size()
+    // -------------------------------------------------------------- //
+    // 初始化 Mat - 识别区域尺寸
+    Mat channel = Mat::zeros(foreground.rows, foreground.cols, CV_8UC3);
+    // 通道数组 ...
+    vector&lt;cv::Mat&gt; channels;
+    channels.push_back(foreground);
+    channels.push_back(foreground);
+    channels.push_back(foreground);
+    // 将多个数组组合合并成一个多通道的数组
+    cv::merge(channels, channel);
+    // 重定义尺寸 ...
+    // cv::resize(channel, channel, Size(frame.cols, frame.rows), 0, 0, cv::INTER_LINEAR);
+    Mat roi = frame;
+    // 实现图片的线性融合 - 数组有相同的尺寸和相同的信道数
+    addWeighted(channel, 0.5, roi, 0.5, 0, roi);
+    // -------------------------------------------------------------- //
+    imshow(&quot;foreground&quot;, frame);
+    // -------------------------------------------------------------- //
+    cv::waitKey(20);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/QGraphicsItem%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E4%BF%A1%E5%8F%B7%E4%B8%8E%E6%A7%BD/" title="QGraphicsItem如何使用信号与槽">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B8%AD%E7%9A%84Race%E6%A3%80%E6%B5%8B/" title="Golang中的Race检测">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-05-12</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#opencv-ref">opencv <span>6</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

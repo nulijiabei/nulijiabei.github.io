@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Swift语言基础教程笔记</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Swift语言基础教程笔记 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Swift 数据类型</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>数据类型</em></strong></p>
+
+<ul>
+<li>整数类型 Int, UInt</li>
+<li>浮点类型 Float, Double</li>
+<li>布尔类型 Bool</li>
+<li>字符类型 String, Character</li>
+<li>字典类型 Dictionary</li>
+<li>数组类型 Array(List)</li>
+<li>元组类型 Tuples</li>
+<li>集合理性 Set</li>
+<li>函数类型 Function</li>
+<li>闭包类型 Closure</li>
+<li>结构类型 Struct</li>
+<li>枚举类型 Enum</li>
+<li>可选类型 Optionals</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>其它类型</em></strong></p>
+
+<ul>
+<li>类型别名 Typealias</li>
+<li>类型安全 Type safe</li>
+<li>类型推断 Type inference</li>
+<li>强制解析 Forced unwrapping</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>类型赋值</em></strong></p>
+
+<pre><code>let imInt:Int = 2
+let imDouble:Double = 3.1415926
+let imBool:Bool = true
+let imString:String = &quot;Hello&quot;
+let imTuple:(Int, Int) = (2, 4)
+let imPptional:Int? = nil
+let imCharacter:Character = &quot;!&quot;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>值类型与引用类型</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>值类型</em></strong></p>
+
+<pre><code>// 值类型传入的都是对象的副本，对值类型的修改不会影响原对象
+Int 
+Float 
+Double 
+Bool 
+Tuple 
+String 
+Array 
+Dictionarry 
+Struct 
+Enum
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>引用类型</em></strong></p>
+
+<pre><code>引用类型传入的都是对象的引用，对引用类型的修改会影响原对象
+Function（函数） 
+Closure(闭包）
+Class(类)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>类型转换</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 最简单的子类转父类：
+var parentObject ＝ childObject as ParentClass
+// 最简单的父类转子类（该父类对象一定要是该子类的引用）：
+var childObject = parentObject as ChildClass
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Int 转其它</em></strong></p>
+
+<pre><code>var aInt : Int = 5
+var aFloat = Float(aInt)
+var aDouble = Double(aInt)
+var aInt32 = Int32(aInt)
+var aCGFloat = CGFloat(aInt)
+var aString = String(aInt)
+</code></pre>
+
+<p><strong><em>Double 转其它</em></strong></p>
+
+<pre><code>var bDouble : Double = 0.99
+var bInt = Int(bDouble)
+var bFloat = Float(bDouble)
+var bCGFloat = CGFloat(bDouble)
+var bString = &quot;\(bDouble)&quot;
+</code></pre>
+
+<p><strong><em>String 转其它</em></strong></p>
+
+<pre><code>var cString : String = &quot;5&quot;
+var cInt = NSString(string: aString).integerValue
+var dString : String = &quot;0.99&quot;
+var dDouble = NSString(string: bString).doubleValue
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>可选类型</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Optionals</em></strong></p>
+
+<pre><code>// 当值可能不存在（may be absent）的时候使用Optionals。
+
+// 声明一个 Optionals 类型
+var optionalInteger: Int?
+var optionalInteger: Optional&lt;Int&gt;
+
+// 当你确定可选类型确实包含值之后
+// 你可以用后缀!来访问这个值
+optionalInteger = 42
+optionalInteger! // 42
+
+// 使用操作符！去获取值为nil的可选变量会有运行时错误
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>例</em></strong></p>
+
+<pre><code>// 普通的函数
+func sayHello(name:String, _ addr:String) {
+    print(name, addr)
+}
+
+// 传入两个参数（可选型）
+var name:String? = &quot;nljb&quot;
+var addr:String? = &quot;beijing&quot;
+
+// 需要解包才可以传入
+// 当然可以这样(name!, addr!)
+// 也可以使用if-let安全解包
+// 并且if-let添加判断条件
+if let name = name where name == &quot;jbnl&quot;, let addr = addr {
+    sayHello(name, addr)
+} else {
+    print(&quot;no nljb&quot;)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如果值为nil，任何操作都不会执行
+
+var myString:String? = nil
+if myString != nil {
+    print(myString)
+}else{
+    print(&quot;nil&quot;)
+}
+// 输出 nil
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>强制解析</em></strong></p>
+
+<pre><code>var myString:String?
+myString = &quot;Hello, Swift!&quot;
+if myString != nil {
+   print(myString)
+}else{
+   print(&quot;myString 值为 nil&quot;)
+}
+// 输出 Optional(&quot;Hello, Swift!&quot;) 
+
+var myString:String?
+myString = &quot;Hello, Swift!&quot;
+if myString != nil {
+   // 强制解析
+   print( myString! )
+}else{
+   print(&quot;myString 值为 nil&quot;)
+}
+// 输出 Hello, Swift!
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>自动解析</em></strong></p>
+
+<pre><code>// 你可以在声明可选变量时使用感叹号（!）替换问号（?）。
+// 这样可选变量在使用时就不需要再加一个感叹号（!）来获取值，它会自动解析。
+
+var myString:String!
+myString = &quot;Hello, Swift!&quot;
+if myString != nil {
+   print(myString)
+}else{
+   print(&quot;myString 值为 nil&quot;)
+}
+// 输出 Hello, Swift!
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>可选绑定</em></strong></p>
+
+<pre><code>// 使用可选绑定（optional binding）来判断可选类型是否包含值
+// 如果包含就把值赋给一个临时常量或者变量。
+
+// 可选绑定可以用在if和while语句中来对可选类型的值进行判断并把值赋给一个常量或者变量。
+
+var myString:String?
+myString = &quot;Hello, Swift!&quot;
+if let yourString = myString {
+   print(&quot;你的字符串值为 - \(yourString)&quot;)
+}else{
+   print(&quot;你的字符串没有值&quot;)
+}
+// 你的字符串值为 - Hello, Swift!
+
+// 注意：还可以使用二元运算符，具体可以看二元运算介绍
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>变量</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 变量 (指定类型)
+var n:Int ; n = 1 ; print(n)
+
+// 变量 (未指定类型, 类型由初始化值决定)
+var nn = 1 ; nn = 2 ; print(nn)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>常量</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 常量
+let x = 100; print(x)
+let xx:Int = 100 ; print(xx)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>字符串</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>String</em></strong></p>
+
+<pre><code>// 空字符串
+var stringA = &quot;&quot;
+stringA.isEmpty
+
+// 字符串长度
+var varA  = &quot;xxx&quot;
+print(&quot;\(varA.characters.count)&quot;)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 字符串连接
+var str = &quot;abc&quot;
+// 字符串与字符串
+str = str + &quot;def&quot;
+// 字符串与Int类型值
+str = &quot;\(str)=\(100)&quot;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>常用方法</em></strong></p>
+
+<pre><code>isEmpty 
+    判断字符串是否为空，返回布尔值
+hasPrefix(prefix: String) 
+    检查字符串是否拥有特定前缀
+hasSuffix(suffix: String) 
+    检查字符串是否拥有特定后缀。
+Int(String) 
+    转换字符串数字为整型
+    let myString: String = &quot;256&quot;
+    let myInt: Int? = Int(myString)
+String.characters.count 
+    计算字符串的长度
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Foundation</em></strong></p>
+
+<pre><code>// 可以用String使用原来在OC语言里NSString中所有的方法
+import Foundation
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>元运算</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>三元</em></strong></p>
+
+<pre><code>Exp1 ? Exp2 : Exp3;
+</code></pre>
+
+<p><strong><em>二元</em></strong></p>
+
+<pre><code>a ?? b -&gt; a != nil ? a! : b
+
+// a 必须为 Optionals 类型
+// b 类型必须是 a 解包后类型
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>数组</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Array</em></strong></p>
+
+<pre><code>// 我们可以使用构造语法来创建一个由特定数据类型构成的空数组：
+var someArray = [SomeType]()
+
+// 以下是创建一个初始化大小数组的语法：
+var someArray = [SomeType](count: NumbeOfElements, repeatedValue: InitialValue)
+
+// 以下实例创建了一个类型为 Int ，大小为 3，初始值为 0 的空数组：
+var someInts = [Int](count: 3, repeatedValue: 0)
+
+// 以下实例创建了含有三个元素的数组：
+var someInts:[Int] = [10, 20, 30]
+
+// 我们可以根据数组的索引来访问数组的元素，语法如下：
+var someVar = someArray[index]
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>例</em></strong></p>
+
+<pre><code>// 数组
+var arr1 = []
+var arr2 = [&quot;abc&quot;, 123]
+var arr3 = [String]()
+var arr4:[String] = [&quot;abc&quot;, &quot;bcd&quot;]
+
+// 遍历
+for item in someStrs {
+    print(item)
+}
+
+// 合并
+var intsA = [Int](count:2, repeatedValue: 2)
+var intsB = [Int](count:3, repeatedValue: 1)
+var intsC = intsA + intsB
+
+// isEmpty
+intsC.isEnpty
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>无序集合</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Set</em></strong></p>
+
+<pre><code>// 无序集合, 初始化
+var s = Set&lt;String&gt;([&quot;D&quot;, &quot;E&quot;])
+// 插入数据
+s.insert(&quot;A&quot;)
+s.insert(&quot;B&quot;)
+
+// 无序集合, 初始化
+var e:Set&lt;String&gt; = [&quot;A&quot;, &quot;B&quot;]
+// 是否为空
+e.isEmpty
+// 集合数量
+e.count
+// 是否存在
+e.contains(&quot;A&quot;)
+// 移除对象
+e.remove(&quot;B&quot;)
+
+// 两个集合的交集
+s.intersect(e)
+// 两个集合的并集
+s.union(e)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>元组</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Tuples</em></strong></p>
+
+<pre><code>// 元组（tuples）是把多个值组合成一个复合值
+// 元组内的值可以使任意类型
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>let http404Error = (404, &quot;Not Found&quot;)
+// 将一个 Int 类型值和一个 String 类型值组合在一起
+
+// 可以将一个元组的内容分解成单独的常量或变量：
+let (statusCode, statusMessage) = http404Error
+println(&quot;The status code is \(statusCode)&quot;)
+println(&quot;The status message is \(statusMessage)&quot;)
+
+// 如果你只需要一部分元组的值，忽略的部分用下划线(_)标记:
+let (justTheStatusCode, _) = http404Error
+println(&quot;The status code is \(justTheStatusCode)&quot;)
+
+// 另外，可以使用索引访问元组中的各个元素，索引数字从0开始:
+println(&quot;The status code is \(http404Error.0)&quot;)
+println(&quot;The status message is \(http404Error.1)&quot;)
+
+// 可以给元组的各个元素进行命名:
+let http200Status = (statusCode: 200, description: &quot;OK&quot;)
+
+// 这时，可以使用元素名来访问这些元素的值:
+println(&quot;The status code is \(http200Status.statusCode)&quot;)
+println(&quot;The status message is \(http200Status.description)&quot;)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>字典</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Dictionary</em></strong></p>
+
+<pre><code>// 我们可以使用以下语法来创建一个特定类型的空字典：
+var someDict =  [KeyType : ValueType]()
+
+// 以下是创建一个空字典，键的类型为 Int，值的类型为 String 的简单语法：
+var someDict = [Int : String]()
+
+// 以下为创建一个字典的实例：
+var someDict:[Int:String] = [1:&quot;One&quot;, 2:&quot;Two&quot;, 3:&quot;Three&quot;]
+
+// 我们可以根据字典的索引来访问数组的元素，语法如下：
+var someVar = someDict[key]
+
+// 我们可以使用 updateValue(forKey:) 增加或更新字典的内容。
+// 如果 key 不存在，则添加值，如果存在则修改 key 对应的值。
+someDict:[Int:String] = [1:&quot;One&quot;, 2:&quot;Two&quot;, 3:&quot;Three&quot;]
+var oldVal = someDict.updateValue(&quot;One 新的值&quot;, forKey: 1)
+
+// 我们可以使用 removeValueForKey() 方法来移除字典 key-value 对。
+// 如果 key 存在该方法返回移除的值，如果不存在返回 nil 。实例如下：
+var someDict:[Int:String] = [1:&quot;One&quot;, 2:&quot;Two&quot;, 3:&quot;Three&quot;]
+var removedValue = someDict.removeValueForKey(2)
+
+// 我们可以使用 for-in 循环来遍历某个字典中的键值对。实例如下:
+var someDict:[Int:String] = [1:&quot;One&quot;, 2:&quot;Two&quot;, 3:&quot;Three&quot;]
+for (key, value) in someDict {
+   print(&quot;字典 key \(key) -  字典 value \(value)&quot;)
+}
+
+// 你可以提取字典的键值(key-value)对，并转换为独立的数组。实例如下：
+var someDict:[Int:String] = [1:&quot;One&quot;, 2:&quot;Two&quot;, 3:&quot;Three&quot;]
+let dictKeys = [Int](someDict.keys)
+let dictValues = [String](someDict.values)
+
+// 我们可以使用只读的 count 属性来计算字典有多少个键值对：
+var someDict1:[Int:String] = [1:&quot;One&quot;, 2:&quot;Two&quot;, 3:&quot;Three&quot;]
+var someDict2:[Int:String] = [4:&quot;Four&quot;, 5:&quot;Five&quot;]
+print(&quot;someDict1 含有 \(someDict1.count) 个键值对&quot;)
+print(&quot;someDict2 含有 \(someDict2.count) 个键值对&quot;)
+
+// 我们可以通过只读属性 isEmpty 来判断字典是否为空，返回布尔值:  
+var someDict3:[Int:String] = [Int:String]()
+print(&quot;someDict1 = \(someDict1.isEmpty)&quot;)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>函数</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Function</em></strong></p>
+
+<pre><code>// Swift 定义函数使用关键字 func
+
+// Swift func 是可以进行嵌套使用的
+
+// 可以指定一个或多个输入参数和一个返回值类型
+// 无参函数 func runoob() -&gt; String 
+// 单个参数 func runoob(site:String) -&gt; String 
+func runoob(one:String, two:String) -&gt; String {
+    return site
+}
+print(runoob(&quot;xxx&quot;))
+
+// 例
+func sayHello(name:String?) -&gt; String {
+    // 这里如果用户没有指定名称则返回Guest
+    let result = &quot;Hello, &quot; + (name ?? &quot;Guest&quot;) + &quot;!&quot;
+    return result
+}
+var nickname:String?
+nickname = &quot;World&quot;
+print(sayHello(nickname))
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>常量参数</em></strong></p>
+
+<pre><code>func sayHello(name:String) -&gt; String {
+    // 传值操作
+    // 则此时name是常量参数不可以修改
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>变量参数</em></strong></p>
+
+<pre><code>func sayHello(var name:String) -&gt; String {
+    // 传值操作
+    // 局部变量参数，修改不会影响外部
+    // 则此时name是变量参数可以修改
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>通过元组返回多个值</em></strong></p>
+
+<pre><code>// ...
+func maxminScores(scores:[Int]) -&gt; (maxscore:Int, minscore:Int) {
+    ...
+    return (scores[0], scores[1])
+}
+
+// 元组返回异常情况, 则这里需要使用 optionals 可选型
+func maxminScores(scores:[Int]) -&gt; (maxscore:Int, minscore:Int)? {
+    if scores.isEmpty {
+        return nil
+    }
+    return (scores[0], scores[1])
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>内部与外部 函数名</em></strong></p>
+
+<pre><code>// userName 外部函数名, greetingWord 外部函数名
+// nickname 内部函数名, greetingWord 内部函数名
+func sayHello(userName nickname:String, greetingWord greeting:String) -&gt; String {
+    ...
+}
+
+// 使用外部函数名
+sayHello(userNmae: &quot;xxx&quot;, greetingWord: &quot;xxx&quot;)  
+
+// nickname 既是内部参数名，又是外部参数名
+// greeting 既是内部参数名，又是外部参数名
+func sayHello(#nickname:String, #greeting:String) -&gt; String {   
+    ...
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>参数的默认值</em></strong></p>
+
+<pre><code>// ...
+func sayHello(nickname:String, greeting:String = &quot;nljb&quot; ) -&gt; String {   
+    ...
+}
+
+// 使用时如果不传入greeting则使用默认值
+sayHello(&quot;xxx&quot;)
+
+// 如果设置了参数默认值则必须使用外部函数名
+// 如果不指定参数默认值的外部函数名则自动使用内部函数名
+sayHello(&quot;xxx&quot;, greeting: &quot;xxx&quot;)
+
+// _ 取消苹果为参数默认值所指定强制外部函数名的设置
+func sayHello(nickname:String, _ greeting:String = &quot;nljb&quot; ) -&gt; String { 
+    ...
+}
+
+// 通过外部函数名可以指定传入的参数
+func sayHello(nickname:String, greeting:String = &quot;nljb&quot;, others:String = &quot;com&quot;) -&gt; String { 
+    ...
+}
+
+// ...
+sayHello(&quot;www&quot;, others: &quot;net&quot;)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>inout</em></strong></p>
+
+<pre><code>// 传引用值, 当声明参数的时候加上 inout
+// 则如果修改该值，外部的值也随之改变
+func sayHello(inout a:Int, inout b:Int) {
+    a = 100
+    b = 100 
+}
+
+// ...
+var x = 0
+var y = 0
+sayHello(&amp;x, b: &amp;y)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>函数类型</em></strong></p>
+
+<pre><code>// 函数类型
+func sayHello(a:Int, b:Int) -&gt; String {
+    ...
+}
+
+// 则 another 当 sayHello 用
+let another = sayHello
+
+// 指定类型
+let another:(Int, Int) -&gt; String = sayHello
+
+// 返回值为空也必须写 () or Void
+let another:(Int, Int) -&gt; () = sayHello
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// ...
+func sayWorld() -&gt; Int {
+    return 99;
+}
+
+// 返回函数类型
+func sayHello() () -&gt; Int {
+    return sayWorld();
+}
+
+let x = sayHello()
+x()
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>闭包</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Closure</em></strong></p>
+
+<pre><code>// 接受闭包的函数
+func sayHello(a:Int, _ x:(a:Int, b:Int) -&gt; Int) -&gt; Int { return x(a: a,b: a) }
+
+// 传入闭包
+let x = sayHello(100, {(a:Int, b:Int) -&gt; Int in return a + b })
+
+// 传入闭包 简写
+let y = sayHello(100, {a, b in return a + b })
+
+// 传入闭包 简写
+let z = sayHello(100, {a, b in a + b })
+
+// 传入闭包 简写 传入参数($0 ... $n)
+let v = sayHello(100, {$0 + $1})
+
+// 传入闭包 简写 运算符
+let n = sayHello(100, +)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 结尾闭包 ... 当闭包是最后一个参数时
+let m = sayHello(100) {
+    (a:Int, b:Int) -&gt; Int in
+    return a + b
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 闭包内使用外部变量
+var num = 5
+let h = sayHello(100) {
+    (a:Int, b:Int) -&gt; Int in
+    return a + b + 5
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>枚举</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Enum</em></strong></p>
+
+<pre><code>// 枚举是值类型
+
+// 枚举类型
+enum GameEnding {
+    case Win
+    case Lose
+    case Draw
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 使用案例
+
+var yourScore:Int = 0
+var enemyScore:Int = 0
+
+var theGameEnding:GameEnding = .Win
+if yourScore &gt; enemyScore { theGameEnding = .Win }
+if yourScore &lt; enemyScore { theGameEnding = .Lose }
+if yourScore == enemyScore { theGameEnding = .Draw }
+
+switch theGameEnding {
+    case .Win: print(&quot;Win&quot;)
+    case .Lose: print(&quot;Lose&quot;)
+    case .Draw: print(&quot;Draw&quot;)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 枚举类型（挂接值为Int, 并且自动++)
+enum Month:Int {
+    case Jan = 1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
+}
+
+// 枚举变量
+let m:Month = .Jan
+
+// 枚举变量，挂接值
+print(m.rawValue)
+
+// 挂接值创建变量 
+// 使用?的原因是rawValue不可控
+// 如果rawValue在Month中没有则返回nil
+let o:Month? = Month(rawValue: 12)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 枚举类型（挂接值为String)
+enum Month:String {
+    case OK = &quot;Is Ok&quot;
+    case Error = &quot;Is Error&quot;
+}
+
+// 可以进行状态定义
+func isOK() -&gt; Month {
+    return Month.Error
+}
+
+if isOK() == Month.OK {
+    print(Month.OK.rawValue)
+} else {
+    print(Month.Error.rawValue)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 枚举类型
+enum BarCode {
+    // 包含四个Int的UPCA
+    case UPCA(Int, Int, Int, Int)
+    // 包含一个String的QRcode
+    case QRcode(String)
+}
+
+// 枚举变量（方法一）
+let codeA = BarCode.UPCA(100, 200, 300, 400)
+// 枚举变量（方法二）
+let codeB:BarCode = .QRcode(&quot;Hello QRcode&quot;)
+
+// 使用变量
+switch codeA {
+    case .UPCA(let a, let b, let c, let d):
+        print(a,b,c,d)
+    case .QRcode(let s):
+        print(s)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>结构体</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Struct</em></strong></p>
+
+<pre><code>// 结构体是值类型
+
+// 构造器语法的最简单形式实在结构体或者类型的名称后跟随一个空括号
+
+// 注意：所有的结构体都有一个自动生成的成员构造器
+//   用于初始化新结构体实例中成员的属性
+（与结构体不同，类实例没有默认的成员构造器）
+（类实例需要使用构造函数init(...)自定义初始化成员属性）
+
+// 结构体（未初始化值)
+struct MarkStruct {
+    var mark1: Int
+    var mark2: Int
+    var mark3: Int
+}
+
+// 结构体变量
+var mark = MarkStruct(mark1: 1, mark2: 2, mark3: 3)
+
+// 结构体（初始化值)
+struct MarkStruct {
+    var mark1 = 1
+    var mark2 = 2
+    var mark3 = 3
+}
+
+// 结构体变量
+var mark = MarkStruct();
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>备注</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 类(类型)与结构体 T()
+var a:String = String()
+
+// : 后面指定的是类型
+// Swift可以自动识别类型
+var a = String()
+
+// 初始化值，可能在()里面填写
+var a = String(&quot;Hello World&quot;)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 数组
+var someArray = [Int]()
+var someInts:[Int] = [10, 20, 30]
+
+// 无序集合
+var e:Set&lt;String&gt; = [&quot;A&quot;, &quot;B&quot;]
+var e = Set&lt;String&gt;([&quot;A&quot;, &quot;B&quot;])
+
+// 字典
+var someDict = [Int : String]()
+var someDict:[Int:String] = [1:&quot;One&quot;, 2:&quot;Two&quot;, 3:&quot;Three&quot;]
+
+....
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Swift%E8%AF%AD%E8%A8%80%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/" title="Swift语言面向对象编程">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E5%8A%A8%E7%94%BB%E7%9B%B8%E5%85%B3%E6%A1%88%E4%BE%8B/" title="Android之动画相关案例">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-02-24</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#ios-ref">ios <span>2</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

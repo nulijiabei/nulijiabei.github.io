@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之FragmentManager介绍</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之FragmentManager介绍 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>FragmentManager</h3>
+
+<blockquote>
+</blockquote>
+
+<p>为了管理Activity中的fragments，需要使用FragmentManager.</p>
+
+<blockquote>
+</blockquote>
+
+<p>为了得到它，需要调用Activity中的getFragmentManager()方法。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>因为FragmentManager的API是在Android 3.0，也即API level 11开始引入的</p>
+
+<blockquote>
+</blockquote>
+
+<p>所以对于之前的版本，需要使用support library中的FragmentActivity，并且使用getSupportFragmentManager()方法。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>FragmentManager 可以做的工作有：</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>可以得到Activity中存在的fragment：
+
+可以使用findFragmentById()或findFragmentByTag()方法。
+
+可以将fragment弹出back stack(popBackStack)
+
+可以将back stack中最后一次的fragment转换弹出, 没有可以出栈时则返回false。
+
+可以为back stack加上监听器：addOnBackStackChangedListener()
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>Performing Fragment Transactions</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>使用Fragment时，可以通过用户交互来执行一些动作，比如增加、移除、替换等。
+
+所有这些改变构成一个集合，这个集合被叫做一个transaction, 通过FragmentTransaction来处理
+
+可以将transaction存进由activity管理的back stack中，这样就可以进行fragment变化的回退操作。
+
+可以这样得到FragmentTransaction类的实例：　
+
+FragmentManager fragmentManager = getFragmentManager();
+FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>Transaction 是一组同时执行的变化的集合</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>用add(), remove(), replace()方法，把所有需要的变化加进去，然后调用commit()方法，将这些变化应用。
+
+在commit()方法之前，你可以调用addToBackStack()，把这个transaction加入back stack中去
+
+这个back stack是由activity管理的，当用户按返回键时，就会回到上一个fragment的状态。
+
+比如下面的代码就是用一个新的fragment取代之前的fragment，并且将前次的状态存储在back stack中。
+
+// Create new fragment and transaction
+Fragment newFragment = new ExampleFragment();
+FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack
+transaction.replace(R.id.fragment_container, newFragment);
+transaction.addToBackStack(null);
+
+// Commit the transaction
+transaction.commit();
+
+// R.id.fragment_container
+&lt;FrameLayout
+    android:id=&quot;@+id/fragment_container&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+&lt;/FrameLayout&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>在这个例子中，newFragment将取代在R.id.fragment_container容器中的fragment
+
+    如果没有，将直接添加新的fragment。
+
+通过调用addToBackStack()，commit()的一系列转换作为一个transaction被存储在back stack中
+
+    用户按Back键可以返回上一个转换前的状态。
+
+当你移除一个fragment的时候:
+
+    如果commit()之前没有调用 addToBackStack()，那个fragment将会是destroyed；
+
+    如果调用了addToBackStack()，这个fragment 会是stopped，可以通过返回键来恢复。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>关于commit()方法</h3>
+
+<pre><code>调用commit()方法并不能立即执行transaction中包含的改变动作，commit()方法把transaction加入activity的UI线程队列中。
+
+但是，如果觉得有必要的话，可以调用executePendingTransactions()方法来立即执行commit()提供的transaction。
+
+这样做通常是没有必要的，除非这个transaction被其他线程依赖。
+
+注意：你只能在activity存储它的状态（当用户要离开activity时）之前调用commit()，在存储状态之后调用将会抛出一个异常。
+
+这是因为当activity再次被恢复时commit之后的状态将丢失。如果丢失也没关系，那么使用commitAllowingStateLoss()方法。
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8B%E7%B1%BB%E5%9E%8B%E6%96%AD%E8%A8%80%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Golang之类型断言的使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E6%9B%BF%E4%BB%A3ListView%E7%9A%84RecyclerView/" title="Android之替代ListView的RecyclerView">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-30</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

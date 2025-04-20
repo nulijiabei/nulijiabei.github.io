@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>C++之string常用方法总结</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>C++之string常用方法总结 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>C++之string常用方法总结</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 常用方法 ...
+// http://www.cplusplus.com/reference/string/string
+c_str
+    Get C string equivalent (public member function )
+data
+    Get string data (public member function )
+get_allocator
+    Get allocator (public member function )
+copy
+    Copy sequence of characters from string (public member function )
+find
+    Find content in string (public member function )
+rfind
+    Find last occurrence of content in string (public member function )
+find_first_of
+    Find character in string (public member function )
+find_last_of
+    Find character in string from the end (public member function )
+find_first_not_of
+    Find absence of character in string (public member function )
+find_last_not_of
+    Find non-matching character in string from the end (public member function )
+substr
+    Generate substring (public member function )
+compare
+    Compare strings (public member function )
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>str.find(str1)
+说明：从pos(默认是是0，即从头开始查找)开始查找，
+找到第一个和str1相匹配的子串，**返回该子串的起始索引位置**
+如果没有找到则返回string::npos
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>str.find_first_of(str1)
+说明：从pos(默认是是0，即从头开始查找)开始查找，
+找到第一个和str1相匹配的子串，**返回该子串的起始索引位置**
+如果没有找到则返回string::npos
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>str.find_last_of(str1)
+说明：从npos(默认是字符串最后一个，即从后向前查找)开始查找，
+找到第一个和str1相匹配的子串，**返回该子串的最后一个字符的索引位置**
+如果没有找到则返回string::npos
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 获取视频文件路径中的文件名 ...
+string str = &quot;/root/video/a.mp4&quot;
+unsigned int pos = str.find_last_of(&quot;/&quot;);
+if (pos != string::npos)
+    str.substr(pos + 1, str.size() - 1)
+...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>str.erase(pos); 
+说明：删除str中下标pos到末尾的所有字符
+str.erase(first,num)
+说明：删除从first开始num个字符
+
+#include&lt;string&gt;
+#include&lt;iostream&gt;
+using namespace std;
+
+int main()
+{
+    string str = &quot;0123456789&quot;;
+    str.erase(7);
+    cout &lt;&lt; str  &lt;&lt; endl;   //结果：0123456
+    str.erase(0, 2);
+    cout &lt;&lt; str &lt;&lt; endl;    // 结果：23456
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E4%BD%BF%E7%94%A8ESP8266%E5%AE%9E%E7%8E%B0%E5%BE%AE%E4%BF%A1Airkiss%E6%99%BA%E8%83%BD%E9%85%8D%E7%BD%91/" title="使用ESP8266实现微信Airkiss智能配网">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/C%2B%2B%E4%B9%8B%E5%9C%A8Class%E4%B8%AD%E4%BD%BF%E7%94%A8Thread/" title="C++之在Class中使用Thread">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-03-25</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

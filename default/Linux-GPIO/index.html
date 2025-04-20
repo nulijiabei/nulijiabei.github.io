@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux-GPIO</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux-GPIO </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>可以使用系统中的GPIOLIB模块在用户空间提供的sysfs接口，实现应用层对GPIO的独立控制。</p>
+
+<p>使用 Linux Kernel 提供的 sysfs 來控制 GPIO</p>
+
+<p>在要寫程式之前，我們先來使用 Linux Kernel 提供的 sysfs 來控制 GPIO。</p>
+
+<hr />
+
+<p>用户空间gpio的调用</p>
+
+<p>用户空间访问gpio,即通过sysfs接口访问gpio,下面是/sys/class/gpio目录下的文件：</p>
+
+<pre><code>--export/unexport文件
+--gpioN指代具体的gpio引脚
+--gpio_chipN指代gpio控制器
+// 必须知道以上接口没有标准device文件和它们的链接。 
+</code></pre>
+
+<p>(1) export/unexport文件接口：</p>
+
+<pre><code>/sys/class/gpio/export，该接口只能写不能读
+// 用户程序通过写入gpio的编号来向内核申请将某个gpio的控制权导出到用户空间
+
+比如  echo 19 &gt; export 
+// 上述操作会为19号gpio创建一个节点gpio19，此时目录下生成gpio19的目录
+// 和(unexport)导出的效果相反。 
+
+比如 echo 19 &gt; unexport
+// 上述操作将会移除gpio19这个节点。 
+</code></pre>
+
+<p>(2) /sys/class/gpio/gpioN</p>
+
+<pre><code>// 指代某个具体的gpio端口,里边有如下属性文件
+direction 表示gpio端口的方向，读取结果是in或out。
+// 该文件也可以写，写入out 时该gpio设为输出同时电平默认为低。
+// 写入low或high则不仅可以设置为输出 还可以设置输出的电平。 
+// 当然如果内核不支持或者内核代码不愿意，将不会存在这个属性
+// 比如内核调用了gpio_export(N,0)就表示内核不愿意修改gpio端口方向属性 
+
+value 表示gpio引脚的电平,0(低电平)1（高电平）
+// 如果gpio被配置为输出，这个值是可写的，记住任何非零的值都将输出高电平,
+// 如果某个引脚能并且已经被配置为中断,则可以调用poll(2)函数监听该中断,中断触发后poll(2)函数就会返回。
+
+edge 表示中断的触发方式，edge文件有如下四个值：&quot;none&quot;, &quot;rising&quot;, &quot;falling&quot;，&quot;both&quot;。
+// none表示引脚为输入，不是中断引脚
+// rising表示引脚为中断输入，上升沿触发
+// falling表示引脚为中断输入，下降沿触发
+// both表示引脚为中断输入，边沿触发
+// 这个文件节点只有在引脚被配置为输入引脚的时候才存在。 当值是none时可以通过如下方法将变为中断引脚
+// echo &quot;both&quot; &gt; edge;对于是both,falling还是rising依赖具体硬件的中断的触发方式。
+// 此方法即用户态gpio转换为中断引脚的方式
+
+active_low 
+// 相互调换高低电平设置
+</code></pre>
+
+<p>(3) /sys/class/gpio/gpiochipN</p>
+
+<pre><code>gpiochipN表示的就是一个gpio_chip,用来管理和控制一组gpio端口的控制器： 
+// base   和N相同，表示控制器管理的最小的端口编号。 
+// lable   诊断使用的标志（并不总是唯一的） 
+// ngpio  表示控制器管理的gpio端口数量（端口范围是：N ~ N+ngpio-1） 
+</code></pre>
+
+<hr />
+
+<pre><code>1. 首先先將 GPIO4 設定成可以用 sysfs 控制
+echo 4 &gt; /sys/class/gpio/export
+
+2. 設定 GPIO4 為輸出腳
+echo out &gt; /sys/class/gpio/gpio4/direction
+
+3. 設定 GPIO4 輸出值為 1 (0: 低電位, 1: 高電位)
+echo 1 &gt; /sys/class/gpio/gpio4/value
+
+4. 設定 GPIO4 輸出值為 0 (0: 低電位, 1: 高電位)
+echo 0 &gt; /sys/class/gpio/gpio4/value
+
+5. 取消建立出來的 GPIO4 node
+echo 4 &gt; /sys/class/gpio/unexport
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>在你執行以上第 3 步的時候，你可以看到 LED 亮了起來，直到第 4 步時，才又變回原本的狀態。</p>
+
+<p>若想要使用 Bash 來控制 GPIO，則可以採用此種方式。</p>
+
+<hr />
+
+<p>使用 debugfs 來觀看目前的 GPIO 設定</p>
+
+<p>我們可以使用 debugfs 來察看目前的 GPIO 設定，首先掛載 debugfs</p>
+
+<pre><code>mount -t debugfs debug /d
+</code></pre>
+
+<p>接著就可以使用</p>
+
+<pre><code>cat /d/gpio
+</code></pre>
+
+<p>來取得目前 GPIO 的狀況</p>
+
+<pre><code>root@raspberrypi:/home/pi#
+cat /d/gpio
+GPIOs 0-53, bcm2708_gpio:
+gpio-4  (sysfs                ) out hi
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Arduino-Hello-World/" title="Arduino Hello World">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux-ACPI-%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0/" title="Linux ACPI 启动参数">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-08-13</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

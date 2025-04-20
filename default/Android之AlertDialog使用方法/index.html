@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之AlertDialog使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之AlertDialog使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <h3>什么是AlertDialog?什么是AlertDialog.Builder?</h3>
+
+<blockquote>
+</blockquote>
+
+<p>AlertDialog是Dialog的一个直接子类</p>
+
+<p>一个AlertDialog可以有两个Button或者3个Button</p>
+
+<p>可以对一个AlertDialog设置title、message。</p>
+
+<p>不能直接通过AlertDialog的构造函数来生成一个AlertDialog</p>
+
+<p>一般生成的时候都是通过它的的一个内部静态类AlertDialog.Builder来构造的。</p>
+
+<hr />
+
+<pre><code>public void send()
+{
+// ....... 构造一个 AlertDialog
+AlertDialog.Builder builder = new AlertDialog.Builder(this)
+    // 对话框标题
+    .setTitle(&quot;简单对话框&quot;)
+    // 对话框图标
+    .setIcon(R.mipmap.ic_launcher);
+    // 对话框内容
+    // .setMessage(&quot;对话框内容.&quot;);
+// 添加一个按钮，并监听按钮事件 (积极的;确实的)
+builder.setPositiveButton(&quot;确定&quot;, new DialogInterface.OnClickListener() {
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+    Intent intent = new Intent(MainActivity.this, ControlActivity.class);
+    startActivity(intent);
+    }
+});
+// 添加一个按钮，并监听按钮事件 (消极的;否认的)
+builder.setNegativeButton(&quot;取消&quot;, new DialogInterface.OnClickListener() {
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+    Intent intent = new Intent(MainActivity.this, ControlActivity.class);
+    startActivity(intent);
+    }
+});
+// 添加一个按钮，并监听按钮事件 (中立的)
+builder.setNeutralButton(&quot;帮助&quot;, new DialogInterface.OnClickListener() {
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+    Intent intent = new Intent(MainActivity.this, ControlActivity.class);
+    startActivity(intent);
+    }
+});
+// 列表
+CharSequence chars[] = {&quot;hello&quot;, &quot;wrold&quot;};
+// 列表项目对话框
+builder.setItems(chars, new DialogInterface.OnClickListener() {
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+    // 点击了第几列
+    Log.i(&quot;info&quot;, String.valueOf(which));
+    // ... 动作
+    Intent intent = new Intent(MainActivity.this, ControlActivity.class);
+    startActivity(intent);
+    }
+});
+// 单选按钮
+builder.setSingleChoiceItems(chars, 0, new DialogInterface.OnClickListener() {
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+    // 点击了第几列
+    Log.i(&quot;info&quot;, String.valueOf(which));
+    // ... 动作
+    Intent intent = new Intent(MainActivity.this, ControlActivity.class);
+    startActivity(intent);
+    }
+});
+boolean m_boolean[] = {false, false};
+// 多选按钮
+builder.setMultiChoiceItems(chars, m_boolean, new DialogInterface.OnMultiChoiceClickListener() {
+    @Override
+    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+    // 获取点击事件，并进行记录
+    Log.i(&quot;info&quot;, String.valueOf(which) + &quot; &quot; + String.valueOf(isChecked));
+    }
+});
+// 获取一个 View
+// View root = this.getLayoutInflater().inflate(R.layout.activity_control, null);
+// 可以设置 View
+// builder.setView(root);
+// 创建及显示
+builder.create().show();
+// .......
+}
+</code></pre>
+
+<hr />
+
+<h3>自定义 AlertDialog</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>public class MainActivity extends Activity {
+
+    // 全局 View 
+    View root;
+
+    public void send()
+    {
+    // 获取一个 View
+    root = this.getLayoutInflater().inflate(R.layout.activity_control, null);
+    // .......
+    AlertDialog.Builder builder = new AlertDialog.Builder(this)
+        // 对话框标题
+        .setTitle(&quot;简单对话框&quot;)
+        // 对话框图标
+        .setIcon(R.mipmap.ic_launcher);
+        // 对话框内容
+        // .setMessage(&quot;对话框内容.&quot;);
+    // 添加一个按钮，并监听按钮事件 (积极的;确实的)
+    builder.setPositiveButton(&quot;确定&quot;, new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+        // 获取结果
+        EditText edit = (EditText) root.findViewById(R.id.editText);
+        EditText edit2 = (EditText) root.findViewById(R.id.editText2);
+        Log.i(&quot;info&quot;, edit.getText().toString());
+        Log.i(&quot;info&quot;, edit2.getText().toString());
+        }
+    });
+    // 添加一个按钮，并监听按钮事件 (消极的;否认的)
+    builder.setNegativeButton(&quot;取消&quot;, new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+        Intent intent = new Intent(MainActivity.this, ControlActivity.class);
+        startActivity(intent);
+        }
+    });
+    // 可以设置 View
+    builder.setView(root);
+    // 创建及显示
+    builder.create().show();
+    // .......
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot; android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; android:paddingLeft=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingRight=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingTop=&quot;@dimen/activity_vertical_margin&quot;
+    android:paddingBottom=&quot;@dimen/activity_vertical_margin&quot;
+    tools:context=&quot;com.example.nljb.nljb.ControlActivity&quot;&gt;
+
+    &lt;LinearLayout
+    android:orientation=&quot;vertical&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_centerHorizontal=&quot;true&quot;
+    android:layout_alignParentTop=&quot;true&quot;&gt;
+
+    &lt;LinearLayout
+        android:orientation=&quot;horizontal&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:gravity=&quot;center&quot;&gt;
+
+        &lt;TextView
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:text=&quot;用户名&quot;
+        android:id=&quot;@+id/textView&quot; /&gt;
+
+        &lt;EditText
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:inputType=&quot;textPersonName&quot;
+        android:text=&quot;Name&quot;
+        android:ems=&quot;10&quot;
+        android:id=&quot;@+id/editText&quot; /&gt;
+    &lt;/LinearLayout&gt;
+
+    &lt;LinearLayout
+        android:orientation=&quot;horizontal&quot;
+        android:layout_width=&quot;fill_parent&quot;
+        android:layout_height=&quot;fill_parent&quot;
+        android:gravity=&quot;center&quot;&gt;
+
+        &lt;TextView
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:text=&quot;密    码&quot;
+        android:id=&quot;@+id/textView2&quot; /&gt;
+
+        &lt;EditText
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:inputType=&quot;numberPassword&quot;
+        android:ems=&quot;10&quot;
+        android:id=&quot;@+id/editText2&quot; /&gt;
+    &lt;/LinearLayout&gt;
+
+    &lt;/LinearLayout&gt;
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BGestureDetector%E6%89%8B%E5%8A%BF%E6%A3%80%E6%B5%8B/" title="Android之GestureDetector手势检测">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BToast%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之Toast简单使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-07</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

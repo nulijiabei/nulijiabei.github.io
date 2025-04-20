@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-上传-and-接收-文件</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-上传-and-接收-文件 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>package main
+
+import (
+    &quot;fmt&quot;
+    &quot;io&quot;
+    &quot;net/http&quot;
+    &quot;log&quot;
+)
+
+// 获取大小的借口
+type Sizer interface {
+    Size() int64
+}
+
+// hello world, the web server
+func HelloServer(w http.ResponseWriter, r *http.Request) {
+    if &quot;POST&quot; == r.Method {
+    file, _, err := r.FormFile(&quot;userfile&quot;)
+    if err != nil {
+        http.Error(w, err.Error(), 500)
+        return
+    }
+    defer file.Close()
+    f,err:=os.Create(&quot;filenametosaveas&quot;)
+    defer f.Close()
+    io.Copy(f,file)
+fmt.Fprintf(w, &quot;上传文件的大小为: %d&quot;, file.(Sizer).Size())
+    return
+    }
+
+    // 上传页面
+    w.Header().Add(&quot;Content-Type&quot;, &quot;text/html&quot;)
+    w.WriteHeader(200)
+    html := `
+&lt;form enctype=&quot;multipart/form-data&quot; action=&quot;/hello&quot; method=&quot;POST&quot;&gt;
+    Send this file: &lt;input name=&quot;userfile&quot; type=&quot;file&quot; /&gt;
+    &lt;input type=&quot;submit&quot; value=&quot;Send File&quot; /&gt;
+&lt;/form&gt;
+`
+    io.WriteString(w, html)
+}
+
+func main() {
+    http.HandleFunc(&quot;/hello&quot;, HelloServer)
+    err := http.ListenAndServe(&quot;:12345&quot;, nil)
+    if err != nil {
+    log.Fatal(&quot;ListenAndServe: &quot;, err)
+    }
+}
+
+客户端上传文件代码：
+ func Upload() (err error) {
+    // Create buffer
+    buf := new(bytes.Buffer) // caveat IMO dont use this for large files, \
+    // create a tmpfile and assemble your multipart from there (not tested)
+    w := multipart.NewWriter(buf)
+    // Create file field
+    fw, err := w.CreateFormFile(&quot;file&quot;, &quot;helloworld.go&quot;) //这里的file很重要，必须和服务器端的FormFile一致
+    if err != nil {
+    fmt.Println(&quot;c&quot;)
+    return err
+    }
+    fd, err := os.Open(&quot;helloworld.go&quot;)
+    if err != nil {
+    fmt.Println(&quot;d&quot;)
+    return err
+    }
+    defer fd.Close()
+    // Write file field from file to upload
+    _, err = io.Copy(fw, fd)
+    if err != nil {
+    fmt.Println(&quot;e&quot;)
+    return err
+    }
+    // Important if you do not close the multipart writer you will not have a
+    // terminating boundry
+    w.Close()
+    req, err := http.NewRequest(&quot;POST&quot;,&quot;http://192.168.2.127/configure.go?portId=2&quot;, buf)
+    if err != nil {
+    fmt.Println(&quot;f&quot;)
+    return err
+    }
+    req.Header.Set(&quot;Content-Type&quot;, w.FormDataContentType())
+      var client http.Client
+    res, err := client.Do(req)
+    if err != nil {
+    fmt.Println(&quot;g&quot;)
+    return err
+    }
+    io.Copy(os.Stderr, res.Body) // Replace this with Status.Code check
+    fmt.Println(&quot;h&quot;)
+    return err
+}
+</code></pre>
+
+<hr />
+
+<p>处理文件上传</p>
+
+<p>你想处理一个由用户上传的文件，比如你正在建设一个类似Instagram的网站，你需要存储用户拍摄的照片。这种需求该如何实现呢？</p>
+
+<p>要使表单能够上传文件，首先第一步就是要添加form的<code>enctype</code>属性，<code>enctype</code>属性有如下三种情况:</p>
+
+<p>application/x-www-form-urlencoded   表示在发送前编码所有字符（默认）</p>
+
+<p>multipart/form-data 不对字符编码。在使用包含文件上传控件的表单时，必须使用该值。</p>
+
+<p>text/plain 空格转换为 &ldquo;+&rdquo; 加号，但不对特殊字符编码。</p>
+
+<p>所以，表单的html代码应该类似于:</p>
+
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;上传文件&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;form enctype=&quot;multipart/form-data&quot; action=&quot;http://127.0.0.1:9090/upload&quot; method=&quot;post&quot;&gt;
+ &lt;input type=&quot;file&quot; name=&quot;uploadfile&quot; /&gt;
+ &lt;input type=&quot;hidden&quot; name=&quot;token&quot; value=&quot;{...{.}...}&quot;/&gt;
+ &lt;input type=&quot;submit&quot; value=&quot;upload&quot; /&gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>在服务器端，我们增加一个handlerFunc:</p>
+
+<pre><code>http.HandleFunc(&quot;/upload&quot;, upload)
+
+// 处理/upload 逻辑
+func upload(w http.ResponseWriter, r *http.Request) {
+    fmt.Println(&quot;method:&quot;, r.Method) //获取请求的方法
+    if r.Method == &quot;GET&quot; {
+        crutime := time.Now().Unix()
+        h := md5.New()
+        io.WriteString(h, strconv.FormatInt(crutime, 10))
+        token := fmt.Sprintf(&quot;%x&quot;, h.Sum(nil))
+        t, _ := template.ParseFiles(&quot;upload.gtpl&quot;)
+        t.Execute(w, token)
+    } else {
+        r.ParseMultipartForm(32 &lt;&lt; 20)
+        file, handler, err := r.FormFile(&quot;uploadfile&quot;)
+        if err != nil {
+            fmt.Println(err)
+            return
+        }
+        defer file.Close()
+        fmt.Fprintf(w, &quot;%v&quot;, handler.Header)
+        f, err := os.OpenFile(&quot;./test/&quot;+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+        if err != nil {
+            fmt.Println(err)
+            return
+        }
+        defer f.Close()
+        io.Copy(f, file)
+    }
+}
+</code></pre>
+
+<p>通过上面的代码可以看到，处理文件上传我们需要调用<code>r.ParseMultipartForm</code>，</p>
+
+<p>里面的参数表示<code>maxMemory</code>，调用<code>ParseMultipartForm</code>之后，</p>
+
+<p>上传的文件存储在<code>maxMemory</code>大小的内存里面，如果文件大小超过了<code>maxMemory</code>，那么剩下的部分将存储在系统的临时文件中。</p>
+
+<p>我们可以通过<code>r.FormFile</code>获取上面的文件句柄，然后实例中使用了<code>io.Copy</code>来存储文件。</p>
+
+<p>获取其他非文件字段信息的时候就不需要调用<code>r.ParseForm</code>，因为在需要的时候Go自动会去调用。而且<code>ParseMultipartForm</code>调用一次之后，后面再次调用不会再有效果。</p>
+
+<p>通过上面的实例我们可以看到我们上传文件主要三步处理：</p>
+
+<pre><code>1. 表单中增加enctype=&quot;multipart/form-data&quot;
+2. 服务端调用`r.ParseMultipartForm`,把上传的文件存储在内存和临时文件中
+3. 使用`r.FormFile`获取文件句柄，然后对文件进行存储等处理。
+</code></pre>
+
+<p>文件handler是multipart.FileHeader,里面存储了如下结构信息</p>
+
+<pre><code>type FileHeader struct {
+Filename string
+Header   textproto.MIMEHeader
+// contains filtered or unexported fields
+}
+</code></pre>
+
+<p>我们通过上面的实例代码打印出来上传文件的信息如下</p>
+
+<pre><code>![](images/4.5.upload2.png?raw=true)
+</code></pre>
+
+<p>打印文件上传后服务器端接受的信息</p>
+
+<h2>客户端上传文件</h2>
+
+<p>我们上面的例子演示了如何通过表单上传文件，然后在服务器端处理文件，</p>
+
+<p>其实Go支持模拟客户端表单功能支持文件上传，详细用法请看如下示例：</p>
+
+<pre><code>package main
+
+import (
+&quot;bytes&quot;
+&quot;fmt&quot;
+&quot;io&quot;
+&quot;io/ioutil&quot;
+&quot;mime/multipart&quot;
+&quot;net/http&quot;
+&quot;os&quot;
+)
+
+func postFile(filename string, targetUrl string) error {
+    bodyBuf := &amp;bytes.Buffer{}
+    bodyWriter := multipart.NewWriter(bodyBuf)
+
+    //关键的一步操作
+    fileWriter, err := bodyWriter.CreateFormFile(&quot;uploadfile&quot;, filename)
+    if err != nil {
+        fmt.Println(&quot;error writing to buffer&quot;)
+        return err
+    }
+
+    //打开文件句柄操作
+    fh, err := os.Open(filename)
+    if err != nil {
+        fmt.Println(&quot;error opening file&quot;)
+        return err
+    }
+
+    //iocopy
+    _, err = io.Copy(fileWriter, fh)
+    if err != nil {
+        return err
+    }
+
+    contentType := bodyWriter.FormDataContentType()
+    bodyWriter.Close()
+
+    resp, err := http.Post(targetUrl, contentType, bodyBuf)
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    resp_body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        return err
+    }
+    fmt.Println(resp.Status)
+    fmt.Println(string(resp_body))
+    return nil
+}
+
+// sample usage
+func main() {
+    target_url := &quot;http://localhost:9090/upload&quot;
+    filename := &quot;./astaxie.pdf&quot;
+    postFile(filename, target_url)
+}
+</code></pre>
+
+<p>上面的例子详细展示了客户端如何向服务器上传一个文件的例子，</p>
+
+<p>客户端通过multipart.Write把文件的文本流写入一个缓存中，然后调用http的Post方法把缓存传到服务器。</p>
+
+<p>如果你还有其他普通字段例如username之类的需要同时写入，那么可以调用multipart的WriteField方法写很多其他类似的字段。</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E5%86%85%E7%BD%AE%E7%9A%84%E7%B1%BB%E5%9E%8B%E5%92%8C%E5%87%BD%E6%95%B0/" title="Golang-内置的类型和函数">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-udp-%E6%9C%8D%E5%8A%A1%E7%AB%AF-and-%E5%AE%A2%E6%88%B7%E7%AB%AF/" title="Golang-udp-服务端-and-客户端">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

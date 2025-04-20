@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Qt之容器遍历使用教程</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Qt之容器遍历使用教程 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Qt之容器遍历使用教程</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Qt 的容器类提供了两种风格的遍历器：Java 风格和 STL 风格。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>Java 风格的遍历器</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Java 风格的遍历器是在 Qt4 首先引入的，是 Qt 应用程序首先推荐使用的形式。这种风格比起 STL 风格的遍历器更方便。方便的代价就是不如后者高效。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>| 容器           | 只读遍历器          | 读写遍历器                 |
+| QList,QQueue     | QListIterator       | QMutableListIterator       |
+| QLinkedList      | QLinkedListIterator | QMutableLinkedListIterator |
+| QVector,QStack   | QVectorIterator     | QMutableVectorIterator     |
+| QSet             | QSetIterator        | QMutableSetIterator        |
+| QMap,QMultiMap   | QMapIterator        | QMutableMapIterator        |
+| QHash,QMultiHash | QHashIterator       | QMutableHashIterator       |
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>QList&lt;QString&gt; list;
+list &lt;&lt; &quot;A&quot; &lt;&lt; &quot;B&quot; &lt;&lt; &quot;C&quot; &lt;&lt; &quot;D&quot;;
+
+QListIterator&lt;QString&gt; i(list);
+while (i.hasNext()) {
+    qDebug() &lt;&lt; i.next(); 
+}
+
+QMutableListIterator&lt;int&gt; i(list);
+while (i.hasNext()) {
+    if (i.next() == “B”) {
+    i.setValue(“b”);     //i.next()=&quot;b&quot;;
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>QMap&lt;int, QString&gt; map;
+map.insert(1,&quot;A&quot;);
+map.insert(2,&quot;B&quot;);
+map.insert(3,&quot;C&quot;);
+
+QMapIterator&lt;int, QString&gt; i(map);
+while (i.hasNext()) {
+    if(i.next().key() == 2)
+    qDebug() &lt;&lt; i.value();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>STL 风格的遍历器</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>STL 风格的遍历器从 Qt 2.0 就开始提供。这种遍历器能够兼容 Qt 和 STL 的通用算法，并且为速度进行了优化。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>| 容器             | 只读遍历器                  | 读写遍历器            |
+| QList,QQueue     | QList::const_iterator       | QList::iterator       |
+| QLinkedList      | QLinkedList::const_iterator | QLinkedList::iterator |
+| QVector,QStack   | QVector::const_iterator     | QVector::iterator     |
+| QSet             | QSet::const_iterator        | QSet::iterator        |
+| QMap,QMultiMap   | QMap::const_iterator        | QMap::iterator        |
+| QHash,QMultiHash | QHash::const_iterator       | QHash::iter           |
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>QList&lt;QString&gt; list;
+list &lt;&lt; &quot;A&quot; &lt;&lt; &quot;B&quot; &lt;&lt; &quot;C&quot; &lt;&lt; &quot;D&quot;;
+
+QList&lt;QString&gt;::iterator i;
+for (i = list.begin(); i != list.end(); ++i) {
+　　*i = (*i).toLower(); // 使用 * 运算符获取遍历器所指的元素
+　　 qDebug()&lt;&lt;*i;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>QMap&lt;int, int&gt; map;
+
+QMap&lt;int, int&gt;::const_iterator i;
+for (i = map.constBegin(); i != map.constEnd(); ++i) {
+    qDebug() &lt;&lt; i.key() &lt;&lt; &quot;:&quot; &lt;&lt; i.value();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>foreach(关键字)</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>如果我们仅仅想要遍历集合所有元素，我们可以使用 Qt 的foreach关键字。这个关键字是 Qt 特有的</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>QLinkedList&lt;QString&gt; list;
+...
+QString str;
+foreach (str, list) {
+    qDebug() &lt;&lt; str;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%9C%A8Ubuntu%E4%B8%AD%E4%BD%BF%E7%94%A8Overlayroot%E6%9D%A5%E5%8F%AA%E8%AF%BB%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" title="在Ubuntu中使用Overlayroot来只读根文件系统">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8BHMAC%E7%9A%84SHA1%E5%8A%A0%E5%AF%86/" title="Golang之HMAC的SHA1加密">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2017-05-12</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

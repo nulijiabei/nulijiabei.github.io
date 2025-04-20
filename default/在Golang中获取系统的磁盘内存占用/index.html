@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>在Golang中获取系统的磁盘内存占用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>在Golang中获取系统的磁盘内存占用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>获取磁盘占用情况(Linux/Mac下有效)</p>
+
+<p><a href="http://wendal.net/2012/1224.html">http://wendal.net/2012/1224.html</a></p>
+
+<p>获取磁盘占用情况(Linux/Mac下有效)</p>
+
+<p>获取内存占用</p>
+
+<p>很明显,Windows下的支持是最弱的, 当然,还能通过调用win32 API的方式获取缺失的信息
+Golang的API并非完全跨平台, 正如上述的syscall.Statfs_t结构体,在Windows下是没有的
+2013年4月6号更新,windows下获取磁盘空间的方法
+通过调用win32 api</p>
+
+<pre><code>//读取内存状态信息
+func(ev*Ev)GetMemo()(int,int,int){
+    //内存状态文件路径
+    varmeminfostring=&quot;/proc/meminfo&quot;
+    //存储各状态信息
+    vartotalint
+    varfreeint
+    varusedint
+    //读取文件
+    evolver.FileRF(meminfo,func(f*os.File){
+    //建立文件流
+    rd:=bufio.NewReader(f)
+    for{
+        //按行读取
+        data,err:=rd.ReadString('\n')
+        iferr==io.EOF{
+        break
+        }
+        iferr!=nil{
+        break
+        }
+        //判断是否为需要的信息
+        ifstrings.HasPrefix(data,&quot;MemTotal&quot;){
+        totalValue:=strings.Split(evolver.Trim(strings.Split(data,&quot;:&quot;)[1]),&quot;&quot;)[0]
+        total=evolver.ToInt(totalValue,0)
+        }elseifstrings.HasPrefix(data,&quot;MemFree&quot;){
+        freeValue:=strings.Split(evolver.Trim(strings.Split(data,&quot;:&quot;)[1]),&quot;&quot;)[0]
+        free=evolver.ToInt(freeValue,0)
+        }
+        //计算以用空间
+        used=total-free
+    }
+    })
+    //返回结果
+    returnfree,used,total
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%AF%B9%E4%BA%8EWIFI%E5%AF%86%E7%A0%81%E4%B8%AD%E5%B8%A6%E6%9C%89%E8%8B%B1%E6%96%87%E5%AD%97%E7%AC%A6%E6%88%96%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6/" title="对于WIFI密码中带有英文字符或特殊字符">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83-Java/" title="命名规范-Java">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

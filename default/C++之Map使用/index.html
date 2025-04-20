@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>C++之Map使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>C++之Map使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>MAP的说明</p>
+
+<pre><code>1, 头文件 
+#include &lt;map&gt; 
+
+2, 定义 
+map&lt;string, int&gt; my_Map; 或者是typedef map&lt;string, int&gt; MY_MAP; 
+MY_MAP my_Map; 
+
+3, 插入数据 
+(1) my_Map[&quot;a&quot;] = 1; 
+(2) my_Map.insert(map&lt;string, int&gt;::value_type(&quot;b&quot;,2)); 
+(3) my_Map.insert(pair&lt;string,int&gt;(&quot;c&quot;,3)); 
+(4) my_Map.insert(make_pair&lt;string,int&gt;(&quot;d&quot;,4)); 
+
+4, 查找数据和修改数据 
+(1) int i = my_Map[&quot;a&quot;]; 
+    my_Map[&quot;a&quot;] = i; 
+(2) MY_MAP::iterator my_Itr; 
+    my_Itr.find(&quot;b&quot;); 
+    int j = my_Itr-&gt;second; 
+    my_Itr-&gt;second = j; 
+不过注意，键本身是不能被修改的，除非删除。 
+
+5, 删除数据 
+(1) my_Map.erase(my_Itr); 
+(2) my_Map.erase(&quot;c&quot;); 
+还是注意，第一种情况在迭代期间是不能被删除的，道理和foreach时不能删除元素一样。 
+
+6, 迭代数据 
+for (my_Itr=my_Map.begin(); my_Itr!=my_Map.end(); ++my_Itr) {} 
+
+7, 其它方法 
+my_Map.size() 返回元素数目 
+my_Map.empty() 判断是否为空 
+my_Map.clear() 清空所有元素 
+可以直接进行赋值和比较：=,   &gt;,   &gt;=,   &lt;,   &lt;=,   !=   等等 
+</code></pre>
+
+<hr />
+
+<pre><code>// 判断KEY是否存在
+bool Exist(const keyName)
+{
+     return (mRegistryMap.find(keyName) != mRegistryMap.end());
+}
+</code></pre>
+
+<hr />
+
+<pre><code>#ifndef INI_H
+#define INI_H
+
+#include &lt;map&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+typedef map&lt;string, string&gt; values;
+typedef map&lt;string, values*&gt; keys;
+
+class INI
+{
+public:
+    INI(string);
+    ~INI();
+public:
+    int ReadINI();
+    int WriteINI();
+    void ClearINI();
+    void ShowINI();
+    void AppendValByKeysAndVals(string, string, string);
+    int DelValByKeysAndVals(string, string);
+    string GetValByKeysAndVals(string, string);
+private:
+    keys * key;
+    string path;
+};
+
+#endif // INI_H
+</code></pre>
+
+<hr />
+
+<pre><code>#include &quot;ini.h&quot;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+#include &lt;string.h&gt;
+
+INI::INI(string _path)
+{
+    key = new keys();
+    path = _path;
+}
+
+INI::~INI()
+{
+    ClearINI();
+    delete(key);
+}
+
+int INI::ReadINI()
+{
+    ClearINI();
+    string line;
+    string type;
+    int i;
+    ifstream f(path.c_str());
+    if (!f.is_open()){
+    return -1;
+    }
+    while(getline(f, line)){
+    if (line.substr(0,1) ==  &quot;#&quot; || line.empty())
+    {
+        continue;
+    }
+    if (line.substr(0,1) ==  &quot;[&quot;)
+    {
+        type = line.substr(1,line.length()-2);
+        continue;
+    }
+    if(type.empty()) {
+        continue;
+    }
+    i = line.find(&quot;=&quot;);
+    if(i == -1)
+    {
+        continue;
+    }
+    if(key-&gt;find(type) == key-&gt;end())
+    {
+        values * val = new values();
+        (*key)[type] = val;
+    }
+    values * vals = (*key)[type];
+    (*vals)[line.substr(0,i)] = line.substr(line.find(&quot;=&quot;)+1,line.length());
+    }
+    f.close();
+    return 0;
+}
+
+void INI::ClearINI()
+{
+    keys::iterator it;
+    for(it=(*key).begin(); it!=(*key).end(); it++)
+    {
+    (*(*it).second).clear();
+    delete((*it).second);
+    (*key).erase((*it).first);
+    }
+}
+
+void INI::ShowINI()
+{
+    keys::iterator it;
+    for(it=(*key).begin(); it!=(*key).end(); it++)
+    {
+    cout &lt;&lt; &quot;[&quot; &lt;&lt; (*it).first &lt;&lt; &quot;]&quot; &lt;&lt; endl;
+    values * vals = (*it).second;
+    values::iterator iv;
+    for(iv=(*vals).begin(); iv!=(*vals).end(); iv++)
+    {
+        cout &lt;&lt; (*iv).first &lt;&lt; &quot;=&quot; &lt;&lt; (*iv).second &lt;&lt; endl;
+    }
+    }
+}
+
+string INI::GetValByKeysAndVals(string _keys, string _values)
+{
+    if (key-&gt;find(_keys) == key-&gt;end())
+    {
+    return &quot;&quot;;
+    }
+    values * vals = (*key)[_keys];
+    if (vals-&gt;find(_values) == vals-&gt;end())
+    {
+    return &quot;&quot;;
+    }
+    return (*vals)[_values];
+}
+
+int INI::DelValByKeysAndVals(string _keys, string _values)
+{
+    if (key-&gt;find(_keys) == key-&gt;end())
+    {
+    return -1;
+    }
+    values * vals = (*key)[_keys];
+    if (vals-&gt;find(_values) == vals-&gt;end())
+    {
+    return -1;
+    }
+    (*vals).erase(_values);
+    if ((*vals).size() == 0)
+    {
+    delete(vals);
+    (*key).erase(_keys);
+    }
+    return 0;
+}
+
+void INI::AppendValByKeysAndVals(string _keys, string _values, string _value)
+{
+    if(key-&gt;find(_keys) == key-&gt;end())
+    {
+    values * vals = new values();
+    (*key)[_keys] = vals;
+    }
+    values * vals = (*key)[_keys];
+    (*vals)[_values] = _value;
+}
+
+int INI::WriteINI()
+{
+    string data;
+    ofstream f(path.c_str());
+    if(!f.is_open())
+    {
+    return -1;
+    }
+    keys::iterator it;
+    for(it=(*key).begin(); it!=(*key).end(); it++)
+    {
+    data.append(&quot;[&quot;);
+    data.append((*it).first);
+    data.append(&quot;]&quot;);
+    data.append(&quot;\n&quot;);
+    values * vals = (*it).second;
+    values::iterator iv;
+    for(iv=(*vals).begin(); iv!=(*vals).end(); iv++)
+    {
+        data.append((*iv).first);
+        data.append(&quot;=&quot;);
+        data.append((*iv).second);
+        data.append(&quot;\n&quot;);
+    }
+    }
+    f.write(data.c_str(), strlen(data.c_str()));
+    f.flush();
+    f.close();
+    return 0;
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/CxImage/" title="CxImage">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux%E4%B8%8BC%2B%2B%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B/" title="Linux下C++的多线程编程">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-28</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

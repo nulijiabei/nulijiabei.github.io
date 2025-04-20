@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之Notification通知用法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之Notification通知用法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>当用户有没有接到的电话的时候，Android顶部状态栏里就会出现一个小图标。</p>
+
+<p>提示用户有没有处理的快讯，当拖动状态栏时，可以查看这些快讯。</p>
+
+<p>Android给我们提供了NotificationManager来管理这个状态栏。</p>
+
+<p>可以很轻松的完成。</p>
+
+<hr />
+
+<pre><code>public void send()
+{
+// .......
+// 消息ID
+final int NOTIFY_ID = 0;
+// 获取系统的 NotificationManager 服务
+NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+// 创建一个点击消息跳转的 Activity
+Intent intent = new Intent(this, ControlActivity.class);
+// Intent 是及时启动，intent 随所在的activity 消失而消失。 
+// PendingIntent 可以看作是对intent的包装，通常通过getActivity,getBroadcast ,getService来得到pendingintent的实例
+// 当前activity并不能马上启动它所包含的intent,而是在外部执行 pendingintent时，调用intent的
+PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);//FLAG_ONE_SHOT
+// 开始创建 Notification
+Notification notification = new Notification.Builder(this)
+    // 设置显示在状态栏的通知提示信息
+    .setTicker(&quot;有新的消息&quot;)
+    // 设置消息标题
+    .setContentTitle(&quot;消息标题&quot;)
+    // 设置消息内容
+    .setContentText(&quot;消息内容&quot;)
+    // 通知消息要启动的 Activity
+    .setContentIntent(contentIntent)
+    // 设置消息图标
+    .setSmallIcon(R.mipmap.ic_launcher)
+    // 设置该通知自动消失
+    .setAutoCancel(true)
+    // 设置通知的时间 (消息上面显示的时间)
+    .setWhen(System.currentTimeMillis())
+    // 使用默认声音，默认LED灯，震动
+    // DEFAULT_SOUND 默认声音
+    // DEFAULT_VIBRATE 默认震动
+    // DEFAULT_LIGHTS 默认闪光灯
+    // DEFAULT_ALL 设置使用默认声音，震动，闪光灯
+    // 设置声音 .setSound(Uri.pare(&quot;file:///sdcard/click.mp3&quot;));
+    // 设置震动 .setVibrate(new long[]{0, 50, 100, 150});
+    .setDefaults(Notification.DEFAULT_ALL)
+    // 为通知设置大图标 .setLargeIcon(...)
+    // 生成 Notification
+    // 貌似 getNotification 被强制换成 build() 了
+    // .getNotification(); 
+    // .build();
+// 发送消息
+notificationManager.notify(NOTIFY_ID, notification);
+// .......
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 一个可以点击即可打开网址的PendingIntent
+    // PendingIntent
+    PendingIntent contentIntent =
+     PendingIntent.getActivity(this, 0, new Intent(Intent.ACTION_VIEW, Uri.parse(url)), PendingIntent.FLAG_UPDATE_CURRENT);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<p>而在Android中，如果需要访问硬件设备的话，是需要对其进行授权的</p>
+
+<p>所以需要在清单文件AndroidManifest.xml中增加两个授权，分别授予访问振动器与闪光灯的权限：</p>
+
+<pre><code>&lt;!-- 闪光灯权限 --&gt;
+&lt;uses-permission android:name=&quot;android.permission.FLASHLIGHT&quot;/&gt;
+&lt;!-- 振动器权限 --&gt;
+&lt;uses-permission android:name=&quot;android.permission.VIBRATE&quot;/&gt;
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BPopupWindow%E5%92%8CAlertDialog%E5%8C%BA%E5%88%AB/" title="Android之PopupWindow和AlertDialog区别">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BFILL_PARENT%E4%B8%8EWRAP_CONTENT%E5%92%8CMATCH_PARENT%E4%BB%8B%E7%BB%8D/" title="Android之FILL_PARENT与WRAP_CONTENT和MATCH_PARENT介绍">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-06</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

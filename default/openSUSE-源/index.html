@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>openSUSE-源</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>openSUSE-源 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>打开YaST中的 Software Repositories</p>
+
+<p>选择Add，通过Specify URL方式，添加如下源：</p>
+
+<pre><code>163-opensuse-11.4-update: http://mirrors.163.com/openSUSE/update/11.4/
+163-opensuse-11.4-oss: http://mirrors.163.com/openSUSE/distribution/11.4/repo/oss/
+163-opensuse-11.4-non-oss: http://mirrors.163.com/openSUSE/distribution/11.4/repo/non-oss/
+</code></pre>
+
+<p>其中Oss是指 Open Source Software，开源软件。那么Non-Oss就是非开源软件了。</p>
+
+<p>另外Sohu也有openSUSE的源，但是在我用的网络，不如163的快。</p>
+
+<pre><code>sohu-opensuse-11.4-update: http://mirrors.sohu.com/opensuse/update/11.4/
+sohu-opensuse-11.4-oss: http://mirrors.sohu.com/opensuse/distribution/11.4/repo/oss/
+sohu-opensuse-11.4-non-oss: http://mirrors.sohu.com/opensuse/distribution/11.4/repo/non-oss/
+</code></pre>
+
+<p>添加了国内的源，便可以不选择系统默认的官方SUSE源。更改Priority也可。系统就能飞速更新了。</p>
+
+<hr />
+
+<pre><code>163-opensuse-13.1-update: http://mirrors.163.com/openSUSE/update/13.1/
+163-opensuse-13.1-oss: http://mirrors.163.com/openSUSE/distribution/13.1/repo/oss/
+163-opensuse-13.1-non-oss: http://mirrors.163.com/openSUSE/distribution/13.1/repo/non-oss/
+
+sohu-opensuse-13.1-update: http://mirrors.sohu.com/opensuse/update/13.1/
+sohu-opensuse-13.1-oss: http://mirrors.sohu.com/opensuse/distribution/13.1/repo/oss/
+sohu-opensuse-13.1-non-oss: http://mirrors.sohu.com/opensuse/distribution/13.1/repo/non-oss/
+</code></pre>
+
+<hr />
+
+<pre><code>sudo zypper ar -f http://packman.inode.at/suse/openSUSE_13.1/ packman 
+
+sudo zypper refresh 
+
+sudo zypper install mplayer 
+</code></pre>
+
+<hr />
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/SOCK_STREAM%E4%B8%8ESOCK_DGRAM%E7%9A%84%E5%8C%BA%E5%88%AB/" title="SOCK_STREAM与SOCK_DGRAM的区别">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/QTableWidget/" title="QTableWidget">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-12</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

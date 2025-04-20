@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>树莓派之在VC4的KMS上使用Wayland方案</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>树莓派之在VC4的KMS上使用Wayland方案 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>树莓派之在VC4的KMS上使用Wayland方案</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>说明：经过测试可以的只有 Raspberry 3B+，Raspberry Zero / 3A+ 经过测试都不行 ...
+说明：本文内容摘自网上，有修改，在我的环境中经过测试，有效 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>测试环境：
+    Raspberry 3B+
+2019-04-08-raspbian-stretch-lite.img
+
+准备工作：
+# enable Broadcom VC4 driver 
+$ sudo raspi-config
+Advanced Options -&gt; GL Driver -&gt; GL (Full KMS)  
+
+运行：
+$ ./RPi3_build_weston.sh all
+
+$ export XDG_RUNTIME_DIR=/tmp/weston_runtime
+$ mkdir $XDG_RUNTIME_DIR &amp;&amp; chmod 0700 $XDG_RUNTIME_DIR
+$ export LD_LIBRARY_PATH=/usr/local/lib/
+$ weston --tty=2 --idle-time=0 -B drm-backend.so &amp;
+// 必须插有鼠标否则会提示找不到输入设备而报错 ...
+
+Date: 2017-06-02 CST
+[09:52:59.501] weston 2.0.0
+           http://wayland.freedesktop.org
+           Bug reports to: https://bugs.freedesktop.org/enter_bug.cgi?product=Wayland&amp;component=weston&amp;version=2.0.0
+           Build: 2.0.0 configure.ac: bump to version 2.0.0 for the official release (2017-02-24 16:19:03 -0800)
+[09:52:59.506] Command line: weston --tty=2 --idle-time=0 -B drm-backend.so
+[09:52:59.507] OS: Linux, 4.9.24-v7+, #993 SMP Wed Apr 26 18:01:23 BST 2017, armv7l
+[09:52:59.509] warning: XDG_RUNTIME_DIR &quot;/tmp/weston_runtime&quot; is not configured
+correctly.  Unix access mode must be 0700 (current mode is 700),
+and must be owned by the user (current owner is UID 1001).
+Refer to your distribution on how to get it, or
+http://www.freedesktop.org/wiki/Specifications/basedir-spec
+on how to implement it.
+[09:52:59.513] Starting with no config file.
+[09:52:59.515] Output repaint window is 7 ms maximum.
+[09:52:59.516] Loading module '/usr/local/lib/libweston-2/drm-backend.so'
+[09:52:59.520] initializing drm backend
+[09:52:59.526] using /dev/dri/card0
+[09:52:59.528] Loading module '/usr/local/lib/libweston-2/gl-renderer.so'
+[09:52:59.586] EGL client extensions: EGL_EXT_client_extensions
+           EGL_EXT_platform_base EGL_KHR_client_get_all_proc_addresses
+           EGL_KHR_debug EGL_EXT_platform_wayland EGL_MESA_platform_gbm
+[09:52:59.588] warning: neither EGL_EXT_swap_buffers_with_damage or EGL_KHR_swap_buffers_with_damage is supported. Performance could be affected.
+[09:52:59.588] EGL_KHR_surfaceless_context available
+[09:52:59.596] EGL version: 1.4 (DRI2)
+[09:52:59.596] EGL vendor: Mesa Project
+[09:52:59.596] EGL client APIs: OpenGL OpenGL_ES 
+[09:52:59.597] EGL extensions: EGL_EXT_buffer_age EGL_EXT_image_dma_buf_import
+           EGL_KHR_cl_event2 EGL_KHR_config_attribs EGL_KHR_create_context
+           EGL_KHR_fence_sync EGL_KHR_get_all_proc_addresses
+           EGL_KHR_gl_renderbuffer_image EGL_KHR_gl_texture_2D_image
+           EGL_KHR_gl_texture_cubemap_image EGL_KHR_image
+           EGL_KHR_image_base EGL_KHR_image_pixmap
+           EGL_KHR_no_config_context EGL_KHR_reusable_sync
+           EGL_KHR_surfaceless_context EGL_KHR_wait_sync
+           EGL_MESA_configless_context EGL_MESA_drm_image
+           EGL_MESA_image_dma_buf_export EGL_WL_bind_wayland_display
+[09:52:59.597] GL version: OpenGL ES 2.0 Mesa 17.1.1 (git-ca0a148)
+[09:52:59.598] GLSL version: OpenGL ES GLSL ES 1.0.16
+[09:52:59.598] GL vendor: Broadcom
+[09:52:59.598] GL renderer: Gallium 0.4 on VC4 V3D 2.1
+[09:52:59.598] GL extensions: GL_EXT_blend_minmax GL_EXT_multi_draw_arrays
+           GL_EXT_texture_format_BGRA8888
+           GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24
+           GL_OES_element_index_uint GL_OES_fbo_render_mipmap
+           GL_OES_mapbuffer GL_OES_rgb8_rgba8 GL_OES_stencil8
+           GL_OES_texture_3D GL_OES_texture_npot GL_OES_vertex_half_float
+           GL_OES_EGL_image GL_OES_depth_texture
+           GL_OES_packed_depth_stencil GL_EXT_texture_type_2_10_10_10_REV
+           GL_OES_get_program_binary GL_APPLE_texture_max_level
+           GL_EXT_discard_framebuffer GL_EXT_read_format_bgra
+           GL_EXT_frag_depth GL_NV_fbo_color_attachments
+           GL_OES_EGL_image_external GL_OES_EGL_sync
+           GL_OES_vertex_array_object GL_EXT_unpack_subimage
+           GL_NV_draw_buffers GL_NV_read_buffer GL_NV_read_depth
+           GL_NV_read_depth_stencil GL_NV_read_stencil GL_EXT_draw_buffers
+           GL_EXT_map_buffer_range GL_KHR_debug GL_OES_surfaceless_context
+           GL_EXT_separate_shader_objects
+           GL_EXT_compressed_ETC1_RGB8_sub_texture
+           GL_EXT_draw_elements_base_vertex GL_EXT_texture_border_clamp
+           GL_KHR_context_flush_control GL_OES_draw_elements_base_vertex
+           GL_OES_texture_border_clamp
+[09:52:59.599] GL ES 2 renderer features:
+           read-back format: BGRA
+           wl_shm sub-image to texture: yes
+           EGL Wayland extension: yes
+[09:52:59.601] event0  - [09:52:59.601] USB Keyboard: [09:52:59.601] is tagged by udev as: Keyboard
+[09:52:59.601] event0  - [09:52:59.601] USB Keyboard: [09:52:59.601] device is a keyboard
+[09:52:59.602] event1  - [09:52:59.602] USB Keyboard: [09:52:59.602] is tagged by udev as: Keyboard
+[09:52:59.602] event1  - [09:52:59.602] USB Keyboard: [09:52:59.602] device is a keyboard
+[09:52:59.603] event2  - [09:52:59.603] USB Optical Mouse: [09:52:59.603] is tagged by udev as: Mouse
+[09:52:59.603] event2  - [09:52:59.604] USB Optical Mouse: [09:52:59.604] device is a pointer
+[09:52:59.654] Registered plugin API 'weston_drm_output_api_v1' of size 12
+[09:52:59.655] Chosen EGL config details:
+           RGBA bits: 8 8 8 0
+           swap interval range: 0 - 0
+[09:52:59.655] Failed to initialize backlight
+[09:52:59.655] EDID data 'BNQ', 'BenQ GW2265', '87E05314019'
+[09:52:59.656] Output HDMI-A-1, (connector 24, crtc 65)
+           mode 1920x1080@60.0, preferred, current
+           mode 1920x1080@59.9
+           mode 1920x1080@60.0
+           mode 1920x1080@59.9
+           mode 1920x1080@50.0
+           mode 1920x1080@50.0
+           mode 1680x1050@59.9
+           mode 1600x900@60.0
+           mode 1280x1024@60.0
+           mode 1280x800@59.9
+           mode 1280x720@60.0
+           mode 1280x720@59.9
+           mode 1280x720@50.0
+           mode 1024x768@60.0
+           mode 800x600@60.3
+           mode 720x576@50.0
+           mode 720x576@50.0
+           mode 720x480@60.0
+           mode 720x480@59.9
+           mode 720x480@60.0
+           mode 720x480@59.9
+           mode 640x480@60.0
+           mode 640x480@59.9
+[09:52:59.656] Compositor capabilities:
+           arbitrary surface rotation: yes
+           screen capture uses y-flip: yes
+           presentation clock: CLOCK_MONOTONIC, id 1
+           presentation clock resolution: 0.000000001 s
+[09:52:59.657] Loading module '/usr/local/lib/weston/desktop-shell.so'
+[09:52:59.658] launching '/usr/local/libexec/weston-keyboard'
+[09:52:59.660] launching '/usr/local/libexec/weston-desktop-shell'
+could not load cursor 'dnd-move'
+could not load cursor 'dnd-copy'
+could not load cursor 'dnd-none'
+could not load cursor 'dnd-move'
+could not load cursor 'dnd-copy'
+could not load cursor 'dnd-none'
+xkbcommon: ERROR: couldn't find a Compose file for locale &quot;en_US.UTF-8&quot;
+could not create XKB compose table for locale 'en_US.UTF-8'.  Disabiling compose
+xkbcommon: ERROR: couldn't find a Compose file for locale &quot;en_US.UTF-8&quot;
+could not create XKB compose table for locale 'en_US.UTF-8'.  Disabiling compose
+could not load cursor 'dnd-move'
+could not load cursor 'dnd-copy'
+could not load cursor 'dnd-none'
+xkbcommon: ERROR: couldn't find a Compose file for locale &quot;en_US.UTF-8&quot;
+could not create XKB compose table for locale 'en_US.UTF-8'.  Disabiling compose
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>root@RPi3:/home/oopsmonk# glmark2-es2-wayland 
+=======================================================
+    glmark2 2014.03
+=======================================================
+    OpenGL Information
+    GL_VENDOR:     Broadcom
+    GL_RENDERER:   Gallium 0.4 on VC4 V3D 2.1
+    GL_VERSION:    OpenGL ES 2.0 Mesa 17.1.1 (git-ca0a148)
+=======================================================
+[build] use-vbo=false: FPS: 281 FrameTime: 3.559 ms
+[build] use-vbo=true: FPS: 303 FrameTime: 3.300 ms
+[texture] texture-filter=nearest: FPS: 375 FrameTime: 2.667 ms
+[texture] texture-filter=linear: FPS: 345 FrameTime: 2.899 ms
+[texture] texture-filter=mipmap: FPS: 289 FrameTime: 3.460 ms
+[shading] shading=gouraud: FPS: 199 FrameTime: 5.025 ms
+[shading] shading=blinn-phong-inf: FPS: 145 FrameTime: 6.897 ms
+[shading] shading=phong: FPS: 85 FrameTime: 11.765 ms
+[shading] shading=cel: FPS: 84 FrameTime: 11.905 ms
+[bump] bump-render=high-poly: FPS: 80 FrameTime: 12.500 ms
+[bump] bump-render=normals: FPS: 461 FrameTime: 2.169 ms
+[bump] bump-render=height: FPS: 390 FrameTime: 2.564 ms
+[effect2d] kernel=0,1,0;1,-4,1;0,1,0;: FPS: 161 FrameTime: 6.211 ms
+[effect2d] kernel=1,1,1,1,1;1,1,1,1,1;1,1,1,1,1;: FPS: 85 FrameTime: 11.765 ms
+[pulsar] light=false:quads=5:texture=false: FPS: 314 FrameTime: 3.185 ms
+[desktop] blur-radius=5:effect=blur:passes=1:separable=true:windows=4: FPS: 40 FrameTime: 25.000 ms
+[desktop] effect=shadow:windows=4: FPS: 121 FrameTime: 8.264 ms
+[buffer] columns=200:interleave=false:update-dispersion=0.9:update-fraction=0.5:update-method=map: FPS: 59 FrameTime: 16.949 ms
+[buffer] columns=200:interleave=false:update-dispersion=0.9:update-fraction=0.5:update-method=subdata: FPS: 59 FrameTime: 16.949 ms
+[buffer] columns=200:interleave=true:update-dispersion=0.9:update-fraction=0.5:update-method=map: FPS: 75 FrameTime: 13.333 ms
+[ideas] speed=duration: FPS: 269 FrameTime: 3.717 ms
+[jellyfish] &lt;default&gt;: FPS: 138 FrameTime: 7.246 ms
+[terrain] &lt;default&gt;: FPS: 5 FrameTime: 200.000 ms
+[shadow] &lt;default&gt;: FPS: 106 FrameTime: 9.434 ms
+[refract] &lt;default&gt;: FPS: 21 FrameTime: 47.619 ms
+[conditionals] fragment-steps=0:vertex-steps=0: FPS: 392 FrameTime: 2.551 ms
+[conditionals] fragment-steps=5:vertex-steps=0: FPS: 259 FrameTime: 3.861 ms
+[conditionals] fragment-steps=0:vertex-steps=5: FPS: 389 FrameTime: 2.571 ms
+[function] fragment-complexity=low:fragment-steps=5: FPS: 357 FrameTime: 2.801 ms
+[function] fragment-complexity=medium:fragment-steps=5: FPS: 48 FrameTime: 20.833 ms
+[loop] fragment-loop=false:fragment-steps=5:vertex-steps=5: FPS: 329 FrameTime: 3.040 ms
+[loop] fragment-steps=5:fragment-uniform=false:vertex-steps=5: FPS: 329 FrameTime: 3.040 ms
+[loop] fragment-steps=5:fragment-uniform=true:vertex-steps=5: FPS: 119 FrameTime: 8.403 ms
+=======================================================
+                  glmark2 Score: 203 
+=======================================================
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>root@RPi3:/home/oopsmonk# glmark2-es2-wayland --fullscreen
+=======================================================
+glmark2 2014.03
+=======================================================
+OpenGL Information
+GL_VENDOR:     Broadcom
+GL_RENDERER:   Gallium 0.4 on VC4 V3D 2.1
+GL_VERSION:    OpenGL ES 2.0 Mesa 17.1.1 (git-ca0a148)
+=======================================================
+[build] use-vbo=false: FPS: 183 FrameTime: 5.464 ms
+[build] use-vbo=true: FPS: 200 FrameTime: 5.000 ms
+[texture] texture-filter=nearest: FPS: 198 FrameTime: 5.051 ms
+[texture] texture-filter=linear: FPS: 192 FrameTime: 5.208 ms
+[texture] texture-filter=mipmap: FPS: 190 FrameTime: 5.263 ms
+[shading] shading=gouraud: FPS: 166 FrameTime: 6.024 ms
+[shading] shading=blinn-phong-inf: FPS: 162 FrameTime: 6.173 ms
+[shading] shading=phong: FPS: 134 FrameTime: 7.463 ms
+[shading] shading=cel: FPS: 128 FrameTime: 7.812 ms
+[bump] bump-render=high-poly: FPS: 77 FrameTime: 12.987 ms
+[bump] bump-render=normals: FPS: 202 FrameTime: 4.950 ms
+[bump] bump-render=height: FPS: 188 FrameTime: 5.319 ms
+[effect2d] kernel=0,1,0;1,-4,1;0,1,0;: FPS: 65 FrameTime: 15.385 ms
+[effect2d] kernel=1,1,1,1,1;1,1,1,1,1;1,1,1,1,1;: FPS: 33 FrameTime: 30.303 ms
+[pulsar] light=false:quads=5:texture=false: FPS: 173 FrameTime: 5.780 ms
+[desktop] blur-radius=5:effect=blur:passes=1:separable=true:windows=4: FPS: 16 FrameTime: 62.500 ms
+[desktop] effect=shadow:windows=4: FPS: 48 FrameTime: 20.833 ms
+[buffer] columns=200:interleave=false:update-dispersion=0.9:update-fraction=0.5:update-method=map: FPS: 51 FrameTime: 19.608 ms
+[buffer] columns=200:interleave=false:update-dispersion=0.9:update-fraction=0.5:update-method=subdata: FPS: 51 FrameTime: 19.608 ms
+[buffer] columns=200:interleave=true:update-dispersion=0.9:update-fraction=0.5:update-method=map: FPS: 51 FrameTime: 19.608 ms
+[ideas] speed=duration: FPS: 126 FrameTime: 7.937 ms
+[jellyfish] &lt;default&gt;: FPS: 70 FrameTime: 14.286 ms
+[terrain] &lt;default&gt;: FPS: 2 FrameTime: 500.000 ms
+[shadow] &lt;default&gt;: FPS: 84 FrameTime: 11.905 ms
+[refract] &lt;default&gt;: FPS: 17 FrameTime: 58.824 ms
+[conditionals] fragment-steps=0:vertex-steps=0: FPS: 205 FrameTime: 4.878 ms
+[conditionals] fragment-steps=5:vertex-steps=0: FPS: 122 FrameTime: 8.197 ms
+[conditionals] fragment-steps=0:vertex-steps=5: FPS: 209 FrameTime: 4.785 ms
+[function] fragment-complexity=low:fragment-steps=5: FPS: 176 FrameTime: 5.682 ms
+[function] fragment-complexity=medium:fragment-steps=5: FPS: 79 FrameTime: 12.658 ms
+[loop] fragment-loop=false:fragment-steps=5:vertex-steps=5: FPS: 171 FrameTime: 5.848 ms
+[loop] fragment-steps=5:fragment-uniform=false:vertex-steps=5: FPS: 172 FrameTime: 5.814 ms
+[loop] fragment-steps=5:fragment-uniform=true:vertex-steps=5: FPS: 58 FrameTime: 17.241 ms
+=======================================================
+          glmark2 Score: 121 
+=======================================================
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>#!/bin/bash 
+# 
+# Build script for wayland weston with DRM backdend 
+# RaspberryPi image: 2017-04-10-raspbian-jessie-lite 
+# By oopsmonk@gmail.com
+# 
+
+WLROOT=$PWD/weston-build/
+
+clone_or_update() {
+    repo=$1
+    dest=$(basename $repo)
+
+    cd ${WLROOT}
+    if [ $? != 0 ]; then
+    echo &quot;Error: Could not cd to ${WLROOT}.  Does it exist?&quot;
+    exit 1
+    fi
+    echo
+    echo checkout: $dest
+    if [ ! -d ${dest} ]; then
+    git clone ${repo} ${dest}
+    if [ $? != 0 ]; then
+        echo &quot;Error: Could not clone repository&quot;
+        exit 1
+    fi
+    fi
+    cd ${dest}
+    git checkout master
+    if [ $? != 0 ]; then
+    echo &quot;Error: Problem checking out master&quot;
+    exit 1
+    fi
+    git pull
+    if [ $? != 0 ]; then
+    echo &quot;Error: Could not pull from upstream&quot;
+    exit 1
+    fi
+
+    if [[ $2 ]]; then
+    branch=$2
+    git checkout ${branch} -b ${branch}_local
+    if [ $? != 0 ]; then
+        git checkout ${branch}_local
+    fi
+    fi
+    cd ${WLROOT}
+}
+
+do_deps(){
+    sudo apt-get update 
+    sudo apt-get install git autoconf libtool build-essential -y
+    # wayland
+    sudo apt-get install libffi-dev libexpat1-dev libxml2-dev -y
+    # libinput
+    sudo apt-get install libmtdev-dev libudev-dev libevdev-dev libwacom-dev -y
+    # drm
+    sudo apt-get install xutils-dev -y
+    # mesa
+    sudo apt-get install bison flex python-mako gettext -y
+    # weston 
+    sudo apt-get install libpam0g-dev libjpeg-dev -y
+}
+
+do_checkout(){
+    clone_or_update git://anongit.freedesktop.org/wayland/wayland 1.13.0
+    clone_or_update git://anongit.freedesktop.org/wayland/wayland-protocols 1.7
+    clone_or_update git://anongit.freedesktop.org/wayland/libinput 1.7.2
+    clone_or_update git://anongit.freedesktop.org/git/mesa/drm libdrm-2.4.81
+    clone_or_update git://anongit.freedesktop.org/mesa/mesa mesa-17.1.1
+    clone_or_update git://github.com/xkbcommon/libxkbcommon xkbcommon-0.7.1
+    clone_or_update git://anongit.freedesktop.org/pixman pixman-0.34.0
+    clone_or_update git://anongit.freedesktop.org/cairo 1.15.4
+    clone_or_update git://anongit.freedesktop.org/wayland/weston 2.0.0
+    clone_or_update https://github.com/glmark2/glmark2.git
+}
+
+gen(){                                                                                                                                                                    
+    pkg=$1
+    shift
+    echo
+    echo autogen $pkg
+    cd $WLROOT/$pkg
+    if [ ! -f &quot;.done_gen&quot; ]; then
+    echo &quot;./autogen.sh $*&quot;
+    ./autogen.sh $*
+    if [ $? != 0 ]; then
+        echo &quot;Configure Error.  Terminating&quot;
+        exit 1
+    fi
+    touch .done_gen
+    fi
+}
+
+compile(){                                                                                                                                                                
+    if [ ! -f &quot;.done_make&quot; ]; then
+    make -j4
+    if [ $? != 0 ]; then
+        echo &quot;Build Error.  Terminating&quot;
+        exit 1
+    fi
+    touch .done_make
+    echo build done...
+    fi
+
+    if [ ! -f &quot;.done_install&quot; ]; then
+    sudo make install
+    if [ $? != 0 ]; then
+        echo &quot;Install Error.  Terminating&quot;
+        exit 1
+    fi
+    touch .done_install
+    echo install done... 
+    fi
+}
+
+build_glmark2(){
+    cd ${WLROOT}/glmark2.git
+    if [ ! -f &quot;.done_gen&quot; ]; then
+    echo &quot;configure glmark2&quot; 
+    ./waf configure --with-flavors=drm-glesv2,wayland-glesv2
+    if [ $? != 0 ]; then
+        echo &quot;Configure Error.  Terminating&quot;
+        exit 1
+    fi
+    touch .done_gen
+    fi
+
+    if [ ! -f &quot;.done_make&quot; ]; then
+    ./waf
+    if [ $? != 0 ]; then
+        echo &quot;Build Error.  Terminating&quot;
+        exit 1
+    fi
+    touch .done_make
+    echo build done...
+    fi
+
+    if [ ! -f &quot;.done_install&quot; ]; then
+    sudo ./waf install
+    if [ $? != 0 ]; then
+        echo &quot;Install Error.  Terminating&quot;
+        exit 1
+    fi
+    touch .done_install
+    echo install done...
+    fi
+}
+
+do_build(){
+    gen wayland --disable-documentation
+    compile
+
+    gen wayland-protocols
+    compile
+
+    gen libinput
+    compile
+
+    gen drm
+    compile
+
+    # VC4_CFLAGS for 
+    # Error: selected processor does not support ARM mode `vst1.8 d0,[r5],r3’
+    export VC4_CFLAGS=&quot;-march=armv7-a -mfpu=neon&quot;
+    gen mesa \
+    --enable-gles2 --disable-glx --enable-gbm \
+    --enable-shared-glapi --with-gallium-drivers=vc4 \
+    --with-dri-drivers= --with-egl-platforms=wayland,drm \
+    --disable-dri3 
+    #--disable-dri3 VC4_CFLAGS=&quot;-march=armv7-a -mfpu=neon&quot;\' 
+    # mesa hack src/egl/main/egl.pc
+    sed -i '/^Libs:/ s/$/ -ldrm/' src/egl/main/egl.pc
+    unset VC4_CFLAGS
+    compile
+
+    gen libxkbcommon --disable-x11 --disable-docs
+    compile
+
+    # --disable-arm-iwmmxt for compiler error:
+    # internal compiler error: Max. number of generated reload insns per insn is achieved (90)
+    gen pixman --disable-arm-iwmmxt 
+    compile
+
+    gen cairo
+    compile
+
+    gen weston \
+    --with-cairo=image \
+    --enable-clients --enable-headless-compositor \
+    --enable-demo-clients-install --enable-drm-compositor \
+    --disable-xwayland --enable-setuid-install=no \
+    --disable-x11-compositor
+    compile
+
+    build_glmark2
+
+}
+
+pkg_uninstl(){
+    pkg=$1
+    shift
+    echo
+    echo uninstall $pkg
+    cd $WLROOT/$pkg
+    sudo make uninstall
+    rm .done_install
+}
+
+do_uninstall(){
+    pkg_uninstl wayland
+    pkg_uninstl wayland-protocols
+    pkg_uninstl libinput
+    pkg_uninstl drm
+    pkg_uninstl mesa
+    pkg_uninstl libxkbcommon
+    pkg_uninstl pixman
+    pkg_uninstl cairo
+    pkg_uninstl weston
+
+    cd $WLROOT/glmark2.git
+    sudo ./waf uninstall
+    rm .done_install
+}
+
+pkg_distc(){
+    pkg=$1
+    shift
+    echo
+    echo clean $pkg
+    cd $WLROOT/$pkg
+    git clean -dxf
+}
+
+do_distclean(){
+    pkg_distc wayland
+    pkg_distc wayland-protocols
+    pkg_distc libinput
+    pkg_distc drm
+    pkg_distc mesa
+    pkg_distc libxkbcommon
+    pkg_distc pixman
+    pkg_distc cairo
+    pkg_distc weston
+    pkg_distc glmark2.git
+}
+
+if [ &quot;$1&quot; = &quot;&quot; ]; then                                                                                                                                                       
+    echo &quot;$0 commands are:  &quot;
+    echo &quot;    all           &quot;
+    echo &quot;    deps          &quot;
+    echo &quot;    checkout      &quot;
+    echo &quot;    build         &quot;
+    echo &quot;    uninstall     &quot;
+    echo &quot;    distclean     &quot;
+else
+    if [ ! -d ${WLROOT} ]; then
+    mkdir -p ${WLROOT}
+    if [ $? != 0 ]; then
+        echo &quot;Error: Could not create dir ${WLROOT}&quot;
+        exit 1
+    fi
+    fi
+
+    while [ &quot;$1&quot; != &quot;&quot; ]
+    do
+    case &quot;$1&quot; in
+        all)
+        do_deps
+        do_checkout
+        do_build
+        ;;
+        deps)
+        do_deps
+        ;;
+        checkout)
+        do_checkout
+        ;;
+        build)
+        do_build
+        ;;
+        uninstall)
+        do_uninstall
+        ;;
+        distclean)
+        do_uninstall
+        do_distclean
+        ;;
+        *)
+        echo -e &quot;$0 \033[47;31mUnknown CMD: $1\033[0m&quot;
+        exit 1
+        ;;
+    esac
+    shift 1
+    done
+    cd $WLROOT
+fi
+
+
+exit 0
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Qrencode%E7%94%9F%E6%88%90%E4%BA%8C%E7%BB%B4%E7%A0%81%E5%B9%B6%E9%80%9A%E8%BF%87SDL%E6%98%BE%E7%A4%BA/" title="Qrencode生成二维码并通过SDL显示">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Rockchip%E4%B9%8BFFmpeg%E9%80%9A%E8%BF%87MPP%E7%A1%AC%E8%A7%A3%E5%B9%B6%E8%BD%AC%E5%82%A8/" title="Rockchip之FFmpeg通过MPP硬解并转储">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2019-06-08</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#pi-ref">pi <span>19</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之Context的理解及使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之Context的理解及使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Context</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Context在android中的作用不言而喻，当我们访问当前应用的资源，启动一个新的activity的时候
+
+都需要提供Context而这个Context到底是什么呢，这个问题好像很好回答又好像难以说清楚。
+
+从字面意思，Context的意思是“上下文”，或者也可以叫做环境、场景等，尽管如此，还是有点抽象。
+
+从类的继承来说，Context作为一个抽象的基类，它的实现子类有三种：Application、Activity和Service 
+
+那么这三种有没有区别呢？为什么通过任意的Context访问资源都得到的是同一套资源呢？
+
+getApplication和getApplicationContext有什么区别呢？应用中到底有多少个Context呢？
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Android之Context的理解及使用/1.gif" alt="" width="600"></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>什么是Context</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Context是一个抽象基类，我们通过它访问当前包的资源（getResources、getAssets）和
+
+启动其他组件（Activity、Service、Broadcast）以及得到各种服务（getSystemService）
+
+当然，通过Context能得到的不仅仅只有上述这些内容。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>对Context的理解可以来说：Context提供了一个应用的运行环境，在Context的大环境里，应用才可以访问资源
+
+才能完成和其他组件、服务的交互，Context定义了一套基本的功能接口，我们可以理解为一套规范
+
+而Activity和Service是实现这套规范的子类，这么说也许并不准确
+
+因为这套规范实际是被ContextImpl类统一实现的，Activity和Service只是继承并有选择性地重写了某些规范的实现。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>可以看到 Activity 继承 Context 向上转型，获取父类对象</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Activity
+public class MainActivity extends Activity {
+
+    // 标签
+    public String ContextLabel = &quot;Hello World&quot;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // FragmentTransaction
+        replaceFragment(R.id.main, new MainFragment());
+    }
+}
+
+// Fragment
+public class MainFragment extends Fragment {
+
+    // MainActivity
+    private MainActivity activity = null;
+
+    // 构造   
+    public MainFragment() {
+        // 实际情况
+        activity = (MainActivity) getActivity()
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // 这样就可以获取父类对象内容了
+        // activity.ContextLabel
+    }
+}
+
+// BaseAdapter
+class EvolverBaseAdapter extends BaseAdapter {
+
+    // 上下文
+    private Context context;
+
+    // Activity
+    public MainActivity activity = null;
+
+    // 构造
+    public EvolverBaseAdapter(Context context, ArrayList&lt;EvolverData&gt; evolver) {
+        this.context = context;
+        activity = (MainActivity) context;
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 定义了一个 TextView 并且传入 MainActivity.this
+// 由于 MainActivity.this 是继承 Activity 继承 Context
+// 所以 传入 MainActivity.this 就是传入 Context
+TextView text = new TextView(MainActivity.this);
+
+// 设置内容，则是通过 Context 找到 getResources 设置
+text.setText(R.string.app_name);
+
+// TextView 构造
+public TextView(Context context) {
+    this(context, null);
+}
+
+// TextView setText 
+@android.view.RemotableViewMethod
+public final void setText(int resid) {
+    setText(getContext().getResources().getText(resid));
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E5%A4%9A%E7%82%B9%E8%A7%A6%E6%91%B8%E5%9D%90%E6%A0%87%E8%8E%B7%E5%8F%96/" title="Android之多点触摸坐标获取">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E5%90%AF%E5%8A%A8%E6%B4%BB%E5%8A%A8%E7%9A%84%E6%9C%80%E4%BD%B3%E5%86%99%E6%B3%95/" title="Android之启动活动的最佳写法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-05-05</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

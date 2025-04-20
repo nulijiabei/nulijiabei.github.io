@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>UBUNTU之RK3399编译QT与WebEngine</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>UBUNTU之RK3399编译QT与WebEngine </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>UBUNTU之RK3399编译QT与WebEngine</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 技术文档 ...
+https://wiki.qt.io/RaspberryPi2EGLFS
+https://wiki.qt.io/RaspberryPiWithWebEngine
+
+// 打开插件 DEBUG
+export QT_DEBUG_PLUGINS=1
+
+// Qt WebEngine 禁用 GPU 线程 ...
+export QTWEBENGINE_DISABLE_GPU_THREAD=1
+/usr/local/bin/simplebrowser -platform xcb
+/usr/local/bin/simplebrowser -platform eglfs
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// QT 源码
+qt-everywhere-src-5.14.2.tar.xz
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 编译环境 
+sudo apt-get install bison build-essential gperf flex ruby python libasound2-dev libbz2-dev libcap-dev
+libcups2-dev libdrm-dev libegl1-mesa-dev libgcrypt11-dev libnss3-dev libpci-dev libpulse-dev libudev-dev
+libxtst-dev gyp ninja-build libglu1-mesa-dev libfontconfig1-dev libx11-xcb-dev libicu-dev 
+libinput-dev libts-dev libxcb-xinerama0-dev libgles2-mesa-dev libgl1-mesa-dev libxcomposite-dev libxcursor-dev
+libevent-dev libjsoncpp-dev libwebp-dev libsnappy-dev libopus-dev libxml2-dev libxslt-dev liblcms2-dev libminizip-dev 
+libtiff-dev libpulse-dev libxrandr-dev
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Build Qt Base 
+git clone git://code.qt.io/qt/qtbase.git
+git checkout 5.13.1
+./configure -release -opengl es2 -opensource -confirm-license -nomake tests -nomake examples -verbose -no-pch -eglfs -xcb
+make
+make install
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Build Qt Declarative
+git clone git://code.qt.io/qt/qtdeclarative.git
+git checkout 5.13.1
+qmake
+make 
+make install
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Build Qt WebEngine
+git clone git://code.qt.io/qt/qtwebengine.git
+git submodule init
+git checkout 5.13.1
+git submodule update
+qmake
+    make
+    make install
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 注意：移除 config.cache 可重新 configure 或 qmake ...
+// ninja -j 2 -v  -C ../qtwebengine/src/core/release QtWebEngineCore
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 测试 ...
+/root/qtwebengine/examples/webenginewidgets/simplebrowser
+qmake
+make install
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Linux%E4%B9%8BDRM%E6%88%AA%E5%9B%BE%E6%96%B9%E6%A1%88/" title="Linux之DRM截图方案">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Gstreamer%E4%B9%8B%E5%BA%94%E7%94%A8%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5/" title="Gstreamer之应用项目实践">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-10-20</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之内部存储与外部存储的使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之内部存储与外部存储的使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>内部存储</h3>
+
+<blockquote>
+</blockquote>
+
+<p>Android提供了openFileOutput和openFileInput方法读取设备上的文件</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>    //确定要操作文件的文件名
+    String FILE_NAME = &quot;tempfile.tmp&quot;;
+
+    // 初始化，如果调用FileOutputStream时指定的文件不存在，
+    // Android会自动创建它（在data/包名/files/目录下会创建txtme.txt文件)
+    // 在默认情况下，写入的时候会覆盖原文件内容，
+    // 如果想把新写入的内容附加到原文件内容后，则应指定其模式为Context.MODE_APPEND
+
+    // MODE_PRIVATE的文件是应用程序私有的 ，
+    // MODE_WORLD_READABLE则所有应用程序都可以访问的，
+    // MODE_WORLD_WRITEABLE所以应用程序都可以写
+
+    // 创建写入流
+    try {
+        FileOutputStream fos = openFileOutput(&quot;nljb&quot; , Context.MODE_PRIVATE);
+        fos.write(&quot;nljb&quot;.toString().getBytes());
+        fos.flush();
+        fos.close();
+    } catch (java.io.IOException e) {
+        e.printStackTrace();
+    }
+
+    // 创建读取流
+    try {
+        FileInputStream fis = openFileInput(&quot;nljb&quot;);
+        byte[] bytes = new byte[fis.available()];
+        fis.read(bytes);
+        fis.close();
+    } catch (java.io.IOException e) {
+        e.printStackTrace();
+    }
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>外部存储</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 写入文件
+File dir = Environment.getExternalStorageDirectory();
+File file = new File(dir, &quot;nljb&quot;);
+Log.i(&quot;INFO&quot;, dir.toString());
+try {
+    if (!file.exists())
+    {
+    file.createNewFile();
+    }
+    FileOutputStream fos = new FileOutputStream(file);
+    fos.write(&quot;nljb&quot;.toString().getBytes());
+    fos.flush();
+    fos.close();
+} catch (java.io.IOException e) {
+    e.printStackTrace();
+}
+
+// 读取文件
+File dir = Environment.getExternalStorageDirectory();
+File file = new File(dir, &quot;nljb&quot;);
+try {
+    if (!file.exists())
+    {
+    file.createNewFile();
+    }
+    FileInputStream fis = openFileInput(file);
+    byte[] bytes = new byte[fis.available()];
+    fis.read(bytes);
+    fis.close();
+} catch (java.io.IOException e) {
+    e.printStackTrace();
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h1>Assets 目录介绍</h1>
+
+<blockquote>
+</blockquote>
+
+<p>Assets 这个目录保存的文件可以打包在程序里</p>
+
+<p>/res和/assets的不同点是，android不为/assets下的文件生成ID。</p>
+
+<p>如果使用/assets下的文件，需要指定文件的路径和文件名。</p>
+
+<blockquote>
+</blockquote>
+
+<p>android中的资源文件，这些资源文件主要分为两类，一种出于asset目录下，称为原生文件</p>
+
+<p>这类文件在被打包成apk文件时是不会进行压缩的；</p>
+
+<p>另一类则是res下的文件，这类文件在打包成apk文件时，会进行小内存优化</p>
+
+<pre><code>AssetManager assetManager = this.getResources().getAsset();
+</code></pre>
+
+<p>在activity中可以通过如下方法进行访问</p>
+
+<pre><code>InputStream inputStream = Resources.openRawResource(int id);
+</code></pre>
+
+<p>asset和res下的文件都是只能读不能写</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BCamera%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之Camera使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BSharedPreferences%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之SharedPreferences使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-19</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

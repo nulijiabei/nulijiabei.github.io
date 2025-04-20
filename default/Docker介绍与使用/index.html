@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Docker介绍与使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Docker介绍与使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Docker 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>docker容器可以理解为在沙盒中运行的进程。这个沙盒包含了该进程运行所必须的资源，包括文件系统、系统类库、shell 环境等等。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>但这个沙盒默认是不会运行任何程序的。你需要在沙盒中运行一个进程来启动某一个容器。这个进程是该容器的唯一进程，所以当该进程结束的时候，容器也会完全的停止。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>Docker是一种Linux容器管理引擎</li>
+<li>Docker(<a href="https://www.docker.com">https://www.docker.com</a>)</li>
+<li>Github(<a href="https://github.com/docker/docker">https://github.com/docker/docker</a>)</li>
+<li>Go语言编写</li>
+<li>适用于Linux平台（仅适用）</li>
+<li>Docker是一种实现打包、输送、运行任意应用的容器解决方案</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Docker提供隔离的运行环境</em></strong></p>
+
+<ul>
+<li>文件系统隔离</li>
+<li>网络隔离</li>
+<li>进程号隔离</li>
+<li>进程间通信隔离</li>
+</ul>
+
+<p><strong><em>Docker容器受到的资源限制</em></strong></p>
+
+<ul>
+<li>CPU计算资源</li>
+<li>内存资源</li>
+<li>磁盘I/O资源等</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Docker 体验</h3>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>Docker Registry 提供进行下载</li>
+<li>Docker Hub 是 Docker 官方支持的镜像仓库</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>Docker Hub Mirror</li>
+<li>缓存 Docker Hub 的镜像</li>
+<li>加速 Docker Hub 镜像的获取</li>
+<li>推荐使用DaoCloud加速器</li>
+<li><a href="https://dashboard.daocloud.io/mirror">https://dashboard.daocloud.io/mirror</a></li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>配置Docker加速器</em></strong></p>
+
+<ul>
+<li>/etc/default/docker (vi)</li>
+<li>DOCKER_OPTS=&ldquo;&ndash;dns 8.8.8.8 &ndash;dns 8.8.4.4&rdquo;</li>
+<li>在后面添加 &ndash;registry-mirror 阿里云 &hellip;</li>
+<li>重启 service docker restart</li>
+<li>下载镜像 docker pull ubuntu:14.04</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>运行Docker容器</em></strong></p>
+
+<ul>
+<li>系统容器：Ubuntu、CentOS、Debian等操作系统</li>
+<li>应用容器：Ghsot应用、2048应用容器，多为（Web)</li>
+<li>存储容器：MySQL、MongoDB、Redis容器</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>查看本地镜像 docker images</li>
+<li>运行本地镜像 docker run -it ubuntu:14.04 /bin/bash</li>
+<li>后台运行镜像 docker run -d -P ..</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>保存Docker容器</em></strong></p>
+
+<ul>
+<li>运行容器并进行修改 docker run it centos /bin/bash</li>
+<li>找到修改的容器 docker ps -l (-a)</li>
+<li>保存容器的修改 docker commit 698 centos-change</li>
+<li>容器ID 698, 镜像名称：centos-change</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Docekr 常用命令 &hellip;</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查看容器的root用户密码
+docker logs &lt;容器名orID&gt; 2&gt;&amp;1 | grep '^User: ' | tail -n1
+
+因为docker容器启动时的root用户的密码是随机分配的。
+通过这种方式就可以得到redmine容器的root用户的密码了。
+
+// 查看容器日志
+docker logs -f &lt;容器名orID&gt;
+
+// 查看正在运行的容器
+docker ps
+
+// 为查看所有的容器，包括已经停止的
+docker ps -a 
+
+// 删除所有容器
+docker rm $(docker ps -a -q)
+
+// 删除单个容器
+docker rm &lt;容器名orID&gt;
+
+// 停止、启动、杀死一个容器
+docker stop &lt;容器名orID&gt;
+docker start &lt;容器名orID&gt;
+docker kill &lt;容器名orID&gt;
+
+// 查看所有镜像
+docker images
+
+// 删除所有镜像
+docker rmi $(docker images | grep none | awk '{print $3}' | sort -r)
+
+// 运行一个新容器，同时为它命名、端口映射、文件夹映射。以redmine镜像为例
+docker run --name redmine -p 9003:80 -p 9023:22 -d -v &lt;接下行&gt;
+/var/redmine/files:/redmine/files -v &lt;接下行&gt;
+/var/redmine/mysql:/var/lib/mysql sameersbn/redmine
+
+// 一个容器连接到另一个容器
+docker run -i -t --name sonar -d -link &lt;接下行&gt;
+mmysql:db tpires/sonar-server sonar
+
+// 容器连接到mmysql容器，并将mmysql容器重命名为db。
+// 这样，sonar容器就可以使用db的相关的环境变量了。
+
+
+// 拉取镜像
+docker pull &lt;镜像名:tag&gt;
+
+// 如
+docker pull sameersbn/redmine:latest
+
+// 当需要把一台机器上的镜像迁移到另一台机器的时候，需要保存镜像与加载镜像。
+
+// 机器 A
+docker save busybox-1 &gt; /home/save.tar
+
+// 使用scp将save.tar拷到机器B上，然后：
+docker load &lt; /home/save.tar
+
+// 构建自己的镜像
+docker build -t &lt;镜像名&gt; &lt;Dockerfile路径&gt;
+
+// 如Dockerfile在当前路径：
+docker build -t xx/gitlab .
+
+// 重新查看container的stdout
+# 启动top命令，后台运行
+$ ID=$(sudo docker run -d ubuntu /usr/bin/top -b)
+# 获取正在running的container的输出
+$ sudo docker attach $ID
+$ sudo docker stop $ID
+
+// 后台运行(-d)、并暴露端口(-p)
+docker run -d -p 127.0.0.1:33301:22 centos6-ssh
+
+// 从container中拷贝文件出来
+sudo docker cp 7bb0e258aefe:/etc/debian_version .
+
+// 删除 none 镜像
+docker rmi $(docker images | awk '/^&lt;none&gt;/ { print $3 }')
+// 删除失败, 需先停止
+docker ps -a | grep &quot;Exited&quot; | awk '{print $1 }'|xargs docker stop
+docker ps -a | grep &quot;Exited&quot; | awk '{print $1 }'|xargs docker rm
+// ... 通过 ID 删除 ...
+docker images|grep none|awk '{print $3 }'|xargs docker rmi
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/The-Docker-Book/" title="The Docker Book">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/AutoIt%E7%9A%84%E4%BB%8B%E7%BB%8D%E4%B8%8E%E4%BD%BF%E7%94%A8/" title="AutoIt的介绍与使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-04-01</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#docker-ref">docker <span>2</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>OrangePi之Android_7.0获取Root权限</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>OrangePi之Android_7.0获取Root权限 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>OrangePi之Android_7.0获取Root权限</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>准备工作：
+
+  1. Orange Pi PC H3 // 开发板一块
+  2. OrangePi_Pc_One_Android_7.0_beta_v1.1.img // 系统镜像 Android 7.0
+    http://www.orangepi.cn/downloadresourcescn/
+  3. Magisk Manager v7.5.1 // 下载  Magisk Manager APK
+    https://github.com/topjohnwu/Magisk/releases 
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>开始：
+
+  1. OrangePi_Pc_One_Android_7.0_beta_v1.1.img 刷入 Orange Pi PC H3 并启动 ...
+  2. 开发者选项 -&gt; 开启 USB调试 and USB0切换到设备模式，并且 usb 连接到电脑 ...
+  3. adb install MagiskManager-v7.5.1.apk 安装 Magisk Manager APK ...
+  4. adb shell -&gt; dd if=/dev/block/by-name/boot of=/sdcard/boot.img 克隆引导镜像 ...
+  5. adb pull /sdcard/boot.img boot.img 拷贝引导镜像到本地 ...
+  6. 复制 boot.img 到u盘，并将u盘插入到 Orange Pi PC H3 上 ...
+  7. 打开 Magisk Manager 选择 Magisk 安装 -&gt; 选择并修补一个文件 -&gt; 选择u盘中的 boot.img ...
+  8. 完成后 /storage/emulated/0/Download/magisk_patched.img 文件拷贝到u盘中备份 ...
+  9. 回写 dd if=/sdcard/MagiskManager/magisk_patched.img of=/dev/block/by-name/boot
+  10. 完成后重启即可 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>翻墙：
+
+  1. Magisk Manager 侧边栏 -&gt; 设置 -&gt; 更新通道 -&gt; 自定义 
+  通道1：http://101.133.237.130/Magisk/Magisk_Latest.json（基本和官方同步）
+  通道2：http://magisk.tsyinpin.com/canary.json（美化测试版面具）
+  通道3：https://qianyegroup.gitee.io/magiskbuilds/updates/custom.json (备用通道)
+  通道4: https://api.pearik.com/magisk/stable.json
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>{
+  &quot;app&quot;: {
+    &quot;version&quot;: &quot;7.4.0&quot;,
+    &quot;versionCode&quot;: &quot;253&quot;,
+    &quot;link&quot;: &quot;http://101.133.237.130/Magisk/Magisk_APP/MagiskManager-v7.4.0.apk&quot;,
+    &quot;note&quot;: &quot;https://github.com/topjohnwu/Magisk/blob/manager-v7.4.0/app/src/main/res/raw/changelog.md&quot;
+  },
+  &quot;uninstaller&quot;: {
+    &quot;link&quot;: &quot;https://github.com/topjohnwu/Magisk/releases/download/v19.3/Magisk-uninstaller-20190604.zip&quot;
+  },
+  &quot;magisk&quot;: {
+    &quot;version&quot;: &quot;20.4&quot;,
+    &quot;versionCode&quot;: &quot;20400&quot;,
+    &quot;link&quot;: &quot;http://101.133.237.130/Magisk/Magisk_zip/Magisk-v20.4.zip&quot;,
+    &quot;md5&quot;: &quot;9503fc692e03d60cb8897ff2753c193f&quot;
+  },
+  &quot;message&quot;:{
+    &quot;Power By&quot;:&quot;Mintimate&quot;,
+    &quot;Address&quot;:&quot;https://www.mintimate.cn&quot;
+  }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>测试：
+
+    static boolean checkRootExecutable() {
+
+    Process process = null;
+    DataOutputStream os = null;
+    try {
+        process = Runtime.getRuntime().exec(&quot;su&quot;);
+        os = new DataOutputStream(process.getOutputStream());
+        os.writeBytes(&quot;exit\n&quot;);
+        os.flush();
+        int exitValue = process.waitFor();
+        if (exitValue == 0) {
+        return true;
+        } else {
+        return false;
+        }
+    } catch (Exception e) {
+        Log.d(&quot;*** DEBUG ***&quot;, &quot;Unexpected error - Here is what I know: &quot; + e.getMessage());
+        return false;
+    } finally {
+        try {
+        if (os != null) {
+            os.close();
+        }
+        process.destroy();
+        } catch (Exception e) {
+        e.printStackTrace();
+        }
+    }
+    }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 获取 ROOT 权限后就可以对只读分区进行文件修改
+# /sbin/magisk --unlock-blocks
+# mount -o rw,remount -t ext4 /sbin/.magisk/block/system_root /sbin/adbd
+# mount -o rw,remount -t ext4 /sbin/.magisk/block/system_root  /sbin/.magisk/mirror/system_root
+# mount -o rw,remount -t ext4 /sbin/.magisk/block/system_root /sbin/healthd
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/OrangePi%E4%B9%8BRK%E7%B3%BB%E5%88%97%E4%B8%BB%E6%9D%BF%E8%87%AA%E5%AE%9A%E4%B9%89DRM%E5%88%86%E8%BE%A8%E7%8E%87/" title="OrangePi之RK系列主板自定义DRM分辨率">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux%E4%B9%8BFFmpeg%E4%BD%BF%E7%94%A8VAAPI%E7%A1%AC%E8%A7%A3H264/" title="Linux之FFmpeg使用VAAPI硬解H264">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-05-12</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

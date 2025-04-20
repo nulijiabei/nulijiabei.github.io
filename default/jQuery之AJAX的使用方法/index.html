@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>jQuery之AJAX的使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>jQuery之AJAX的使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>jQuery之AJAX的使用方法</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>什么是 AJAX？
+AJAX = 异步 JavaScript 和 XML（Asynchronous JavaScript and XML）。
+简短地说，在不重载整个网页的情况下，AJAX 通过后台加载数据，并在网页上进行显示。
+使用 AJAX 的应用程序案例：谷歌地图、腾讯微博、优酷视频、人人网等等。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>通过 jQuery AJAX 方法，您能够使用 HTTP Get 和 HTTP Post
+从远程服务器上请求文本、HTML、XML 或 JSON
+同时您能够把这些外部数据直接载入网页的被选元素中。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>jQuery load()</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>load() 方法从服务器加载数据，并把返回的数据放入被选元素中。</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>$(selector).load(URL,data,callback);
+</code></pre>
+
+<ul>
+<li>必需的 URL 参数规定您希望加载的 URL。</li>
+<li>可选的 data 参数规定与请求一同发送的查询字符串键/值对集合。</li>
+<li>可选的 callback 参数是 load() 方法完成后所执行的函数名称。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 这是示例文件（&quot;demo_test.txt&quot;）的内容：
+&lt;h2&gt;jQuery and AJAX is FUN!!!&lt;/h2&gt;
+&lt;p id=&quot;p1&quot;&gt;This is some text in a paragraph.&lt;/p&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下面的例子会把文件 &quot;demo_test.txt&quot; 的内容加载到指定的 &lt;div&gt; 元素中：
+&lt;script&gt;
+$(document).ready(function(){
+  $(&quot;#btn1&quot;).click(function(){
+    $('#test').load('/example/jquery/demo_test.txt');
+  })
+})
+&lt;/script&gt;
+&lt;h3 id=&quot;test&quot;&gt;请点击下面的按钮，通过 jQuery AJAX 改变这段文本。&lt;/h3&gt;
+&lt;button id=&quot;btn1&quot; type=&quot;button&quot;&gt;获得外部的内容&lt;/button&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 也可以把 jQuery 选择器添加到 URL 参数。
+// 下面的例子把 &quot;demo_test.txt&quot; 文件中 id=&quot;p1&quot; 的元素的内容，加载到指定的 &lt;div&gt; 元素中：
+$(document).ready(function(){
+  $(&quot;button&quot;).click(function(){
+    $(&quot;#div1&quot;).load(&quot;/example/jquery/demo_test.txt #p1&quot;);
+  });
+});
+&lt;div id=&quot;div1&quot;&gt;&lt;h2&gt;使用 jQuery AJAX 来改变文本&lt;/h2&gt;&lt;/div&gt;
+&lt;button&gt;获得外部内容&lt;/button&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 可选的 callback 参数规定当 load() 方法完成后所要允许的回调函数。回调函数可以设置不同的参数：
+// responseTxt - 包含调用成功时的结果内容
+// statusTXT - 包含调用的状态
+// xhr - 包含 XMLHttpRequest 对象
+$(document).ready(function(){
+  $(&quot;button&quot;).click(function(){
+    $(&quot;#div1&quot;).load(&quot;/example/jquery/demo_test.txt&quot;,function(responseTxt,statusTxt,xhr){
+      if(statusTxt==&quot;success&quot;)
+        alert(&quot;外部内容加载成功！&quot;);
+      if(statusTxt==&quot;error&quot;)
+        alert(&quot;Error: &quot;+xhr.status+&quot;: &quot;+xhr.statusText);
+    });
+  });
+});
+&lt;div id=&quot;div1&quot;&gt;&lt;h2&gt;使用 jQuery AJAX 来改变文本&lt;/h2&gt;&lt;/div&gt;
+&lt;button&gt;获得外部内容&lt;/button&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>HTTP 请求：GET vs. POST</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>两种在客户端和服务器端进行请求-响应的常用方法是：GET 和 POST。</em></strong></p>
+
+<ul>
+<li>GET - 从指定的资源请求数据</li>
+<li>POST - 向指定的资源提交要处理的数据</li>
+<li>GET 基本上用于从服务器获得（取回）数据。注释：GET 方法可能返回缓存数据。</li>
+<li>POST 也可用于从服务器获取数据。不过，POST 方法不会缓存数据，并且常用于连同请求一起发送数据。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>jQuery get()</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>$.get() 方法通过 HTTP GET 请求从服务器上请求数据。</em></strong></p>
+
+<pre><code>$.get(URL,callback);
+</code></pre>
+
+<ul>
+<li>必需的 URL 参数规定您希望请求的 URL。</li>
+<li>可选的 callback 参数是请求成功后所执行的函数名。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下面的例子使用 $.get() 方法从服务器上的一个文件中取回数据：
+// $.get() 的第一个参数是我们希望请求的 URL（&quot;demo_test.asp&quot;）。
+// 第二个参数是回调函数。第一个回调参数存有被请求页面的内容，第二个回调参数存有请求的状态。
+$(document).ready(function(){
+  $(&quot;button&quot;).click(function(){
+    $.get(&quot;/example/jquery/demo_test.asp&quot;,function(data,status){
+      alert(&quot;数据：&quot; + data + &quot;\n状态：&quot; + status);
+    });
+  });
+});
+&lt;button&gt;向页面发送 HTTP GET 请求，然后获得返回的结果&lt;/button&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>jQuery $.post()</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>$.post() 方法通过 HTTP POST 请求从服务器上请求数据。</em></strong></p>
+
+<pre><code>$.post(URL,data,callback);
+</code></pre>
+
+<ul>
+<li>必需的 URL 参数规定您希望请求的 URL。</li>
+<li>可选的 data 参数规定连同请求发送的数据。</li>
+<li>可选的 callback 参数是请求成功后所执行的函数名。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下面的例子使用 $.post() 连同请求一起发送数据：
+// $.post() 的第一个参数是我们希望请求的 URL (&quot;demo_test_post.asp&quot;)。
+// 然后我们连同请求（name 和 city）一起发送数据。
+// &quot;demo_test_post.asp&quot; 中的 ASP 脚本读取这些参数，对它们进行处理，然后返回结果。
+// 第三个参数是回调函数。第一个回调参数存有被请求页面的内容，而第二个参数存有请求的状态。
+$(document).ready(function(){
+  $(&quot;button&quot;).click(function(){
+    $.post(&quot;/example/jquery/demo_test_post.asp&quot;,
+    {
+      name:&quot;Donald Duck&quot;,
+      city:&quot;Duckburg&quot;
+    },
+    function(data,status){
+      alert(&quot;数据：&quot; + data + &quot;\n状态：&quot; + status);
+    });
+  });
+});
+&lt;button&gt;向页面发送 HTTP POST 请求，并获得返回的结果&lt;/button&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>jQuery $.getJSON()</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>jQuery.getJSON(url,data,success(data,status,xhr))
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>url   必需。规定将请求发送的哪个 URL。</li>
+<li>data  可选。规定连同请求发送到服务器的数据。</li>
+<li>success(data,status,xhr) 可选。规定当请求成功时运行的函数。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>success(data,status,xhr) 额外的参数：</li>
+<li>response - 包含来自请求的结果数据</li>
+<li>status - 包含请求的状态</li>
+<li>xhr - 包含 XMLHttpRequest 对象</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 例子
+$(document).ready(function(){
+  $(&quot;button&quot;).click(function(){
+    $.getJSON(&quot;/example/jquery/demo_ajax_json.js&quot;,function(result){
+      $.each(result, function(i, field){
+        $(&quot;p&quot;).append(field + &quot; &quot;);
+      });
+    });
+  });
+});
+&lt;button&gt;获得 JSON 数据&lt;/button&gt;
+&lt;p&gt;&lt;/p&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 从 Flickr JSONP API 载入 4 张最新的关于猫的图片：
+// HTML 代码：
+&lt;div id=&quot;images&quot;&gt;&lt;/div&gt;
+// jQuery 代码：
+$.getJSON(&quot;http://api.flickr.com/services/feeds/photos_public.gne?
+tags=cat&amp;tagmode=any&amp;format=json&amp;jsoncallback=?&quot;, function(data){
+  $.each(data.items, function(i,item){
+    $(&quot;&lt;img/&gt;&quot;).attr(&quot;src&quot;, item.media.m).appendTo(&quot;#images&quot;);
+    if ( i == 3 ) return false;
+  });
+});
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 从 test.js 载入 JSON 数据，附加参数，显示 JSON 数据中一个 name 字段数据：
+$.getJSON(&quot;test.js&quot;, { name: &quot;John&quot;, time: &quot;2pm&quot; }, function(json){
+  alert(&quot;JSON Data: &quot; + json.users[3].name);
+});
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>Evolver 项目所使用的 getJson()</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>$(document).ready(function () {
+    $(&quot;#scan_btn&quot;).click(function (e) {
+        requestJSON(&quot;/api/get/report&quot;, {&quot;mid&quot;: $(&quot;#scan_mid&quot;).val()});
+    });
+    var today = $(&quot;#today&quot;);
+    var aweek = $(&quot;#aweek&quot;);
+    var li_today = $(&quot;#li_today&quot;);
+    var li_aweek = $(&quot;#li_aweek&quot;);
+    today.click(function (e) {
+        li_today.removeClass();
+        li_aweek.removeClass();
+        li_today.addClass(&quot;active&quot;);
+        requestJSON(&quot;/api/get/report&quot;, {&quot;date&quot;: &quot;today&quot;});
+    });
+    aweek.click(function (e) {
+        li_today.removeClass();
+        li_aweek.removeClass();
+        li_aweek.addClass(&quot;active&quot;);
+        requestJSON(&quot;/api/get/report&quot;, {&quot;date&quot;: &quot;aweek&quot;});
+    });
+    today.click();
+});
+
+function requestJSON(addr, data) {
+    $(&quot;#lines_tbody&quot;).html(&quot;&quot;);
+    // 请求JSON数据
+    $.getJSON(addr, data, function (json) {
+        // 打印JSON数据
+        console.log(JSON.stringify(json));
+        if (json.ok) {
+            var data = json.data;
+            $(&quot;#stats_danger&quot;).text(&quot;异常&quot; + &quot;（&quot; + data.stats.danger + &quot;）&quot;);
+            $(&quot;#stats_warning&quot;).text(&quot;警告&quot; + &quot;（&quot; + data.stats.warning + &quot;）&quot;);
+            $(&quot;#stats_default&quot;).text(&quot;正常&quot; + &quot;（&quot; + data.stats.default + &quot;）&quot;);
+            var lines = data.lines;
+            $.each(lines, function (index, content) {
+                var class_tr = '&lt;tr&gt;';
+                var class_lv = &quot;正常状态&quot;;
+                var class_tm;
+                if (content.level == 1) {
+                    class_tr = '&lt;tr class=&quot;warning&quot;&gt;';
+                    class_lv = &quot;警告状态&quot;;
+                }
+                if (content.level == 2) {
+                    class_tr = '&lt;tr class=&quot;danger&quot;&gt;';
+                    class_lv = &quot;异常状态&quot;;
+                }
+                if (content.timeout) {
+                    class_tm = '&lt;span class=&quot;label label-warning&quot;&gt;超时&lt;/span&gt;';
+                } else {
+                    class_tm = '&lt;span class=&quot;label label-success&quot;&gt;有效&lt;/span&gt;';
+                }
+                if (content.process.xplay == &quot;&quot;) {
+                    content.process.xplay = &quot;error&quot;;
+                }
+                if (content.process.peanut == &quot;&quot;) {
+                    content.process.peanut = &quot;error&quot;;
+                }
+                if (content.process.watchdog == &quot;&quot;) {
+                    content.process.watchdog = &quot;error&quot;;
+                }
+                if (content.process.x == &quot;&quot;) {
+                    content.process.x = &quot;error&quot;;
+                }
+                $(&quot;#lines_tbody&quot;).append(
+                    class_tr +
+                    &quot;&lt;td&gt;&quot; + content.id + &quot;&lt;/td&gt;&quot; +
+                    &quot;&lt;td&gt;&quot; + content.proxy + &quot;&lt;/td&gt;&quot; +
+                    '&lt;td class=&quot;dropdown&quot;&gt;' +
+                    '&lt;a class=&quot;dropdown-toggle&quot; data-toggle=&quot;dropdown&quot; href=&quot;#&quot;&gt;' +
+                    class_lv +
+                    '&lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;' +
+                    '&lt;/a&gt;' +
+                    '&lt;ul class=&quot;dropdown-menu&quot; aria-describedby=&quot;dropdownMenu1&quot;&gt;' +
+                    '&lt;li class=&quot;text-center&quot;&gt;' + &quot;xplay(&quot; + content.process.xplay + ')&lt;/li&gt;' +
+                    '&lt;li class=&quot;text-center&quot;&gt;' + &quot;peanut(&quot; + content.process.peanut + ')&lt;/li&gt;' +
+                    '&lt;li class=&quot;text-center&quot;&gt;' + &quot;watchdog(&quot; + content.process.watchdog + ')&lt;/li&gt;' +
+                    '&lt;li class=&quot;text-center&quot;&gt;' + &quot;x-window(&quot; + content.process.x + ')&lt;/li&gt;' +
+                    '&lt;/ul&gt;' +
+                    &quot;&lt;/td&gt;&quot; +
+                    &quot;&lt;td&gt;&quot; + content.pile + &quot;&lt;/td&gt;&quot; +
+                    &quot;&lt;td&gt;&quot; + content.uptime + &quot;(H)&quot; + &quot;&lt;/td&gt;&quot; +
+                    &quot;&lt;td&gt;&quot; + content.evolver_sleep + &quot;(S)&quot;+&quot;&lt;/td&gt;&quot; +
+                    &quot;&lt;td&gt;&quot; + content.term_time + &quot;&lt;/td&gt;&quot; +
+                    &quot;&lt;td&gt;&quot; + content.create_time + &quot;&lt;/td&gt;&quot; +
+                    &quot;&lt;td&gt;&quot; + class_tm + &quot;&lt;/td&gt;&quot; +
+                    &quot;&lt;/tr&gt;&quot;
+                );
+            });
+        } else {
+            console.log(json.data);
+        }
+    });
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8Bvendor%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Golang之vendor的使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux%E4%B9%8BX11VNC%E9%80%9A%E8%BF%87VNC%E6%9D%A5%E8%BF%9E%E6%8E%A5%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%A1%8C%E9%9D%A2/" title="Linux之X11VNC通过VNC来连接服务器桌面">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-05-29</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#javascript-ref">javascript <span>11</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

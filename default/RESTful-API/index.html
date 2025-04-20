@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>RESTful API</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>RESTful API </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>RESTful API 简单了解</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>首先为什么要用RESTful结构呢？</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>早先页是前端后端融在一起的，比如之前的PHP，JSP等。
+在之前的桌面时代问题不大，但是近年来移动互联网的发展，各种类型的Client层出不穷，RESTful可以通过一套统一的接口为 Web，iOS和Android提供服务。
+另外对于广大平台来说，比如Facebook platform，微博开放平台，微信公共平台等，它们不需要有显式的前端，只需要一套提供服务的接口，于是RESTful更是它们最好的选择。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>在RESTful架构下：</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/2017-12-29-RESTful-API/1.jpg" alt="" width="500" height="200"></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>Server的API如何设计才满足RESTful要求?</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 通过http协议的GET,POST,DELETE,PUT方法实现对url资源的CRUD（创建、读取、更新和删除）操作
+// 当然 RESTful 还能做很多 ... 但是这里只说最常用的 ...
+
+// Server和Client之间传递某资源的一个表现形式，比如用JSON，XML传输文本，或者用JPG，WebP传输图片等。
+// 当然还可以压缩HTTP传输时的数据（on-wire data compression）。
+// 用 HTTP Status Code传递Server的状态信息。比如最常用的 200 表示成功，500 表示Server内部错误等。
+
+// 关于安全：自己的接口就用https，加上一个key做一次hash放在最后即可
+// 如果是平台的API，可以用成熟但是复杂的OAuth2
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>GET       用来获取资源</li>
+<li>POST      用来新建资源（更新资源）</li>
+<li>PUT       用来更新资源</li>
+<li>DELETE    用来删除资源</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>DELETE <a href="http://api.qc.com/v1/friends">http://api.qc.com/v1/friends</a>   删除某人的好友</li>
+<li>POST <a href="http://api.qc.com/v1/friends">http://api.qc.com/v1/friends</a> 添加好友</li>
+<li>UPDATE <a href="http://api.qc.com/v1/profile">http://api.qc.com/v1/profile</a>   更新个人资料</li>
+<li>GET <a href="http://api.qc.com/v1/id">http://api.qc.com/v1/id</a>       获取个人资料</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/2017-12-29-RESTful-API/2.jpg" alt="" width="500" height="200"></p>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/OpenCV%E4%B9%8B-%E4%B8%A4%E5%B9%85%E7%9B%B8%E5%90%8C%E4%B8%8E%E4%B8%8D%E5%90%8C%E5%B0%BA%E5%AF%B8%E5%9B%BE%E5%83%8F%E8%9E%8D%E5%90%88/" title="OpenCV之-两幅相同与不同尺寸图像融合">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E9%80%9A%E8%BF%87Screen%E8%BF%9B%E8%A1%8C%E8%BF%9C%E7%A8%8B%E4%BC%9A%E8%AF%9D%E7%AE%A1%E7%90%86/" title="通过Screen进行远程会话管理">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2017-12-29</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

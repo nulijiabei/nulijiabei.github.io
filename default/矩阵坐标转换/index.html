@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>矩阵坐标转换</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>矩阵坐标转换 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p><img src="/assets/media/矩阵坐标转换/rect.png" alt="" width="600"></p>
+
+<hr />
+
+<pre><code>比方说画面宽度640，你希望从320开始截取，那就是320/640 = 0.5
+</code></pre>
+
+<hr />
+
+<pre><code>E:
+X0 = 0
+Y0 = 2160
+X1 = 1920
+Y1 = 3240
+</code></pre>
+
+<hr />
+
+<pre><code>OFF_X0 = 0 / 3840
+OFF_Y0 = 2160 / 3240 
+OFF_X1 = 1920 / 3840
+OFF_Y1 = 3240 / 3240
+</code></pre>
+
+<hr />
+
+<pre><code>// 转换为矩阵
+Rect Control::GetRect(int _width, int _height, int _top, int _left)
+{
+    Rect rect;
+    rect.x0 = _left;
+    rect.y0 = _top;
+    rect.x1 = _width + _left;
+    rect.y1 = _height + _top;
+    return std::move(rect);
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// 计算矩形交点
+Rect Control::GetIntersectRect(Rect* _a, Rect* _b, bool* _error)
+{
+    // 重置
+    (*_error) = false;
+    // 对象
+    Rect rect;
+    // 计算
+    rect.x0 = max(_a-&gt;x0, _b-&gt;x0);
+    rect.y0 = max(_a-&gt;y0, _b-&gt;y0);
+    rect.x1 = min(_a-&gt;x1, _b-&gt;x1);
+    rect.y1 = min(_a-&gt;y1, _b-&gt;y1);
+    // 判断是否相交
+    if (rect.x0 &gt;= rect.x1 || rect.y0 &gt;= rect.y1)
+    {
+    *_error = true;
+    }
+    // 相交区域
+    return std::move(rect);
+}
+</code></pre>
+
+<hr />
+
+<pre><code>Offset Control::GetOffset(int _src_top, int _src_left, int _dst_top, int _dst_left)
+{
+    Offset offset;
+    if(_src_left &lt; _dst_left)
+    {
+    offset.left = 0;
+    }
+    else
+    {
+    offset.left = _src_left - _dst_left;
+    }
+    if(_src_top &lt; _dst_top)
+    {
+    offset.top = 0;
+    }
+    else
+    {
+    offset.top = _src_top - _dst_top;
+    }
+    return std::move(offset);
+}
+</code></pre>
+
+<hr />
+
+<pre><code>Size Control::GetRectSize(Rect* _rect)
+{
+    Size size;
+    size.width = _rect-&gt;x1 - _rect-&gt;x0;
+    size.height = _rect-&gt;y1 - _rect-&gt;y0;
+    return std::move(size);
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// _width 是Pobj的宽
+// _height 是Pobj的高
+// _rect 是相交区域矩阵坐标
+Change Control::GetChangeRect(int _width, int _height, Rect* _rect)
+{
+    Change change;
+    change.off_x0 = float(_rect-&gt;x0) / _width;
+    change.off_y0 = float(_rect-&gt;y0) / _height;
+    change.off_x1 = float(_rect-&gt;x1) / _width;
+    change.off_y1 = float(_rect-&gt;y1) / _height;
+    return std::move(change);
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// _b 是Pobj的矩阵坐标
+// _c 是相交区域矩阵坐标
+Change Control::GetChangeRect(Rect* _b, Rect* _c)
+{
+    int b_width = _b-&gt;x1 - _b-&gt;x0;
+    int b_height = _b-&gt;y1 - _b-&gt;y0;
+    int c_width = _c-&gt;x1 - _c-&gt;x0;
+    int c_height = _c-&gt;y1 - _c-&gt;y0;
+    Rect v;
+    v.x0 = _c-&gt;x0 - _b-&gt;x0;
+    v.y0 = _c-&gt;y0 - _b-&gt;y0;
+    v.x1 = v.x0 + c_width;
+    v.y1 = v.y0 + c_height;
+    Change change;
+    change.off_x0 = float(v.x0) / b_width;
+    change.off_y0 = float(v.y0) / b_height;
+    change.off_x1 = float(v.x1) / b_width;
+    change.off_y1 = float(v.y1) / b_height;
+    return std::move(change);
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Asio-io_service/" title="Asio-io_service">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/C%2B%2B0x%E4%B9%8B%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/" title="C++0x之右值引用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-10-21</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

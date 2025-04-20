@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang http 超时设置方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang http 超时设置方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>c := http.Client{
+    Transport: &amp;http.Transport{
+        Dial: func(netw, addr string) (net.Conn, error) {
+        deadline := time.Now().Add(25 * time.Second)
+        c, err := net.DialTimeout(netw, addr, time.Second*20)
+        if err != nil {
+            return nil, err
+        }
+        c.SetDeadline(deadline)
+        return c, nil
+        },
+    },
+    }
+
+c.Get(&quot;http://www.qq.com&quot;)
+</code></pre>
+
+<p>//////////////////////////////////////////////</p>
+
+<pre><code>// 上载请求
+func NetUploadJson(addr string, buf interface{}) (*[]byte, *int, error) {
+    // 将需要上传的JSON转为Byte
+    v, _ := json.Marshal(buf)
+    // 上传JSON数据
+    req, e := http.NewRequest(&quot;POST&quot;, addr, bytes.NewReader(v))
+    if e != nil {
+    // 提交异常,返回错误
+    return nil, nil, e
+    }
+    // Body Type
+    req.Header.Set(&quot;Content-Type&quot;, &quot;application/json&quot;)
+    // 完成后断开连接
+    req.Header.Set(&quot;Connection&quot;, &quot;close&quot;)
+    // -------------------------------------------
+    // 设置 TimeOut
+    DefaultClient := http.Client{
+    Transport: &amp;http.Transport{
+        Dial: func(netw, addr string) (net.Conn, error) {
+        deadline := time.Now().Add(30 * time.Second)
+        c, err := net.DialTimeout(netw, addr, time.Second*30)
+        if err != nil {
+            return nil, err
+        }
+        c.SetDeadline(deadline)
+        return c, nil
+        },
+    },
+    }
+    // -------------------------------------------
+    // 执行
+    resp, ee := DefaultClient.Do(req)
+    if ee != nil {
+    // 提交异常,返回错误
+    return nil, nil, ee
+    }
+    // 保证I/O正常关闭
+    defer resp.Body.Close()
+    // 判断返回状态
+    if resp.StatusCode == http.StatusOK {
+    // 读取返回的数据
+    data, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        // 读取异常,返回错误
+        return nil, nil, err
+    }
+    // 将收到的数据与状态返回
+    return &amp;data, &amp;resp.StatusCode, nil
+    } else if resp.StatusCode != http.StatusOK {
+    // 返回异常状态
+    return nil, &amp;resp.StatusCode, nil
+    }
+    // 不会到这里
+    return nil, nil, nil
+}
+
+// 下载文件
+func NetDownloadFile(addr string) (*[]byte, *int, *http.Header, error) {
+    // 上传JSON数据
+    req, e := http.NewRequest(&quot;GET&quot;, addr, nil)
+    if e != nil {
+    // 返回异常
+    return nil, nil, nil, e
+    }
+    // 完成后断开连接
+    req.Header.Set(&quot;Connection&quot;, &quot;close&quot;)
+    // -------------------------------------------
+    // 设置 TimeOut
+    DefaultClient := http.Client{
+    Transport: &amp;http.Transport{
+        Dial: func(netw, addr string) (net.Conn, error) {
+        deadline := time.Now().Add(30 * time.Second)
+        c, err := net.DialTimeout(netw, addr, time.Second*30)
+        if err != nil {
+            return nil, err
+        }
+        c.SetDeadline(deadline)
+        return c, nil
+        },
+    },
+    }
+    // -------------------------------------------
+    // 执行
+    resp, ee := DefaultClient.Do(req)
+    if ee != nil {
+    // 返回异常
+    return nil, nil, nil, ee
+    }
+    // 保证I/O正常关闭
+    defer resp.Body.Close()
+    // 判断请求状态
+    if resp.StatusCode == 200 {
+    data, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        // 读取错误,返回异常
+        return nil, nil, nil, err
+    }
+    // 成功，返回数据及状态
+    return &amp;data, &amp;resp.StatusCode, &amp;resp.Header, nil
+    } else {
+    // 失败，返回状态
+    return nil, &amp;resp.StatusCode, nil, nil
+    }
+    // 不会到这里
+    return nil, nil, nil, nil
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E4%BC%A0%E9%80%92-%E5%B0%8F%E6%8A%84/" title="Golang 传递 小抄">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-Screenshot/" title="Golang-Screenshot">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-03</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

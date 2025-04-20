@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>使用nmcli-network-manager管理wifi网络</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>使用nmcli-network-manager管理wifi网络 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>使用nmcli-network-manager管理wifi网络</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 使用 nmtui 可以在命令行界面进行网络配置
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 配置文件：/etc/NetworkManager/NetworkManager.conf
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 注意：OBJECT和COMMAND可以用全程也可以用简称，最少可以只用一个字母，但我们一般用头三个字母，这样不容易搞错
+
+root@desktop:~# nmcli -help
+Usage: nmcli [OPTIONS] OBJECT { COMMAND | help }
+
+OPTIONS
+  -t[erse]                                   terse output
+  -p[retty]                                  pretty output
+  -m[ode] tabular|multiline                  output mode
+  -c[olors] auto|yes|no                      whether to use colors in output
+  -f[ields] &lt;field1,field2,...&gt;|all|common   specify fields to output
+  -e[scape] yes|no                           escape columns separators in values
+  -n[ocheck]                                 don't check nmcli and NetworkManager versions
+  -a[sk]                                     ask for missing parameters
+  -s[how-secrets]                            allow displaying passwords
+  -w[ait] &lt;seconds&gt;                          set timeout waiting for finishing operations
+  -v[ersion]                                 show program version
+  -h[elp]                                    print this help
+
+OBJECT
+  g[eneral]       NetworkManager's general status and operations
+  n[etworking]    overall networking control
+  r[adio]         NetworkManager radio switches
+  c[onnection]    NetworkManager's connections
+  d[evice]        devices managed by NetworkManager
+  a[gent]         NetworkManager secret agent or polkit agent
+  m[onitor]       monitor NetworkManager changes
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// WIFI 相关 ...
+nmcli device wifi // 扫描
+
+root@desktop:~# nmcli device wifi 
+*  SSID                 MODE   CHAN  RATE       SIGNAL  BARS  SECURITY  
+   --                   Infra  1     54 Mbit/s  100     ▂▄▆█            
+   dnet                 Infra  11    54 Mbit/s  100     ▂▄▆█  WPA2      
+   danoo-007            Infra  11    54 Mbit/s  84      ▂▄▆█  WPA1 WPA2 
+   danoo100             Infra  3     54 Mbit/s  74      ▂▄▆_  WPA1 WPA2 
+
+// 使用方法:
+connect &lt;(B)SSID&gt; [password &lt;password&gt;] [wep-key-type key|phrase] [ifname &lt;ifname&gt;]
+                [bssid &lt;BSSID&gt;] [name &lt;name&gt;] [private yes|no] [hidden yes|no]
+
+// 关闭/打开 所有无线网卡
+nmcli r wifi off
+nmcli r wifi on
+
+// 禁用网卡
+nmcli device disconnect ifname wlan0
+
+// 停用 wlan0 某一个活动的连接
+nmcli con to check
+nmcli con down &lt;wifi name&gt; to disconnect
+
+// 连接 WIFI 网络
+nmcli dev wifi con &quot;wifi name&quot; password &quot;wifi password&quot;
+
+// 启用连接 WIFI 
+nmcli con up &lt;wifi name&gt;
+
+// 删除WIFI连接 - 配置
+nmcli con delete &lt;wifi name&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 同样支持 hotspot 热点 ...
+
+ARGUMENTS := wifi hotspot [ifname &lt;ifname&gt;] [con-name &lt;name&gt;] [ssid &lt;SSID&gt;]
+              [band a|bg] [channel &lt;channel&gt;] [password &lt;password&gt;]
+
+Create a Wi-Fi hotspot. Use 'connection down' or 'device disconnect'
+to stop the hotspot.
+Parameters of the hotspot can be influenced by the optional parameters:
+ifname - Wi-Fi device to use
+con-name - name of the created hotspot connection profile
+ssid - SSID of the hotspot
+band - Wi-Fi band to use
+channel - Wi-Fi channel to use
+password - password to use for the hotspot
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 启用/禁用所有网络连接
+nmcli net on/off
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查看网卡信息
+nmcli device show // 所有
+nmcli device show eth0
+nmcli device show wlan0
+
+root@desktop:~# nmcli device show eth0
+GENERAL.DEVICE:                         eth0
+GENERAL.TYPE:                           ethernet
+GENERAL.HWADDR:                         00:30:18:57:3D:23
+GENERAL.MTU:                            1400
+GENERAL.STATE:                          10 (unmanaged)
+GENERAL.CONNECTION:                     --
+GENERAL.CON-PATH:                       --
+WIRED-PROPERTIES.CARRIER:               off
+IP4.ADDRESS[1]:                         169.254.4.9/16
+IP4.GATEWAY:                            0.0.0.0
+IP6.ADDRESS[1]:                         fe80::230:18ff:fe57:3d23/64
+IP6.GATEWAY:   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查看设备状态
+nmcli device status
+
+root@desktop:~# nmcli device status
+DEVICE  TYPE      STATE         CONNECTION 
+tun0    tun       connected     tun0       
+wlan0   wifi      disconnected  --         
+eth0    ethernet  unmanaged     --         
+lo      loopback  unmanaged     --         
+ppp0    unknown   unmanaged     --   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 禁用设备 ... 活跃设备
+nmcli device dis wlan0
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 开关连接
+nmcli con up tun0
+nmcli con down tun0
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查看所有状态
+nmcli general status
+
+root@desktop:~# nmcli general status
+STATE      CONNECTIVITY  WIFI-HW  WIFI     WWAN-HW  WWAN    
+connected  full          enabled  enabled  enabled  enabled 
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查看所有连接
+// nmcli con show // 查看所有连接
+// nmcli con show -a // 活动的连接 --active
+// nmcli con show tun0 // 详细信息
+
+root@aaa:~# nmcli con show
+NAME                UUID                                  TYPE            DEVICE 
+Wired connection 1  68fccaf2-58cc-3ba1-86a4-aa5cb026c836  802-3-ethernet  eth1   
+tap0                d6dda4d5-b457-4fd7-ac84-e46b82cf4850  tun             tap0   
+tun0                05d6d9f7-9eab-4541-b110-7ea0dd4ac8b3  tun             tun0  
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B9%8B%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E4%B8%8E%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE/" title="树莓派之系统安装与网络配置">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux%E4%B9%8Bpppd%E6%8B%A8%E5%8F%B7%E6%88%90%E5%8A%9F%E5%90%8E%E5%90%8E%E8%87%AA%E5%8A%A8%E6%8C%82%E6%96%AD/" title="Linux之pppd拨号成功后后自动挂断">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-08-11</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

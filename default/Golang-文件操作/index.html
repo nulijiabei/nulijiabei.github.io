@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-文件操作</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-文件操作 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Go语言，在Package io中，定义了io.Reader和io.Writer两个interface</p>
+
+<p>Go以组合、委派等面向对象的方式，让其它的对象定义具体的实现</p>
+
+<p>如果对一个文件每次读取一行(Readline)的话，就可以使用bufio.ReadString来实现，下边是一个简单的例子：</p>
+
+<pre><code>////////////////////////////////源代码////////////////////////////////
+package main
+
+import (
+   &quot;os&quot;
+   &quot;bufio&quot;
+   &quot;fmt&quot;
+)
+
+func main(){   
+    //打开文件，并进行相关处理
+   f , err := os.Open(&quot;test.txt&quot;,os.O_RDONLY,0)
+   if err != nil{
+       fmt.Printf(&quot;%v\n&quot;,err)
+       os.Exit(1)
+   }
+   //文件关闭
+   defer f.Close() 
+
+    //将文件作为一个io.Reader对象进行buffered I/O操作
+   br := bufio.NewReader(f)
+   for{
+       //每次读取一行
+       line , err := br.ReadString('\n')
+       if err == os.EOF {
+       break
+       }else{
+       fmt.Printf(&quot;%v&quot;,line)
+       }
+   }
+}
+////////////////////////////////源代码////////////////////////////////
+</code></pre>
+
+<p>两个包具有文件操作的相关方法，一个是os,一个是syscall,其中os中的相关方法是对syscall相关方法的封装，推荐使用os中的相关方法。</p>
+
+<p>文件的打开文件的第一步操作实际上是创建，但是由于文件的打开方法也可以创建，实际中使用创建方法的地方不多。文件打开有两个方法：</p>
+
+<pre><code>//以只读方式打开一个存在的文件，打开就可以读取了。
+func Open(name string) (file *File, err error)
+
+//以各种方式打开各种存在不存在的文件，具体怎么样看flag和perm。
+func OpenFile(name string, flag int, perm FileMode) (file *File, err error)
+</code></pre>
+
+<hr />
+
+<p>flag可选值（掩码）：</p>
+
+<pre><code>const (
+    O_RDONLY int = syscall.O_RDONLY // open the file read-only.
+    O_WRONLY int = syscall.O_WRONLY // open the file write-only.
+    O_RDWR   int = syscall.O_RDWR   // open the file read-write.
+    O_APPEND int = syscall.O_APPEND // 在文件末尾追加，打开后cursor在文件结尾位置
+    O_CREATE int = syscall.O_CREAT  // 如果不存在则创建
+    O_EXCL   int = syscall.O_EXCL   //与O_CREATE一起用，构成一个新建文件的功能，它要求文件必须不存在
+    O_SYNC   int = syscall.O_SYNC   // 同步方式打开，没有缓存，这样写入内容直接写入硬盘，系统掉电文件内容有一定保证
+    O_TRUNC  int = syscall.O_TRUNC  // 打开并清空文件
+)
+</code></pre>
+
+<p>perm是文件的unix权限位，可以直接用数字写，如0644。可选值有：</p>
+
+<pre><code>const (
+    // The single letters are the abbreviations
+    // used by the String method's formatting.
+    ModeDir        FileMode = 1 &lt;&lt; (32 - 1 - iota) // d: is a directory
+    ModeAppend                                     // a: append-only
+    ModeExclusive                                  // l: exclusive use
+    ModeTemporary                                  // T: temporary file (not backed up)
+    ModeSymlink                                    // L: symbolic link
+    ModeDevice                                     // D: device file
+    ModeNamedPipe                                  // p: named pipe (FIFO)
+    ModeSocket                                     // S: Unix domain socket
+    ModeSetuid                                     // u: setuid
+    ModeSetgid                                     // g: setgid
+    ModeCharDevice                                 // c: Unix character device, when ModeDevice is set
+    ModeSticky
+
+    // Mask for the type bits. For regular files, none will be set.
+    ModeType = ModeDir | ModeSymlink | ModeNamedPipe | ModeSocket | ModeDevice
+
+    ModePerm FileMode = 0777 // permission bits
+)
+</code></pre>
+
+<p>上述可选值是权限位的高有效位，低有效位的值还是要用户自己写数字。</p>
+
+<p>文件的写入</p>
+
+<pre><code>func (f *File) Write(b []byte) (n int, err error)
+</code></pre>
+
+<p>// 该函数写入len(b)个字节。如果返回值值n!=len(b)，则表明没写进去，err将!=nil。
+// 可能有人会疑惑，write函数为什么不指定写入的个数呢？C语言的对应函数就是指定的。
+// 其实go不一样啦，因为go有slice，如果你想写入8个字节，你可以Write(b)。</p>
+
+<pre><code>func (f *File) WriteAt(b []byte, off int64) (n int, err error) //WriteAt实际上是省略了seek的步骤。
+</code></pre>
+
+<p>示例代码（该代码只写入http)：package main</p>
+
+<pre><code>import (
+    &quot;os&quot;
+)
+
+func main() {
+    fd,_:=os.OpenFile(&quot;a.txt&quot;,os.O_RDWR|os.O_CREATE,0644)
+    buf:=[]byte(&quot;http://www.usr.cc&quot;)
+    fd.Write(buf)
+    fd.Close()
+}
+
+// 从光标的当前位置开始读len(b)个字节，返回值n是实际上读到的字节数。
+// 读取操作可能遇到EOF而停止，此时计数n为０，err为io.EOF.
+文件的读取func (f *File) Read(b []byte) (n int, err error)
+
+// 这个不多说了。
+func (f *File) ReadAt(b []byte, off int64) (n int, err error)
+</code></pre>
+
+<p>下面的示例代码写入<a href="http://www.usr.cc，读到的是http：package">http://www.usr.cc，读到的是http：package</a> main</p>
+
+<pre><code>import (
+    &quot;os&quot;
+    &quot;fmt&quot;
+)
+
+func main() {
+    fd,_:=os.OpenFile(&quot;a.txt&quot;,os.O_RDWR|os.O_CREATE,0644)
+    buf:=[]byte(&quot;http://www.usr.cc&quot;)
+    fd.Write(buf)
+    rx_buf:=make([]byte,4)
+    fd.ReadAt(rx_buf,0)
+    fmt.Println(string(rx_buf))
+    fd.Close()
+}
+
+// 文件的关闭fb.Close()
+</code></pre>
+
+<p>写程序离不了文件操作，这里总结下go语言文件操作。</p>
+
+<p>一、建立与打开</p>
+
+<p>建立文件函数：</p>
+
+<pre><code>func Create(name string) (file *File, err Error)
+func NewFile(fd int, name string) *File
+</code></pre>
+
+<p>具体见官网：<a href="http://golang.org/pkg/os/#Create">http://golang.org/pkg/os/#Create</a></p>
+
+<p>打开文件函数：</p>
+
+<pre><code>func Open(name string) (file *File, err Error)
+func OpenFile(name string, flag int, perm uint32) (file *File, err Error)
+</code></pre>
+
+<p>具体见官网：<a href="http://golang.org/pkg/os/#Open">http://golang.org/pkg/os/#Open</a></p>
+
+<p>二、写文件</p>
+
+<p>写文件函数：</p>
+
+<pre><code>func (file *File) Write(b []byte) (n int, err Error)
+func (file *File) WriteAt(b []byte, off int64) (n int, err Error)
+func (file *File) WriteString(s string) (ret int, err Error)
+</code></pre>
+
+<p>具体见官网：<a href="http://golang.org/pkg/os/#File.Write">http://golang.org/pkg/os/#File.Write</a></p>
+
+<p>写文件示例代码：</p>
+
+<pre><code>package main 
+import(
+    &quot;os&quot;
+    &quot;fmt&quot;
+    )
+
+func main() {
+    userFile := &quot;test.txt&quot;
+    fout,err := os.Create(userFile)
+    deferfout.Close()
+    if err != nil{
+        fmt.Println(userFile,err)
+        return
+    }
+    for i:= 0;i&lt;10;i++ {
+        fout.WriteString(&quot;Just a test!\r\n&quot;)
+        fout.Write([]byte(&quot;Just a test!\r\n&quot;))
+    }
+}
+</code></pre>
+
+<p>三、读文件</p>
+
+<p>读文件函数：</p>
+
+<pre><code>func (file *File) Read(b []byte) (n int, err Error)
+func (file *File) ReadAt(b []byte, off int64) (n int, err Error)
+</code></pre>
+
+<p>具体见官网：<a href="http://golang.org/pkg/os/#File.Read">http://golang.org/pkg/os/#File.Read</a></p>
+
+<p>读文件示例代码：</p>
+
+<pre><code>package main
+import(&quot;os&quot;
+&quot;fmt&quot;
+)
+func main() {
+    userFile := &quot;test.txt&quot;
+    fin,err := os.Open(userFile)
+    deferfin.Close()
+    if err != nil{
+    fmt.Println(userFile,err)
+    return
+    }
+    buf := make([]byte, 1024)
+    for{
+      n, _ := fin.Read(buf)
+     if0== n { break}os.Stdout.Write(buf[:n])
+    }
+}
+</code></pre>
+
+<p>四、删除文件</p>
+
+<p>函数：</p>
+
+<p>func Remove(name string) Error</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Xorg/" title="Xorg">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-%E4%BD%BF%E7%94%A8%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%8F%82%E6%95%B0/" title="Golang-使用命令行参数">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-15</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

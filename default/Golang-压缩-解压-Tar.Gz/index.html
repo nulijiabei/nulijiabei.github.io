@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-压缩-解压-Tar.Gz</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-压缩-解压-Tar.Gz </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>golang处理压缩包,我最常用的就是tar.gz了,所以今天写了一个测试一下.代码放这里以后浏览.</p>
+
+<pre><code>//压缩文件
+package main
+
+import (
+    &quot;fmt&quot;
+    &quot;os&quot;
+    &quot;io&quot;
+    &quot;archive/tar&quot;
+    &quot;compress/gzip&quot;
+)
+
+func main() {
+    // file write
+    fw, err := os.Create(&quot;tar/lin_golang_src.tar.gz&quot;)
+    if err != nil {
+    panic(err)
+    }
+    defer fw.Close()
+
+    // gzip write
+    gw := gzip.NewWriter(fw)
+    defer gw.Close()
+
+    // tar write
+    tw := tar.NewWriter(gw)
+    defer tw.Close()
+
+    // 打开文件夹
+    dir, err := os.Open(&quot;file/&quot;)
+    if err != nil {
+    panic(nil)
+    }
+    defer dir.Close()
+
+    // 读取文件列表
+    fis, err := dir.Readdir(0)
+    if err != nil {
+    panic(err)
+    }
+
+    // 遍历文件列表
+    for _, fi := range fis {
+    // 逃过文件夹, 我这里就不递归了
+    if fi.IsDir() {
+        continue
+    }
+
+    // 打印文件名称
+    fmt.Println(fi.Name())
+
+    // 打开文件
+    fr, err := os.Open(dir.Name() + &quot;/&quot; + fi.Name())
+    if err != nil {
+        panic(err)
+    }
+    defer fr.Close()
+
+    // 信息头
+    h := new(tar.Header)
+    h.Name = fi.Name()
+    h.Size = fi.Size()
+    h.Mode = int64(fi.Mode())
+    h.ModTime = fi.ModTime()
+
+    // 写信息头
+    err = tw.WriteHeader(h)
+    if err != nil {
+        panic(err)
+    }
+
+    // 写文件
+    _, err = io.Copy(tw, fr)
+    if err != nil {
+        panic(err)
+    }
+    }
+
+    fmt.Println(&quot;tar.gz ok&quot;)
+}
+解压文件
+package main
+
+import (
+    &quot;fmt&quot;
+    &quot;os&quot;
+    &quot;io&quot;
+    // &quot;time&quot;
+    &quot;archive/tar&quot;
+    &quot;compress/gzip&quot;
+)
+
+func main() {
+    // file read
+    fr, err := os.Open(&quot;tar/lin_golang_src.tar.gz&quot;)
+    if err != nil {
+    panic(err)
+    }
+    defer fr.Close()
+
+    // gzip read
+    gr, err := gzip.NewReader(fr)
+    if err != nil {
+    panic(err)
+    }
+    defer gr.Close()
+
+    // tar read
+    tr := tar.NewReader(gr)
+
+    // 读取文件
+    for {
+    h, err := tr.Next()
+    if err == io.EOF {
+        break
+    }
+    if err != nil {
+        panic(err)
+    }
+
+    // 显示文件
+    fmt.Println(h.Name)
+
+    // 打开文件
+    fw, err := os.OpenFile(&quot;file2/&quot; + h.Name, os.O_CREATE | os.O_WRONLY, 0644/*os.FileMode(h.Mode)*/)
+    if err != nil {
+        panic(err)
+    }
+    defer fw.Close()
+
+    // 写文件
+    _, err = io.Copy(fw, tr)
+    if err != nil {
+        panic(err)
+    }
+
+    }
+
+    fmt.Println(&quot;un tar.gz ok&quot;)
+}
+</code></pre>
+
+<p>呼呼,以后打包下载东西的时候可以使用了.</p>
+
+<p><a href="http://www.dotcoo.com/golang-tar-gzip">http://www.dotcoo.com/golang-tar-gzip</a></p>
+
+<hr />
+
+<pre><code>// 解压Tar文件
+func Untar(file,pathstring) error {
+    // 打开文件
+    f,err:=os.Open(file)
+    iferr!= nil {
+    returnerr
+    }
+    deferf.Close()
+    // 读取GZIP
+    gr,err:=gzip.NewReader(f)
+    iferr!= nil {
+    returnerr
+    }
+    defergr.Close()
+    // 读取TAR
+    tr:=tar.NewReader(gr)
+    for {
+    hdr,err:=tr.Next()
+    iferr==io.EOF{
+        break
+    } else iferr!= nil {
+        returnerr
+    }
+    ifhdr.FileInfo().IsDir() {
+        os.MkdirAll(path+string(os.PathSeparator)+hdr.Name,hdr.FileInfo().Mode())
+    } else {
+        fw,err:=os.OpenFile(path+string(os.PathSeparator)+hdr.Name,os.O_CREATE|os.O_WRONLY|os.O_TRUNC,hdr.FileInfo().Mode())
+        iferr!= nil {
+        returnerr
+        }
+        deferfw.Close()
+        _,err=io.Copy(fw,tr)
+        iferr!= nil {
+        returnerr
+        }
+    }
+    }
+    return nil
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%93%8D%E4%BD%9C%E5%A4%84%E7%90%86%E5%8C%85-Strings/" title="Golang-字符串操作处理包-Strings">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-%E5%88%A4%E6%96%AD%E6%96%87%E4%BB%B6%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8/" title="Golang-判断文件是否存在">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

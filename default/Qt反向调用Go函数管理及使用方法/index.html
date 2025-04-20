@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Qt反向调用Go函数管理及使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Qt反向调用Go函数管理及使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p><img src="/assets/media/Qt反向调用Go函数管理及使用方法/1.png" alt="" width="600"></p>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>C.char</li>
+<li>C.schar（signed char）</li>
+<li>C.uchar（unsigned char）</li>
+<li>C.short</li>
+<li>C.ushort（unsigned short）</li>
+<li>C.int</li>
+<li>C.uint（unsigned int）</li>
+<li>C.long</li>
+<li>C.ulong（unsigned long）</li>
+<li>C.longlong（long long）</li>
+<li>C.ulonglong（unsigned long long）</li>
+<li>C.float</li>
+<li>C.double</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Golang 的字符串转为 C 字符串
+// C 的字符串是使用 malloc 分配的，因此，此函数的调用者
+// 需要调用 C.free 来释放内存
+func C.CString(string) *C.char
+
+// 转换 C 字符串到 Golang 字符串
+func C.GoString(*C.char) string
+
+// 转换一定长度的 C 字符串到 Golang 字符串
+func C.GoStringN(*C.char, C.int) string
+
+// 转换一块 C 内存区域到 Golang 的字节数组中去
+func C.GoBytes(unsafe.Pointer, C.int) []byte
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h2>简单说一下</h2>
+
+<blockquote>
+</blockquote>
+
+<p>在Go中将Go-&gt;C函数通过函数指针(void*)传入Qt中进行使用</p>
+
+<blockquote>
+</blockquote>
+
+<h3>Go-&gt;C传入Qt</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如果看过我之前几篇介绍，这里就不用多说了吧
+/*
+    extern void cgo_init();
+    extern int cgo_start();
+    extern void drv_cgo_callback(void*, void*);
+    static void callback()
+    {   
+        char * _cgo_connect = &quot;cgo_connect&quot;;
+        extern int cgo_connect(void*, int); // Go -&gt; C
+        drv_cgo_callback(_cgo_connect, &amp;cgo_connect); // 将 Go -&gt; C 传入 Qt
+
+    }
+*/
+// #include &lt;stdio.h&gt;
+// #include &lt;stdlib.h&gt;
+// #cgo LDFLAGS: -L./ -lexamples
+import &quot;C&quot;
+import &quot;unsafe&quot;
+
+func start() {
+    // 需要注意的是先通过函数调用Qt里面的初始化函数初始化类，以便存储Go -&gt; C的函数
+    C.cgo_init()
+    // 将 Go -&gt; C 传入 Qt
+    C.callback()    
+    // 运行
+    C.cgo_start()
+}
+
+// Go -&gt; C
+//export cgo_connect 
+func cgo_connect(_content unsafe.Pointer, _size C.int) C.int {
+    device := string(C.GoBytes(_content, _size))
+    log.Println(&quot;Go-&gt;&quot;, device)
+    if err := StaticConn.Connect(device, &quot;1.0.1&quot;); err != nil {
+        return C.int(0)
+    }
+    return C.int(1)
+}
+</code></pre>
+
+<hr />
+
+<h3>Qt 里面看一下</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>#ifndef CGO_H
+#define CGO_H
+
+#include &lt;map&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+// 定义将函数指针转换回来的函数类型
+typedef int (*COMMAND_CGO_CONNECT_FUNCTION)(void*, int);
+typedef int (*COMMAND_CGO_CHECKCONN_FUNCTION)();
+typedef void (*COMMAND_CGO_DISCONN_FUNCTION)();
+typedef void (*COMMAND_CGO_COMMAND_FUNCTION)(void*, int);
+typedef void (*COMMAND_CGO_SHORTCUTS_FUNCTION)(void*, int);
+typedef void * (*COMMAND_CGO_MESSAGE_FUNCTION)();
+typedef int (*COMMAND_CGO_GOLINE_FUNCTION)(void*, int);
+
+// 定义一个类
+class Cgo
+{
+public:
+    Cgo();
+    // 将函数指针存入本类
+    int setCgo(void*, void*);
+public:
+    // 所有需要用到的Go函数
+    COMMAND_CGO_CONNECT_FUNCTION cgo_connect;
+    COMMAND_CGO_CHECKCONN_FUNCTION cgo_checkconn;
+    COMMAND_CGO_DISCONN_FUNCTION cgo_disconn;
+    COMMAND_CGO_COMMAND_FUNCTION cgo_command;
+    COMMAND_CGO_SHORTCUTS_FUNCTION cgo_shortcuts;
+    COMMAND_CGO_MESSAGE_FUNCTION cgo_message;
+    COMMAND_CGO_GOLINE_FUNCTION cgo_goline;
+};
+
+#endif // CGO_H
+</code></pre>
+
+<hr />
+
+<pre><code>// 这里就不多说了.
+#include &quot;cgo.h&quot;
+#include &lt;QString&gt;
+
+Cgo::Cgo()
+{
+    cgo_connect = 0;
+    cgo_checkconn = 0;
+    cgo_disconn = 0;
+    cgo_command = 0;
+    cgo_shortcuts = 0;
+    cgo_message = 0;
+    cgo_goline = 0;
+}
+
+int Cgo::setCgo(void* _a, void* _b)
+{
+    if (QString(&quot;cgo_connect&quot;).compare((char*)_a) == 0)
+    cgo_connect = (COMMAND_CGO_CONNECT_FUNCTION)_b;
+    if (QString(&quot;cgo_checkconn&quot;).compare((char*)_a) == 0)
+    cgo_checkconn = (COMMAND_CGO_CHECKCONN_FUNCTION)_b;
+    if (QString(&quot;cgo_disconn&quot;).compare((char*)_a) == 0)
+    cgo_disconn = (COMMAND_CGO_DISCONN_FUNCTION)_b;
+    if (QString(&quot;cgo_command&quot;).compare((char*)_a) == 0)
+    cgo_command = (COMMAND_CGO_COMMAND_FUNCTION)_b;
+    if (QString(&quot;cgo_shortcuts&quot;).compare((char*)_a) == 0)
+    cgo_shortcuts = (COMMAND_CGO_SHORTCUTS_FUNCTION)_b;
+    if (QString(&quot;cgo_message&quot;).compare((char*)_a) == 0)
+    cgo_message = (COMMAND_CGO_MESSAGE_FUNCTION)_b;
+    if (QString(&quot;cgo_goline&quot;).compare((char*)_a) == 0)
+    cgo_goline = (COMMAND_CGO_GOLINE_FUNCTION)_b;
+    return 1;
+}
+</code></pre>
+
+<hr />
+
+<h3>主要说一下，函数传递进来，怎么用</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 所有会用到Go函数的类都需要有(Cgo *cgo 和 setCgo(Cgo*))
+class Examples : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit Examples(QWidget *parent = 0);
+    ~Examples();
+
+public:
+    QTimer* timer;
+    Cgo* cgo; // 这里
+
+public:
+
+    void sendDisplay(const char *);
+
+    int setCgo(Cgo*); // 这里
+
+.........
+
+// 另一个，QDialog 里面也是一样
+class Connect : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit Connect(QWidget *parent = 0);
+    ~Connect();
+
+public:
+    Cgo *cgo;
+
+public:
+    int setCgo(Cgo*);
+
+.......
+
+// 至于怎么设置，不用我说了吧
+int Connect::setCgo(Cgo *_a)
+{
+    cgo = _a;
+}
+</code></pre>
+
+<hr />
+
+<p>也就是说，新建一个Cgo类，把所有Go传入进来的类型都放到里面去，然后传到QT类里面!!!</p>
+
+<hr />
+
+<pre><code>void Examples::sendMessage()
+{
+    // 这里用了 Examples 里面的 cgo
+    void * p = cgo-&gt;cgo_message();
+    QString command = (char*)p;
+    if (!command.isEmpty())
+    {
+    QMessageBox::information(this, tr(&quot;提示&quot;), tr(command.toLatin1().data()), QMessageBox::Yes);
+    }
+}
+
+// 这里为了让 Connect 也能用所以传入 cgo
+void Examples::on_connect_triggered()
+{
+    Connect conn(this);
+    conn.setCgo(cgo);
+    conn.exec();
+}
+
+.......
+</code></pre>
+
+<hr />
+
+<h3>初始化 cgo_init 所调用函数</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>#include &quot;examples.h&quot;
+#include &quot;cgo.h&quot;
+#include &lt;QApplication&gt;
+
+using namespace std;
+
+// ...
+Examples * win;
+
+// ...
+Cgo * cgo;
+
+// C.cgo_init 这里很重要，要先把, Cgo 初始化.
+extern &quot;C&quot; void cgo_init()
+{
+    cgo = new Cgo();
+}
+
+// C.cgo_start
+extern &quot;C&quot; int cgo_start()
+{
+    int argc = 0 ;
+    char *argv[] = {};
+    QApplication a(argc, argv);
+    QTextCodec::setCodecForTr(QTextCodec::codecForName(&quot;UTF-8&quot;));
+    win = new Examples();
+    win-&gt;setCgo(cgo);
+    win-&gt;show();
+    return a.exec();
+}
+
+// 这是一个 Go 调用 C 函数 C.cgo_callback
+extern &quot;C&quot; void cgo_callback(void * p)
+{
+    win-&gt;sendDisplay((char*)p);
+}
+
+// 这里，在 Go 中调用，传入函数
+extern &quot;C&quot; void drv_cgo_callback(void* _a, void* _b)
+{
+    cgo-&gt;setCgo(_a, _b);
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Qt%E4%B9%8BQLineEdit%E5%85%B3%E9%94%AE%E5%AD%97%E6%8F%90%E7%A4%BA/" title="Qt之QLineEdit关键字提示">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E5%85%B3%E4%BA%8E%E6%9C%80%E8%BF%91%E7%94%A8Golang%E5%92%8CQt%E6%B7%B7%E5%86%99%E7%A8%8B%E5%BA%8F%E6%89%80%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91/" title="关于最近用Golang和Qt混写程序所遇到的坑">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-02-03</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

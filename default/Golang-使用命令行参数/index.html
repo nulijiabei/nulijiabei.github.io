@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-使用命令行参数</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-使用命令行参数 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Golang有两个标准包中都有获得命令行参数的方法：</p>
+
+<pre><code>[*]os/Args可以简单地获得一个类似Ｃ语言中的argv结构
+[*]flag则提供了一个更为复杂的标志与值的方法
+</code></pre>
+
+<p>os.Argsos.Args返回一个字符串数组[] string.</p>
+
+<p>使用方法很简单：package main</p>
+
+<pre><code>import (
+    &quot;fmt&quot;
+    &quot;os&quot;
+)
+
+func main() {
+    fmt.Println(os.Args)
+}
+</code></pre>
+
+<p>使用命令：go run test.go arg1 arg2</p>
+
+<p>可见返回了一个三个元素的数组，第０个元素是程序的名字包括路径，os.Args就第一个参数，os.Args就是第二个参数。</p>
+
+<hr />
+
+<p>flag包flag包提供的功能非常复杂。</p>
+
+<p>它将命令行参数分为非标志类参数(nonflag arguments)和Flags，标志参数是这样的-flagname=x，比如说-baudrate=1200。</p>
+
+<p>非标志类参数为arg1 arg2。</p>
+
+<p>flag参数处理流程由于标志类参数是参数的一部分，但又特殊，为了将标志类参数区别处理</p>
+
+<p>flag包有两类方法，一类是flag处理方法，另一类是正常的参数处理方法。</p>
+
+<p>正常的参数处理方法正常参数处理方法与os.Args差不多，这里是一个方法，flag.Args()，返回也是[]string.</p>
+
+<pre><code>package main
+import (
+    &quot;fmt&quot;
+/*    &quot;os/exec&quot;
+    &quot;bytes&quot;*/
+    &quot;flag&quot;
+)
+
+func main() {
+    flag.Parse()
+    fmt.Println(flag.Args())
+} 
+
+go run test.go arg1 arg2
+</code></pre>
+
+<p>如果有标志类参数呢？</p>
+
+<pre><code>go run test.go arg1 arg2　-baudrate=1200
+</code></pre>
+
+<p>这里充分证明了标志类参数也是参数。</p>
+
+<p>标志类参数Parse前定义如果使用标志类参数，要提前定义,定义之后再调用Parse才能解析出来：</p>
+
+<pre><code>package main
+import (
+    &quot;fmt&quot;
+    &quot;flag&quot;
+)
+
+func main() {
+    baudrate:=flag.Int(&quot;baudrate&quot;,1200, &quot;help message for flagname&quot;)
+    databits:=flag.Int(&quot;databits&quot;,10,&quot;number of data bits&quot;)
+    flag.Parse()
+    fmt.Println(*baudrate)
+    fmt.Println(*databits)
+    fmt.Println(flag.Args())
+}
+
+go run test.go -baudrate=9600 -databits=8 arg1 arg2
+</code></pre>
+
+<p>标志类参数必须在Parse之定义，否则会出错：</p>
+
+<pre><code>package main
+import (
+    &quot;fmt&quot;
+    &quot;flag&quot;
+)
+
+func main() {
+    flag.Parse()
+    baudrate:=flag.Int(&quot;baudrate&quot;,1200, &quot;help message for flagname&quot;)
+    databits:=flag.Int(&quot;databits&quot;,10,&quot;number of data bits&quot;)
+    fmt.Println(*baudrate)
+    fmt.Println(*databits)
+    fmt.Println(flag.Args())
+}
+
+go run test.go -baudrate=9600 -databits=8 arg1 arg2
+
+flag provided but not defined: -baudrate
+
+Usage of /tmp/go-build944578075/command-line-arguments/_obj/a.out:
+exit status 2
+</code></pre>
+
+<p>flag.Int返回的是地址</p>
+
+<p>需要注意的是这里flag.Int返回的值为一个地址，你可以随时到这个地址里去取值</p>
+
+<p>但在Parse之前取值，取到的是默认值，Parse之后去随值，取到的才是真正的值：</p>
+
+<pre><code>package main
+import (
+    &quot;fmt&quot;
+    &quot;flag&quot;
+)
+
+func main() {
+    baudrate:=flag.Int(&quot;baudrate&quot;,1200, &quot;help message for flagname&quot;)
+    databits:=flag.Int(&quot;databits&quot;,10,&quot;number of data bits&quot;)
+
+    fmt.Println(*baudrate)
+    fmt.Println(*databits)
+    flag.Parse()
+    fmt.Println(flag.Args())
+}
+
+go run test.go -baudrate=9600 -databits=8 arg1 arg2
+</code></pre>
+
+<p>标志类参数顺序</p>
+
+<p>标志类参数之间的前后顺序可以改变，但是似乎标志类参数非要放到非标志类参数之前才能正确解析。</p>
+
+<pre><code>package main
+import (
+    &quot;fmt&quot;
+    &quot;flag&quot;
+)
+
+func main() {
+    databits:=flag.Int(&quot;databits&quot;,10,&quot;number of data bits&quot;)
+    baudrate:=flag.Int(&quot;baudrate&quot;,1200, &quot;help message for flagname&quot;)
+    flag.Parse()
+    fmt.Println(*baudrate)
+    fmt.Println(*databits)
+    fmt.Println(flag.Args())
+}
+
+go run test.go -baudrate=9600 -databits=8 arg1 arg2
+</code></pre>
+
+<p>上面的命令正确解析了，调换了baudrate和databits的顺序</p>
+
+<pre><code>go run test.go arg1 -baudrate=9600 -databits=8  arg2
+</code></pre>
+
+<p>上前这里没能正确解析，可以baudrate和databits得到的还是默认值，而非标志类参数获取到了所有的参数。</p>
+
+<p>&ndash;help</p>
+
+<p>flag.Int的最后一个参数是help信息：</p>
+
+<pre><code>go run test.go --help
+
+Usage of /tmp/go-build327358548/command-line-arguments/_obj/a.out:
+  -baudrate=1200: help message for flagname
+  -databits=10: number of data bits
+exit status 2
+</code></pre>
+
+<p>flag.String传入的参数显然不能都是数字，实际go语言提供的类型都支持，与flag.Int类似，所有其他函数都有：</p>
+
+<pre><code>flag.String flag.Uint flag.Float64....
+</code></pre>
+
+<p>flag.IntVarflag.Int返回的是指针，用起来可以有点不太好，flag.IntVar可能用起来更好的些：</p>
+
+<pre><code>var baudrate int
+flag.IntVar(&amp;baudrate,&quot;baudrate&quot;,1200,&quot;baudrate of serial port&quot;)
+flag.Parse()
+fmt.Println(baudrate)
+</code></pre>
+
+<p>当前你一样可以用flag.UintVar flag.Float64Var  flag.StringVar</p>
+
+<p>参数个数参数个数也分为标志类参数的非标志类参数，两个方法为NArg和NFlag,</p>
+
+<pre><code>package main
+import (
+    &quot;fmt&quot;
+    &quot;flag&quot;
+)
+
+func main() {
+    databits:=flag.Int(&quot;databits&quot;,10,&quot;number of data bits&quot;)
+    baudrate:=flag.Int(&quot;baudrate&quot;,1200, &quot;help message for flagname&quot;)
+    flag.Parse()
+    fmt.Println(*baudrate)
+    fmt.Println(*databits)
+    fmt.Println(flag.Args())
+    fmt.Println(flag.NArg())
+    fmt.Println(flag.NFlag())
+}
+
+go run test.go -baudrate=9600 -databits=8 arg1 arg2
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/" title="Golang-文件操作">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-Time/" title="Golang-Time">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-15</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

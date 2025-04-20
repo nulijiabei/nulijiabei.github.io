@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之监听返回键用法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之监听返回键用法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<p>主要是实现onKeyDown函数，并且判断KeyEvent.KEYCODE_BACK即可</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+    if (keyCode == KeyEvent.KEYCODE_BACK )
+    {
+        // 创建退出对话框
+        final AlertDialog.Builder isExit = new AlertDialog.Builder(this)
+        // 设置对话框标题
+        .setTitle(&quot;系统提示&quot;)
+        // 设置对话框消息
+        .setMessage(&quot;确定要退出吗?&quot;);
+        // 添加一个按钮，并监听按钮事件 (积极的;确实的)
+        isExit.setPositiveButton(&quot;确定&quot;, new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            // 关闭, 自定义 exitActivity() 方法
+                    AgentApplication.exitActivity();
+        }
+        });
+        // 添加一个按钮，并监听按钮事件 (消极的;否认的)
+        isExit.setNegativeButton(&quot;取消&quot;, new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            // 关闭
+            return;
+        }
+        });
+        // 显示对话框
+        isExit.create().show();
+    }
+
+    return false;
+
+    }
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>完美关闭程序，需要记录所有 Activity 统一关闭</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 保存着所有 Activity 关闭时，统一释放
+public class AgentApplication extends Application {
+
+    private static List&lt;Activity&gt; activities = new ArrayList&lt;Activity&gt;();
+
+    public static void addActivity(Activity activity) {
+    activities.add(activity);
+    }
+
+    public static void exitActivity() {
+    for (Activity activity : activities) {
+        activity.finish();
+    }
+    System.exit(0);
+    }
+
+}
+
+// 一个 Activity
+public class MainActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    // 这里，每个 Activity onCreate 都要添加
+    AgentApplication.addActivity(this);
+    }
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>OnkeyDown 和 OnBackPressed 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// OnkeyDown事件和OnkeyUp事件是不同事件。 
+// OnBackPressed方法会处理返回键的操作，不会向上传播
+// 如果你想向上传播 请使用OnkeyDown事件或OnkeyUp事件
+@Override
+public void onBackPressed() {
+    super.onBackPressed();
+}
+
+// ...
+@Override
+public boolean onKeyDown(int keyCode, KeyEvent event) {
+    return false;
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BFragment%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之Fragment使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BSubMenu%E5%92%8CPopupMenu%E8%8F%9C%E5%8D%95%E7%9A%84%E4%BD%BF%E7%94%A8/" title="Android之SubMenu和PopupMenu菜单的使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-10</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

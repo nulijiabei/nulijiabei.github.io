@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-标准库解读-基本的IO接口</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-标准库解读-基本的IO接口 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>io 包为I/O原语提供了基本的接口。它主要包装了这些原语的已有实现。</p>
+
+<p>由于这些接口和原语以不同的实现包装了低级操作，因此除非另行通知，否则客户端不应假定它们对于并行执行是安全的。</p>
+
+<p>在io包中最重要的是两个接口：</p>
+
+<pre><code>Reader和Writer接口。
+</code></pre>
+
+<p>本章所提到的各种IO包，都跟这两个接口有关，也就是说，只要实现了这两个接口，它就有了IO的功能。</p>
+
+<p>Reader接口Reader接口的定义如下：</p>
+
+<pre><code>type Reader interface {    Read(p []byte) (n int, err error)}
+</code></pre>
+
+<p>官方文档中关于该接口方法的说明：</p>
+
+<p>Read 将 len(p) 个字节读取到 p 中。</p>
+
+<p>它返回读取的字节数 n（0 &lt;= n &lt;= len(p)） 以及任何遇到的错误。</p>
+
+<p>即使 Read 返回的 n &lt; len(p)，它也会在调用过程中使用 p 的全部作为暂存空间。</p>
+
+<p>若一些数据可用但不到 len(p) 个字节，Read 会照例返回可用的数据，而不是等待更多数据。</p>
+
+<p>当 Read 在成功读取 n &gt; 0 个字节后遇到一个错误或EOF（end-of-file），它就会返回读取的字节数。</p>
+
+<p>它会从相同的调用中返回（非nil的）错误或从随后的调用中返回错误（同时 n == 0）。</p>
+
+<p>一般情况的一个例子就是 Reader 在输入流结束时会返回一个非零的字节数，同时返回的err不是EOF就是nil。</p>
+
+<p>无论如何，下一个 Read 都应当返回 0, EOF。</p>
+
+<p>调用者应当总在考虑到错误 err 前处理 n &gt; 0 的字节。</p>
+
+<p>这样做可以在读取一些字节，以及允许的 EOF 行为后正确地处理I/O错误。</p>
+
+<p>也就是说，当Read方法返回错误时，不代表没有读取到任何数据。</p>
+
+<p>调用者应该处理返回的任何数据，之后才处理可能的错误。</p>
+
+<p>根据Go语言中关于接口和实现了接口的类型的定义（Interface_types），</p>
+
+<p>我们知道Reader接口的方法集（Method_sets）只包含一个Read方法，因此，所有实现了Read方法的类型都实现了io.Reader接口，</p>
+
+<p>也就是说，在所有需要io.Reader的地方，可以传递实现了Read()方法的类型的实例。</p>
+
+<p>下面，我们通过具体例子来谈谈该接口的用法。</p>
+
+<pre><code>func ReadFrom(reader io.Reader, num int) ([]byte, error) {
+    p := make([]byte, num)
+    n, err := reader.Read(p)
+    if n &gt; 0 {
+    return p[:n], nil
+    }
+    return p, err
+}
+</code></pre>
+
+<p>ReadFrom函数将io.Reader作为参数，也就是说，ReadFrom可以从任意的地方读取数据，只要来源实现了io.Reader接口。</p>
+
+<p>比如，我们可以从标准输入、文件、字符串等读取数据，示例代码如下：</p>
+
+<pre><code>// 从标准输入读取
+data, err = ReadFrom(os.Stdin, 11)
+// 从普通文件读取，其中file是os.File的实例
+data, err = ReadFrom(file, 9)
+// 从字符串读取
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+</code></pre>
+
+<p>完整的演示例子源码见</p>
+
+<p><a href="https://github.com/polaris1119/The-Golang-Standard-Library-by-Example/blob/master/code/src/chapter01/io/reader.go">https://github.com/polaris1119/The-Golang-Standard-Library-by-Example/blob/master/code/src/chapter01/io/reader.go</a></p>
+
+<p>小贴士</p>
+
+<p>io.EOF 变量的定义：var EOF = errors.New(&ldquo;EOF&rdquo;)，是error类型。</p>
+
+<p>根据reader接口的说明，在 n &gt; 0 且数据被读完了的情况下，返回的error有可能是EOF也有可能是nil。</p>
+
+<p>Writer接口Writer接口的定义如下：</p>
+
+<pre><code>type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+</code></pre>
+
+<p>官方文档中关于该接口方法的说明：</p>
+
+<p>Write 将 len(p) 个字节从 p 中写入到基本数据流中。</p>
+
+<p>它返回从 p 中被写入的字节数 n（0 &lt;= n &lt;= len(p)）以及任何遇到的引起写入提前停止的错误。</p>
+
+<p>若 Write 返回的 n &lt; len(p)，它就必须返回一个非nil的错误。</p>
+
+<p>同样的，所有实现了Write方法的类型都实现了io.Writer接口。</p>
+
+<p>在上个例子中，我们是自己实现一个函数接收一个io.Reader类型的参数。这里，我们通过标准库的例子来学习。</p>
+
+<p>在fmt标准库中，有一组函数：Fprint/Fprintf/Fprintln，它们接收一个io.Wrtier类型参数（第一个参数），</p>
+
+<p>也就是说它们将数据格式化输出到io.Writer中。那么，调用这组函数时，该如何传递这个参数呢？</p>
+
+<p>我们以fmt.Fprintln为例，同时看一下fmt.Println函数的源码。</p>
+
+<pre><code>func Println(a ...interface{}) (n int, err error) {
+    return Fprintln(os.Stdout, a...)
+}
+</code></pre>
+
+<p>实现了io.Reader接口或io.Writer接口的类型初学者看到函数参数是一个接口类型，很多时候有些束手无策，不知道该怎么传递参数。</p>
+
+<p>还有人问：标准库中有哪些类型实现了io.Reader或io.Writer接口？</p>
+
+<pre><code>var (
+    Stdin  = NewFile(uintptr(syscall.Stdin), &quot;/dev/stdin&quot;)
+    Stdout = NewFile(uintptr(syscall.Stdout), &quot;/dev/stdout&quot;)
+    Stderr = NewFile(uintptr(syscall.Stderr), &quot;/dev/stderr&quot;)
+)
+</code></pre>
+
+<p>通过本节上面的例子，我们可以知道，os.File同时实现了这两个接口。</p>
+
+<p>我们还看到 os.Stdin/Stdout这样的代码，它们似乎分别实现了 io.Reader/io.Writer接口。</p>
+
+<p>没错，实际上在os包中有这样的代码：</p>
+
+<pre><code>var (
+    Stdin  = NewFile(uintptr(syscall.Stdin), &quot;/dev/stdin&quot;)
+    Stdout = NewFile(uintptr(syscall.Stdout), &quot;/dev/stdout&quot;)
+    Stderr = NewFile(uintptr(syscall.Stderr), &quot;/dev/stderr&quot;)
+)
+</code></pre>
+
+<p>也就是说，Stdin/Stdout/Stderr 只是三个特殊的文件（即都是os.File的实例），自然也实现了io.Reader和io.Writer。</p>
+
+<p>目前，Go文档中还没发直接列出实现了某个接口的所有类型。</p>
+
+<p>不过，我们可以通过查看标准库文档，列出实现了io.Reader或io.Writer接口的类型（导出的类型）：</p>
+
+<pre><code>os.File 同时实现了io.Reader和io.Writer
+strings.Reader 实现了io.Reader
+bufio.Reader/Writer 分别实现了io.Reader和io.Writer
+bytes.Buffer 同时实现了io.Reader和io.Writer
+bytes.Reader 实现了io.Reader
+compress/gzip.Reader/Writer 分别实现了io.Reader和io.Writer
+crypto/cipher.StreamReader/StreamWriter 分别实现了io.Reader和io.Writer
+crypto/tls.Conn 同时实现了io.Reader和io.Writer
+encoding/csv.Reader/Writer 分别实现了io.Reader和io.Writer
+mime/multipart.Part 实现了io.Reader
+</code></pre>
+
+<p>除此之外，io包本身也有这两个接口的实现类型。如：</p>
+
+<p>实现了Reader的类型：LimitedReader、PipeReader、SectionReader</p>
+
+<p>实现了Writer的类型：PipeWriter以上类型中，常用的类型有：os.File、strings.Reader、bufio.Reader/Writer、bytes.Buffer、bytes.Reader</p>
+
+<p>小贴士</p>
+
+<p>从接口名称很容易猜到，一般地，Go中接口的命名约定：接口名以er结尾。</p>
+
+<p>注意，这里并非强行要求，你完全可以不以 er 结尾。标准库中有些接口也不是以 er 结尾的。</p>
+
+<p>ReaderAt和WriterAt接口ReaderAt接口的定义如下：</p>
+
+<pre><code>type ReaderAt interface {
+    ReadAt(p []byte, off int64) (n int, err error)
+}
+</code></pre>
+
+<p>官方文档中关于该接口方法的说明：</p>
+
+<p>ReadAt 从基本输入源的偏移量 off 处开始，将 len(p) 个字节读取到 p 中。</p>
+
+<p>它返回读取的字节数 n（0 &lt;= n &lt;= len(p)）以及任何遇到的错误。</p>
+
+<p>当 ReadAt 返回的 n &lt; len(p) 时，它就会返回一个非nil的错误来解释 为什么没有返回更多的字节。</p>
+
+<p>在这一点上，ReadAt 比 Read 更严格。</p>
+
+<p>即使 ReadAt 返回的 n &lt; len(p)，它也会在调用过程中使用 p 的全部作为暂存空间。</p>
+
+<p>若一些数据可用但不到 len(p) 字节，ReadAt 就会阻塞直到所有数据都可用或产生一个错误。 在这一点上 ReadAt 不同于 Read。</p>
+
+<p>若 n = len(p) 个字节在输入源的的结尾处由 ReadAt 返回，那么这时 err == EOF 或者 err == nil。</p>
+
+<p>若 ReadAt 按查找偏移量从输入源读取，ReadAt 应当既不影响基本查找偏移量也不被它所影响。</p>
+
+<p>ReadAt 的客户端可对相同的输入源并行执行 ReadAt 调用。</p>
+
+<p>可见，ReaderAt接口使得可以从指定偏移量处开始读取数据。</p>
+
+<p>简单示例代码如下：</p>
+
+<pre><code>reader := strings.NewReader(&quot;Go语言学习园地&quot;)
+p := make([]byte, 6)
+n, err := reader.ReadAt(p, 2)
+if err != nil {
+    panic(err)
+}
+fmt.Printf(&quot;%s, %d\n&quot;, p, n)
+</code></pre>
+
+<p>WriterAt接口的定义如下：</p>
+
+<pre><code>type WriterAt interface {
+    WriteAt(p []byte, off int64) (n int, err error)
+}
+</code></pre>
+
+<p>官方文档中关于该接口方法的说明：</p>
+
+<p>WriteAt 从 p 中将 len(p) 个字节写入到偏移量 off 处的基本数据流中。</p>
+
+<p>它返回从 p 中被写入的字节数 n（0 &lt;= n &lt;= len(p)）以及任何遇到的引起写入提前停止的错误。</p>
+
+<p>若 WriteAt 返回的 n &lt; len(p)，它就必须返回一个非nil的错误。</p>
+
+<p>若 WriteAt 按查找偏移量写入到目标中，WriteAt 应当既不影响基本查找偏移量也不被它所影响。</p>
+
+<p>若区域没有重叠，WriteAt 的客户端可对相同的目标并行执行 WriteAt 调用。</p>
+
+<p>我们可以通过该接口将数据写入数据流的特定偏移量之后。</p>
+
+<p>通过简单示例来演示WriteAt方法的使用（os.File实现了WriterAt接口）：</p>
+
+<pre><code>file, err := os.Create(&quot;writeAt.txt&quot;)
+if err != nil {
+    panic(err)
+}
+defer file.Close()
+file.WriteString(&quot;Golang中文社区——这里是多余的&quot;)
+n, err := file.WriteAt([]byte(&quot;Go语言学习园地&quot;), 24)
+if err != nil {
+    panic(err)
+}
+fmt.Println(n)
+</code></pre>
+
+<p>打开文件WriteAt.txt，内容是：Golang中文社区——Go语言学习园地。</p>
+
+<p>分析：</p>
+
+<p>file.WriteString(&ldquo;Golang中文社区——这里是多余的&rdquo;) 往文件中写入Golang中文社区——这里是多余的</p>
+
+<p>之后file.WriteAt([]byte(&ldquo;Go语言学习园地&rdquo;), 24) 在文件流的offset=24处写入Go语言学习园地（会覆盖该位置的内容）。</p>
+
+<p>ReaderFrom 和 WriterTo 接口ReaderFrom的定义如下：</p>
+
+<pre><code>type ReaderFrom interface {
+    ReadFrom(r Reader) (n int64, err error)
+}
+</code></pre>
+
+<p>官方文档中关于该接口方法的说明：</p>
+
+<p>ReadFrom 从 r 中读取数据，直到 EOF 或发生错误。</p>
+
+<p>其返回值 n 为读取的字节数。除 io.EOF 之外，在读取过程中遇到的任何错误也将被返回。</p>
+
+<p>如果 ReaderFrom 可用，Copy 函数就会使用它。</p>
+
+<p>注意：ReadFrom方法不会返回err == EOF。</p>
+
+<p>下面的例子简单的实现将文件中的数据全部读取（显示在标准输出）：</p>
+
+<pre><code>file, err := os.Open(&quot;writeAt.txt&quot;)
+if err != nil {
+    panic(err)
+}
+defer file.Close()
+writer := bufio.NewWriter(os.Stdout)
+writer.ReadFrom(file)
+writer.Flush()
+</code></pre>
+
+<p>当然，我们可以通过ioutil包的ReadFile函数获取文件全部内容。</p>
+
+<p>其实，跟踪一下ioutil.ReadFile的源码，会发现其实也是通过ReadFrom方法实现（用的是bytes.Buffer，它实现了ReaderFrom接口）。</p>
+
+<p>如果不通过ReadFrom接口来做这件事，而是使用io.Reader接口，我们有两种思路：</p>
+
+<p>先获取文件的大小（File的Stat方法），之后定义一个该大小的[]byte，通过Read一次性读取</p>
+
+<p>定义一个小的[]byte，不断的调用Read方法直到遇到EOF，将所有读取到的[]byte连接到一起</p>
+
+<p>这里不给出实现代码了，有兴趣的可以实现以下。</p>
+
+<p>提示</p>
+
+<p>通过查看 bufio.Writer或strings.Buffer 类型的ReadFrom方法实现，会发现，其实它们的实现和上面说的第2种思路类似。</p>
+
+<p>WriterTo的定义如下：</p>
+
+<pre><code>type WriterTo interface {
+    WriteTo(w Writer) (n int64, err error)
+}
+</code></pre>
+
+<p>官方文档中关于该接口方法的说明：</p>
+
+<p>WriteTo 将数据写入 w 中，直到没有数据可写或发生错误。其返回值 n 为写入的字节数</p>
+
+<p>在写入过程中遇到的任何错误也将被返回。</p>
+
+<p>如果 WriterTo 可用，Copy 函数就会使用它。</p>
+
+<p>读者是否发现，其实ReaderFrom和WriterTo接口的方法接收的参数是io.Reader和io.Writer类型。</p>
+
+<p>根据io.Reader和io.Writer接口的讲解，对该接口的使用应该可以很好的掌握。</p>
+
+<p>这里只提供简单的一个示例代码：将一段文本输出到标准输出</p>
+
+<pre><code>reader := bytes.NewReader([]byte(&quot;Go语言学习园地&quot;))
+reader.WriteTo(os.Stdout)
+</code></pre>
+
+<p>通过io.ReaderFrom和io.WriterTo的学习，我们知道，如果这样的需求，可以考虑使用这两个接口：“一次性从某个地方读或写到某个地方去。”</p>
+
+<p>Seeker接口接口定义如下：</p>
+
+<pre><code>type Seeker interface {
+    Seek(offset int64, whence int) (ret int64, err error)
+}
+</code></pre>
+
+<p>官方文档中关于该接口方法的说明：</p>
+
+<p>Seek 设置下一次 Read 或 Write 的偏移量为 offset</p>
+
+<p>它的解释取决于 whence： 0 表示相对于文件的起始处，1 表示相对于当前的偏移，而 2 表示相对于其结尾处。</p>
+
+<p>Seek 返回新的偏移量和一个错误，如果有的话。</p>
+
+<p>也就是说，Seek方法用于设置偏移量的，这样可以从某个特定位置开始操作数据流。</p>
+
+<p>听起来和ReaderAt/WriteAt接口有些类似，不过Seeker接口更灵活，可以更好的控制读写数据流的位置。</p>
+
+<p>简单的示例代码：获取倒数第二个字符（需要考虑UTF-8编码，这里的代码只是一个示例）</p>
+
+<pre><code>reader := strings.NewReader(&quot;Go语言学习园地&quot;)
+reader.Seek(-6, os.SEEK_END)
+r, _, _ := reader.ReadRune()
+fmt.Printf(&quot;%c\n&quot;, r)
+</code></pre>
+
+<p>小贴士</p>
+
+<p>whence的值，在os包中定义了相应的常量，应该使用这些常量</p>
+
+<pre><code>const (
+    SEEK_SET int = 0 // seek relative to the origin of the file
+    SEEK_CUR int = 1 // seek relative to the current offset
+    SEEK_END int = 2 // seek relative to the end
+)
+</code></pre>
+
+<hr />
+
+<p>Closer接口接口定义如下：</p>
+
+<pre><code>type Closer interface {
+    Close() error
+}
+</code></pre>
+
+<p>该接口比较简单，只有一个Close()方法，用于关闭数据流。</p>
+
+<p>文件(os.File)、归档（压缩包）、数据库连接、Socket等需要手动关闭的资源都实现了Closer接口。</p>
+
+<p>实际编程中，经常将Close方法的调用放在defer语句中。</p>
+
+<p>小提示</p>
+
+<p>初学者容易写出这样的代码：</p>
+
+<pre><code>file, err := os.Open(&quot;studygolang.txt&quot;)
+defer file.Close()
+if err != nil {
+    ...
+}
+</code></pre>
+
+<p>当文件 studygolang.txt 不存在或找不到时，file.Close()会panic，因为file是nil。</p>
+
+<p>因此，应该将defer file.Close()放在错误检查之后。</p>
+
+<p>其他接口ByteReader和ByteWriter通过名称大概也能猜出这组接口的用途：读或写一个字节。接口定义如下：</p>
+
+<pre><code>type ByteReader interface {
+    ReadByte() (c byte, err error)
+}
+
+type ByteWriter interface {
+    WriteByte(c byte) error
+}
+</code></pre>
+
+<p>在标准库中，有如下类型实现了io.ByteReader或io.ByteWriter:</p>
+
+<pre><code>bufio.Reader/Writer 分别实现了io.ByteReader和io.ByteWriter
+bytes.Buffer 同时实现了io.ByteReader和io.ByteWriter
+bytes.Reader 实现了io.ByteReader
+strings.Reader 实现了io.ByteReader
+</code></pre>
+
+<p>接下来的示例中，我们通过bytes.Buffer来一次读取或写入一个字节（主要代码）：</p>
+
+<pre><code>var ch byte
+fmt.Scanf(&quot;%c\n&quot;, &amp;ch)
+
+buffer := new(bytes.Buffer)
+err := buffer.WriteByte(ch)
+if err == nil {
+    fmt.Println(&quot;写入一个字节成功！准备读取该字节……&quot;)
+    newCh, _ := buffer.ReadByte()
+    fmt.Printf(&quot;读取的字节：%c\n&quot;, newCh)
+} else {
+    fmt.Println(&quot;写入错误&quot;)
+}
+</code></pre>
+
+<p>程序从标准输入接收一个字节（ASCII字符），调用buffer的WriteByte将该字节写入buffer中，之后通过ReadByte读取该字节。</p>
+
+<p>完整的代码见：code/src/chapter01/io/byterwer.go</p>
+
+<p>一般地，我们不会使用bytes.Buffer来一次读取或写入一个字节。那么，这两个接口有哪些用处呢？</p>
+
+<p>在标准库encoding/binary中，实现Google-ProtoBuf中的Varints读取，ReadVarint就需要一个io.ByteReader类型的参数，</p>
+
+<p>也就是说，它需要一个字节一个字节的读取。关于encoding/binary包在后面会详细介绍。</p>
+
+<p>在标准库image/jpeg中，Encode函数的内部实现使用了ByteWriter写入一个字节。</p>
+
+<p>小贴士</p>
+
+<p>可以通过在Go语言源码src/pkg中搜索&rdquo;io.ByteReader&rdquo;或&rdquo;io.ByteWiter&rdquo;，获得哪些地方用到了这两个接口。</p>
+
+<p>你会发现，这两个接口在二进制数据或归档压缩时用的比较多。</p>
+
+<p>ByteScanner、RuneReader和RuneScanner将这三个接口放在一起，是考虑到与ByteReader相关或相应。</p>
+
+<p>ByteScanner接口的定义如下：</p>
+
+<pre><code>type ByteScanner interface {
+    ByteReader
+    UnreadByte() error
+}
+</code></pre>
+
+<p>可见，它内嵌了ByteReader接口（可以理解为继承了ByteReader接口），UnreadByte方法的意思是：</p>
+
+<p>将上一次ReadByte的字节还原，使得再次调用ReadByte返回的结果和上一次调用相同，</p>
+
+<p>也就是说，UnreadByte是重置上一次的ReadByte。注意，UnreadByte调用之前必须调用了ReadByte，且不能连续调用UnreadByte。即：</p>
+
+<pre><code>buffer := bytes.NewBuffer([]byte{'a', 'b'})
+err := buffer.UnreadByte()
+和
+buffer := bytes.NewBuffer([]byte{'a', 'b'})
+buffer.ReadByte()
+err := buffer.UnreadByte()
+err = buffer.UnreadByte()
+</code></pre>
+
+<p>err都非nil，错误为：</p>
+
+<pre><code>bytes.Buffer: UnreadByte: previous operation was not a read
+</code></pre>
+
+<p>RuneReader接口和ByteReader类似，只是ReadRune方法读取单个UTF-8字符，</p>
+
+<p>返回其rune和该字符占用的字节数。该接口在regexp包有用到。</p>
+
+<p>之前有人在QQ群中问道：</p>
+
+<p>strings.Index(“行业交流群”,“交流”) 返回的是单字节字符的位置：6。</p>
+
+<p>但是想要的是unicode字符的位置：2。</p>
+
+<p>当时以为strings.IndexRune可以，然而IndexRune还不如Index，一方面第二个参数是rune类型；</p>
+
+<p>另一方面返回的结果跟Index是一样的。这里通过RuneReader接口来实现这个需求，代码如下：</p>
+
+<pre><code>// strings.Index的UTF-8版本// 即 Utf8Index(&quot;Go语言学习园地&quot;, &quot;学习&quot;) 返回 4，而不是strings.Index的 8
+
+func Utf8Index(str, substr string) int {
+    asciiPos := strings.Index(str, substr)
+    if asciiPos == -1 || asciiPos == 0 {
+    return asciiPos
+    }
+    pos := 0
+    totalSize := 0
+    reader := strings.NewReader(str)
+    for _, size, err := reader.ReadRune(); err == nil; _, size, err = reader.ReadRune(){
+    totalSize += size
+    pos++
+    // 匹配到
+    if totalSize == asciiPos {
+        return pos
+    }
+    }
+    return pos
+}
+</code></pre>
+
+<p>该实现借助了strings.Index。</p>
+
+<p>另外，此处的strings.NewReader可以换成bytes.NewBufferString，</p>
+
+<p>不过，根据strings.NewReader的文档，strings.Reader比bytes.Buffer效率更高，</p>
+
+<p>只是strings.Reader是只读的，而bytes.Buffer是可读写的（从前面介绍的实现的接口可以知道）。</p>
+
+<p>关于bytes和strings包，后面章节会详细介绍。</p>
+
+<p>RuneScanner接口和ByteScanner类似，就不赘述了。</p>
+
+<p>ReadCloser、ReadSeeker、ReadWriteCloser、ReadWriteSeeker、ReadWriter、WriteCloser和WriteSeeker接口</p>
+
+<p>这些接口是上面介绍的接口的两个或三个组合而成的新接口。</p>
+
+<p>例如ReadWriter接口：</p>
+
+<pre><code>type ReadWriter interface {
+    Reader
+    Writer
+}
+</code></pre>
+
+<p>这是Reader接口和Writer接口的简单组合（内嵌）。</p>
+
+<p>这些接口的作用是：有些时候同时需要某两个接口的所有功能，即必须同时实现了某两个接口的类型才能够被传入使用。</p>
+
+<p>可见，io包中有大量的&rdquo;小接口&rdquo;，这样方便组合为&rdquo;大接口&rdquo;。</p>
+
+<p>SectionReader 类型SectionReader是一个struct（没有任何导出的字段），实现了 Read, Seek 和 ReadAt，同时，</p>
+
+<p>内嵌了 ReaderAt 接口。结构定义如下：</p>
+
+<pre><code>type SectionReader struct {
+    r     ReaderAt  // 该类型最终的 Read/ReadAt 最终都是通过 r 的 ReadAt 实现
+    base  int64     // NewSectionReader 会将 base 设置为 off
+    off   int64     // 从 r 中的 off 偏移处开始读取数据
+    limit int64     // limit - off = SectionReader 流的长度
+}
+</code></pre>
+
+<p>从名称我们可以猜到，该类型读取数据流中部分数据。看一下</p>
+
+<p><code>func NewSectionReader(r ReaderAt, off int64, n int64) *SectionReader</code>的文档说明就知道了：</p>
+
+<p>NewSectionReader 返回一个 SectionReader，它从 r 中的偏移量 off 处读取 n 个字节后以 EOF 停止。</p>
+
+<p>也就是说，SectionReader 只是内部（内嵌）ReaderAt表示的数据流的一部分：从 off 开始后的n个字节。</p>
+
+<p>这个类型的作用是：方便重复操作某一段(section)数据流；或者同时需要ReadAt和Seek的功能。</p>
+
+<p>由于该类型所支持的操作，前面都有介绍，因此提供示例代码了。</p>
+
+<p>关于该类型在标准库中的使用，我们在 8.5 archive/zip — zip归档访问 会讲到。</p>
+
+<p>LimitedReader 类型LimitedReader 类型定义如下：</p>
+
+<pre><code>type LimitedReader struct {
+    R Reader // underlying reader，最终的读取操作通过 R.Read 完成
+    N int64  // max bytes remaining
+}
+</code></pre>
+
+<p>文档说明如下：</p>
+
+<p>从 R 读取但将返回的数据量限制为 N 字节。</p>
+
+<p>每调用一次 Read 都将更新 N 来反应新的剩余数量。</p>
+
+<p>也就是说，最多只能返回 N 字节数据。</p>
+
+<pre><code>LimitedReader只实现了Read方法（Reader接口）。
+</code></pre>
+
+<p>使用示例如下：</p>
+
+<pre><code>content := &quot;This Is LimitReader Example&quot;
+reader := strings.NewReader(content)
+limitReader := &amp;io.LimitedReader{R: reader, N: 8}
+for limitReader.N &gt; 0 {
+    tmp := make([]byte, 2)
+    limitReader.Read(tmp)
+    fmt.Printf(&quot;%s&quot;, tmp)
+}
+</code></pre>
+
+<p>可见，通过该类型可以达到 只允许读取一定长度数据 的目的。</p>
+
+<p>在io包中，LimitReader 函数的实现其实就是调用 LimitedReader：</p>
+
+<p>func LimitReader(r Reader, n int64) Reader { return &amp;LimitedReader{r, n} }</p>
+
+<p>PipReader 和 PipWriter 类型PipReader（一个没有任何导出字段的struct）是管道的读取端。</p>
+
+<p>它实现了io.Reader和io.Closer接口。</p>
+
+<p>关于 Read 方法的说明：从管道中读取数据。</p>
+
+<p>该方法会堵塞，直到管道写入端开始写入数据或写入端关闭了。</p>
+
+<p>如果写入端关闭时带上了error（即调用CloseWithError关闭），该方法返回的err就是写入端传递的error；否则err为EOF。</p>
+
+<p>PipWriter（一个没有任何导出字段的struct）是管道的写入端。它实现了io.Writer和io.Closer接口。</p>
+
+<p>关于 Write 方法的说明：写数据到管道中。</p>
+
+<p>该方法会堵塞，直到管道读取端读完所有数据或读取端关闭了。</p>
+
+<p>如果读取端关闭时带上了error（即调用CloseWithError关闭），该方法返回的err就是读取端传递的error；否则err为 ErrClosedPipe。</p>
+
+<p>其他方法的使用通过例子一起讲解：</p>
+
+<pre><code>func main() {
+    Pipe()
+}
+
+func Pipe() {
+    pipeReader, pipeWriter := io.Pipe()
+    go PipeWrite(pipeWriter)
+    go PipeRead(pipeReader)
+    time.Sleep(1e7)
+}
+
+func PipeWrite(pipeWriter *io.PipeWriter) {
+    var (
+    i   = 0
+    err error
+    n int
+    )
+    data := []byte(&quot;Go语言学习园地&quot;)
+    for _, err = pipeWriter.Write(data); err == nil; n, err = pipeWriter.Write(data) {
+    i++
+    if i == 3 {
+        pipeWriter.CloseWithError(errors.New(&quot;输出3次后结束&quot;))
+    }
+    }
+    fmt.Println(&quot;close 后输出的字节数：&quot;, n, &quot; error：&quot;,  err)
+}
+
+func PipeRead(pipeReader *io.PipeReader) {
+    var (
+    err error
+    n   int
+    )
+    data := make([]byte, 1024)
+    for n, err = pipeReader.Read(data); err == nil; n, err = pipeReader.Read(data) {
+    fmt.Printf(&quot;%s\n&quot;, data[:n])
+    }
+    fmt.Println(&quot;writer 端 closewitherror后：&quot;, err)
+}
+</code></pre>
+
+<p>writer 端 closewitherror后： 输出3次后结束close 后输出的字节数： 20  error： io: read/write on closed pipe</p>
+
+<p>细心的读者可能发现：不是输出3此后结束吗？怎么“Go语言学习园地”却输出了4次？这个问题我们稍候讨论。我们先来分析一下例子代码。</p>
+
+<p>io.Pipe()用于创建创建一个同步的内存管道（synchronous in-memory pipe），</p>
+
+<p>函数签名：</p>
+
+<pre><code>func Pipe() (*PipeReader, *PipeWriter)它将 io.Reader 连接到 io.Writer。
+</code></pre>
+
+<p>一端的读取匹配另一端的写入，直接在这两端之间复制数据；它没有内部缓存。</p>
+
+<p>它对于并行调用 Read 和 Write 以及其它函数或 Close 来说都是安全的。</p>
+
+<p>一旦等待的I/O结束，Close 就会完成。并行调用 Read 或并行调用 Write 也同样安全： 同种类的调用将按顺序进行控制。稍候我们会分析管道相关的源码。</p>
+
+<p>正因为是*同步*的，因此不能在一个goroutine中进行读和写。</p>
+
+<p>在 PipeWrite 函数中，我们循环往管道中写数据，写第三次时，</p>
+
+<p>我们调用 CloseWithError 方法关闭管道的写入端，之后再一次调用 Write 方法，发现返回了error，于是退出了循环。</p>
+
+<p>可是，从输出结果中，我们发现，最后一次写虽然返回error（返回的n并非0），</p>
+
+<p>但是读取端却能读到最后一次写的数据，这让人很费解。下面我们一起来探索一下相关源码，分析问题的原因。</p>
+
+<p>io 包 管道（pipe） 源码分析从上文知道，PipWriter 和 PipeReader 都没有导出成员。</p>
+
+<p>查看源码发现，两者都只有一个成员：p *pipe，这两种类型的所有方法都是调用了 pipe 类型对应的方法实现的。</p>
+
+<p>pipe类型的定义如下：</p>
+
+<pre><code>// A pipe is the shared pipe structure underlying PipeReader and PipeWriter.
+
+type pipe struct {
+    rl    sync.Mutex // gates readers one at a time
+    wl    sync.Mutex // gates writers one at a time
+    l     sync.Mutex // protects remaining fields
+    data  []byte     // data remaining in pending write
+    rwait sync.Cond  // waiting reader
+    wwait sync.Cond  // waiting writer
+    rerr  error      // if reader closed, error to give writes
+    werr  error      // if writer closed, error to give reads
+}
+</code></pre>
+
+<p>字段说明：</p>
+
+<p>rl/wl 用于控制同一时刻只能有一个读取器或写入器</p>
+
+<p>l 用于保护其他字段</p>
+
+<p>data 在管道中的数据</p>
+
+<p>rwait/wwait sync.Cond类型（后续会讲解），分别控制读取器或写入器等待</p>
+
+<p>rerr/werr 读取器（写入器）关闭，该错误会被Write（Read）方法返回</p>
+
+<p>pipe的read方法：</p>
+
+<pre><code>func (p *pipe) read(b []byte) (n int, err error) {
+    // One reader at a time.（控制一次只能一个读取器）
+    p.rl.Lock()
+    defer p.rl.Unlock()
+
+    // 保护其他字段的读写
+    p.l.Lock()
+    defer p.l.Unlock()
+    for {
+    // Reader端关闭后，再Read，则返回ErrClosedPipe
+    if p.rerr != nil {
+        return 0, ErrClosedPipe
+    }
+    // 管道中有数据，退出循环
+    if p.data != nil {
+        break
+    }
+    // Writer端关闭，返回p.werr
+    if p.werr != nil {
+        return 0, p.werr
+    }
+    // 没有数据或管道没有关闭，读取端等待
+    p.rwait.Wait()
+    }
+    // 管道中有数据，将其copy一份到b中
+    n = copy(b, p.data)
+    p.data = p.data[n:]
+    // 如果管道数据被读光，需要唤醒在等待的Writer
+    if len(p.data) == 0 {
+    p.data = nil
+    p.wwait.Signal()
+    }
+    return
+}
+</code></pre>
+
+<p>加上的代码注释已经很清楚了，因此不再赘述。</p>
+
+<p>pipe的write方法：</p>
+
+<pre><code>func (p *pipe) write(b []byte) (n int, err error) {
+    // pipe uses nil to mean not available
+    if b == nil {
+    // zero的定义为：var zero [0]byte
+    b = zero[:]
+    }
+
+    // One writer at a time.
+    p.wl.Lock()
+    defer p.wl.Unlock()
+
+    p.l.Lock()
+    defer p.l.Unlock()
+    // 上面说的问题来了：不管三七二十一，一上来些将数据放进管道中
+    p.data = b
+    // 唤醒在等待的Reader
+    p.rwait.Signal()
+    for {
+    // 数据被读走，退出循环
+    if p.data == nil {
+        break
+    }
+    // Reader端关闭，设置err = p.rerr，退出循环
+    if p.rerr != nil {
+        err = p.rerr
+        break
+    }
+    // Writer端关闭后，再Writer，设置err = ErrClosedPipe
+    if p.werr != nil {
+        err = ErrClosedPipe
+    }
+    // 数据没被读走（全部）或管道读取端没关闭，则等待
+    p.wwait.Wait()
+    }
+    // 计算写入的字节数
+    n = len(b) - len(p.data)
+    p.data = nil // in case of rerr or werr
+    return
+}
+</code></pre>
+
+<p>通过上面两个方法的代码注释，应该清楚例子中为啥输出4次了吧？我们再分析一下：</p>
+
+<p>当i == 3，调用CloseWithError之后，程序执行 for 中的 n, err = pipeWriter.Write(data)，</p>
+
+<p>根据上面pipe.write方法，p.data 会被设置上数据，这个时候，Reader被唤醒，将数据读走（第4次）。</p>
+
+<p>由于异步，多goroutine，跟调度有关系，这个时候Writer可能在等待，也可能在Reader读完数据后将其唤醒，</p>
+
+<p>总之，Writer会执行到 if p.werr != nil，即例子中Write循环结束；</p>
+
+<p>而Reader被唤醒之后，首先判断的是p.data != nil，而不是 p.werr != nil，因此数据被正常读取，且没错误被返回，</p>
+
+<p>这时执行下一次循环，当然，这时候由于没有Write，且 p.werr != nil，于是Read方法返回err(=p.werr)。</p>
+
+<p>个人认为这是一个bug，已经向官方提出：issue5330，修复处：</p>
+
+<p>在pipe.write方法的defer p.l.Unlock()后面增加如下代码：</p>
+
+<pre><code>// 写端关闭了，不让写入数据
+if p.werr != nil {
+    p.rwait.Signal()
+    err = ErrClosedPipe
+    return
+}
+</code></pre>
+
+<p>同时，for循环中如下代码没有必要，删除：</p>
+
+<p>// Writer端关闭后，再Writer，设置err = ErrClosedPipe</p>
+
+<pre><code>if p.werr != nil {
+    err = ErrClosedPipe
+}
+</code></pre>
+
+<p>pipe.read方法中，调整检查p.werr和p.data的顺序，即改为：</p>
+
+<pre><code>if p.werr != nil {
+    return 0, p.werr
+}
+if p.data != nil {
+    break
+}
+</code></pre>
+
+<p>这样不至于有错误时还把数据读走。</p>
+
+<p>另外，对于管道的close方法（非CloseWithError时），err会被置为EOF。</p>
+
+<p>Copy 和 CopyN 函数Copy 函数的签名：</p>
+
+<pre><code>func Copy(dst Writer, src Reader) (written int64, err error)
+</code></pre>
+
+<p>函数文档：</p>
+
+<p>Copy 将 src 复制到 dst，直到在 src 上到达 EOF 或发生错误。</p>
+
+<p>它返回复制的字节数，如果有的话，还会返回在复制时遇到的第一个错误。</p>
+
+<p>成功的 Copy 返回 err == nil，而非 err == EOF。</p>
+
+<p>由于 Copy 被定义为从 src 读取直到 EOF 为止，因此它不会将来自 Read 的 EOF 当做错误来报告。</p>
+
+<p>若 dst 实现了 ReaderFrom 接口，其复制操作可通过调用 dst.ReadFrom(src) 实现。</p>
+
+<p>此外，若 dst 实现了 WriterTo 接口，其复制操作可通过调用 src.WriteTo(dst) 实现。</p>
+
+<p>代码：</p>
+
+<pre><code>io.Copy(os.Stdout, strings.NewReader(&quot;Go语言学习园地&quot;))直接将内容输出（写入Stdout中）。
+</code></pre>
+
+<p>我们甚至可以这么做：</p>
+
+<pre><code>package main
+
+import (
+    &quot;fmt&quot;
+    &quot;io&quot;
+    &quot;os&quot;
+)
+
+func main() {
+    io.Copy(os.Stdout, os.Stdin)
+    fmt.Println(&quot;Got EOF -- bye&quot;)
+}
+</code></pre>
+
+<p>执行：echo &ldquo;Hello, World&rdquo; | go run main.go</p>
+
+<p>CopyN 函数的签名：</p>
+
+<pre><code>func CopyN(dst Writer, src Reader, n int64) (written int64, err error)
+</code></pre>
+
+<p>函数文档：</p>
+
+<p>CopyN 将 n 个字节从 src 复制到 dst。</p>
+
+<p>它返回复制的字节数以及在复制时遇到的最早的错误。</p>
+
+<p>由于 Read 可以返回要求的全部数量及一个错误（包括 EOF），因此 CopyN 也能如此。</p>
+
+<p>若 dst 实现了 ReaderFrom 接口，复制操作也就会使用它来实现。</p>
+
+<p>代码：</p>
+
+<pre><code>io.CopyN(os.Stdout, strings.NewReader(&quot;Go语言学习园地&quot;), 8)
+</code></pre>
+
+<p>Go语言ReadAtLeast 和 ReadFull 函数ReadAtLeast 函数的签名：</p>
+
+<pre><code>func ReadAtLeast(r Reader, buf []byte, min int) (n int, err error)
+</code></pre>
+
+<p>函数文档：</p>
+
+<p>ReadAtLeast 将 r 读取到 buf 中，直到读了最少 min 个字节为止。</p>
+
+<p>它返回复制的字节数，如果读取的字节较少，还会返回一个错误。</p>
+
+<p>若没有读取到字节，错误就只是 EOF。</p>
+
+<p>如果一个 EOF 发生在读取了少于 min 个字节之后，ReadAtLeast 就会返回 ErrUnexpectedEOF。</p>
+
+<p>若 min 大于 buf 的长度，ReadAtLeast 就会返回 ErrShortBuffer。</p>
+
+<p>对于返回值，当且仅当 err == nil 时，才有 n &gt;= min。</p>
+
+<p>一般可能不太会用到这个函数。使用时需要注意返回的error判断。</p>
+
+<p>ReadFull 函数的签名：</p>
+
+<pre><code>func ReadFull(r Reader, buf []byte) (n int, err error)
+</code></pre>
+
+<p>函数文档：</p>
+
+<p>ReadFull 精确地从 r 中将 len(buf) 个字节读取到 buf 中。</p>
+
+<p>它返回复制的字节数，如果读取的字节较少，还会返回一个错误。</p>
+
+<p>若没有读取到字节，错误就只是 EOF。如果一个 EOF 发生在读取了一些但不是所有的字节后，ReadFull 就会返回 ErrUnexpectedEOF</p>
+
+<p>对于返回值，当且仅当 err == nil 时，才有 n == len(buf)。</p>
+
+<p>注意该函数和ReadAtLeast的区别：ReadFull 将buf读满；而ReadAtLeast是最少读取min个字节。</p>
+
+<p>WriteString 函数这是为了方便写入string类型提供的函数，函数签名：</p>
+
+<pre><code>func WriteString(w Writer, s string) (n int, err error)
+</code></pre>
+
+<p>当 w 实现了 WriteString 方法时，直接调用该方法，否则执行w.Write([]byte(s))。</p>
+
+<p>MultiReader 和 MultiWriter 函数这两个函数的定义分别是：</p>
+
+<pre><code>func MultiReader(readers ...Reader) Reader
+func MultiWriter(writers ...Writer) Writer
+</code></pre>
+
+<p>它们接收多个Reader或Writer，返回一个Reader或Writer。</p>
+
+<p>我们可以猜想到这两个函数就是操作多个Reader或Writer就像操作一个。</p>
+
+<p>事实上，在io包中定义了两个非导出类型：mutilReader和multiWriter，它们分别实现了io.Reader和io.Writer接口。</p>
+
+<p>类型定义为：</p>
+
+<pre><code>type multiReader struct {
+    readers []Reader
+}
+
+type multiWriter struct {
+    writers []Writer
+}
+</code></pre>
+
+<p>对于这两种类型对应的实现方法（Read和Write方法）的使用，我们通过例子来演示。</p>
+
+<p>MultiReader的使用：</p>
+
+<pre><code>readers := []io.Reader{
+    strings.NewReader(&quot;from strings reader&quot;),
+    bytes.NewBufferString(&quot;from bytes buffer&quot;),
+}
+reader := io.MultiReader(readers...)
+data := make([]byte, 0, 1024)
+var (
+    err error
+    n   int
+)
+for err != io.EOF {
+    tmp := make([]byte, 512)
+    n, err = reader.Read(tmp)
+    if err == nil {
+    data = append(data, tmp[:n]...)
+    } else {
+    if err != io.EOF {
+        panic(err)
+    }
+    }
+}
+fmt.Printf(&quot;%s\n&quot;, data)
+</code></pre>
+
+<p>from strings readerfrom bytes buffer代码中首先构造了一个io.Reader的slice，</p>
+
+<p>由 strings.Reader 和 bytes.Buffer 两个实例组成，然后通过MultiReader得到新的Reader，循环读取新Reader中的内容。</p>
+
+<p>从输出结果可以看到，第一次调用Reader的Read方法获取到的是slice中第一个元素的内容</p>
+
+<p>……也就是说，MultiReader只是逻辑上将多个Reader组合起来，并不能通过调用一次Read方法获取所有Reader的内容。</p>
+
+<p>在所有的Reader内容都被读完后，Reader会返回EOF。</p>
+
+<p>MultiWriter的使用：</p>
+
+<pre><code>file, err := os.Create(&quot;tmp.txt&quot;)
+if err != nil {
+    panic(err)
+}
+defer file.Close()
+writers := []io.Writer{
+    file,
+    os.Stdout,
+}
+writer := io.MultiWriter(writers...)
+writer.Write([]byte(&quot;Go语言学习园地&quot;))
+</code></pre>
+
+<p>这段程序执行后在生成tmp.txt文件，同时在文件和屏幕中都输出：Go语言学习园地。这和Unix中的tee命令类似。</p>
+
+<p>动手试试</p>
+
+<p>Go实现Unix中tee命令的功能很简单吧。multiWriter的write方法是如何实现的？有兴趣可以自己实现一个，然后对着源码比较一下。</p>
+
+<p>TeeReader函数函数签名如下：</p>
+
+<p>func TeeReader(r Reader, w Writer) ReaderTeeReader 返回一个 Reader，它将从 r 中读到的数据写入 w 中。</p>
+
+<p>所有经由它处理的从 r 的读取都匹配于对应的对 w 的写入。它没有内部缓存，即写入必须在读取完成前完成。任何在写入时遇到的错误都将作为读取错误返回。</p>
+
+<p>也就是说，我们通过Reader读取内容后，会自动写入到Writer中去。例子代码如下：</p>
+
+<pre><code>reader := io.TeeReader(strings.NewReader(&quot;Go语言学习园地&quot;), os.Stdout)
+reader.Read(make([]byte, 20))
+</code></pre>
+
+<p>输出结果：</p>
+
+<p>Go语言学习园地这种功能的实现其实挺简单，无非是在Read完后执行Write。</p>
+
+<p>至此，io所有接口、类型和函数都讲解完成。</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E6%AD%A3%E5%88%99-regexp/" title="Golang-正则-regexp">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-%E5%8F%8D%E5%B0%84%E7%AF%87/" title="Golang-反射篇">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-10</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

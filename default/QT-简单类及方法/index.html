@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>QT-简单类及方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>QT-简单类及方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>#include &lt;QApplication&gt;
+#include &lt;QTextCodec&gt;
+#include &lt;QLabel&gt;
+#include &lt;QPushButton&gt;
+#include &lt;QWidget&gt;
+#include &lt;QSpinBox&gt;
+#include &lt;QSlider&gt;
+#include &lt;QHBoxLayout&gt;
+
+int main(int argc, char *argv[])
+{
+
+    // -------------------------------- //
+    // 解决中文字体乱码问题
+
+    QTextCodec::setCodecForTr(QTextCodec::codecForName(&quot;UTF-8&quot;));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName(&quot;UTF-8&quot;));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName(&quot;UTF-8&quot;));
+
+    // -------------------------------- //
+    // APP框架，用来管理整个应用程序资源
+
+    QApplication app(argc, argv);
+
+    // -------------------------------- //
+    // 按钮事件
+
+    // QPushButton * button = new QPushButton(&quot;QUIT&quot;);
+    // QObject::connect(button, SIGNAL(clicked()), &amp;app, SLOT(quit()));
+    // button-&gt;show();
+
+    // -------------------------------- //
+
+    // 窗口部件
+    QWidget *window = new QWidget;
+    // 设置标题
+    window-&gt;setWindowTitle(&quot;Enter Your Age&quot;);
+
+    // 微调框
+    QSpinBox * spinBox = new QSpinBox;
+    spinBox-&gt;setRange(0, 130);
+
+    // 滑动条
+    QSlider * slider = new QSlider(Qt::Horizontal);
+    slider-&gt;setRange(0, 130);
+
+    // 连接触发微调框修改滑框
+    QObject::connect(spinBox, SIGNAL(valueChanged(int)),
+             slider, SLOT(setValue(int)));
+
+    // 连接触发滑动条修改微调框
+    QObject::connect(slider, SIGNAL(valueChanged(int)),
+             spinBox, SLOT(setValue(int)));
+
+    // 设置滑动条值
+    slider-&gt;setValue(35);
+
+    // 设置滑动条值
+    spinBox-&gt;setValue(35);
+
+    // 竖直布局
+    // QVBoxLayout *layout = new QVBoxLayout;
+    // 把窗口排列在一个网格中
+    // QGridLayout *layout = new QGridLayout;
+    // 水平布局
+    QHBoxLayout * layout = new QHBoxLayout;
+
+    // 向布局增加组建
+    layout-&gt;addWidget(spinBox);
+    layout-&gt;addWidget(slider);
+
+    // 将布局设置给窗口
+    window-&gt;setLayout(layout);
+    window-&gt;show();
+
+    // -------------------------------- //
+
+    return app.exec();
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/QT-%E8%A7%A3%E5%86%B3%E8%AE%BE%E7%BD%AE%E4%B8%AD%E6%96%87%E6%96%87%E5%AD%97%E4%B9%B1%E7%A0%81/" title="QT-解决设置中文文字乱码">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-GUI/" title="Golang-GUI">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-05</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

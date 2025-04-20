@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>openSUSE之Broadwell-U的Graphics驱动方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>openSUSE之Broadwell-U的Graphics驱动方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<p>VGA -&gt; Intel Corporation Broadwell-U Integrated Graphics (<a href="https://01.org/zh/linuxgraphics">https://01.org/zh/linuxgraphics</a>)</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>支持列表的核显型号有Broadwell-U处理器的HD Graphics 5500/6000/6100
+
+Intel Graphics 驱动支持从 2014Q2 开始支持 Broadwell-U 处理器
+
+Intel Graphics 驱动 2014Q2 驱动安装内核要求 Linux Kernel - 3.15 +
+
+Intel Graphics 驱动最新 2015Q1 兼容内核 Linux Kernel - 3.19.2 
+
+Intel Graphics 2015Q1 兼容显卡与 2014Q2 无区别，主要是修复BUG
+
+openSUSE 13.1 -&gt; libva info: va_getDriverName() returns -1  (3.11.6-4-desktop) (内核不匹配)
+
+openSUSE 13.2 -&gt; 内核 (3.16.6-2-desktop) 匹配 Intel Graphics for Linux* - 2014Q3 Intel Graphics Stack Release
+
+源码安装一下驱动相关软件时所需配套软件几乎都可以在YAST中找到 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>安装 libva -&gt; Libva - 1.4.0 升级到 Libva - 1.5.1 (./configure &ndash;prefix=/usr)</p>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/openSUSE之Broadwell-U的Graphics驱动方法/1.png" alt="" width="600" hight="200" ></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>安装 -&gt; xf86-video-intel - 2.99.911 升级到 xf86-video-intel - 2.99.917</p>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/openSUSE之Broadwell-U的Graphics驱动方法/2.png" alt="" width="600" hight="120" ></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>安装 -&gt; vaapi intel-driver - 1.4.0 升级到 vaapi intel-driver - 1.5.1</p>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/openSUSE之Broadwell-U的Graphics驱动方法/3.png" alt="" width="600" hight="600" ></p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E7%BD%91%E7%BB%9C%E6%A1%86%E6%9E%B6volley%E5%92%8Casync%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之网络框架volley和async的使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8B%E5%A6%82%E4%BD%95%E5%AE%89%E5%85%A8%E7%9A%84%E5%AD%98%E5%82%A8%E5%AF%86%E7%A0%81/" title="Golang之如何安全的存储密码">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-07-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

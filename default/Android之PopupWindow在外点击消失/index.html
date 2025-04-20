@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之PopupWindow在外点击消失</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之PopupWindow在外点击消失 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <h3>PopupWindow 如果要想点击其他地方使其隐藏</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// PopupWindow
+// 载入一个Layout视图
+View root = this.getLayoutInflater().inflate(R.layout.window, null);
+
+// 通过视图及布局生成 PopupWindow
+// import android.view.ViewGroup.LayoutParams;
+// import android.widget.PopupWindow;
+    final PopupWindow popup = new PopupWindow(root, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
+
+// 使其聚焦 
+mPopupWindow.setFocusable(true); 
+
+// 设置允许在外点击消失 
+mPopupWindow.setOutsideTouchable(true); 
+
+//刷新状态 
+mPopupWindow.update(); 
+
+//点back键和其他地方使其消失,设置了这个才能触发OnDismisslistener ，设置其他控件变化等操作 
+// 设置背景色 ...
+mPopupWindow.setBackgroundDrawable(new BitmapDrawable()); 
+
+// new BitmapDrawable() 已经过时，可以使用 new BitmapDrawable(this.getResources())
+// 背景色的设置还可以
+// popup.setBackgroundDrawable(new ColorDrawable(0x55000000));
+
+// 监听按钮事件，来触发显示
+popup.showAtLocation(findViewById(R.id.button), Gravity.CENTER, 20, 20);
+</code></pre>
+
+<hr />
+
+<h3>关于 PopupWindow 其它区域变暗效果</h3>
+
+<blockquote>
+</blockquote>
+
+<p>网上查了一下，没有什么具体的好办法，有设置背景色的，有调节透明度的</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如果这样，默认非显示区域都是透明的,但是全屏的缘故，在外点击消失失效
+PopupWindow(root, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true);
+
+// 设置背景色，..... 有点滥
+popup.setBackgroundDrawable(new ColorDrawable(0x55000000));
+
+// 透明度，靠谱点，将主窗口透明
+// 记得关闭窗口的时候要设置回来哦!
+WindowManager.LayoutParams lp = getWindow().getAttributes();
+lp.alpha = 0.3f;
+getWindow().setAttributes(lp);
+
+// 具体介绍
+// alpha 渐变透明度动画效果
+0.0 表示完全透明
+1.0 表示完全不透明
+以上值取0.0-1.0之间的float数据类型的数字
+
+// 返回时,恢复透明度
+    popup.setOnDismissListener(new PopupWindow.OnDismissListener() {
+        @Override
+        public void onDismiss() {
+            WindowManager.LayoutParams lp = getWindow().getAttributes();
+            lp.alpha = 1.0f;
+            getWindow().setAttributes(lp);
+        }
+    });
+
+// 命令关闭 
+popup.dismiss();
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BToast%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之Toast简单使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BPopupWindow%E5%92%8CAlertDialog%E5%8C%BA%E5%88%AB/" title="Android之PopupWindow和AlertDialog区别">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-06</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>QListView和QListWidget</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>QListView和QListWidget </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>QListView是基于Model，而QListWidget是基于Item。</p>
+
+<p>往QListView中添加条目需借助QAbstractListModel:</p>
+
+<pre><code>// 如：
+
+    MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui-&gt;setupUi(this);
+    QStringListModel* slm = new QStringListModel(this);
+    QStringList* sl = new QStringList();
+    sl-&gt;append(&quot;asdfsadfsa&quot;);
+    sl-&gt;append(&quot;asdfsadfsa&quot;);
+    sl-&gt;append(&quot;asdfsadfsa&quot;);
+    slm-&gt;setStringList(*sl);
+    ui-&gt;listView-&gt;setModel(slm);
+    delete sl;
+
+}
+</code></pre>
+
+<hr />
+
+<p>而在QListWidget中添加条目可以直接additem</p>
+
+<pre><code>// 如：
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui-&gt;setupUi(this);
+    QStringList* sl = new QStringList();
+    sl-&gt;append(&quot;1&quot;);
+    sl-&gt;append(&quot;2&quot;);
+    sl-&gt;append(&quot;3&quot;);
+    ui-&gt;listWidget-&gt;addItems(*sl);
+    connect(ui-&gt;pushButton,SIGNAL(clicked()), this, SLOT(close()));
+
+}
+</code></pre>
+
+<hr />
+
+<pre><code>listWidget = QListWidget() 
+#实例化一个(itembase)的列表
+
+listWidget.addItem('dd') 
+#添加一个项
+
+listWidget.addItems([]) 
+#从序列中添加子项
+
+listWidget.setDragEnabled(True)
+#设置拖拉
+
+listWidget.sortItems() 
+#排序
+
+listWidget.selectAll()
+#全选
+
+listWidget.setSortingEnabled(bool)
+#设置自动排序
+
+listWidget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+#设置选择模式
+
+选择模式有:
+ExtendedSelection   按住ctrl多选
+SingleSelection     单选 
+MultiSelection      点击多选 
+ContiguousSelection 鼠标拖拉多选
+
+listWidget.setCurrentRow(0) 
+#设置当前选择行默认为-1
+
+listWidget.count() 
+#得到子项总数
+
+listWidget.item(row).text() 
+#得到第 row 行的内容 listWidget.item(row) 返回一个 item 对象
+
+listWidget.takeItem(row) 
+#返回row 行的所在的item 对象 可以用在 insertItem（）中
+
+listWidget.insertItem(2,item) 
+#在第二行插入一项item可谓为一个listviewitem对象或者string
+
+listWidget.setCurrentItem('dd')
+#设置'dd'为当前项
+
+listWidget.selectedItems() 
+#返回一个包含item对象 的list 对象
+
+item.setText('dsds') 
+# 设置item的内容为dsdsitem为对象 可从 listWidget.item(row) takeItem(row) 得到
+</code></pre>
+
+<hr />
+
+<p>QListWidget的用法</p>
+
+<pre><code>setSelectionMode()
+#设置list一次最多可以选择多少item
+
+#有两种方法来listwidget中添加Item:
+#一种是在item构造时候，指定父widget，
+#如果item构造时候QListWidget已经存在，可以用下面的方法
+new QListWidgetItem(tr(&quot;Oak&quot;), listWidget);
+
+#第二种方法是构造完item，在使用QListWidget::addItem()来添加item
+#向QListWidget中指定的位置插入item，使用QListWidget::insertItem(int , QListWidgetItem*)
+#使用QListWidget::count()来统计widget中总共的item数目
+#使用QListWidget::takeItem(int index)来删除表中的某一项
+#设置当前的item是第几行，QListWidget::setCurrentRow ( int row )
+#设置list是否可以自动排序QListWidget::setSortingEnabled(bool)，默认是FALSE
+</code></pre>
+
+<hr />
+
+<p>LineEdit 类</p>
+
+<pre><code>将LineEdit框设置成密码输入框：line.setEchoMode(QLineEdit::Password)
+获取linedit的值： line.text()
+给lineedit 赋值为空： line.setText()
+</code></pre>
+
+<p>MessageBox 类</p>
+
+<pre><code>实例介绍：（实现提示框）
+@kuang = Qt::MessageBox.new(Qt::MessageBox::NoIcon, &quot;提示&quot;, &quot;登录成功！&quot;, 0, self)
+@kuang.addButton(&quot;确定&quot;,Qt::MessageBox::AcceptRole)
+@kuang.exec()
+这样就可以创建一个提示登录成功的窗口。（注：这是在QtRuby 中的相关代码。）
+</code></pre>
+
+<p>TabelWidget类</p>
+
+<pre><code>设置行表头隐藏：
+verticalHeader().setVisible(false);
+设置列表头隐藏：
+horizontalHeader().setVisible(false);
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/QTableWidget/" title="QTableWidget">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/QT-%E8%A7%A3%E5%86%B3%E8%AE%BE%E7%BD%AE%E4%B8%AD%E6%96%87%E6%96%87%E5%AD%97%E4%B9%B1%E7%A0%81/" title="QT-解决设置中文文字乱码">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-09</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

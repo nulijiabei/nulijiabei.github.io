@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-绘图基础-不同的输出源</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-绘图基础-不同的输出源 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>先看一个简单代码， 它执行后会产生下面的300*500的png图片文件：</p>
+
+<p><img src="/assets/media/Golang-绘图基础-不同的输出源/1_0.jpg" alt="" width="140" height="240"></p>
+
+<p>代码：</p>
+
+<pre><code>package main
+
+ import (
+     &quot;fmt&quot;
+     &quot;image&quot;
+     &quot;image/color&quot;
+     &quot;image/png&quot;
+     &quot;log&quot;
+     &quot;os&quot;
+ )
+
+ func main() {
+     const (
+     dx = 300
+     dy = 500
+     )
+
+     // 需要保存的文件
+     imgcounter := 123
+     imgfile, _ := os.Create(fmt.Sprintf(&quot;%03d.png&quot;, imgcounter))
+     defer imgfile.Close()
+
+     // 新建一个 指定大小的 RGBA位图
+     img := image.NewNRGBA(image.Rect(0, 0, dx, dy))
+
+     for y := 0; y &lt; dy; y++ {
+     for x := 0; x &lt; dx; x++ {
+         // 设置某个点的颜色，依次是 RGBA
+         img.Set(x, y, color.RGBA{uint8(x % 256), uint8(y % 256), 0, 255})
+     }
+     }
+
+     // 以PNG格式保存文件
+     err := png.Encode(imgfile, img)
+     if err != nil {
+     log.Fatal(err)
+     }
+
+}
+</code></pre>
+
+<p>我们再看一个代码，以http文件流的方式展示图片，效果如下:</p>
+
+<p><img src="/assets/media/Golang-绘图基础-不同的输出源/2_0.jpg" alt="" width="140" height="240"></p>
+
+<p>代码如下：</p>
+
+<pre><code>package main
+
+import (
+    &quot;image&quot;
+    &quot;image/color&quot;
+    &quot;image/png&quot;
+    &quot;net/http&quot;
+    &quot;time&quot;
+)
+
+func pic(w http.ResponseWriter, req *http.Request) {
+    const (
+    dx = 300
+    dy = 500
+    )
+
+    // 新建一个 指定大小的 RGBA位图
+    img := image.NewNRGBA(image.Rect(0, 0, dx, dy))
+
+    for y := 0; y &lt; dy; y++ {
+    for x := 0; x &lt; dx; x++ {
+        // 设置某个点的颜色，依次是 RGBA
+        img.Set(x, y, color.RGBA{uint8(x % 256), uint8(y % 256), 0, 255})
+    }
+    }
+
+    // 图片流方式输出
+    w.Header().Set(&quot;Content-Type&quot;, &quot;image/png&quot;)
+    png.Encode(w, img)
+}
+
+func main() {
+    http.HandleFunc(&quot;/&quot;, pic)
+    s := &amp;http.Server{
+    Addr:           &quot;:82&quot;,
+    ReadTimeout:    30 * time.Second,
+    WriteTimeout:   30 * time.Second,
+    MaxHeaderBytes: 1 &lt;&lt; 20}
+    s.ListenAndServe()
+
+}
+</code></pre>
+
+<p>通过两种方式来展示图片,我们可以看到,上面两个代码最大的区别就是输出源不一样,</p>
+
+<p>一个是到文件,一个是到http流. 而我们的代码也很清晰的展示了这两种方式只需要修改对应的实现即可.其他代码是没有变化的.</p>
+
+<p>这里代码中的 image.NewNRGBA 返回的 image对象是一个内存中的图片。</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E7%BB%98%E5%9B%BE%E5%9F%BA%E7%A1%80-%E7%BB%98%E5%88%B6%E7%AE%80%E5%8D%95%E5%9B%BE%E5%BD%A2/" title="Golang-绘图基础-绘制简单图形">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-%E5%AE%98%E6%96%B9%E5%9B%BE%E7%89%87%E5%BA%93/" title="Golang-官方图片库">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-09</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

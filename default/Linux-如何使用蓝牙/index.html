@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux-如何使用蓝牙</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux-如何使用蓝牙 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>lsusb</p>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Linux-如何使用蓝牙/1.png" alt="" width="600"></p>
+
+<hr />
+
+<p>运行hciconfig可以看到：</p>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Linux-如何使用蓝牙/2.png" alt="" width="600"></p>
+
+<blockquote>
+</blockquote>
+
+<p>从上图可以看出，我们的蓝牙设备是 hci0</p>
+
+<blockquote>
+</blockquote>
+
+<p>查看我们的蓝牙设备的硬件地址:</p>
+
+<pre><code>hcitool dev
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>运行hcitoo &ndash;help 可以查看更多相关命令</p>
+
+<hr />
+
+<p>然后我们激活它：</p>
+
+<pre><code>sudo hciconfig hci0 up
+</code></pre>
+
+<p>要注意的是，激活前蓝牙必须是打开的，否则会出现如下错误：</p>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Linux-如何使用蓝牙/3.png" alt="" width="600"></p>
+
+<hr />
+
+<p>然后我们开始扫描了：</p>
+
+<pre><code>hcitool scan
+</code></pre>
+
+<p><img src="/assets/media/Linux-如何使用蓝牙/4.png" alt="" width="600"></p>
+
+<blockquote>
+</blockquote>
+
+<p>可以看到，发现了我手机的蓝牙了~~</p>
+
+<blockquote>
+</blockquote>
+
+<p>然后我们要开始连接了，连接阶段使用的主要命令是</p>
+
+<pre><code>rfcomm
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>查看用法:</p>
+
+<pre><code>rfcomm --help
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>首先需要绑定目的蓝牙设备：</p>
+
+<pre><code>sudo rfcomm bind /dev/rfcomm0 E0:A6:70:8C:A3:02
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>注意：上面的这个地址是目的蓝牙设备的硬件地址</p>
+
+<blockquote>
+</blockquote>
+
+<p>接着我们连接它：</p>
+
+<pre><code>sudo cat &gt;/dev/rfcomm0
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>这是目的蓝牙主机就会弹出一个对话框要求输入pin码，随便输入一个.</p>
+
+<p>然后主机就会弹出一个对话框，只要输入的和刚才一致就可以通过验证。</p>
+
+<p>之后我们发现我的手机已经显示了成功配对的标记了。</p>
+
+<hr />
+
+<p>在配对完成之后我们需要删除绑定（否则在下次使用时会提示设备正忙），命令如下：</p>
+
+<pre><code>sudo rfcomm release /dev/rfcomm0
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8BCGO%E4%B8%8EQT%E7%BB%91%E5%AE%9A%E7%BC%96%E8%AF%91/" title="Golang之CGO与QT绑定编译">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-Package-Sync/" title="Golang Package Sync">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-12-10</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

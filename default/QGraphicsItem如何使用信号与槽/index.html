@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>QGraphicsItem如何使用信号与槽</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>QGraphicsItem如何使用信号与槽 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>QGraphicsItem如何使用信号/槽</h4>
+
+<blockquote>
+</blockquote>
+
+<p>对于 QGraphicsItem 来说，信号/槽和属性机制不是它的一部分，因为它不继承自 QObject。这是一个出于性能考虑的设计决策，允许比较大的场景以及快速的交互。</p>
+
+<p>特殊情况下，如果真的需要使用信号/槽，可以使用 QObject 的信号/槽和属性机制来扩展 QGraphicsItem。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>继承自 QObject 和 QGraphicsItem</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>class CustomItem : public QObject, public QGraphicsItem
+{
+    Q_OBJECT
+
+public:
+    explicit CustomItem(QGraphicsItem *parent = 0);
+    virtual QRectF boundingRect() const;
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
+Q_SIGNALS:
+    void mySignal();
+
+public Q_SLOTS:
+    void mySlot();
+    ...
+};
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>继承自 QGraphicsObject</h4>
+
+<blockquote>
+</blockquote>
+
+<p>QGraphicsObject 类为需要信号/槽和属性的所有 items 提供一个基类，将 QGraphicsItem 的许多基本 setters 和 getters 映射到属性，并为其中的许多添加了通知信号。</p>
+
+<p>由于 QGraphicsObject 继承自 QObject 和 QGraphicsItem，所以，上述的自定义 item 可以变成这样：</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>class CustomItem : public QGraphicsObject
+{
+    Q_OBJECT
+
+public:
+    explicit CustomItem(QGraphicsItem *parent = 0);
+    virtual QRectF boundingRect() const;
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
+Q_SIGNALS:
+    void mySignal();
+
+public Q_SLOTS:
+    void mySlot();
+    ...
+};
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// .h
+#ifndef CUSTOMITEM_H
+#define CUSTOMITEM_H
+
+#include &lt;QObject&gt;
+#include &lt;QGraphicsItem&gt;
+
+class CustomItem : public QObject, public QGraphicsItem
+{
+    Q_OBJECT
+public:
+    CustomItem(QGraphicsItem *parent = 0);
+    ~CustomItem();
+public slots:
+    virtual void hello();
+};
+
+#endif // CUSTOMITEM_H
+
+
+// .cpp
+#include &quot;include/customitem.h&quot;
+
+CustomItem::CustomItem(QGraphicsItem *parent)
+{
+}
+
+CustomItem::~CustomItem()
+{
+
+}
+
+void CustomItem::hello()
+{
+
+}
+
+// 继承
+class DemoItem : public CustomItem
+{
+
+}
+
+DemoItem::DemoItem()
+{
+    QTimer *m_timer = new QTimer(this);
+    // 这里的 hello 必须在父类定义好 ... 
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(hello()));
+    m_timer-&gt;start(1000);
+}
+
+void DemoItem::hello()
+{
+    cout &lt;&lt; &quot;www.nljb.net&quot; &lt;&lt; endl;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>部分摘自：<a href="https://blog.csdn.net/liang19890820/article/details/53643700">https://blog.csdn.net/liang19890820/article/details/53643700</a> 感谢</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Qt%E4%B8%AD%E4%B8%A4%E4%B8%AA%E7%B1%BB%E4%BA%92%E7%9B%B8%E5%8C%85%E5%90%AB%E4%B8%8E%E5%BC%95%E7%94%A8/" title="Qt中两个类互相包含与引用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/OpenCV%E4%B9%8BBackgroundSubtractorMOG2%E5%8A%A8%E6%80%81%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B/" title="OpenCV之BackgroundSubtractorMOG2动态目标检测">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-05-19</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>命名规范-Bash</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>命名规范-Bash </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>1 概述</p>
+
+<p>1.1 目的</p>
+
+<pre><code>定义Shell脚本命名和编码规范，作为OS裁剪设计、开发以及维护人员的技术参考资料。
+</code></pre>
+
+<p>1.2 概述</p>
+
+<pre><code>本文主要根据Fedora Core 4.0的特点，描述安装脚本、OS初始脚本、补丁制作等方面的代码编写规范。
+</code></pre>
+
+<p>1.3 开发工具</p>
+
+<pre><code>shell脚本是个文件，没有开发环境，FC4图形环境下，可用gedit、vi、vim、joe等，推荐使用gedit，并将环境设置为sh高亮显示；字符界面下，可用vi、joe、vim；Windows下，可用ultraedit。文件保存时，有汉字提示的Shell脚本文件，文件保存时，字符编码必须为GB18030/GBK/GB2132三种格式之一。
+</code></pre>
+
+<p>2 对象命名规范</p>
+
+<p>2.1 命名约定</p>
+
+<pre><code>1.本文档的命名约定是系统配置文件、脚本文件；
+
+2.文件名、变量名、函数名不超过20个字符； 
+
+3.命名只能使用英文字母，数字和下划线，只有一个英文单词时使用全拼，有多个单词时，用下划线连接，长度较长时，可以取单词前3～4个字母。遇到复杂情况大家一起讨论决定； 
+
+4.文件名全部以小写命名，不能大小写混用（通过U盘交换文件时，大小写可能会丢失，即：大写文件名可能会全部变成小写文件名）；
+
+5.避免使用Linux的保留字如true、关键字如PWD等（见附表）； 
+
+6.从配置文件导出配置时，要注意过滤空行和注释
+</code></pre>
+
+<p>2.2 Shell脚本命名及规范</p>
+
+<pre><code>Shell脚本文件包括如下文件：
+
+1、Linux启动初始化文件，如/etc/rc.d/rc.sysinit等
+
+2、隐藏初始化文件，如~/.bash_profile、~/.xinitrc等
+
+3、用户自定义Shell文件，如/root/install/scripts/findtermtype。sh
+
+这些文件的命名长度都不能超过20个字符。脚本命令过长时，以“_”相隔，如rdc09_tianjin.sh、inst_cp86.sh等。
+</code></pre>
+
+<p>2.3 缩进</p>
+
+<pre><code>由于Shell没有很好的编辑环境，所以，缩进应该是每行1个TAB，不建议用空格缩进。
+</code></pre>
+
+<p>2.4 页宽</p>
+
+<pre><code>每行不要超过80行，如果超出，建议用“\”折行，有管道的命令行除外。
+</code></pre>
+
+<p>2.5 环境变量</p>
+
+<pre><code>变量：全部是大写字母
+
+变量引用：全部以变量名加双引号引用，如”$TERMTYPE”，或“${TERMTYPE}”，如果变量类型是数值型不引用，如:
+
+如果需要从配置文件导出变量，则在变量前加一大写字母，以识别导出变量与自定义环境变量的区别，如：
+
+变量值的引用尽量以$开头，如$(ls inst_*.sh)，避免使用`ls inst_*。sh`
+
+循环控制变量可以命名为单个字母， 比如 i、j等。 也可以是更有意义的名称， 比如 UserIndex。
+
+环境变量在脚本开头定义。
+
+函数中使用较多的文件，以环境变量的形式在文件开头定义
+</code></pre>
+
+<p>2.6 函数</p>
+
+<pre><code>函数以动名词形式存储，且第二个单词首字母要大写，如updateConfig()
+
+每个函数控制在50－100行，超出行数建议分成两个函数
+</code></pre>
+
+<p>2.7 语句</p>
+
+<pre><code>if 语句 
+
+if/then/else 语句中最可能被执行的部分应该放在 then 子句中， 不太可能被执行的部分应该放在 else 子句中。 
+
+如果可能， 尽量不要使用一连串的 if 语句， 而应该以 case 语句替代。 
+
+不要使 if 语句嵌套超过5层以上， 尽量以更清楚的代码替代。 
+
+case 语句 
+
+概要 
+
+case 语句中的单个子句应该以 case 常数的数字顺序或字母顺序排列。 子句中的执行语句应该尽量保持简单， 一般不要超过4到5行代码。 如果执行语句过于复杂， 应该将它放置在独立的函数中。 
+
+case 语句的 *) 子句应该只在正常的默认情况或检测到错误的情况下使用。 
+
+格式 
+
+case 语句遵循同样的缩进和命名约定。 
+
+while 语句 
+
+使用 Exit 过程退出 while 循环是不好的; 如果可能， 应该只使用循环条件来结束循环。 
+
+while 循环的所有初始化代码应该紧贴在进入 while 循环之前， 不要被其他无关语句分隔开。 
+
+循环结束后的处理应该紧跟在循环之后。 
+
+for 语句 
+
+如果需要执行确定次数的增量循环， 应该用 for 语句替代 while 语句。 
+</code></pre>
+
+<p>2.8 信号捕捉</p>
+
+<pre><code>如果在进行重要配置修改时，应捕捉用户按键，如果用户按下Ctrl+C等重要操作终止程序，则调用回退程序，如：
+</code></pre>
+
+<p>2.9 关于注释</p>
+
+<pre><code>程序头应加注版本与功能说明的注释。但程序第一行不能汉字。
+
+程序体中应包含必要的注释，注释说明如下：
+
+单行注释，可以放在代码行的尾部或代码行的上部；
+
+多行注释，用于注解复杂的功能说明，可以放在程序体中，也可以放在代码块的开始部分
+
+代码修改时，对修改的内容要加必要版本注释及功能说明，格式参考如下：
+
+不再有用的注释要删除。
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%91%BD%E5%90%8D%E8%A7%84%E8%8C%83-Golang/" title="命名规范-Golang">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/ulimit/" title="ulimit">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

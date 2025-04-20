@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>FFmpeg之从MP4提取H264裸流</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>FFmpeg之从MP4提取H264裸流 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>FFmpeg之从MP4提取H264裸流</h3>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// mp4 转 h264 裸码流
+ffmpeg -i input.mp4 -vcodec h264 output.h264
+// Video: h264, yuv420p(tv, bt709, progressive)
+ffmpeg.exe -i input.mp4 -color_primaries bt709 -color_trc bt709 -colorspace bt709 output.h264
+// Video: h264, yuv420p(progressive)
+ffmpeg -i input_file.avi -vcodec copy -an -bsf:v h264_mp4toannexb output_file.h264
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>#ifndef DECODER_H
+#define DECODER_H
+
+#include &lt;iostream&gt;
+#include &lt;QDebug&gt;
+#include &lt;QRunnable&gt;
+#include &lt;QThread&gt;
+
+extern &quot;C&quot;
+{
+#include &quot;libavcodec/avcodec.h&quot;
+#include &quot;libavformat/avformat.h&quot;
+#include &quot;libswscale/swscale.h&quot;
+#include &quot;libavutil/imgutils.h&quot;
+}
+
+class Decoder : public QRunnable
+{
+public:
+    Decoder();
+    ~Decoder();
+    void run();
+    bool create();
+private:
+    Log4Qt::Logger *m_log;
+    AVFormatContext *pFormatCtx;
+    AVBitStreamFilterContext* h264bsfc;
+    int videoindex;
+};
+#endif // DECODER_H
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>#include &quot;decoder.h&quot;
+
+Decoder::Decoder()
+{
+}
+
+Decoder::~Decoder()
+{
+}
+
+bool Decoder::create()
+{
+    // qDebug() &lt;&lt; avcodec_configuration();
+    Runtime::m_decoder_mutex.lock();
+
+    av_register_all();
+    avformat_network_init();
+
+    pFormatCtx = avformat_alloc_context();
+
+    if(avformat_open_input(&amp;pFormatCtx, &quot;E:/1111.mp4&quot;, NULL, NULL) != 0){
+    printf(&quot;Couldn't open input stream.\n&quot;);
+    return false;
+    }
+
+    if(avformat_find_stream_info(pFormatCtx, NULL) &lt; 0){
+    printf(&quot;Couldn't find stream information.\n&quot;);
+    return false;
+    }
+
+    videoindex = -1;
+    for(int i = 0; i &lt; pFormatCtx-&gt;nb_streams; i++) {
+    if(pFormatCtx-&gt;streams[i]-&gt;codec-&gt;codec_type == AVMEDIA_TYPE_VIDEO) {
+        videoindex = i;
+        break;
+    }
+    }
+    if(videoindex == -1) {
+    printf(&quot;Didn't find a video stream.\n&quot;);
+    return false;
+    }
+
+    h264bsfc = av_bitstream_filter_init(&quot;h264_mp4toannexb&quot;);
+    if(h264bsfc == NULL) {
+    printf(&quot;h264bsfc not found.\n&quot;);
+    return false;
+    }
+
+    // --------------------------------- //
+    AVCodec* currentCodec = NULL;
+    currentCodec = av_codec_next(currentCodec);
+    while (currentCodec != NULL) {
+    if (av_codec_is_encoder(currentCodec)) {
+        cout &lt;&lt; currentCodec-&gt;name &lt;&lt; &quot;\t&quot; &lt;&lt; currentCodec-&gt;long_name &lt;&lt; endl;
+    }
+    currentCodec = av_codec_next(currentCodec);
+    }
+    // --------------------------------- //
+
+    Runtime::m_decoder_mutex.unlock();
+    return true;
+}
+
+#ifdef Q_OS_LINUX // Linux
+
+#endif
+
+#ifdef Q_OS_WIN // Windows 10
+
+void Decoder::run()
+{
+
+    this-&gt;create();
+
+    AVPacket *packet = (AVPacket *)av_malloc(sizeof(AVPacket));
+
+    FILE *fp=fopen(&quot;test.264&quot;,&quot;ab&quot;);
+
+    int count = 0;
+    while(av_read_frame(pFormatCtx, packet) &gt;= 0)
+    {
+    av_bitstream_filter_filter(h264bsfc, pFormatCtx-&gt;streams[videoindex]-&gt;codec, NULL, &amp;packet-&gt;data, &amp;packet-&gt;size, packet-&gt;data, packet-&gt;size, 0);
+    fwrite(packet-&gt;data, 1, packet-&gt;size, fp);
+    count++;
+    av_free_packet(packet);
+    }
+
+    av_bitstream_filter_close(h264bsfc);
+    avformat_close_input(&amp;pFormatCtx);
+
+}
+
+#endif
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Qt%E4%B9%8BQOpenGLWidget%E4%BD%BF%E7%94%A8QPainter%E7%BB%98%E5%88%B6FFmpeg%E8%A7%A3%E7%A0%81%E7%9A%84YUV420P%E5%B8%A7/" title="Qt之QOpenGLWidget使用QPainter绘制FFmpeg解码的YUV420P帧">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B9%8B%E9%83%A8%E7%BD%B2QT%E4%B8%8EFFmpeg%E7%A1%AC%E8%A7%A3%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" title="树莓派之部署QT与FFmpeg硬解开发环境">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-09-27</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

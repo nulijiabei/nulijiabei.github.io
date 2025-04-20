@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Go-SSH-使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Go-SSH-使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <h3>建立连接 (密码登陆模式)</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+
+import (
+    &quot;fmt&quot;
+
+    &quot;code.google.com/p/go.crypto/ssh&quot;
+)
+
+type Node struct {
+    User     string
+    Password string
+}
+
+func NewNode(user, password string) *Node {
+    node := new(Node)
+    node.User = user
+    node.Password = password
+    return node
+}
+
+func (this *Node) Conn(addr string) (*ssh.Client, error) {
+
+    authMethods := []ssh.AuthMethod{}
+
+    keyboardInteractiveChallenge := func(
+        user,
+        instruction string,
+        questions []string,
+        echos []bool,
+    ) (answers []string, err error) {
+        if len(questions) == 0 {
+            return []string{}, nil
+        }
+        return []string{this.Password}, nil
+    }
+
+    authMethods = append(authMethods, ssh.KeyboardInteractive(keyboardInteractiveChallenge))
+    authMethods = append(authMethods, ssh.Password(this.Password))
+
+    sshConfig := &amp;ssh.ClientConfig{
+        User: this.User,
+        Auth: authMethods,
+    }
+
+    client, err := ssh.Dial(&quot;tcp&quot;, fmt.Sprintf(&quot;%s:22&quot;, addr), sshConfig)
+    if err != nil {
+        return nil, err
+    }
+
+    return client, nil
+}
+</code></pre>
+
+<hr />
+
+<h3>建立 Session 并设置</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Root
+node := NewNode(&quot;root&quot;, &quot;123456&quot;)
+
+// Connect
+client, err := node.Conn(&quot;127.0.0.1&quot;)
+if err != nil {
+    panic(err)
+}
+defer client.Close()
+
+session, err := client.NewSession()
+if err != nil {
+    panic(err)
+}
+defer session.Close()
+
+// 注意：如果想模拟SSH，可以将流输出到os.Stdout和os.Stderr中.
+// Set IO
+stdin, _ := session.StdinPipe()
+stdout, _ := session.StdoutPipe()
+
+// 以下设置，可以支持目录，文件，颜色输出
+/*
+
+    // Set up terminal modes
+    modes := ssh.TerminalModes{
+        ssh.ECHO:          0,     // disable echoing
+        ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+        ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+    }
+
+    // Request pseudo terminal
+    if err := session.RequestPty(&quot;xterm&quot;, 80, 40, modes); err != nil {
+        panic(err)
+    }
+
+*/
+
+// Start remote shell
+if err := session.Shell(); err != nil {
+    panic(err)
+}
+</code></pre>
+
+<hr />
+
+<h3>使用</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 执行
+stdin.Write([]byte(fmt.Sprintf(&quot;%s 2&gt;&amp;1; echo -e End-Goline-End\n&quot;, command)))
+
+// 读取返回
+r_ := bufio.NewReader(stdout)
+
+//  返回数据
+datas := make([]byte, 0)
+
+// 读取客户端返回
+for {
+    data, err := r_.ReadBytes('\n')
+    if err != nil {
+        break
+    }
+    if z.Trim(string(data)) == &quot;End-Goline-End&quot; {
+        // 返回
+        fmt.Println(z.Trim(string(datas))) 
+        // 清零
+        datas = []byte{}
+        // 跳出
+        break
+    }
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/C%2B%2B%E4%B9%8B%E5%B9%BF%E6%92%AD%E6%97%B6%E9%97%B4%E6%88%B3/" title="C++之广播时间戳">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Darwin-Streaming-Server/" title="Darwin Streaming Server">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-11-26</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

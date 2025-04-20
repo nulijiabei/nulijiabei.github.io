@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang之编码的使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang之编码的使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>AES 与 DEA 高级加密解密方法</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>crypto/aes 是美国联邦政府采用的一种区块加密标准
+crypto/des 一种对称加密算法，是目前使用最广泛的密钥系统
+            特别是在保护金融数据安全中...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// AES 与 DES 实现方法类似, 下面是 AES 介绍
+
+package main
+
+import (
+    &quot;crypto/aes&quot;
+    &quot;crypto/cipher&quot;
+    &quot;fmt&quot;
+)
+
+// 数据操作的偏移量
+var IV = []byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f}
+
+func main() {
+
+    // 要加密的内容
+    content := []byte(&quot;my name is nljb&quot;)
+
+    // KEY, 必须是16,24,32位的[]byte
+    // 分别对应AES_128,AES_192,AES_256
+    key := &quot;B8XKCA7IVW6WB7GX76V771RN8LJCY2H0&quot;       
+
+    // 通过密钥生成一个新的密码块
+    c, err := aes.NewCipher([]byte(key))
+    if err != nil {
+        panic(err)
+    }
+
+    // 加密模式 (ECB、CBC、CFB、OFB)
+    // IV是initialization vector的意思
+    // 就是加密的初始话矢量，初始化加密函数的变量
+    // 也就是加密动作中的 数据操作的偏移量
+    cfb := cipher.NewCFBEncrypter(c, IV)
+
+    // 存储密码, 必须与块体的长度相同
+    ciphertext := make([]byte, len(content))
+
+    // 流化, 必须与块体的长度相同
+    cfb.XORKeyStream(ciphertext, content)
+
+    // 输出
+    fmt.Println(string(content), ciphertext)
+
+    // ------------------------------------- //
+
+    // 解密模式 (ECB、CBC、CFB、OFB)
+    // 也就是说，解密的时候也需要加密时的密钥与偏移量
+    cfbdec := cipher.NewCFBDecrypter(c, IV)
+
+    // 存储数据, 必须与块体的长度相同
+    plaintextCopy := make([]byte, len(content))
+
+    // 流化, 必须与块体的长度相同
+    cfbdec.XORKeyStream(plaintextCopy, ciphertext)
+
+    // 输出
+    fmt.Println(ciphertext, string(plaintextCopy))
+
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Base64/Base32编码</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>是网络上最常见的用于传输8Bit字节代码的编码方式之一，大家可以查看RFC2045～RFC2049，上面有MIME的详细规范。
+Base64编码可用于在HTTP环境下传递较长的标识信息。例如在Java Persistence系统Hibernate中
+就采用了Base64来将一个较长的唯一标识符（一般为128-bit的UUID）编码为一个字符串用作HTTP表单和HTTP GET URL中的参数。
+在其他应用程序中，也常常需要把二进制数据编码为适合放在URL（包括隐藏表单域）中的形式。
+此时，采用Base64编码具有不可读性，即所编码的数据不会被人用肉眼所直接看到。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Base64编码说明
+Base64编码要求把3个8位字节(3*8=24)转化为4个6位的字节(4*6=24)之后在6位的前面补两个0,形成8位一个字节的形式。
+如果剩下的字符不足3个字节,则用0填充,输出字符使用'=',因此编码后输出的文本末尾可能会出现1或2个'='。
+为了保证所输出的编码位可读字符,Base64制定了一个编码表,以便进行统一转换.编码表的大小为2^6=64,这也是Base64名称的由来。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>0   A   16  Q   32  g   48  w
+1   B   17  R   33  h   49  x
+2   C   18  S   34  i   50  y
+3   D   19  T   35  j   51  z
+4   E   20  U   36  k   52  0
+5   F   21  V   37  l   53  1
+6   G   22  W   38  m   54  2
+7   H   23  X   39  n   55  3
+8   I   24  Y   40  o   56  4
+9   J   25  Z   41  p   57  5
+10  K   26  a   42  q   58  6
+11  L   27  b   43  r   59  7
+12  M   28  c   44  s   60  8
+13  N   29  d   45  t   61  9
+14  O   30  e   46  u   62  +
+15  P   31  f   47  v   63  /
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>编码内容: `&quot;'www.baidu.com','www.sina.com'&quot;`,!@#$%^&amp;*(){}[]?&lt;&gt;.
+编码结果: YCInd3d3LmJhaWR1LmNvbScsJ3d3dy5zaW5hLmNvbSciYCwhQCMkJV4mKigpe31bXT88Pi4=
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+
+import (
+    // &quot;encoding/base32&quot;
+    &quot;encoding/base64&quot;
+    &quot;fmt&quot;
+)
+
+func base64Encode(src []byte) []byte {
+    return []byte(base64.StdEncoding.EncodeToString(src))
+}
+
+func base64Decode(src []byte) ([]byte, error) {
+    return base64.StdEncoding.DecodeString(string(src))
+}
+
+func main() {
+
+    nljb := &quot;www.nljb.net&quot;
+    debyte := base64Encode([]byte(nljb))
+    fmt.Println(string(debyte))
+
+    srbyte, err := base64Decode(debyte)
+    fmt.Println(string(srbyte), err)
+
+}
+
+// 输出
+d3d3Lm5samIubmV0
+www.nljb.net &lt;nil&gt;
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Gob编码</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>gob是Golang包自带的一个数据结构序列化的编码/解码工具。
+编码使用Encoder，解码使用Decoder。
+一种典型的应用场景就是RPC(remote procedure calls)。
+gob和json的pack之类的方法一样，由发送端使用Encoder对数据结构进行编码。
+在接收端收到消息之后，接收端使用Decoder将序列化的数据变化成本地变量。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>package main
+
+import (
+    &quot;bytes&quot;
+    &quot;encoding/gob&quot;
+    &quot;fmt&quot;
+    &quot;log&quot;
+)
+
+type P struct {
+    X, Y, Z int
+    Name    string
+}
+
+type Q struct {
+    X, Y *int32
+    Name string
+}
+
+func main() {
+
+    var network bytes.Buffer       
+    enc := gob.NewEncoder(&amp;network)
+    dec := gob.NewDecoder(&amp;network)
+    // Encode (send) the value.
+    err := enc.Encode(P{3, 4, 5, &quot;Pythagoras&quot;})
+    if err != nil {
+        log.Fatal(&quot;encode error:&quot;, err)
+    }
+    // Decode (receive) the value.
+    var q Q
+    err = dec.Decode(&amp;q)
+    if err != nil {
+        log.Fatal(&quot;decode error:&quot;, err)
+    }
+    fmt.Println(q)
+    fmt.Printf(&quot;%q: {%d,%d}\n&quot;, q.Name, *q.X, *q.Y)
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>UrlEncode编码</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>将字符串以 URL 编码
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>编码内容: http://www.baidu.com/p/home/index.html
+编码结果: http%3a%2f%2fwww.baidu.com%2fp%2fhome%2findex.html
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Hex编码/十六进制编码</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>将字符串以 十六进制 编码
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>编码内容: www.baidu.com
+编码结果: 7777772e62616964752e636f6d20
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>...
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Java%E4%B9%8BMap%E7%9A%84%E5%90%84%E7%A7%8D%E9%94%81%E7%9A%84%E4%BD%BF%E7%94%A8/" title="Java之Map的各种锁的使用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E7%9A%84Activity%E5%88%87%E6%8D%A2%E5%8A%A8%E7%94%BB%E7%89%B9%E6%95%88%E5%BA%93SwitchLayout/" title="Android的Activity切换动画特效库SwitchLayout">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-06-25</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

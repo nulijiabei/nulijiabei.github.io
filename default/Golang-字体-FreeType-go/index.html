@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-字体-FreeType-go</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-字体-FreeType-go </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>FreeType库（<a href="http://www.freetype.org/）是一个完全免费(开源)的、高质量的且可移植的字体引擎">http://www.freetype.org/）是一个完全免费(开源)的、高质量的且可移植的字体引擎</a></p>
+
+<p>它提供统一的接口来访问多种字体格式文件，包括TrueType, OpenType, Type1, CID, CFF, Windows FON/FNT, X11 PCF等。</p>
+
+<p>支持单色位图、反走样位图的渲染。</p>
+
+<p>freetype-go就是用go语言实现了FreeType驱动。</p>
+
+<p>它的项目地址： <a href="https://code.google.com/p/freetype-go">https://code.google.com/p/freetype-go</a></p>
+
+<p>下面是使用它绘制的一个字体效果图：</p>
+
+<p><img src="/assets/media/Golang-字体-FreeType-go/4bed2e738bd4b31cd3dc1d1f85d6277f9f2ff8b6.jpg" alt="" width="100" height="80"></p>
+
+<p>相关代码:</p>
+
+<pre><code>package main
+
+import (
+    &quot;code.google.com/p/freetype-go/freetype&quot;
+    &quot;fmt&quot;
+    &quot;image&quot;
+    &quot;image/color&quot;
+    &quot;image/png&quot;
+    &quot;io/ioutil&quot;
+    &quot;log&quot;
+    &quot;os&quot;
+)
+
+const (
+    dx       = 100         // 图片的大小 宽度
+    dy       = 40          // 图片的大小 高度
+    fontFile = &quot;RAVIE.TTF&quot; // 需要使用的字体文件
+    fontSize = 20          // 字体尺寸
+    fontDPI  = 72          // 屏幕每英寸的分辨率
+)
+
+func main() {
+
+    // 需要保存的文件
+    imgcounter := 123
+    imgfile, _ := os.Create(fmt.Sprintf(&quot;%03d.png&quot;, imgcounter))
+    defer imgfile.Close()
+
+    // 新建一个 指定大小的 RGBA位图
+    img := image.NewNRGBA(image.Rect(0, 0, dx, dy))
+
+    // 画背景
+    for y := 0; y &lt; dy; y++ {
+    for x := 0; x &lt; dx; x++ {
+        // 设置某个点的颜色，依次是 RGBA
+        img.Set(x, y, color.RGBA{uint8(x), uint8(y), 0, 255})
+    }
+    }
+
+    // 读字体数据
+    fontBytes, err := ioutil.ReadFile(fontFile)
+    if err != nil {
+    log.Println(err)
+    return
+    }
+    font, err := freetype.ParseFont(fontBytes)
+    if err != nil {
+    log.Println(err)
+    return
+    }
+
+    c := freetype.NewContext()
+    c.SetDPI(fontDPI)
+    c.SetFont(font)
+    c.SetFontSize(fontSize)
+    c.SetClip(img.Bounds())
+    c.SetDst(img)
+    c.SetSrc(image.White)
+
+    pt := freetype.Pt(10, 10+int(c.PointToFix32(fontSize)&gt;&gt;8)) // 字出现的位置
+
+    _, err = c.DrawString(&quot;ABCDE&quot;, pt)
+    if err != nil {
+    log.Println(err)
+    return
+    }
+
+     // 以PNG格式保存文件
+     err = png.Encode(imgfile, img)
+     if err != nil {
+     log.Fatal(err)
+     }
+
+ }
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E5%AE%98%E6%96%B9%E5%9B%BE%E7%89%87%E5%BA%93/" title="Golang-官方图片库">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-Raster-%E5%AD%97%E4%BD%93%E9%A2%9C%E8%89%B2/" title="Golang-Raster-字体颜色">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-09</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

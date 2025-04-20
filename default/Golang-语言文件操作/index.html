@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-语言文件操作</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-语言文件操作 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>收集整理了一下的代码.参照着使用吧,自己做个记录.</p>
+
+<pre><code>func Open(name string) (file *File, err error),*File 是实现了 io.Reader这个接口
+
+byte[] 转化为 bytes.Buffer:bytes.NewBuffer([]byte).
+</code></pre>
+
+<p>一、建立与打开</p>
+
+<p>建立文件函数：</p>
+
+<pre><code>func Create(name string) (file *File, err Error)
+
+func NewFile(fd int, name string) *File
+</code></pre>
+
+<p>具体见官网：<a href="http://golang.org/pkg/os/#Create">http://golang.org/pkg/os/#Create</a></p>
+
+<p>打开文件函数：</p>
+
+<pre><code>func Open(name string) (file *File, err Error)
+
+func OpenFile(name string, flag int, perm uint32) (file *File, err Error)
+</code></pre>
+
+<p>具体见官网：<a href="http://golang.org/pkg/os/#Open">http://golang.org/pkg/os/#Open</a></p>
+
+<p>二、写文件</p>
+
+<p>写文件函数：</p>
+
+<pre><code>func (file *File) Write(b []byte) (n int, err Error)
+
+func (file *File) WriteAt(b []byte, off int64) (n int, err Error)
+
+func (file *File) WriteString(s string) (ret int, err Error)
+</code></pre>
+
+<p>具体见官网：<a href="http://golang.org/pkg/os/#File.Write">http://golang.org/pkg/os/#File.Write</a></p>
+
+<p>写文件示例代码：</p>
+
+<pre><code>package main
+import (
+    &quot;os&quot;
+    &quot;fmt&quot;
+)
+func main() {
+    userFile := &quot;test.txt&quot;
+    fout,err := os.Create(userFile)
+    defer fout.Close()
+    if err != nil {
+        fmt.Println(userFile,err)
+        return
+    }
+    for i:= 0;i&lt;10;i++ {
+        fout.WriteString(&quot;Just a test!\r\n&quot;)
+        fout.Write([]byte(&quot;Just a test!\r\n&quot;))
+    }
+}
+</code></pre>
+
+<p>三、读文件</p>
+
+<p>读文件函数：</p>
+
+<pre><code>func (file *File) Read(b []byte) (n int, err Error)
+
+func (file *File) ReadAt(b []byte, off int64) (n int, err Error)
+</code></pre>
+
+<p>具体见官网：<a href="http://golang.org/pkg/os/#File.Read">http://golang.org/pkg/os/#File.Read</a></p>
+
+<p>读文件示例代码：</p>
+
+<pre><code>package main
+import (
+    &quot;os&quot;
+    &quot;fmt&quot;
+)
+func main() {
+    userFile := &quot;test.txt&quot;
+    fin,err := os.Open(userFile)
+    defer fin.Close()
+    if err != nil {
+        fmt.Println(userFile,err)
+        return
+    }
+    buf := make([]byte, 1024)
+    for{
+        n, _ := fin.Read(buf)
+        if0 == n { break }
+        os.Stdout.Write(buf[:n])
+    }
+}
+</code></pre>
+
+<p>四、删除文件</p>
+
+<p>函数：</p>
+
+<pre><code>func Remove(name string) Error
+</code></pre>
+
+<hr />
+
+<pre><code>// 使用os库
+package main
+
+import (
+    &quot;io&quot;
+    &quot;os&quot;
+)
+
+func main() {
+    fi, err := os.Open(&quot;input.txt&quot;)
+    if err != nil { panic(err) }
+    defer fi.Close()
+
+    fo, err := os.Create(&quot;output.txt&quot;)
+    if err != nil { panic(err) }
+    defer fo.Close()
+
+    buf := make([]byte, 1024)
+    for {
+    n, err := fi.Read(buf)
+    if err != nil &amp;&amp; err != io.EOF { panic(err) }
+    if n == 0 { break }
+
+    if n2, err := fo.Write(buf[:n]); err != nil {
+        panic(err)
+    } else if n2 != n {
+        panic(&quot;error in writing&quot;)
+    }
+    }
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// 这个例子使用了os.Open os.Create。
+
+// 使用bufio库
+package main
+
+import (
+    &quot;bufio&quot;
+    &quot;io&quot;
+    &quot;os&quot;
+)
+
+func main() {
+    fi, err := os.Open(&quot;input.txt&quot;)
+    if err != nil { panic(err) }
+    defer fi.Close()
+    r := bufio.NewReader(fi)
+
+    fo, err := os.Create(&quot;output.txt&quot;)
+    if err != nil { panic(err) }
+    defer fo.Close()
+    w := bufio.NewWriter(fo)
+
+    buf := make([]byte, 1024)
+    for {
+    n, err := r.Read(buf)
+    if err != nil &amp;&amp; err != io.EOF { panic(err) }
+    if n == 0 { break }
+
+    if n2, err := w.Write(buf[:n]); err != nil {
+        panic(err)
+    } else if n2 != n {
+        panic(&quot;error in writing&quot;)
+    }
+    }
+
+    if err = w.Flush(); err != nil { panic(err) }
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// 使用ioutil库
+package main
+
+import (
+    &quot;io/ioutil&quot;
+)
+
+func main() {
+    b, err := ioutil.ReadFile(&quot;input.txt&quot;)
+    if err != nil { panic(err) }
+
+    err = ioutil.WriteFile(&quot;output.txt&quot;, b, 0644)
+    if err != nil { panic(err) }
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E8%AF%BB%E5%8F%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%B5%81-ICCID/" title="Golang-读取字符串流-ICCID">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-%E7%BA%B3%E7%A7%92%E7%BA%A7%E5%88%AB-%E5%B1%80%E5%9F%9F%E7%BD%91-%E5%B9%BF%E6%92%AD-%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5/" title="Golang-纳秒级别-局域网-广播-时间同步">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

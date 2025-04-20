@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux巨大变革之Systemd取代SysV的Init</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux巨大变革之Systemd取代SysV的Init </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<p><a href="http://www.ibm.com/developerworks/cn/linux/1407_liuming_init3/index.html">http://www.ibm.com/developerworks/cn/linux/1407_liuming_init3/index.html</a></p>
+
+<blockquote>
+</blockquote>
+
+<h3>target 取代 runlevel</h3>
+
+<blockquote>
+</blockquote>
+
+<p>在systemd的管理体系里面，以前的运行级别（runlevel）的概念被新的运行目标（target）所取代。</p>
+
+<p>注意：tartget的命名类似于multi-user.target等这种形式</p>
+
+<p>比如原来的(runlevel3)就对应新的多用户目标(multi-user.target),(runlevel5)就相当于(graphical.target)。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 0 关闭系统。
+runlevel0.target, poweroff.target
+// 1, s, single 单用户模式。
+runlevel1.target, rescue.target 
+// 2,4 用户定义/域特定运行级别。默认等同于 3。
+runlevel2.target, runlevel4.target, multi-user.target
+// 3 多用户，非图形化。用户可以通过多个控制台或网络登录。
+runlevel3.target, multi-user.target
+// 5 多用户，图形化。通常为所有运行级别 3 的服务外加图形化登录。
+runlevel5.target, graphical.target
+// 6 重启
+runlevel6.target, reboot.target
+// emergency 紧急 Shell
+emergency.target
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>注意：也就是(/etc/systemd/system)目录下(default.target -&gt; /usr/lib/systemd/system/runlevel3.target)
+所以：runlevel3.target 对应 /etc/systemd/system/multi-user.target.wants 目录的 cron.service 
+同时：multi-user.target.wants/cron.service 也就是 cron.service -&gt; /usr/lib/systemd/system/cron.service
+同样：runlevel5.target 对应 /etc/systemd/system/graphical.target.wants 
+备注：在openSUSE系统下可以使用 systemd 的主要命令行工具 systemctl 来管理。
+注意：在 systemd 下，有些系统服务器，service、chkconfig 兼容，有些系统则无法继续使用
+比如：在 chkconfig 运行级别3下执行 chkconfig sshd on 时，系统会自动在 multi-user.* 建立 sshd.service 连接
+原理：也就是将 /usr/lib/systemd/system/ 下对应的服务连接到 /etc/systemd/system/ 对应等级的目录中
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>由于不再使用运行级别概念，所以/etc/inittab也不再被系统使用 
+而在systemd的管理体系里面，默认的target（相当于以前的默认运行级别）是通过软链来实现。如：
+ln -s /lib/systemd/system/runlevel3.target /etc/systemd/system/default.target
+在/lib/systemd/system/ 下面定义runlevelX.target文件目的主要是为了能够兼容以前的运行级别level的管理方法。
+事实上/lib/systemd/system/runlevel3.target，同样是被软连接到multi-user.target。
+注：opensuse下是在/usr/lib/systemd/system/目录下。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Systemd 命令和 sysvinit 命令的对照表</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Sysvinit 命令         Systemd 命令                  备注
+service foo start   systemctl start foo.service 用来启动一个服务 (并不会重启现有的)
+service foo stop    systemctl stop foo.service  用来停止一个服务 (并不会重启现有的)。
+service foo restart systemctl restart foo.service   用来停止并启动一个服务。
+service foo reload  systemctl reload foo.service    当支持时，重新装载配置文件而不中断等待操作。
+service foo condrestart systemctl condrestart foo.service   如果服务正在运行那么重启它。
+service foo status  systemctl status foo.service            汇报服务是否正在运行。
+ls /etc/rc.d/init.d/    systemctl list-unit-files --type=service    用来列出可以启动或停止的服务列表。
+chkconfig foo on    systemctl enable foo.service    在下次启动时或满足其他触发条件时设置服务为启用
+chkconfig foo off   systemctl disable foo.service   在下次启动时或满足其他触发条件时设置服务为禁用
+chkconfig foo       systemctl is-enabled foo.service    用来检查一个服务在当前环境下被配置为启用还是禁用。
+chkconfig –list     systemctl list-unit-files --type=service    输出在各个运行级别下服务的启用和禁用情况
+chkconfig foo –list ls /etc/systemd/system/*.wants/foo.service  用来列出该服务在哪些运行级别下启用和禁用。
+chkconfig foo –add  systemctl daemon-reload                         当您创建新服务文件或者变更设置时使用。
+telinit 3       systemctl isolate multi-user.target (OR systemctl isolate runlevel3.target OR telinit 3) 改变至多用户运行级别。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Systemd 电源管理命令</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>systemctl reboot    重启机器
+systemctl poweroff  关机
+systemctl suspend   待机
+systemctl hibernate 休眠
+systemctl hybrid-sleep  混合休眠模式（同时休眠到硬盘并待机）
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Systemd 物理文件组成</h3>
+
+<blockquote>
+</blockquote>
+
+<p>Systemd是一个完整的软件包，安装完成后有很多物理文件组成.</p>
+
+<p>大致分布为，配置文件位于/etc/systemd这个目录下，配置工具命令位于/bin，和/sbin这两个目录下</p>
+
+<p>预先准备的备用配置文件位于/lib/systemd目录下，还有库文件和帮助手册等等。</p>
+
+<p>这是一个庞大的软件包。详情使用rpm -ql systemd即可查看。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Systemd 运行原理</h3>
+
+<blockquote>
+</blockquote>
+
+<p>配置单元(unit)</p>
+
+<blockquote>
+</blockquote>
+
+<p>系统初始化要做很多工作，如挂载文件系统，启动服务，配置交换分区，都可以看做是一个配置单元，安装功能不同把配置单元分成多种类型。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>service 
+// 后台服务进程，如httpd，mysqld等
+soket 
+// 对应一个套接字，之后对应到一个service，类似于xinetd的功能
+device 
+// 对应udev规则标记的一个设备
+mount 
+// 系统中的一个挂载点，systemd据此进行自动挂载，为了与SystemV兼容，目前systemd自动处理/etc/fstab并转化为mount
+automount 
+// 自动挂载点
+swap 
+// 配置交换分区
+target 
+// 配置单元的逻辑分组，包含多个相关的配置单元，可以当成是SystemV中的运行级。
+timer 
+// 定时器。用来定时触发用户定义的操作，它可以用来取代传统的atd，crond等。
+snapshot 
+// 与target类似，表示当前的运行状态
+
+注意：每一个配置单元都有一个对应的配置文件，系统管理员的任务就是处理这些不同的文件，比如一个MySql服务对应一个mysql.service文件。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Journald</h3>
+
+<blockquote>
+</blockquote>
+
+<p>Journald是systemd独有的日志系统，替换了sysVinit中的syslog守护进程。命令journalctl用来读取日志。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 所有引导日志
+journalctl -b
+// 系统时时日志（tail -f)
+journalctl -f
+// 指定查看程序日志
+journalctl /usr/sbin/dnsmasq
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>hostnamectl</h3>
+
+<blockquote>
+</blockquote>
+
+<p>Systemd带来了一整套与操作系统交互的新途径，并且极具特色。</p>
+
+<p>举个栗子，你可以用hostnamectl命令来获得你的linux机器的hostname和其它有用的独特信息。</p>
+
+<pre><code>   Static hostname: danooplayer
+     Icon name: computer-desktop
+       Chassis: desktop
+    Machine ID: 0635b925bb7b4b7d9ad909b98374199d
+       Boot ID: be2f99093bd3442c9c9516b938389c16
+  Operating System: openSUSE 13.1 (Bottle) (i586)
+       CPE OS Name: cpe:/o:opensuse:opensuse:13.1
+        Kernel: Linux 3.11.6-4-desktop
+      Architecture: i686
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Systemctl</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 列出当前目标
+systemctl list-units --type=target
+    // 输出
+    basic.target         loaded active active Basic System
+    cryptsetup.target    loaded active active Encrypted Volumes
+    getty.target         loaded active active Login Prompts
+    local-fs-pre.target  loaded active active Local File Systems (Pre)
+    local-fs.target      loaded active active Local File Systems
+    multi-user.target    loaded active active Multi-User System
+    network.target       loaded active active Network
+    nss-lookup.target    loaded active active Host and Network Name Lookups
+    paths.target         loaded active active Paths
+    remote-fs-pre.target loaded active active Remote File Systems (Pre)
+    remote-fs.target     loaded active active Remote File Systems
+    slices.target        loaded active active Slices
+    sockets.target       loaded active active Sockets
+    swap.target          loaded active active Swap
+    sysinit.target       loaded active active System Initialization
+    timers.target        loaded active active Timers
+// 改变当前目标
+systemctl isolate graphical.target
+    // 查看支持的 target 
+    ll /usr/lib/systemd/system/*.target
+// 默认目标
+systemctl get-default
+    // 输出
+    runlevel3.target
+// 设置默认目标
+systemctl set-default graphical.target / multi-user.target
+// 使某服务自动启动 
+systemctl enable httpd.service
+// 使某服务不自动启动    
+systemctl disable httpd.service
+// 检查服务状态   
+systemctl status httpd.service （服务详细信息） 
+systemctl is-active httpd.service （仅显示是否 Active)
+// 显示所有已启动的服务   
+systemctl list-units --type=service
+systemctl list-units --type=target
+// 启动某服务
+systemctl start httpd.service
+// 停止某服务
+systemctl stop httpd.service
+// 重启某服务
+systemctl restart httpd.service
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Systemd 的使用</h3>
+
+<blockquote>
+</blockquote>
+
+<p>下面针对技术人员的不同角色来简单地介绍一下 systemd 的使用。</p>
+
+<p>本文只打算给出简单的描述，让您对 systemd 的使用有一个大概的理解。</p>
+
+<p>具体的细节内容太多，即无法在一篇短文内写全，本人也没有那么强大的能力。</p>
+
+<p>还需要读者自己去进一步查阅 systemd 的文档。</p>
+
+<blockquote>
+</blockquote>
+
+<p>系统软件开发人员</p>
+
+<p>开发人员需要了解 systemd 的更多细节。</p>
+
+<p>比如您打算开发一个新的系统服务，就必须了解如何让这个服务能够被 systemd 管理。</p>
+
+<p>这需要您注意以下这些要点：</p>
+
+<pre><code>后台服务进程代码不需要执行两次派生来实现后台精灵进程，只需要实现服务本身的主循环即可。
+不要调用 setsid()，交给 systemd 处理
+不再需要维护 pid 文件。
+Systemd 提供了日志功能，服务进程只需要输出到 stderr 即可，无需使用 syslog。
+处理信号 SIGTERM，这个信号的唯一正确作用就是停止当前服务，不要做其他的事情。
+SIGHUP 信号的作用是重启服务。
+需要套接字的服务，不要自己创建套接字，让 systemd 传入套接字。
+使用 sd_notify()函数通知 systemd 服务自己的状态改变。一般地，当服务初始化结束，进入服务就绪状态时，可以调用它。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>Unit 文件的编写</p>
+
+<p>对于开发者来说，工作量最大的部分应该是编写配置单元文件，定义所需要的单元。</p>
+
+<p>举例来说，开发人员开发了一个新的服务程序</p>
+
+<p>比如 httpd，就需要为其编写一个配置单元文件以便该服务可以被 systemd 管理</p>
+
+<p>类似 UpStart 的工作配置文件。在该文件中定义服务启动的命令行语法，以及和其他服务的依赖关系等。</p>
+
+<p>此外我们之前已经了解到，systemd 的功能繁多，不仅用来管理服务，还可以管理挂载点，定义定时任务等。</p>
+
+<p>这些工作都是由编辑相应的配置单元文件完成的。我在这里给出几个配置单元文件的例子。</p>
+
+<p>下面是 SSH 服务的配置单元文件，服务配置单元文件以.service 为文件名后缀。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>  #cat /etc/system/system/sshd.service
+  [Unit]
+  Description=OpenSSH server daemon
+  [Service]
+  EnvironmentFile=/etc/sysconfig/sshd
+  ExecStartPre=/usr/sbin/sshd-keygen
+  ExecStart=/usrsbin/sshd –D $OPTIONS
+  ExecReload=/bin/kill –HUP $MAINPID
+  KillMode=process
+  Restart=on-failure
+  RestartSec=42s
+  [Install]
+  WantedBy=multi-user.target
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>文件分为三个小节。</p>
+
+<pre><code>第一个是[Unit]部分，这里仅仅有一个描述信息。
+第二部分是 Service 定义，其中:
+    ExecStartPre 定义启动服务之前应该运行的命令；
+    ExecStart 定义启动服务的具体命令行语法。
+第三部分是[Install]，WangtedBy 表明这个服务是在多用户模式下所需要的。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>那我们就来看下 multi-user.target 吧：</p>
+
+<pre><code>  #cat multi-user.target
+  [Unit]
+  Description=Multi-User System
+  Documentation=man.systemd.special(7)
+  Requires=basic.target
+  Conflicts=rescue.service rescure.target
+  After=basic.target rescue.service rescue.target
+  AllowIsolate=yes
+  [Install]
+  Alias=default.target
+</code></pre>
+
+<p>第一部分中的 Requires 定义表明 multi-user.target 启动的时候 basic.target 也必须被启动；</p>
+
+<p>另外 basic.target 停止的时候，multi-user.target 也必须停止。</p>
+
+<p>如果您接着查看 basic.target 文件，会发现它又指定了 sysinit.target 等其他的单元必须随之启动。</p>
+
+<p>同样 sysinit.target 也会包含其他的单元。</p>
+
+<p>采用这样的层层链接的结构，最终所有需要支持多用户模式的组件服务都会被初始化启动好。</p>
+
+<blockquote>
+</blockquote>
+
+<p>此外在/etc/systemd/system 目录下还可以看到诸如*.wants 的目录</p>
+
+<p>放在该目录下的配置单元文件等同于在[Unit]小节中的 wants 关键字</p>
+
+<p>即本单元启动时，还需要启动这些单元。</p>
+
+<p>比如您可以简单地把您自己写的 foo.service 文件放入 multi-user.target.wants 目录下，这样每次都会被默认启动了。</p>
+
+<blockquote>
+</blockquote>
+
+<p>最后，让我们来看看 sys-kernel-debug.mout 文件，这个文件定义了一个文件挂载点：</p>
+
+<pre><code>#cat sys-kernel-debug.mount
+[Unit]
+Description=Debug File Syste
+DefaultDependencies=no
+ConditionPathExists=/sys/kernel/debug
+Before=sysinit.target
+[Mount]
+What=debugfs
+Where=/sys/kernel/debug
+Type=debugfs
+</code></pre>
+
+<p>这个配置单元文件定义了一个挂载点。</p>
+
+<p>挂载配置单元文件有一个[Mount]配置小节，里面配置了 What，Where 和 Type 三个数据项。</p>
+
+<p>这都是挂载命令所必须的，例子中的配置等同于下面这个挂载命令：</p>
+
+<p>mount –t debugfs /sys/kernel/debug debugfs</p>
+
+<p>配置单元文件的编写需要很多的学习，必须参考 systemd 附带的 man 等文档进行深入学习。</p>
+
+<p>希望通过上面几个小例子，大家已经了解配置单元文件的作用和一般写法了。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h1>补充</h1>
+
+<blockquote>
+</blockquote>
+
+<p>关于通过 getty.target 终端启动与守护进程</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 创建终端配置文件
+/usr/lib/systemd/system/getty@xxx.service
+
+// 内容
+    #  This file is part of systemd.
+    #
+    #  systemd is free software; you can redistribute it and/or modify it
+    #  under the terms of the GNU Lesser General Public License as published by
+    #  the Free Software Foundation; either version 2.1 of the License, or
+    #  (at your option) any later version.
+
+    [Unit]
+    Description=Getty on %I
+    Documentation=man:agetty(8) man:systemd-getty-generator(8)
+    Documentation=http://0pointer.de/blog/projects/serial-console.html
+    Conflicts=rescue.service
+    After=systemd-user-sessions.service plymouth-quit-wait.service
+    After=rc-local.service
+
+    # If additional gettys are spawned during boot then we should make
+    # sure that this is synchronized before getty.target, even though
+    # getty.target didn't actually pull it in.
+    Before=getty.target
+    IgnoreOnIsolate=yes
+
+    # On systems without virtual consoles, don't start any getty. Note
+    # that serial gettys are covered by serial-getty@.service, not this
+    # unit.
+    // 终端 ...
+    ConditionPathExists=/dev/tty0
+
+    [Service]
+    # the VT is cleared by TTYVTDisallocate
+    // 这里就是需要通过终端启动的进程
+    ExecStart=/usr/bin/startx_run
+    Type=idle
+    Restart=always
+    RestartSec=0
+    UtmpIdentifier=%I
+    TTYPath=/dev/%I
+    TTYReset=yes
+    TTYVHangup=yes
+    TTYVTDisallocate=yes
+    KillMode=process
+    IgnoreSIGPIPE=no
+    SendSIGHUP=yes
+
+    # Unset locale for the console getty since the console has problems
+    # displaying some internationalized messages.
+    Environment=LANG= LANGUAGE= LC_CTYPE= LC_NUMERIC= LC_TIME= LC_COLLATE= LC_MONETARY= LC_MESSAGES= LC_PAPER= LC_NAME= LC_ADDRESS= LC_TELEPHONE= LC_MEASUREMENT= LC_IDENTIFICATION=
+
+    [Install]
+    WantedBy=getty.target
+
+// 进入终端启动的进程目录
+/etc/systemd/system/getty.target.wants 
+
+// 连接需要启动的进程配置文件
+getty@tty1.service -&gt; /usr/lib/systemd/system/getty@.service
+getty@tty2.service -&gt; /usr/lib/systemd/system/getty@...
+getty@tty3.service -&gt; /usr/lib/systemd/system/getty@...
+getty@tty4.service -&gt; /usr/lib/systemd/system/getty@...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BOnTouchListener%E4%B8%8EOnGestureListener%E7%9A%84%E5%8C%BA%E5%88%AB/" title="Android之OnTouchListener与OnGestureListener的区别">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8BInterface%E6%8E%A5%E5%8F%A3%E4%BD%BF%E7%94%A8/" title="Golang之Interface接口使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-17</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>CSS之SCSS的使用介绍</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>CSS之SCSS的使用介绍 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>CSS 常用</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>全局样式 
+
+// main.js
+import &quot;@/assets/scss/_global.scss&quot;;
+
+// _global.scss
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing:border-box;
+  -moz-box-sizing:border-box; /* Firefox */
+  -webkit-box-sizing:border-box; /* Safari */
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>border-box 告诉浏览器：你想要设置的边框和内边距的值是包含在width内的。
+// 也就是说，如果你将一个元素的width设为100px，那么这100px会包含它的border和padding
+// 内容区的实际宽度是width减去(border + padding)的值
+// 大多数情况下，这使得我们更容易地设定一个元素的宽高。
+
+特别说明：border-box 不包含 margin 
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 如何查看元素是块级元素还是内联(行内)元素
+let element = document.getElementById(&quot;myName&quot;);
+console.log(window.getComputedStyle(element).display);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>块级元素：display: block;
+// 1. 每个块级元素都从新的一行开始, 并且其后的元素也另起一行, 一个块级元素独占一行
+// 2. 元素的高度、宽度、行高以及顶和底边距都可设置
+// 3. 元素宽度在不设置的情况下, 是它本身父容器的100%(和父元素的宽度一致)，除非设定一个宽度。
+
+内联(行内)元素：display: inline;
+// 1. 和其他元素都在一行上；
+// 2. 元素的高度、宽度及顶部和底部边距不可设置；
+// 3. 元素的宽度就是它包含的文字或图片的宽度，不可改变。
+
+内联(行内)块级元素：display: inline-block; (同时具备内联元素、块状元素的特点)
+// 1. 和其他元素都在一行上；
+// 2. 元素的高度、宽度、行高以及顶和底边距都可设置。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>&lt;div&gt; 元素允许你将一组元素集中到一个块级元素内 (display: block;)
+&lt;span&gt; 元素用来包含一段文本或包含若干个内联(行内)元素 (display: inline;)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>1. text-align 属性对块级元素起作用，对行内元素不起作用
+// 因为：行内元素的宽完全是靠内容撑开, 行内元素的宽就是内容宽，没有可居中的空间
+
+2. 块级元素即使设置宽度也还是独占一行
+// 块级元素当没有明确指定 width 和 height 值时，块级元素尺寸由内容确定
+// 当指定了 width 和 height 的值时，内容超出块级元素的尺寸就会溢出
+// 这时块级元素要呈现什么行为要看其 overflow 的值
+
+3. 块级元素可以设置 margin 和 padding 属性
+// 行内元素 margin-left、padding-right 可以产生边距效果
+// 行内元素 margin-top、margin-bottom 不起作用
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>什么是文档流
+
+1. 窗体自上而下分成一行一行，并在每行中按从左至右的顺序排放元素
+2. 每个非浮动块级元素都独占一行；非浮动的内联元素则从左到右连续排列，直到改行容纳不下再另起一行
+3. 浮动元素则按规定浮在行的一端，若当前行容不下，则另起新行再浮动
+4. 几乎所有元素(包括块级，内联和列表元素）均可生成子行，用于摆放子元素
+5. 有三种情况将使得元素脱离文档流而存在，分别是 float、absolute、fixed
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>Position 定位元素, 指出一个元素的定位方法
+
+position 有4种可能值 ...
+
+1. static (不脱离文档流)
+    // 默认值，元素按照在文档流中出现的顺序渲染
+    // (忽略 top, bottom, left, right 或者 z-index 声明)
+2. absolute (脱离文档流)
+    // 绝对定位，元素相对于它的第一个被定位的祖先元素(非static)来进行定位
+3. fixed (脱离文档流)
+    // 元素相对于浏览器window进行定位
+4. relative (不脱离文档流)
+    // 元素相对与它的正常位置进行定位
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>FlexBox 弹性布局
+
+// 任何一个容器都可以指定为 Flex 布局。
+.box{
+  display: flex;
+}
+
+// 行内元素也可以使用 Flex 布局。
+.box{
+  display: inline-flex;
+}
+
+// 例
+.box {
+    display:flex;  /*盒子模型*/
+    flex-direction: row;  /*横向*/
+    justify-content: space-around; /*主轴居中*/
+    align-items: center; /*纵轴居中*/
+}
+
+// 注意: 设为 Flex 布局以后，子元素的float、clear和vertical-align属性将失效。
+
+采用 Flex 布局的元素，称为 Flex 容器（flex container），简称&quot;容器&quot;。
+// 它的所有子元素自动成为容器成员，称为 Flex 项目（flex item），简称&quot;项目&quot;。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>容器属性：以下6个属性设置在容器上 ...
+
+1. flex-direction 
+    // 属性决定主轴的方向（即项目的排列方向）
+    * row（默认值）：主轴为水平方向，起点在左端。
+    * row-reverse：主轴为水平方向，起点在右端。
+    * column：主轴为垂直方向，起点在上沿。
+    * column-reverse：主轴为垂直方向，起点在下沿。
+2. flex-wrap 
+    // 默认项目都排在一条线（又称&quot;轴线&quot;）上。
+    // flex-wrap 属性定义，如果一条轴线排不下，如何换行。
+    * nowrap（默认）：不换行。
+    * wrap：换行，第一行在上方。
+    * wrap-reverse：换行，第一行在下方。
+3. flex-flow
+    // 属性是flex-direction属性和flex-wrap属性的简写形式，默认值为row nowrap
+4. justify-content
+    // 属性定义了项目在主轴上的对齐方式 (主轴)
+    * flex-start（默认值）：左对齐
+    * flex-end：右对齐
+    * center： 居中
+    * space-between：两端对齐，项目之间的间隔都相等。
+    * space-around：每个项目两侧的间隔相等。
+5. align-items
+    // 属性定义项目在交叉轴上如何对齐 (纵轴)
+    * flex-start：交叉轴的起点对齐。
+    * flex-end：交叉轴的终点对齐。
+    * center：交叉轴的中点对齐。
+    * baseline: 项目的第一行文字的基线对齐。
+    * stretch（默认值）：如果项目未设置高度或设为auto，将占满整个容器的高度。
+6. align-content
+    // 属性定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用
+    * flex-start：与交叉轴的起点对齐。
+    * flex-end：与交叉轴的终点对齐。
+    * center：与交叉轴的中点对齐。
+    * space-between：与交叉轴两端对齐，轴线之间的间隔平均分布。
+    * space-around：每根轴线两侧的间隔都相等。
+    * stretch（默认值）：轴线占满整个交叉轴。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>项目的属性：以下6个属性设置在项目上 ...
+
+1. order
+    // 属性定义项目的排列顺序。数值越小，排列越靠前，默认为0。
+    // order: &lt;integer&gt;;
+2. flex-grow
+    // 属性定义项目的放大比例，默认为0，即如果存在剩余空间，也不放大。
+    // flex-grow: &lt;number&gt;; /* default 0 */
+3. flex-shrink
+    // 属性定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小。
+    // flex-shrink: &lt;number&gt;; /* default 1 */
+4. flex-basis
+    // 属性定义了在分配多余空间之前，项目占据的主轴空间（main size）。
+    // 浏览器根据这个属性，计算主轴是否有多余空间。
+    // 它的默认值为 auto，即项目的本来大小。
+    // 它可以设为跟width或height属性一样的值（比如350px），则项目将占据固定空间。
+    // flex-basis: &lt;length&gt; | auto; /* default auto */
+5. flex
+    // 属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto。后两个属性可选。
+    // flex: none | [ &lt;'flex-grow'&gt; &lt;'flex-shrink'&gt;? || &lt;'flex-basis'&gt; ]
+6. align-self
+    // 属性允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性。
+    // 默认值为auto，表示继承父元素的align-items属性，如果没有父元素，则等同于stretch。
+    // align-self: auto | flex-start | flex-end | center | baseline | stretch;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>CSS之SCSS的使用介绍</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>SCSS (Sassy CSS)，一款css预处理语言
+SCSS 是 Sass 3 引入新的语法，其语法完全兼容 CSS3，并且继承了 Sass 的强大功能。
+也就是说，任何标准的 CSS3 样式表都是具有相同语义的有效的 SCSS 文件。
+SCSS 需要使用分号和花括号而不是换行和缩进。
+SCSS 对空白符号不敏感，其实就和css3语法一样，其后缀名是分别为 .scss。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>变量</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>$ 符号来标识变量；把反复使用的css属性值定义成变量；
+
+$highlight-color: #F90;
+$highlight-border: 1px solid $highlight-color; // 变量中可存在变量
+
+$link-color: blue;
+a {
+  color: $link_color; // 中划线和下划线等价，包括对混合器和Sass函数的命名
+}
+
+$side : left;
+.rounded {
+  border-#{$side}-radius: 5px; // 如果变量需要镶嵌在字符串之中，就必须需要写在#{}之中。
+}
+
+$nav-color: #F90;// 当前样式表都可以使用
+nav {
+  $width: 100px; // 只有nav{}里面才可以使用，当前样式表其他地方可以重复定义和使用
+  width: $width;
+  color: $nav-color;
+}
+
+// 编译后
+nav {
+  width: 100px;
+  color: #F90;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>嵌套</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 选择器嵌套
+#content {
+  article {
+    h1 { color: #333 }
+    p { margin-bottom: 1.4em }
+  }
+  aside { background-color: #EEE }
+}
+
+/* 编译后 */
+#content article h1 { color: #333 }
+#content article p { margin-bottom: 1.4em }
+#content aside { background-color: #EEE }
+
+// 属性也可以嵌套，比如border-color属性，可以写成：
+p {
+    border: {   // 注意，border后面必须加上冒号。
+        color: red;
+    }
+}
+
+// 在嵌套的代码块内，可以使用&amp;引用父元素。比如a:hover伪类，可以写成
+a {
+    &amp;:hover { color: #ffb3ff; } 
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>计算功能</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 所有数据类型均支持相等运算 == 或 !=，此外，每种数据类型也有其各自支持的运算方式。
+
+// 数字运算: 支持数字的加减乘除、取整等运算 (+, -, *, /, %)
+$var: 20px;
+body {
+  margin: (14px/2);
+  top: 50px + 100px;
+  right: $var * 10%;}
+
+// 字符串运算： + 可用于连接字符串
+// 注意，如果有引号字符串（位于 + 左侧）连接无引号字符串，运算结果是有引号的，
+// 相反，无引号字符串（位于 + 左侧）连接有引号字符串，运算结果则没有引号
+p {cursor: e + -resize;} // 编译后 p {cursor: e-resize; }
+
+// 例如
+p:before { 
+    content: &quot;Foo &quot; + Bar;  
+    font-family: sans- + &quot;serif&quot;;
+}
+
+// 编译为
+p:before {
+  content: &quot;Foo Bar&quot;;
+  font-family: sans-serif; 
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>继承</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 继承是基于类class的（有时是基于其他类型的选择器）
+// 允许一个选择器，继承另一个选择器。
+// 比如，现有class1：
+.class1 {
+    border: 1px solid #ddd;
+}
+
+// class2 要继承 class1，就要使用 @extend 命令：
+.class2 {
+     @extend .class1;
+     font-size:120%;
+ }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>混合器 Mixin</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 避免不停地重复一段样式
+
+// 使用@mixin命令，定义一个代码块。
+@mixin left {
+　　float: left;
+　　margin-left: 10px;
+}
+
+// 使用@include命令，调用这个mixin。
+div {
+　　@include left;
+}
+　　
+// mixin 的强大之处，在于可以指定参数和缺省值。
+@mixin left($value: 10px) {
+    float: left;
+    margin-right: $value;
+}
+
+// 使用的时候，根据需要加入参数：
+div {
+　　@include left(20px);
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>插入文件</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Sass 拓展了 @import 的功能，允许其导入 SCSS 或 Sass 文件。
+// 被导入的文件将合并编译到同一个 CSS 文件中
+// 另外，被导入的文件中所包含的变量或者混合指令 (mixin) 都可以在导入的文件中使用。
+
+@import &quot;foo.scss&quot;;             // 都会导入文件 foo.scss
+@import &quot;foo&quot;;                  // 都会导入文件 foo.scss
+@import &quot;http://foo.com/bar&quot;;   // 插入外部文件
+@import &quot;foo.css&quot;;              // 等同于css的import命令。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Vue.js%E4%B9%8B%E4%BD%BF%E7%94%A8%E5%9F%BA%E4%BA%8EGin%E7%9A%84JwtBearer%E8%AE%A4%E8%AF%81/" title="Vue.js之使用基于Gin的JwtBearer认证">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8B%E4%BD%BF%E7%94%A8Module%E5%88%9B%E5%BB%BAgin%E9%A1%B9%E7%9B%AE/" title="Golang之使用Module创建gin项目">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2021-01-22</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#javascript-ref">javascript <span>11</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

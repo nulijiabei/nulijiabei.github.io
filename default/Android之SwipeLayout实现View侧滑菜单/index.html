@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之SwipeLayout实现View侧滑菜单</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之SwipeLayout实现View侧滑菜单 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>AndroidSwipeLayout</h3>
+
+<blockquote>
+</blockquote>
+
+<p>一个很强大的SwipeLayout和SwipeListView相比它不局限于ListView</p>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Android之SwipeLayout实现View侧滑菜单/swipelayout.gif" alt="" width="300" height="500"></p>
+
+<blockquote>
+</blockquote>
+
+<p>官方：<a href="https://github.com/daimajia/AndroidSwipeLayout/wiki/usage">https://github.com/daimajia/AndroidSwipeLayout/wiki/usage</a></p>
+
+<blockquote>
+</blockquote>
+
+<p>Jar：<a href="https://github.com/daimajia/AndroidSwipeLayout/releases/download/v1.1.8/AndroidSwipeLayout-v1.1.8.jar">https://github.com/daimajia/AndroidSwipeLayout/releases/download/v1.1.8/AndroidSwipeLayout-v1.1.8.jar</a></p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>Show Mode : 支持 LayDown 和 PullOut</p>
+
+<blockquote>
+</blockquote>
+
+<p>Drag edge : 支持 LEFT, RIGHT, TOP, BOTTOM</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// XML
+// 一个SwipeLayou包含两个Layout
+// 其中一个Layout是隐藏的(侧滑才会显示)
+// 另外一个Layout是显示的
+&lt;com.daimajia.swipe.SwipeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;80dp&quot;&gt;
+    &lt;!-- Bottom View Start--&gt;   
+     // 隐藏的
+     &lt;LinearLayout
+    android:background=&quot;#66ddff00&quot;
+    android:id=&quot;@+id/bottom_wrapper&quot;
+    android:layout_width=&quot;160dp&quot;
+    android:weightSum=&quot;1&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+    &lt;!--What you want to show--&gt;
+    &lt;/LinearLayout&gt;
+    &lt;!-- Bottom View End--&gt;
+
+    &lt;!-- Surface View Start --&gt;
+     // 显示的 
+     &lt;LinearLayout
+    android:padding=&quot;10dp&quot;
+    android:background=&quot;#ffffff&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+    &lt;!--What you want to show in SurfaceView--&gt;
+    &lt;/LinearLayout&gt;
+    &lt;!-- Surface View End --&gt;
+&lt;/com.daimajia.swipe.SwipeLayout&gt;
+
+
+// 同时还可以进行一些事件监听
+SwipeLayout swipeLayout =  (SwipeLayout)findViewById(R.id.sample1);
+
+//set show mode.
+swipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
+
+//add drag edge.(If the BottomView has 'layout_gravity' attribute, this line is unnecessary)
+swipeLayout.addDrag(SwipeLayout.DragEdge.Left, findViewById(R.id.bottom_wrapper));
+
+swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
+        @Override
+        public void onClose(SwipeLayout layout) {
+        //when the SurfaceView totally cover the BottomView.
+        }
+
+        @Override
+        public void onUpdate(SwipeLayout layout, int leftOffset, int topOffset) {
+           //you are swiping.
+        }
+
+        @Override
+        public void onStartOpen(SwipeLayout layout) {
+
+        }
+
+        @Override
+        public void onOpen(SwipeLayout layout) {
+           //when the BottomView totally show.
+        }
+
+        @Override
+        public void onStartClose(SwipeLayout layout) {
+
+        }
+
+        @Override
+        public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
+           //when user's hand released.
+        }
+});
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E5%9C%A8Layout%E4%B8%AD%E8%87%AA%E5%AE%9A%E4%B9%89View/" title="Android之在Layout中自定义View">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Java%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E4%B9%8B%E7%BB%A7%E6%89%BF/" title="Java面向对象之继承">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-27</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

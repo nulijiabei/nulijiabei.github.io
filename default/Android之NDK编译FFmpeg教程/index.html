@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之NDK编译FFmpeg教程</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之NDK编译FFmpeg教程 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Android之NDK编译FFmpeg教程</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// CLANG
+
+// Android NDK 下载
+// 本科教程使用 android-ndk-r20b-linux-x86_64.zip 
+// 在 ubuntu 18.04 x64 下进行 ...
+https://developer.android.google.cn/ndk/downloads/
+
+// FFmpeg 下载
+// 本教程使用 FFmpeg 4.2.2 &quot;Ada&quot; 下进行 ...
+http://ffmpeg.org/download.html#releases
+
+// 注意: FFmpeg h264_mediacodec 最高版本 3.4.7
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 环境准备 ...
+apt-get install yasm
+apt-get install pkg-config
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 修改 FFmpeg configure
+SLIBNAME_WITH_MAJOR='$(SLIBNAME).$(LIBMAJOR)'
+LIB_INSTALL_EXTRA_CMD='$$(RANLIB)&quot;$(LIBDIR)/$(LIBNAME)&quot;'
+SLIB_INSTALL_NAME='$(SLIBNAME_WITH_VERSION)'
+SLIB_INSTALL_LINKS='$(SLIBNAME_WITH_MAJOR)$(SLIBNAME)'
+// 将其修改为
+SLIBNAME_WITH_MAJOR='$(SLIBPREF)$(FULLNAME)-$(LIBMAJOR)$(SLIBSUF)'
+LIB_INSTALL_EXTRA_CMD='$$(RANLIB)&quot;$(LIBDIR)/$(LIBNAME)&quot;'
+SLIB_INSTALL_NAME='$(SLIBNAME_WITH_MAJOR)'
+SLIB_INSTALL_LINKS='$(SLIBNAME)'
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>--disable-asm // 如出现 asm 异常则增加 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// FFmpeg Build 脚本
+
+#!/bin/bash
+make clean
+
+export NDK=/home/kres/android-ndk-r20b
+TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64/
+API=21
+
+function build_android
+{
+    echo &quot;Compiling FFmpeg for $CPU&quot;
+    ./configure \
+    --prefix=$PREFIX \
+    --enable-neon \
+    --enable-hwaccels \
+    --enable-gpl \
+    --enable-shared \
+    --enable-jni \
+    --enable-mediacodec \
+    --disable-decoders \
+        --enable-decoder=h264_mediacodec \
+        --enable-decoder=vp9 \
+        --enable-decoder=h264 \
+        --enable-decoder=mpeg4 \
+        --enable-decoder=aac \
+        --enable-decoder=aac_latm \
+        --enable-decoder=mjpeg \
+        --enable-decoder=png \
+        --enable-decoder=mpeg4_mediacodec \
+    --disable-encoders \  // 按需开启
+        --enable-encoder=vp9_vaapi --enable-encoder=h264_nvenc --enable-encoder=h264_v4l2m2m --enable-encoder=hevc_nvenc \
+    --disable-demuxers \ // 按需开启
+        --enable-demuxer=rtsp --enable-demuxer=rtp --enable-demuxer=flv --enable-demuxer=h264 \
+    --disable-muxers \ // 按需开启
+        --enable-muxer=rtsp --enable-muxer=rtp --enable-muxer=flv --enable-muxer=h264 \
+    --disable-parsers \ // 按需开启
+        --enable-parser=mpeg4video --enable-parser=aac --enable-parser=h264 --enable-parser=vp9 \
+    --disable-protocols \ // 按需开启
+        --enable-protocol=rtmp --enable-protocol=rtp --enable-protocol=tcp --enable-protocol=udp \
+    --disable-bsfs \
+    --disable-indevs --enable-indev=v4l2 \
+    --disable-outdevs \
+    --disable-filters \
+    --disable-postproc \
+    --disable-static \
+    --disable-doc \
+    --disable-ffmpeg \
+    --disable-ffplay \
+    --disable-ffprobe \
+    --enable-avdevice \
+    --disable-doc \
+    --disable-symver \
+    --cross-prefix=$CROSS_PREFIX \
+    --target-os=android \
+    --arch=$ARCH \
+    --cpu=$CPU \
+    --cc=$CC \
+    --cxx=$CXX \
+    --enable-cross-compile \
+    --sysroot=$SYSROOT \
+    --extra-cflags=&quot;-Os -fpic $OPTIMIZE_CFLAGS&quot; \
+    --extra-ldflags=&quot;$ADDI_LDFLAGS&quot; \
+    $ADDITIONAL_CONFIGURE_FLAG
+
+    make clean
+    make -j6
+    make install
+    echo &quot;The Compilation of FFmpeg for $CPU is completed&quot;
+
+}
+
+#armv8-a
+ARCH=arm64
+CPU=armv8-a
+CC=$TOOLCHAIN/bin/aarch64-linux-android$API-clang
+CXX=$TOOLCHAIN/bin/aarch64-linux-android$API-clang++
+SYSROOT=$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+CROSS_PREFIX=$TOOLCHAIN/bin/aarch64-linux-android-
+PREFIX=$(pwd)/android/$CPU
+OPTIMIZE_CFLAGS=&quot;-march=$CPU&quot;
+build_android
+
+#armv7-a
+ARCH=arm
+CPU=armv7-a
+CC=$TOOLCHAIN/bin/armv7a-linux-androideabi$API-clang
+CXX=$TOOLCHAIN/bin/armv7a-linux-androideabi$API-clang++
+SYSROOT=$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+CROSS_PREFIX=$TOOLCHAIN/bin/arm-linux-androideabi-
+PREFIX=$(pwd)/android/$CPU
+OPTIMIZE_CFLAGS=&quot;-mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU &quot;
+build_android
+
+#x86
+ARCH=x86
+CPU=x86
+CC=$TOOLCHAIN/bin/i686-linux-android$API-clang
+CXX=$TOOLCHAIN/bin/i686-linux-android$API-clang++
+SYSROOT=$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+CROSS_PREFIX=$TOOLCHAIN/bin/i686-linux-android-
+PREFIX=$(pwd)/android/$CPU
+OPTIMIZE_CFLAGS=&quot;-march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32&quot;
+build_android
+
+#x86_64
+ARCH=x86_64
+CPU=x86-64
+CC=$TOOLCHAIN/bin/x86_64-linux-android$API-clang
+CXX=$TOOLCHAIN/bin/x86_64-linux-android$API-clang++
+SYSROOT=$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+CROSS_PREFIX=$TOOLCHAIN/bin/x86_64-linux-android-
+PREFIX=$(pwd)/android/$CPU
+OPTIMIZE_CFLAGS=&quot;-march=$CPU -msse4.2 -mpopcnt -m64 -mtune=intel&quot;
+build_android
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在编译脚本中添加了宏：BIONIC_IOCTL_NO_SIGNEDNESS_OVERLOAD
+
+CC  libavdevice/v4l2.o
+libavdevice/v4l2.c:135:9: error: assigning to 'int (*)(int, unsigned long, ...)' from incompatible type '&lt;overloaded function type&gt;'
+    SET_WRAPPERS();
+    ^~~~~~~~~~~~~~
+libavdevice/v4l2.c:121:17: note: expanded from macro 'SET_WRAPPERS'
+    s-&gt;ioctl_f  = prefix ## ioctl;      \
+        ^           ~~~~~
+/home/cc/android-ndk-r19c/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/bits/ioctl.h:56:5: note: candidate function has type mismatch at 2nd parameter
+      (expected 'unsigned long' but has 'unsigned int')
+int ioctl(int __fd, unsigned __request, ...) __overloadable __enable_if(1, &quot;&quot;) __RENAME(ioctl);
+    ^
+/home/cc/android-ndk-r19c/toolchains/llvm/prebuilt/linux-x86_64/bin/../sysroot/usr/include/bits/ioctl.h:36:5: note: candidate function has type mismatch at 2nd parameter
+      (expected 'unsigned long' but has 'int')
+int ioctl(int __fd, int __request, ...);
+    ^
+1 error generated.
+make: *** [ffbuild/common.mak:60: libavdevice/v4l2.o] Error 1
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>#!/bin/bash
+
+export NDK=/root/android-ndk-r20b
+TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64/
+API=21
+
+#armv7-a
+ARCH=arm
+CPU=armv7-a
+CC=$TOOLCHAIN/bin/armv7a-linux-androideabi$API-clang
+CXX=$TOOLCHAIN/bin/armv7a-linux-androideabi$API-clang++
+SYSROOT=$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+CROSS_PREFIX=$TOOLCHAIN/bin/arm-linux-androideabi-
+PREFIX=$(pwd)/android/$CPU
+OPTIMIZE_CFLAGS=&quot;-mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU -DBIONIC_IOCTL_NO_SIGNEDNESS_OVERLOAD&quot;
+
+    echo &quot;Compiling FFmpeg for $CPU&quot;
+    ./configure \
+    --prefix=$PREFIX \
+    --disable-asm \
+    --enable-neon \
+    --enable-hwaccels \
+    --enable-shared \
+    --enable-jni \
+    --enable-mediacodec \
+    --enable-decoders \
+    --disable-encoders \
+    --enable-demuxers \
+    --enable-muxers \
+    --enable-parsers \
+    --enable-protocols \
+    --disable-bsfs \
+    --disable-indevs \
+    --disable-outdevs \
+    --disable-filters \
+    --disable-postproc \
+    --disable-static \
+    --disable-doc \
+    --disable-ffmpeg \
+    --disable-ffplay \
+    --disable-ffprobe \
+    --enable-avdevice \
+    --disable-doc \
+    --disable-symver \
+    --cross-prefix=$CROSS_PREFIX \
+    --target-os=android \
+    --arch=$ARCH \
+    --cpu=$CPU \
+    --cc=$CC \
+    --cxx=$CXX \
+    --enable-cross-compile \
+    --sysroot=$SYSROOT \
+    --extra-cflags=&quot;-Os -fpic $OPTIMIZE_CFLAGS&quot; \
+    --extra-ldflags=&quot;$ADDI_LDFLAGS&quot; \
+    $ADDITIONAL_CONFIGURE_FLAG
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E9%9B%86%E6%88%90FFmpeg%E5%88%B0APP%E9%A1%B9%E7%9B%AE/" title="Android之集成FFmpeg到APP项目">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8B%E7%9B%91%E5%90%AC%E5%B1%80%E5%9F%9F%E7%BD%91%E5%B9%BF%E6%92%AD/" title="微信小程序之监听局域网广播">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-03-12</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

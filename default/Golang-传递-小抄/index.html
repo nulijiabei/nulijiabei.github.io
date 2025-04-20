@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang 传递 小抄</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang 传递 小抄 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+<p>一些学习总结</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>1、GoLang里面interface类型式一切类型的基类型，一个函数的参数如果始inteface{}</p>
+
+<blockquote>
+<blockquote>
+<p>说明可以接受一切类型，只要这个类型中包含需要的那个方法，调用时候就不会失败；</p>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<pre><code>func test(i interface{}){
+    i.Get()
+}
+</code></pre>
+
+<p><br /></p>
+
+<blockquote>
+<p>2、方法定义中可以制定某个类型（或者指针）是其调用者，方法的返回可以按照名称返回；</p>
+</blockquote>
+
+<pre><code>func (p *A) test(i int){
+
+}
+
+func test()(p int){
+    p:=1
+    return
+}
+</code></pre>
+
+<p><br /></p>
+
+<blockquote>
+<p>3、switch流程可以强制穿透功能；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>4、语意上对并发的支持，用go关键词；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>5、make关键词只能创建channel,数组类型；其它对象的创建用new关键词；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>6、方法内用new关键词创建的对象（指针）可以返回，用&amp;标记也可以返回本地指针；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>7、方法参数如果是数字，除了类型相同外，大小必须明确，否则视为slice类型；</p>
+
+<blockquote>
+<blockquote>
+<p>数组传参是按照值传递，map、slice按照引用传递；</p>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>8、数组，slice，map结构的遍历用range实现；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>9、不支持指针地址的++操作；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>10、type  A struct{} 、type B A 、type  C struct{A} 三个类型中A和C可以共享方法，B和A不共享方法；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>11、反射（自省）可以获得类型的字段和方法信息，和Python/Java/CSharp类似，没有深入研究；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>12、defer 在方法返回时调用，如果方法中有多个go 方法，会在每个go 方法调用完后被执行；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>13、类型转换，基本类型(string,bytes,int,float）之间的转换通过内置方法实现</p>
+
+<blockquote>
+<blockquote>
+<p>struct通过 struct名称(变量名称)，也可以通过reflect及switch实现(接口变量名.(type))；</p>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>14、change/select/chan 类似与Unix中的管道概念，支持读、写操作；</p>
+</blockquote>
+
+<p><br /></p>
+
+<blockquote>
+<p>15、对于复杂类型的格式化输出可以用 %#v ，这个格式化出来的信息比较全面；</p>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E5%AE%9E%E7%8E%B0%E5%9B%BE%E7%89%87%E7%BC%A9%E6%94%BE/" title="Golang-实现图片缩放">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-http-%E8%B6%85%E6%97%B6%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/" title="Golang http 超时设置方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-03</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

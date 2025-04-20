@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之ZXing从相册扫描二维码</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之ZXing从相册扫描二维码 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<pre><code>### ZXing
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 监听按钮触发选择相册图片
+    photoCameraButton = (Button) this.findViewById(R.id.btn_photo_camera);
+    photoCameraButton.getBackground().setAlpha(50);
+    photoCameraButton.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent innerIntent = new Intent();
+            innerIntent.setAction(Intent.ACTION_GET_CONTENT);
+            innerIntent.setType(&quot;image/*&quot;);
+            Intent wrapperIntent = Intent.createChooser(innerIntent, &quot;选择二维码图片&quot;);
+            CaptureActivity.this
+                    .startActivityForResult(wrapperIntent, 1001);
+        }
+    });
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>  // 监听返回
+  @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (resultCode == RESULT_OK) {
+        switch (requestCode) {
+        case 1001:
+
+            // 图片
+            Bitmap bitmap = null;
+
+            String[] proj = {MediaStore.Images.Media.DATA};
+
+            // 获取选中图片的路径
+            Cursor cursor = getContentResolver().query(data.getData(), proj, null, null, null);
+            if (cursor.moveToFirst()) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            try {
+                bitmap = RGBLuminanceSource.loadBitmap(cursor.getString(column_index));
+            } catch (FileNotFoundException e) {
+                Log.e(&quot;Err&quot;, e.toString());
+                e.printStackTrace();
+            }
+            }
+
+            Hashtable&lt;EncodeHintType, String&gt; hints = new Hashtable&lt;EncodeHintType, String&gt;();
+            hints.put(EncodeHintType.CHARACTER_SET, &quot;utf-8&quot;);
+            RGBLuminanceSource source = new RGBLuminanceSource(bitmap);
+            BinaryBitmap bitmap1 = new BinaryBitmap(new HybridBinarizer(source));
+            QRCodeReader reader2 = new QRCodeReader();
+            Result result = null;
+            try {
+            try {
+                result = reader2.decode(bitmap1, hints);
+            } catch (ChecksumException e) {
+                // TODO Auto-generated catch block
+                Toast.makeText(getApplicationContext(), &quot;失败&quot;, Toast.LENGTH_SHORT).show();
+            } catch (FormatException e) {
+                // TODO Auto-generated catch block
+                Toast.makeText(getApplicationContext(), &quot;失败&quot;, Toast.LENGTH_SHORT).show();
+            }
+            // 成功
+            if (result != null) {
+                // System.out.println(&quot;Result:&quot; + result.getText());
+                Intent resultIntent = new Intent();
+                Bundle bundle = new Bundle();
+                bundle.putString(&quot;result&quot;, result.getText());
+                resultIntent.putExtras(bundle);
+                this.setResult(RESULT_OK, resultIntent);
+                CaptureActivity.this.finish();
+            } else {
+                Toast.makeText(getApplicationContext(), &quot;失败&quot;, Toast.LENGTH_SHORT).show();
+            }
+            } catch (NotFoundException e) {
+            // TODO Auto-generated catch block
+            Toast.makeText(getApplicationContext(), &quot;失败&quot;, Toast.LENGTH_SHORT).show();
+            }
+            break;
+        }
+    }
+    }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 除了jar包，这里还要用到一个类就是
+/*
+ * Copyright 2009 ZXing authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package ;
+
+import java.io.FileNotFoundException;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import com.google.zxing.LuminanceSource;
+
+/**
+ * This class is used to help decode images from files which arrive as RGB data
+ * from Android bitmaps. It does not support cropping or rotation.
+ * 
+ * @author dswitkin@google.com (Daniel Switkin)
+ */
+public final class RGBLuminanceSource extends LuminanceSource {
+    private final byte[] luminances;
+
+    public RGBLuminanceSource(String path) throws FileNotFoundException {
+    this(loadBitmap(path));
+    }
+
+    public RGBLuminanceSource(Bitmap bitmap) {
+    super(bitmap.getWidth(), bitmap.getHeight());
+    int width = bitmap.getWidth();
+    int height = bitmap.getHeight();
+    int[] pixels = new int[width * height];
+    bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+    // In order to measure pure decoding speed, we convert the entire image
+    // to a greyscale array
+    // up front, which is the same as the Y channel of the
+    // YUVLuminanceSource in the real app.
+    luminances = new byte[width * height];
+    for (int y = 0; y &lt; height; y++) {
+        int offset = y * width;
+        for (int x = 0; x &lt; width; x++) {
+        int pixel = pixels[offset + x];
+        int r = (pixel &gt;&gt; 16) &amp; 0xff;
+        int g = (pixel &gt;&gt; 8) &amp; 0xff;
+        int b = pixel &amp; 0xff;
+        if (r == g &amp;&amp; g == b) {
+            // Image is already greyscale, so pick any channel.
+            luminances[offset + x] = (byte) r;
+        } else {
+            // Calculate luminance cheaply, favoring green.
+            luminances[offset + x] = (byte) ((r + g + g + b) &gt;&gt; 2);
+        }
+        }
+    }
+    }
+
+    @Override
+    public byte[] getRow(int y, byte[] row) {
+    if (y &lt; 0 || y &gt;= getHeight()) {
+        throw new IllegalArgumentException(
+            &quot;Requested row is outside the image: &quot; + y);
+    }
+    int width = getWidth();
+    if (row == null || row.length &lt; width) {
+        row = new byte[width];
+    }
+    System.arraycopy(luminances, y * width, row, 0, width);
+    return row;
+    }
+
+    // Since this class does not support cropping, the underlying byte array
+    // already contains
+    // exactly what the caller is asking for, so give it to them without a copy.
+    @Override
+    public byte[] getMatrix() {
+    return luminances;
+    }
+
+    private static Bitmap loadBitmap(String path) throws FileNotFoundException {
+    Bitmap bitmap = BitmapFactory.decodeFile(path);
+    if (bitmap == null) {
+        throw new FileNotFoundException(&quot;Couldn't open &quot; + path);
+    }
+    return bitmap;
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>但是可能由于版本问题，QRCodeReader.decode()方法的参数有点变化，可以参考
+http://blog.csdn.net/cgwcgw_/article/details/10817121
+
+Map&lt;DecodeHintType, String&gt; map = new HashMap&lt;DecodeHintType, String&gt;();  
+    map.put(DecodeHintType.CHARACTER_SET, &quot;utf-8&quot;);
+
+HashMap&lt;DecodeHintType, String&gt; hints = new HashMap&lt;DecodeHintType, String&gt;();  
+hints.put(DecodeHintType.CHARACTER_SET, &quot;utf-8&quot;);
+
+Hashtable&lt;EncodeHintType, String&gt; hints = new Hashtable&lt;EncodeHintType, String&gt;();
+hints.put(EncodeHintType.CHARACTER_SET, &quot;utf-8&quot;);
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E7%BD%91%E7%BB%9C%E6%B5%81%E9%87%8F%E5%AE%9E%E6%97%B6%E7%9B%91%E6%8E%A7%E5%B7%A5%E5%85%B7/" title="网络流量实时监控工具">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BSwipeRefreshLayout%E6%89%8B%E5%8A%BF%E5%88%B7%E6%96%B0/" title="Android之SwipeRefreshLayout手势刷新">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-14</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

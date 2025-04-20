@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>在Ubuntu中Build人脸识别引擎SeetaFace</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>在Ubuntu中Build人脸识别引擎SeetaFace </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>在Ubuntu中Build人脸识别引擎SeetaFace</h4>
+
+<blockquote>
+</blockquote>
+
+<p><strong><em>SeetaFace是中科院计算机所山世光老师所带领的团队开发出来的人脸识别库，开源免费可用，据说识别率可达97.1%，实测下来识别率确实是很高</em></strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>FaceDetection
+    人脸识别模块，用于识别出照片中的人脸，染回每个人脸的坐标和人脸总数
+FaceAlignment
+    特征点识别模块，主要识别两个嘴角、鼻子、两个眼睛五个点的坐标
+FaceIdentification
+    人脸比较模块，根据官方的说法，先提取特征值，然后比较。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下载
+// 解压获得 SeetaFaceEngine-master/FaceDetection
+// 解压获得 SeetaFaceEngine-master/FaceAlignment
+// 解压获得 SeetaFaceEngine-master/FaceIdentification
+https://github.com/nulijiabei/SeetaFaceEngine（Download SeetaFace）
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><strong>编译顺序：FaceDetection、FaceAlignment、FaceIdentification</strong></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>说明：只要编译成功，运行时出现段错误等 ... 都是相关文件路径配置错误
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>sudo apt-get install build-essential
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下载 OpenCV 不要使用 v3.x(测试失败) 使用 2.4.13.2(经过测试) ...
+http://opencv.org/releases.html
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 编译 OpenCV
+cd ~/opencv
+mkdir release
+cd release
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local ..
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 编译 FaceDetection
+cd SeetaFaceEngine-master/FaceDetection
+mkdir build
+cd build  
+cmake ..  
+make -j${npoc}
+
+// 使用 FaceDetection
+./build/facedet_test imagefilePath ./model/seeta_fd_frontal_V1.0.bin
+
+// 注意
+error: ‘isnan’ was not declared in this scope 
+解决方法，修改文件中的isnan为“std::isnan”
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 编译 FaceAlignment
+cd SeetaFaceEngine-master/FaceAlignment
+mkdir build
+cd build  
+cmake .. 
+make
+
+// 准备工作
+拷贝FaceDetection中的/include/face_detection.h到FaceAlignment的include
+拷贝FaceDetection中的/build/libseeta_facedet_lib.so文件到FaceAlignment/build
+拷贝FaceDetection/model文件夹下的seeta_fd_frontal_v1.0.bin文件到FaceAlignment的build
+拷贝FaceAlignment中的model文件夹和data文件夹到FaceAlignment/build
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 编译 FaceIdentification
+cd SeetaFaceEngine-master/FaceIdentification
+mkdir build
+cd build
+cmake .. &amp;&amp; make
+
+// 准备工作
+拷贝FaceDetection中的/include/face_detection.h到FaceIdentification的include
+拷贝FaceDetection中的/build/libseeta_facedet_lib.so文件到FaceIdentification/build
+拷贝FaceAlignment中的/include/face_alignment.h到FaceIdentification的include
+拷贝FaceAlignment中的/build/libseeta_fa_lib.so文件到FaceIdentification/build
+
+// 准备工作 +
+修改FaceIdentification下src/test/CMakeLists.txt
+......
+add_executable(${BIN} ${f}) // 原有参照
+target_link_libraries(${BIN} viplnet ${OpenCV_LIBS}) // 原有参照
+target_link_libraries(${BIN} viplnet ${OpenCV_LIBS} /实际路径/SeetaFaceEngine-master/FaceIdentification/linux/libseeta_facedet_lib.so)
+target_link_libraries(${BIN} viplnet ${OpenCV_LIBS} /实际路径/SeetaFaceEngine-master/FaceIdentification/linux/libseeta_fa_lib.so)
+......
+
+// 准备工作 +
+拷贝FaceDetection/model文件夹下的seeta_fd_frontal_v1.0.bin文件到FaceIdentification的build
+拷贝FaceAlignment/model文件夹下的seeta_fa_v1.1.bin文件到文件到FaceIdentification的build/model
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 项目中Linux系统路径配置都是./而不是../所以最好将./data/和./model拷贝到build目录中
+// 当然你也可以修改这里的配置 ...
+#ifdef _WIN32
+std::string DATA_DIR = &quot;../../data/&quot;;
+std::string MODEL_DIR = &quot;../../model/&quot;;
+#else
+std::string DATA_DIR = &quot;./data/&quot;;
+std::string MODEL_DIR = &quot;./model/&quot;;
+#endif
+
+// FaceIdentification 中 model/seeta_fr_v1.0.bin 是需要解压缩的哦
+apt-get install rar // 然后解压 .. 到当前目录
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 最后重申：只要编译过了 ... 运行段错误，一定是.bin文件路径配置错误造成的 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// OpenCV 默认只支持 avi 格式视频读取 ... 如果需要兼容 mp4、mov、等格式 ... 需要 ffmepg
+
+sudo add-apt-repository ppa:kirillshkrogalev/ffmpeg-next 
+sudo apt-get update 
+sudo apt-get install ffmpeg
+
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_TIFF=ON -D CMAKE_CXX_FLAGS=-D__STDC_CONSTANT_MACROS ..
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>apt-get install zlib1g-dev
+apt-get install libjpeg8-dev
+apt-get install libpng12-dev
+apt-get install libx264-dev
+apt-get install libxvidcore-dev
+apt-get install libtiff-dev
+apt-get install ffmpeg
+apt-get install libv4l-dev
+apt-get install libgtk2.0-dev
+apt-get install build-essential libavcodec-dev libavformat-dev libswscale-dev libjasper-dev cmake  cmake-curses-gui cmake-qt-gui
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Bash%E5%B0%8F%E6%95%B0%E6%AF%94%E8%BE%83/" title="Bash小数比较">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux-Integration-Services/" title="Linux Integration Services">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2017-05-20</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

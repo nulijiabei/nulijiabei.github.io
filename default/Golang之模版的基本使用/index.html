@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang之模版的基本使用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang之模版的基本使用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<pre><code>说明：Go内置的模版引擎功能很单一，基本上就是个输出替换工具
+如果：希望在模版中实现更多逻辑判断等... 推荐使用三方的引擎
+
+推荐：https://github.com/flosch/pongo2
+原因：兼容Django模版，所以更容易学习
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>模版的使用</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// GO
+package main
+
+import (
+    &quot;html/template&quot;
+    &quot;log&quot;
+    &quot;net/http&quot;
+    &quot;runtime&quot;
+)
+
+// 主
+func main() {
+
+    // 设置CPU核心数量
+    runtime.GOMAXPROCS(runtime.NumCPU())
+
+    // 设置日志的结构
+    log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime | log.Lmicroseconds)
+
+    // -------------------------------------------------------- //
+
+    http.Handle(&quot;/css/&quot;, http.FileServer(http.Dir(&quot;template&quot;)))
+
+    http.Handle(&quot;/js/&quot;, http.FileServer(http.Dir(&quot;template&quot;)))
+
+    http.Handle(&quot;/files/&quot;, http.FileServer(http.Dir(&quot;template&quot;)))
+
+    http.Handle(&quot;/images/&quot;, http.FileServer(http.Dir(&quot;template&quot;)))
+
+    // -------------------------------------------------------- //
+
+    http.HandleFunc(&quot;/&quot;, index)
+
+    // -------------------------------------------------------- //
+
+    // 建立监听
+    if err := http.ListenAndServe(&quot;:8080&quot;, nil); err != nil {
+        // 踢出错误
+        log.Panic(err)
+    }
+
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+
+    // 解析参数
+    r.ParseForm()
+
+    // 解析主页面
+    t, err := template.ParseFiles(&quot;template/default.html&quot;)
+    if err != nil {
+        // 输出错误信息
+        http.Error(w, err.Error(), 500)
+        return
+    }
+
+    // 数据推荐存在MAP中 ...
+    data := make(map[string]interface{})
+
+    // String
+    data[&quot;Name&quot;] = &quot;nljb&quot;
+    data[&quot;Email&quot;] = &quot;nljb@qq.com&quot;
+
+    // 布尔
+    data[&quot;True&quot;] = true
+    data[&quot;False&quot;] = false
+
+    // 整型
+    data[&quot;Year&quot;] = 35
+
+    // 结构体
+    type User struct {
+        Name string
+        Pass string
+    }
+    data[&quot;User&quot;] = User{Name: &quot;nljb&quot;, Pass: &quot;1234&quot;}
+
+    // 列表
+    data[&quot;List&quot;] = []int{1, 2, 3, 4, 5, 6, 7, 8}
+
+    // 列表结构体
+    a := User{Name: &quot;nljb&quot;, Pass: &quot;1234&quot;}
+    b := User{Name: &quot;jbnl&quot;, Pass: &quot;4321&quot;}
+    data[&quot;Structs&quot;] = []User{a, b}
+
+    // 模版变量
+    data[&quot;var&quot;] = &quot;hello world !!!&quot;
+
+    data[&quot;maps&quot;] = map[string]string{&quot;name&quot;: &quot;golang&quot;}
+
+    // 执行
+    t.Execute(w, data)
+
+    // 返回
+    return
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>    // HTML
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;GOLANG&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+Name -&gt; [[.Name]] , Email: [[.Email]]
+&lt;br&gt;
+True -&gt; [[.True]] , False: [[.False]]
+&lt;br&gt;
+Year -&gt; [[.Year]]
+&lt;br&gt;
+[[if .True]]
+IF Bool -&gt; true
+[[else]]
+IF Bool -&gt; flase
+[[end]]
+&lt;br&gt;
+Range List -&gt;
+[[range .List]]
+[[.]]
+[[end]]
+&lt;br&gt;
+Struct -&gt; [[.User.Name]] , [[.User.Pass]]
+&lt;br&gt;
+[[with .User]]
+With Struct -&gt; [[.Name]] , [[.Pass]]
+[[else]]
+[[ //* 当 User 为空时会执行这里 *//]]
+[[end]]
+&lt;br&gt;
+Range Struct List -&gt;
+[[range .Structs]]
+[[.Name]] - [[.Pass]] ;
+[[end]]
+&lt;br&gt;
+[[$xxx := .var]]
+Var -&gt; [[$xxx]]
+&lt;br&gt;
+Printf -&gt; [[.var | printf &quot;%s&quot;]]
+&lt;br&gt;
+Printf -&gt; [[printf &quot;Nums -&gt; %s %d&quot; (printf &quot;%d %d&quot; 1 2) 3]]
+&lt;br&gt;
+&lt;!-- index 支持 map, slice, array, string，读取指定类型对应下标的值 --&gt;
+Index Map -&gt; [[index .maps &quot;name&quot;]]
+&lt;br&gt;
+Len -&gt; [[printf &quot;The content length is %d&quot; (.var|len)]]
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Linux%E4%B9%8BX11VNC%E9%80%9A%E8%BF%87VNC%E6%9D%A5%E8%BF%9E%E6%8E%A5%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%A1%8C%E9%9D%A2/" title="Linux之X11VNC通过VNC来连接服务器桌面">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8B%E8%8E%B7%E5%8F%96%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F/" title="Golang之获取上传文件大小">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2016-05-16</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

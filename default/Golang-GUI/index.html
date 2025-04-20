@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-GUI</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-GUI </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>有道词典例子（摘抄自网络）</p>
+
+<pre><code>package main
+
+import (
+    &quot;encoding/json&quot;
+    &quot;fmt&quot;
+    &quot;github.com/andlabs/ui&quot;
+    &quot;io/ioutil&quot;
+    &quot;net/http&quot;
+    &quot;net/url&quot;
+    &quot;os&quot;
+    &quot;reflect&quot;
+    &quot;regexp&quot;
+)
+
+//从有道获取的JSON的解析结构
+type basic struct {
+    Us_Phonetic string
+    Phonetic    string
+    Uk_Phonetic string
+    Explains    []string
+}
+type web struct {
+    Value []string
+    Key   string
+}
+type Youdao struct {
+    Translation []string
+    Basic       basic
+    Query       string
+    ErrorCode   int32
+    Web         []web
+}
+
+//从百度获取的输入反馈中的部分
+type str struct {
+    WordsToSearch string
+}
+
+var (
+    w     ui.Window
+    si    ui.Label
+    al    ui.Label
+    table ui.Table
+    input ui.TextField
+    proxy string
+)
+
+func main() {
+    if len(os.Args) != 1 {
+        t := getJSON(getWords())
+        fmt.Println(simple(t))
+    } else {
+        go ui.Do(gui)
+        err := ui.Go()
+        if err != nil {
+            panic(err)
+        }
+    }
+}
+
+//gui界面，用的 github.com/andlabs/ui 的ui库
+func gui() {
+    input = ui.NewTextField()
+    input.OnChanged(func() {
+        go feedback() // 主要是这里在不同的刷新(table)内容
+    })
+    button := ui.NewButton(&quot;查词&quot;)
+    button.OnClicked(guiTranslate)
+    inputBox := ui.NewHorizontalStack(input, button)
+    inputBox.SetStretchy(0)
+
+    tab := ui.NewTab()
+    table = ui.NewTable(reflect.TypeOf(str{}))
+    table.OnSelected(tableSelected)
+    tab.Append(&quot;单词&quot;, table)
+    si = ui.NewLabel(&quot;Simple&quot;)
+    tab.Append(&quot;简约&quot;, si)
+    al = ui.NewLabel(&quot;All&quot;)
+    tab.Append(&quot;全部&quot;, al)
+
+    stack := ui.NewVerticalStack(inputBox, tab)
+    stack.SetStretchy(1)
+
+    w = ui.NewWindow(&quot;Window&quot;, 280, 350, stack)
+    w.OnClosing(func() bool {
+        ui.Stop()
+        return true
+    })
+    w.Show()
+}
+
+//取词并在屏幕上显示
+func guiTranslate() {
+    t := getJSON(input.Text())
+    si.SetText(simple(t))
+    al.SetText(all(t))
+}
+
+//输入反馈功能，用的百度的输入反馈接口
+func feedback() {
+    table.Lock()
+    d := table.Data().(*[]str)
+    *d = []str{}
+    table.Unlock()
+    in := input.Text()
+    conn := Proxy()
+    address := &quot;HTTP://nssug.baidu.com/su?prod=recon_dict&amp;wd=&quot; + in
+    resp, err := conn.Get(address)
+    if err != nil {
+        fmt.Println(&quot;Connect error&quot;)
+        os.Exit(3)
+    }
+    t, _ := ioutil.ReadAll(resp.Body)
+    t = regexp.MustCompile(`\[.+`).Find(t)
+    tmp := regexp.MustCompile(`\b\w+?\b`).FindAllString(string(t), -1)
+    s := make([]str, len(tmp))
+    for i, key := range tmp {
+        s[i].WordsToSearch = key
+    }
+    table.Lock()
+    d = table.Data().(*[]str)
+    *d = s
+    table.Unlock()
+}
+
+//输入反馈功能，反馈项被选中时进行查房
+func tableSelected() {
+    i := table.Selected()
+    data := table.Data().(*[]str)
+    d := *data
+    t := getJSON(d[i].WordsToSearch)
+    si.SetText(simple(t))
+    al.SetText(all(t))
+}
+
+//以简洁的方式输出翻译的string
+func simple(y *Youdao) string {
+    text := y.Query
+    if len(y.Basic.Explains) == 0 {
+        text = text + &quot;\nNo translation, please check your word&quot;
+    } else {
+        for _, t := range y.Translation {
+            text += &quot;\n&quot; + t
+        }
+        for i, t := range y.Basic.Explains {
+            if (i == 0) &amp;&amp; (t == y.Translation[0]) {
+            } else if i == 0 {
+                text += &quot;\n\n&quot; + t
+            } else {
+                text += &quot;\n&quot; + t
+            }
+        }
+    }
+    return text
+}
+
+//输出全部有道翻译反馈的string
+func all(y *Youdao) string {
+    text := y.Query
+    if len(y.Basic.Explains) == 0 {
+        text = text + &quot;\nNo translation, please check your word&quot;
+    } else {
+        for _, t := range y.Translation {
+            text += &quot;\n&quot; + t
+        }
+        for i, t := range y.Basic.Explains {
+            if (i == 0) &amp;&amp; (t == y.Translation[0]) {
+            } else if i == 0 {
+                text += &quot;\n\n&quot; + t
+            } else {
+                text += &quot;\n&quot; + t
+            }
+        }
+        for _, t := range y.Web {
+            text += &quot;\n\n&quot; + t.Key
+            for i, tmp := range t.Value {
+                if i == 0 {
+                    text += &quot;\n&quot; + tmp
+                } else {
+                    text += &quot;;&quot; + tmp
+                }
+            }
+        }
+    }
+    return text
+}
+
+//根据输入单词取得翻译结果并解析为一个struct
+func getJSON(words string) *Youdao {
+    conn := Proxy()
+    address := &quot;http://fanyi.youdao.com/openapi.do?keyfrom=&quot; +
+        &quot;GoldenDictPlugin&quot; + &quot;&amp;key=&quot; + &quot;1683580050&quot; +
+        &quot;&amp;type=data&amp;doctype=json&amp;version=1.1&amp;q=&quot; + words
+    resp, err := conn.Get(address)
+    if err != nil {
+        fmt.Println(&quot;Connect error&quot;)
+        os.Exit(1)
+    }
+    j, _ := ioutil.ReadAll(resp.Body)
+
+    var data *Youdao
+    err = json.Unmarshal(j, &amp;data)
+    if err != nil {
+        fmt.Println(err)
+        os.Exit(5)
+    }
+    return data
+}
+
+//命令行模式下获取作为参数传入的单词
+func getWords() string {
+    var words string
+    l := len(os.Args)
+    if l == 1 {
+        os.Exit(0)
+    } else {
+        words = url.QueryEscape(os.Args[1])
+    }
+    for i := 2; i &lt; l; i++ {
+        words = words + &quot;%20&quot; + url.QueryEscape(os.Args[i])
+    }
+    return words
+}
+
+//返回一个可设置代理的 http Client，代理在全局变量 proxy 中设定
+func Proxy() *http.Client {
+    var conn http.Client
+    if proxy != &quot;&quot; {
+        proxyUrl, err := url.Parse(proxy)
+        if err != nil {
+            fmt.Println(err)
+            os.Exit(2)
+        }
+        conn.Transport = &amp;http.Transport{Proxy: http.ProxyURL(proxyUrl)}
+    }
+    return &amp;conn
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/QT-%E7%AE%80%E5%8D%95%E7%B1%BB%E5%8F%8A%E6%96%B9%E6%B3%95/" title="QT-简单类及方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-GUI-%E5%AE%A2%E6%88%B7%E7%AB%AF/" title="Golang-GUI-客户端">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

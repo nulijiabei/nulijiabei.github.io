@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Gstreamer之应用项目实践</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Gstreamer之应用项目实践 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Gstreamer之应用项目实践</h4>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>Pad Templates 中 Pad 的三种状态 ...
+
+Always Pad
+// 一直存在的 Pad 被称为 Always Pad，使用时直接连接即可 ...
+// 例如：audiotestsrc、videotestsrc 等 ...
+// 查询：gst-inspect-1.0 videotestsrc ...
+
+Request Pad
+// 这是根据需要来建立的 ...
+// 例如：tee 等 ...
+tee_audio_pad = gst_element_release_request_pad(tee, tee_audio_pad); 
+queue_audio_pad = gst_element_get_static_pad(audio_queue, &quot;sink&quot;);
+gst_pad_link(tee_audio_pad, queue_audio_pad)
+gst_object_unref(tee_audio_pad);
+// 说明：
+gst_element_get_request_pad (GstElement *element, const gchar *name);
+// 功能：获取指定element中的指定pad，此接口仅适用于 request pads
+// 使用后必须调用gst_element_release_request_pad()释放。
+gst_element_request_pad (GstElement *element,GstPadTemplate *templ,const gchar *name,const GstCaps *caps);
+// 功能：通过模板获取指定element的pad。此接口仅适用于request pads
+// 使用后必须调用gst_element_release_request_pad()释放。比 gst_element_get_request_pad 快一些
+
+Sometimes Pad
+​// 初始时没有 Pad 的 Element, Pad 会在数据流到 Element 时才会出现。
+// 这种 Pad 被称为 Sometimes Pad，例如: uridecodebin 等 ...  
+// 监听 pad-added 信号，回调 pad_added_handler 建立连接 ...
+g_signal_connect(source, &quot;pad-added&quot;, G_CALLBACK(pad_added_handler), &amp;data);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>win32 {
+    INCLUDEPATH += D:\gstreamer\1.0\x86\include\glib-2.0
+    INCLUDEPATH += D:\gstreamer\1.0\x86\lib\glib-2.0\include
+    INCLUDEPATH += D:\gstreamer\1.0\x86\include\gstreamer-1.0
+    INCLUDEPATH += D:\gstreamer\1.0\x86\lib\gstreamer-1.0\include
+    LIBS += -LD:/gstreamer/1.0/x86/lib -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0 -lgstvideo-1.0
+}
+
+unix {
+    INCLUDEPATH += /usr/include/gstreamer-1.0
+    INCLUDEPATH += /usr/include/glib-2.0
+    INCLUDEPATH += /usr/lib/aarch64-linux-gnu/glib-2.0/include
+    LIBS += -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 设置 DEBUG LEVEL 
+
+// GST_LEVEL_NONE = 0,
+// GST_LEVEL_ERROR = 1,
+// GST_LEVEL_WARNING = 2,
+// GST_LEVEL_FIXME = 3,
+// GST_LEVEL_INFO = 4,
+// GST_LEVEL_DEBUG = 5,
+// GST_LEVEL_LOG = 6,
+// GST_LEVEL_TRACE = 7,
+// GST_LEVEL_MEMDUMP = 9,
+gst_debug_set_default_threshold(GST_LEVEL_DEBUG);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Gstreamer AppSrc 简介
+
+appsrc
+// 应用程序可以通过 appsrc 元件向管道中插入数据。
+// appsrc 有别于其他 GStreamer 元件，它提供额外的API函数。
+// 通过链接libgstapp库来使用appsrc，直接调用其方法或者使用appsrc的响应信号
+
+caps
+// 在操作appsrc前，caps属性必须被设定为一个固定的caps，以描述被推进appsrc数据的格式。
+// 当推送缓存搭到一个未知的caps即caps没有被设置，这时会发生一个异常。
+// 当使用类似文件一样的源时，推送其原始数据到appsrc将会典型地发生这种情况。
+// 如果你不想准确地设定caps，你可以使用gst_app_src_push_sample函数，该函数获取与采样数据关联的caps，
+// 且该caps取代appsrc上先前已设定的caps（如果你设定的caps不同于原来采样的caps）。
+
+gst_app_src_push_buffer | push-buffer
+// 主要的操作数据到appsrc元件中的方式是调用gst_app_src_push_buffer方法，或者是发送push-buffer响应信号，
+// 该操作将缓存放进了一个队列，appsrc将在它的流线程中读取该队列中的数据。
+// 值得注意的是数据传输过程不是在执行push-buffer操作的线程。
+
+max-bytes、enough-data、need-data
+// max-bytes 属性控制了在被appsrc认为队列满之前有多少数据可以被放进appsrc里的队列中。
+// 内部队列满时将发出“enough-data”信号，该信号通知应用程序应该停止向appsrc中推送数据了。
+// block属性将是appsrc阻塞push-buffer方法直到可以推进去数据。
+// 当内部队列没有可用的数据，“need-data”信号将被发送，该信号将通知应用程序应该推送更多的数据到appsrc中。
+
+stream-mode、seek-data
+// 在“need-data”和“enough-data”之外，当stream-mode属性设置为seekable或者random-access时，
+// appsrc能够发送“seek-data”信号。该信号的参数包含了新的希望在stream中设定的位置，且该参数以format属性为单位。
+// 在接收到seek-data信号后，应用程序应该从新的位置开始推送数据。
+// 这些信号（need-data,enought-data,和seek-data）允许应用程序以两种不同的方式操作appsrc。
+
+推模式
+// 推模式，应用程序重复的调用push-buffer/push-sample函数（来向appsrc中）推送一个新的buffer/sample。
+// appsrc中队列里缓存的数量能够被控制，通过enough-data、need-data信号相应的停止或者开始调用push-buffer/push-sample。
+// 在stream-type属性为stream和seekable时，这是一种典型的模式。处理各种网络协议或者硬件设备（打交道）时使用这种模式。
+
+拉模式
+// 拉模式，该模式下，need-data信号触发下一次push-buffer函数调用。
+// 该模式在random-access流类型下被典型使用。对于文件操作或者其他的可随机操作源使用这种模式，
+// 在这种模式下，由need-data信号确定字节数的缓存应该被推进appsrc中。
+
+// 在所有模式下，appsrc的size属性都将以字节数表示包含的总的流数量。
+// 在random-access模式下务必要设置该属性，对于stream好seekable模式，该属性是可选但被推荐设置的。
+
+// 当应用程序完成推送数据到appsrc，其应该调用gst_app_src_end_of_stream函数，或者发送end-of-stream响应信号。
+// 在调用该函数后，不应该再由缓存被推送到appsrc，直到立即定位发生或者是appsrc切换到了REAY状态。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 简单的序列播放 ...
+
+restart:
+
+    msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,(GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+    if(msg != NULL) {
+        GError *err;
+        gchar *debug_info;
+        switch(GST_MESSAGE_TYPE(msg)) {
+        case GST_MESSAGE_ERROR:
+            gst_message_parse_error(msg, &amp;err, &amp;debug_info);
+            g_printerr(&quot;Error received from element %s: %s\n&quot;, GST_OBJECT_NAME(msg-&gt;src), err-&gt;message);
+            g_printerr(&quot;Debugging information: %s\n&quot;, debug_info ? debug_info : &quot;none&quot;);
+            g_clear_error(&amp;err);
+            g_free(debug_info);
+            break;
+        case GST_MESSAGE_EOS: // 在结束时播放下一个视频 ...
+            g_print(&quot;End-Of-Stream reached.\n&quot;);
+            gst_element_set_state(data.pipeline, GST_STATE_NULL);
+            g_object_set(data.source, &quot;location&quot;, &quot;e:/yiyezi.mp4&quot;, NULL);
+            gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
+            goto restart;
+        default:
+            /* We should not reach here because we only asked for ERRORs and EOS */
+            g_printerr(&quot;Unexpected message received.\n&quot;);
+            break;
+        }
+        gst_message_unref(msg);
+    }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 默认视频播放 ...
+// uridecodebin
+// queue &gt; audioconvert &gt; audioresample &gt; autoaudiosink
+// queue &gt; videoconvert &gt; autovideosink
+
+#include &lt;QCoreApplication&gt;
+
+using namespace std;
+
+#include &lt;gst/gst.h&gt;
+
+typedef struct _CustomData {
+    GstElement *pipeline;
+    GstElement *source;
+    GstElement *audio_queue;
+    GstElement *audio_convert;
+    GstElement *audio_resample;
+    GstElement *audio_sink;
+    GstElement *video_queue;
+    GstElement *video_convert;
+    GstElement *video_sink;
+} CustomData;
+
+// uridecodebin 的 pad_added 信号回调 ...
+static void pad_added_handler(GstElement *src, GstPad *new_pad, CustomData *data) {
+
+    // sink 是输入，即上游 Element 向本元素发送的数据。
+    // src 是输出，本元素向下游元素发送的数据。也就是输入数据经过本元素处理之后的输出。
+
+    g_print(&quot;Received new pad '%s' from '%s':\n&quot;, GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+
+    // ----------------------------------------- //
+    // 获取新的 Pad 的 Type ...
+    /* Check the new pad's type */
+    // 获取 Pad 当前的 Caps 根据不同的 Element 状态会有不同的结果
+    GstCaps *new_pad_caps = gst_pad_get_current_caps(new_pad);
+    // 从 Caps 中获取第一个结构 ...
+    GstStructure *new_pad_struct = gst_caps_get_structure(new_pad_caps, 0);
+    // 获取结构的名称 ...
+    const gchar *new_pad_type = gst_structure_get_name(new_pad_struct);
+    // ----------------------------------------- //
+
+    // 当 new pad 类型为 audio 时 ...
+    if (g_str_has_prefix(new_pad_type, &quot;audio/x-raw&quot;)) {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取音频 Queue 的输入接口 ...
+        GstPad *audio_sink_pad = gst_element_get_static_pad(data-&gt;audio_queue, &quot;sink&quot;);
+        if(gst_pad_is_linked(audio_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(audio_sink_pad);
+            goto exit;
+        }
+        // 将 New Pad 数据连接到 音频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, audio_sink_pad);
+        if(GST_PAD_LINK_FAILED(ret)) {
+            g_print(&quot;Type is '%s' but link failed.\n&quot;, new_pad_type);
+        } else {
+            g_print(&quot;Link succeeded(type '%s').\n&quot;, new_pad_type);
+        }
+    }
+
+    // 当 new pad 类型未 video 时 ...
+    if (g_str_has_prefix(new_pad_type, &quot;video/x-raw&quot;)) {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取视频 Queue 的输入接口 ...
+        GstPad *video_sink_pad = gst_element_get_static_pad(data-&gt;video_queue, &quot;sink&quot;);
+        if(gst_pad_is_linked(video_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(video_sink_pad);
+            goto exit;
+        }
+        // 将 New Pad 数据连接到 视频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, video_sink_pad);
+        if(GST_PAD_LINK_FAILED(ret)) {
+            g_print(&quot;Type is '%s' but link failed.\n&quot;, new_pad_type);
+        } else {
+            g_print(&quot;Link succeeded(type '%s').\n&quot;, new_pad_type);
+        }
+    }
+
+exit:
+    /* Unreference the new pad's caps, if we got them */
+    if(new_pad_caps != NULL)
+        gst_caps_unref(new_pad_caps);
+}
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+
+    // 个人数据 ...
+    CustomData data;
+
+    // Element 就像一个黑盒子, 一个管道 ...
+    // 从 Element 的一端输入数据, Element 对数据进行一些处理，然后数据从 Element 的另一端输出
+    GstElement *pipeline;
+
+    // Bus(总线) 主要用于向用户提供内部 Elements 的事件信息
+    // 每一个管道默认包含一个总线，所以应用程序不需要再创建总线
+    // 应用程序只需要在总线上设置一个类似于对象的信号处理器的消息处理器
+    GstBus *bus;
+
+    // Bus 发出的消息是 GstMessage 结构
+    GstMessage *msg;
+
+    /* Initialize GStreamer */
+    gst_init(&amp;argc, &amp;argv);
+
+    // uridecodebin
+    // queue &gt; audioconvert &gt; audioresample &gt; autoaudiosink
+    // queue &gt; videoconvert &gt; autovideosink
+
+    // gst_element_factory_make 创建 Element 元件
+    data.source = gst_element_factory_make(&quot;uridecodebin&quot;, &quot;source&quot;);
+    data.audio_queue = gst_element_factory_make(&quot;queue&quot;, &quot;audio_queue&quot;);
+    data.audio_convert = gst_element_factory_make(&quot;audioconvert&quot;, &quot;audio_convert&quot;);
+    data.audio_resample = gst_element_factory_make(&quot;audioresample&quot;, &quot;audio_resample&quot;);
+    data.audio_sink = gst_element_factory_make(&quot;autoaudiosink&quot;, &quot;audio_sink&quot;);
+    data.video_queue = gst_element_factory_make(&quot;queue&quot;, &quot;video_queue&quot;);
+    data.video_convert = gst_element_factory_make(&quot;videoconvert&quot;, &quot;video_convert&quot;);
+    data.video_sink = gst_element_factory_make(&quot;autovideosink&quot;, &quot;video_sink&quot;);
+
+    /* Create the empty pipeline */
+    // 创建管道 ...
+    pipeline = gst_pipeline_new(&quot;test-pipeline&quot;);
+
+    // 将元素添加到管道中（注意转换），并按顺序连接起来 ...
+    gst_bin_add_many(GST_BIN(pipeline), data.source, data.audio_queue, data.audio_convert, data.audio_resample, data.audio_sink,
+                     data.video_queue, data.video_convert, data.video_sink, NULL);
+
+    // 将一系列元素链接在一起 ...
+    gst_element_link_many(data.audio_queue, data.audio_convert, data.audio_resample, data.audio_sink, NULL);
+    gst_element_link_many(data.video_queue, data.video_convert, data.video_sink, NULL);
+
+    // 修改管道的 uri 地址 ...
+    g_object_set(data.source, &quot;uri&quot;, &quot;file:///e:/yiyezi.mp4&quot;, NULL);
+
+    // 连接到 uridecodebin 的 pad-added 信号, 通过回调 ...
+    g_signal_connect(data.source, &quot;pad-added&quot;, G_CALLBACK(pad_added_handler), &amp;data);
+
+    /* Start playing the pipeline */
+    // 修改状态为 PLAYING ...
+    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+    /* Wait until error or EOS */
+    // 从 Element(管道) 中获得 Bus(总线)
+    bus = gst_element_get_bus(pipeline);
+
+    // 从总线上获取一条消息，该消息的类型与消息类型的掩码类型匹配，直到指定的超时时间为止（并丢弃所有与提供的掩码不匹配的消息）
+    // 也就是直到从 Bus(总线) 总获取到 GST_MESSAGE_ERROR 或 GST_MESSAGE_EOS 消息时才返回 ...
+    msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,(GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+
+    /* Free resources */
+    if(msg != NULL)
+        gst_message_unref(msg);
+    gst_object_unref(bus);
+    gst_element_set_state(pipeline, GST_STATE_NULL);
+
+    gst_object_unref(pipeline);
+
+    return a.exec();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Rockchip 提供的常用 plugins ...
+https://github.com/rockchip-linux/gstreamer-rockchip
+https://github.com/rockchip-linux/gstreamer-rockchip-extra
+
+Elements    Type    Comments    Origin
+rkximagesink | Video Render (sink) | kmssink on X11, for overlay display     | ximagesink + kmssink
+kmssink      | Video Render (sink) | overlay display                         | kmssink
+rgaconvert   | Video Converter     | video colorspace,format,size conversion | v4l2 transform
+rkcamsrc     | Device Sources      | rockchip isp camera source              | v4l2src
+
+rkximage:  rkximagesink: Video sink
+rkisp:  rkisp: Gstreamer Plugin For Rockchip ISP Source
+rockchipmpp:  mppvideodec: Rockchip's MPP video decoder
+rockchipmpp:  mpph264enc: Rockchip Mpp H264 Encoder
+rockchipmpp:  mppjpegenc: Rockchip Mpp JPEG Encoder
+rockchipmpp:  mppjpegdec: Rockchip's MPP JPEG image decoder
+
+// Rockchip 高效输出 ...
+mppvideodec &gt; rkximagesink (基于 X Window 输出)
+mppvideodec &gt; kmssink (基于 KMS/DRM 输出)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// H264 视频播放 ...
+// filesrc &gt; qtdemux
+// queue &gt; decodebin &gt; audioconvert &gt; audioresample &gt; autoaudiosink
+// queue &gt; h264parse &gt; avdec_h264 &gt; autovideosink
+// 可扩展 queue &gt; h264parse &gt; mppvideodec &gt; kmssink
+// 可扩展 queue &gt; h265parse &gt; mppvideodec &gt; kmssink
+
+#include &lt;QCoreApplication&gt;
+
+using namespace std;
+
+#include &lt;gst/gst.h&gt;
+
+typedef struct _CustomData {
+    GstElement *pipeline;
+    GstElement *source;
+    GstElement *demux;
+    GstElement *audio_queue;
+    GstElement *audio_decbin;
+    GstElement *audio_convert;
+    GstElement *audio_resample;
+    GstElement *audio_sink;
+    GstElement *video_queue;
+    GstElement *h264_parse;
+    GstElement *avdec_h264;
+    GstElement *video_sink;
+} CustomData;
+
+// demux 的 pad_added 信号回调 ...
+static void pad_added_demux(GstElement *src, GstPad *new_pad, CustomData *data) {
+
+    // sink 是输入，即上游 Element 向本元素发送的数据。
+    // src 是输出，本元素向下游元素发送的数据。也就是输入数据经过本元素处理之后的输出。
+
+    g_print(&quot;Received new pad '%s' from '%s':\n&quot;, GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+
+    if (strcmp(GST_PAD_NAME(new_pad), &quot;audio_0&quot;) == 0)
+    {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取音频 Queue 的输入接口 ...
+        GstPad *audio_sink_pad = gst_element_get_static_pad(data-&gt;audio_queue, &quot;sink&quot;);
+        if(gst_pad_is_linked(audio_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(audio_sink_pad);
+        }
+        // 将 New Pad 数据连接到 音频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, audio_sink_pad);
+        gst_object_unref(audio_sink_pad);
+    } else {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取视频 Queue 的输入接口 ...
+        GstPad *video_sink_pad = gst_element_get_static_pad(data-&gt;video_queue, &quot;sink&quot;);
+        if(gst_pad_is_linked(video_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(video_sink_pad);
+        }
+        // 将 New Pad 数据连接到 视频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, video_sink_pad);
+        gst_object_unref(video_sink_pad);
+    }
+}
+
+// decbin 的 pad_added 信号回调 ...
+static void pad_added_decbin(GstElement *src, GstPad *new_pad, CustomData *data) {
+
+    // sink 是输入，即上游 Element 向本元素发送的数据。
+    // src 是输出，本元素向下游元素发送的数据。也就是输入数据经过本元素处理之后的输出。
+
+    g_print(&quot;Received new pad '%s' from '%s':\n&quot;, GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+
+    // ----------------------------------------- //
+    // 获取新的 Pad 的 Type ...
+    /* Check the new pad's type */
+    // 获取 Pad 当前的 Caps 根据不同的 Element 状态会有不同的结果
+    GstCaps *new_pad_caps = gst_pad_get_current_caps(new_pad);
+    // 从 Caps 中获取第一个结构 ...
+    GstStructure *new_pad_struct = gst_caps_get_structure(new_pad_caps, 0);
+    // 获取结构的名称 ...
+    const gchar *new_pad_type = gst_structure_get_name(new_pad_struct);
+    // ----------------------------------------- //
+
+    // 当 new pad 类型为 audio 时 ...
+    if (g_str_has_prefix(new_pad_type, &quot;audio/x-raw&quot;)) {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取音频 Queue 的输入接口 ...
+        GstPad *audio_sink_pad = gst_element_get_static_pad(data-&gt;audio_convert, &quot;sink&quot;);
+        if(gst_pad_is_linked(audio_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(audio_sink_pad);
+            goto exit;
+        }
+        // 将 New Pad 数据连接到 音频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, audio_sink_pad);
+        if(GST_PAD_LINK_FAILED(ret)) {
+            g_print(&quot;Type is '%s' but link failed.\n&quot;, new_pad_type);
+        } else {
+            g_print(&quot;Link succeeded(type '%s').\n&quot;, new_pad_type);
+        }
+    }
+
+exit:
+    /* Unreference the new pad's caps, if we got them */
+    if(new_pad_caps != NULL)
+        gst_caps_unref(new_pad_caps);
+}
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+
+    // 个人数据 ...
+    CustomData data;
+    memset(&amp;data, 0, sizeof(data));
+
+    // Bus(总线) 主要用于向用户提供内部 Elements 的事件信息
+    // 每一个管道默认包含一个总线，所以应用程序不需要再创建总线
+    // 应用程序只需要在总线上设置一个类似于对象的信号处理器的消息处理器
+    GstBus *bus;
+
+    // Bus 发出的消息是 GstMessage 结构
+    GstMessage *msg;
+
+    /* Initialize GStreamer */
+    gst_init(&amp;argc, &amp;argv);
+
+    // gst_element_factory_make 创建 Element 元件
+    data.source = gst_element_factory_make(&quot;filesrc&quot;, &quot;file-source&quot;);
+    data.demux = gst_element_factory_make(&quot;qtdemux&quot;, &quot;demux&quot;);
+    data.audio_queue = gst_element_factory_make(&quot;queue&quot;, &quot;audio_queue&quot;);
+    data.audio_decbin = gst_element_factory_make(&quot;decodebin&quot;, &quot;audio_decodebin&quot;);
+    data.audio_convert = gst_element_factory_make(&quot;audioconvert&quot;, &quot;audio_convert&quot;);
+    data.audio_resample = gst_element_factory_make(&quot;audioresample&quot;, &quot;audio_resample&quot;);
+    data.audio_sink = gst_element_factory_make(&quot;autoaudiosink&quot;, &quot;audio_sink&quot;);
+    data.video_queue = gst_element_factory_make(&quot;queue&quot;, &quot;video_queue&quot;);
+    data.h264_parse = gst_element_factory_make(&quot;h264parse&quot;, &quot;h264_parse&quot;);
+    data.avdec_h264 = gst_element_factory_make(&quot;avdec_h264&quot;, &quot;avdec_h264&quot;);
+    data.video_sink = gst_element_factory_make(&quot;autovideosink&quot;, &quot;video_sink&quot;);
+
+    /* Create the empty pipeline */
+    // 创建管道 ...
+    data.pipeline = gst_pipeline_new(&quot;test-pipeline&quot;);
+
+    if (!data.pipeline || !data.source || !data.demux ||
+            !data.audio_queue || !data.audio_decbin || !data.audio_convert || !data.audio_resample || !data.audio_sink ||
+            !data.video_queue || !data.h264_parse || !data.avdec_h264 || !data.video_sink ) {
+        g_printerr(&quot;Not all elements could be created.\n&quot;);
+        return -1;
+    }
+
+    // 将元素添加到管道中（注意转换），并按顺序连接起来 ...
+    gst_bin_add_many(GST_BIN(data.pipeline), data.source, data.demux,
+                     data.audio_queue, data.audio_decbin, data.audio_convert, data.audio_resample, data.audio_sink,
+                     data.video_queue, data.h264_parse, data.avdec_h264, data.video_sink, NULL);
+
+    // 将一系列元素链接在一起 ...
+    if (gst_element_link(data.source, data.demux) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+    if (gst_element_link_many(data.audio_queue, data.audio_decbin, NULL) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+    if (gst_element_link_many(data.audio_convert, data.audio_resample, data.audio_sink, NULL) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+    if (gst_element_link_many(data.video_queue, data.h264_parse, data.avdec_h264, data.video_sink, NULL) != TRUE ) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+
+    // 修改管道的 location 地址 ...
+    g_object_set(data.source, &quot;location&quot;, &quot;e:/yiyezi.mp4&quot;, NULL);
+
+    // 连接到 uridecodebin 的 pad-added 信号, 通过回调 ...
+    g_signal_connect(data.demux, &quot;pad-added&quot;, G_CALLBACK(pad_added_demux), &amp;data);
+    g_signal_connect(data.audio_decbin, &quot;pad-added&quot;, G_CALLBACK(pad_added_decbin), &amp;data);
+
+    /* Start playing the pipeline */
+    // 修改状态为 PLAYING ...
+    gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
+
+    /* Wait until error or EOS */
+    // 从 Element(管道) 中获得 Bus(总线)
+    bus = gst_element_get_bus(data.pipeline);
+
+    // 从总线上获取一条消息，该消息的类型与消息类型的掩码类型匹配，直到指定的超时时间为止（并丢弃所有与提供的掩码不匹配的消息）
+    // 也就是直到从 Bus(总线) 总获取到 GST_MESSAGE_ERROR 或 GST_MESSAGE_EOS 消息时才返回 ...
+    msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,(GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+
+    /* Free resources */
+    if(msg != NULL)
+        gst_message_unref(msg);
+    gst_object_unref(bus);
+    gst_element_set_state(data.pipeline, GST_STATE_NULL);
+
+    gst_object_unref(data.pipeline);
+
+    return a.exec();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 显示帧率 ...
+
+// filesrc &gt; qtdemux
+// queue &gt; decodebin &gt; audioconvert &gt; audioresample &gt; autoaudiosink
+// queue &gt; h264parse &gt; avdec_h264 &gt; autovideosink
+// queue &gt; h264parse &gt; avdec_h264 &gt; fpsdisplaysink -&gt; autovideosink
+
+GST_DEBUG=fpsdisplaysink:5 gst-launch-1.0 ... ! fpsdisplaysink text-overlay=false video-sink=kmssink
+GST_DEBUG=fpsdisplaysink:5 gst-launch-1.0 ... ! fpsdisplaysink text-overlay=false video-sink=autovideosink
+
+#include &lt;QCoreApplication&gt;
+
+using namespace std;
+
+#include &lt;gst/gst.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+
+typedef struct _CustomData {
+    GstElement *pipeline;
+    GstElement *source;
+    GstElement *demux;
+    GstElement *audio_queue;
+    GstElement *audio_decbin;
+    GstElement *audio_convert;
+    GstElement *audio_resample;
+    GstElement *audio_sink;
+    GstElement *video_queue;
+    GstElement *video_parse;
+    GstElement *video_decode;
+    GstElement *video_sink;
+    GstElement *fpsdisplaysink;
+} CustomData;
+
+// demux 的 pad_added 信号回调 ...
+static void pad_added_demux(GstElement *src, GstPad *new_pad, CustomData *data) {
+
+    // sink 是输入，即上游 Element 向本元素发送的数据。
+    // src 是输出，本元素向下游元素发送的数据。也就是输入数据经过本元素处理之后的输出。
+
+    g_print(&quot;Received new pad '%s' from '%s':\n&quot;, GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+
+    if(strcmp(GST_PAD_NAME(new_pad), &quot;audio_0&quot;) == 0)
+    {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取音频 Queue 的输入接口 ...
+        GstPad *audio_sink_pad = gst_element_get_static_pad(data-&gt;audio_queue, &quot;sink&quot;);
+        if(gst_pad_is_linked(audio_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(audio_sink_pad);
+        }
+        // 将 New Pad 数据连接到 音频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, audio_sink_pad);
+        gst_object_unref(audio_sink_pad);
+    } else {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取视频 Queue 的输入接口 ...
+        GstPad *video_sink_pad = gst_element_get_static_pad(data-&gt;video_queue, &quot;sink&quot;);
+        if(gst_pad_is_linked(video_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(video_sink_pad);
+        }
+        // 将 New Pad 数据连接到 视频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, video_sink_pad);
+        gst_object_unref(video_sink_pad);
+    }
+}
+
+// decbin 的 pad_added 信号回调 ...
+static void pad_added_decbin(GstElement *src, GstPad *new_pad, CustomData *data) {
+
+    // sink 是输入，即上游 Element 向本元素发送的数据。
+    // src 是输出，本元素向下游元素发送的数据。也就是输入数据经过本元素处理之后的输出。
+
+    g_print(&quot;Received new pad '%s' from '%s':\n&quot;, GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+
+    // ----------------------------------------- //
+    // 获取新的 Pad 的 Type ...
+    /* Check the new pad's type */
+    // 获取 Pad 当前的 Caps 根据不同的 Element 状态会有不同的结果
+    GstCaps *new_pad_caps = gst_pad_get_current_caps(new_pad);
+    // 从 Caps 中获取第一个结构 ...
+    GstStructure *new_pad_struct = gst_caps_get_structure(new_pad_caps, 0);
+    // 获取结构的名称 ...
+    const gchar *new_pad_type = gst_structure_get_name(new_pad_struct);
+    // ----------------------------------------- //
+
+    // 当 new pad 类型为 audio 时 ...
+    if(g_str_has_prefix(new_pad_type, &quot;audio/x-raw&quot;)) {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取音频 Queue 的输入接口 ...
+        GstPad *audio_sink_pad = gst_element_get_static_pad(data-&gt;audio_convert, &quot;sink&quot;);
+        if(gst_pad_is_linked(audio_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(audio_sink_pad);
+            goto exit;
+        }
+        // 将 New Pad 数据连接到 音频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, audio_sink_pad);
+        if(GST_PAD_LINK_FAILED(ret)) {
+            g_print(&quot;Type is '%s' but link failed.\n&quot;, new_pad_type);
+        } else {
+            g_print(&quot;Link succeeded(type '%s').\n&quot;, new_pad_type);
+        }
+    }
+
+exit:
+    /* Unreference the new pad's caps, if we got them */
+    if(new_pad_caps != NULL)
+        gst_caps_unref(new_pad_caps);
+}
+
+// fps 回调 ...
+void user_function(GstElement *fpsdisplaysink,
+                   gdouble fps, // 当前测量的 fps
+                   gdouble droprate, // 缓冲区丢失的速率
+                   gdouble avgfps, // 平均 fps
+                   gpointer user_data) {
+    g_print(&quot;fps is %f\n&quot;, avgfps);
+}
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+
+    // 是否开启显示 FPS ...
+    bool fps = true;
+
+    // 个人数据 ...
+    CustomData data;
+    memset(&amp;data, 0, sizeof(data));
+
+    // Bus(总线) 主要用于向用户提供内部 Elements 的事件信息
+    // 每一个管道默认包含一个总线，所以应用程序不需要再创建总线
+    // 应用程序只需要在总线上设置一个类似于对象的信号处理器的消息处理器
+    GstBus *bus;
+
+    // Bus 发出的消息是 GstMessage 结构
+    GstMessage *msg;
+
+    /* Initialize GStreamer */
+    gst_init(&amp;argc, &amp;argv);
+
+    // gst_element_factory_make 创建 Element 元件
+    data.source = gst_element_factory_make(&quot;filesrc&quot;, &quot;file-source&quot;);
+    data.demux = gst_element_factory_make(&quot;qtdemux&quot;, &quot;demux&quot;);
+    data.audio_queue = gst_element_factory_make(&quot;queue&quot;, &quot;audio_queue&quot;);
+    data.audio_decbin = gst_element_factory_make(&quot;decodebin&quot;, &quot;audio_decodebin&quot;);
+    data.audio_convert = gst_element_factory_make(&quot;audioconvert&quot;, &quot;audio_convert&quot;);
+    data.audio_resample = gst_element_factory_make(&quot;audioresample&quot;, &quot;audio_resample&quot;);
+    data.audio_sink = gst_element_factory_make(&quot;autoaudiosink&quot;, &quot;audio_sink&quot;);
+    data.video_queue = gst_element_factory_make(&quot;queue&quot;, &quot;video_queue&quot;);
+    data.video_parse = gst_element_factory_make(&quot;h264parse&quot;, &quot;video_parse&quot;);
+    data.video_decode = gst_element_factory_make(&quot;avdec_h264&quot;, &quot;video_decoder&quot;);
+    data.video_sink = gst_element_factory_make(&quot;autovideosink&quot;, &quot;video_sink&quot;);
+    data.fpsdisplaysink = gst_element_factory_make(&quot;fpsdisplaysink&quot;, &quot;fpsdisplay_sink&quot;);
+
+    /* Create the empty pipeline */
+    // 创建管道 ...
+    data.pipeline = gst_pipeline_new(&quot;test-pipeline&quot;);
+
+    if(!data.pipeline || !data.source || !data.demux ||
+            !data.audio_queue || !data.audio_decbin || !data.audio_convert || !data.audio_resample || !data.audio_sink ||
+            !data.video_queue || !data.video_parse || !data.video_decode || !data.video_sink || !data.fpsdisplaysink) {
+        g_printerr(&quot;Not all elements could be created.\n&quot;);
+        return -1;
+    }
+
+    if (fps) { // 开启 FPS
+        // 将元素添加到管道中（注意转换），并按顺序连接起来 ...
+        gst_bin_add_many(GST_BIN(data.pipeline), data.source, data.demux,
+                         data.audio_queue, data.audio_decbin, data.audio_convert, data.audio_resample, data.audio_sink,
+                         data.video_queue, data.video_parse, data.video_decode, data.fpsdisplaysink, NULL);
+    } else {
+        // 将元素添加到管道中（注意转换），并按顺序连接起来 ...
+        gst_bin_add_many(GST_BIN(data.pipeline), data.source, data.demux,
+                         data.audio_queue, data.audio_decbin, data.audio_convert, data.audio_resample, data.audio_sink,
+                         data.video_queue, data.video_parse, data.video_decode, data.video_sink, NULL);
+    }
+
+    // 将一系列元素链接在一起 ...
+    if(gst_element_link(data.source, data.demux) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+    if(gst_element_link_many(data.audio_queue, data.audio_decbin, NULL) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+    if(gst_element_link_many(data.audio_convert, data.audio_resample, data.audio_sink, NULL) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+    if (fps) { // 开启 FPS
+        if(gst_element_link_many(data.video_queue, data.video_parse, data.video_decode, data.fpsdisplaysink, NULL) != TRUE ) {
+            g_printerr(&quot;Elements could not be linked.\n&quot;);
+            gst_object_unref(data.pipeline);
+            return -1;
+        }
+    } else {
+        if(gst_element_link_many(data.video_queue, data.video_parse, data.video_decode, data.video_sink, NULL) != TRUE ) {
+            g_printerr(&quot;Elements could not be linked.\n&quot;);
+            gst_object_unref(data.pipeline);
+            return -1;
+        }
+    }
+
+    // 修改管道的 location 地址 ...
+    g_object_set(data.source, &quot;location&quot;, &quot;e:/kaoya720.mp4&quot;, NULL);
+
+    if (fps) { // 开启 FPS
+        g_object_set(data.fpsdisplaysink, &quot;signal-fps-measurements&quot;, TRUE,
+                     &quot;fps-update-interval&quot;, 2000, &quot;text-overlay&quot;, FALSE,
+                     &quot;video-sink&quot;, data.video_sink, NULL);
+        g_signal_connect(data.fpsdisplaysink, &quot;fps-measurements&quot;, G_CALLBACK(user_function), NULL);
+    }
+
+    // 连接到 uridecodebin 的 pad-added 信号, 通过回调 ...
+    g_signal_connect(data.demux, &quot;pad-added&quot;, G_CALLBACK(pad_added_demux), &amp;data);
+    g_signal_connect(data.audio_decbin, &quot;pad-added&quot;, G_CALLBACK(pad_added_decbin), &amp;data);
+
+    /* Start playing the pipeline */
+    // 修改状态为 PLAYING ...
+    gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
+
+    /* Wait until error or EOS */
+    // 从 Element(管道) 中获得 Bus(总线)
+    bus = gst_element_get_bus(data.pipeline);
+
+restart:
+
+    // 从总线上获取一条消息，该消息的类型与消息类型的掩码类型匹配，直到指定的超时时间为止（并丢弃所有与提供的掩码不匹配的消息）
+    // 也就是直到从 Bus(总线) 总获取到 GST_MESSAGE_ERROR 或 GST_MESSAGE_EOS 消息时才返回 ...
+    msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+
+    /* Parse message */
+    if(msg != NULL) {
+        GError *err;
+        gchar *debug_info;
+
+        switch(GST_MESSAGE_TYPE(msg)) {
+        case GST_MESSAGE_ERROR:
+            gst_message_parse_error(msg, &amp;err, &amp;debug_info);
+            g_printerr(&quot;Error received from element %s: %s\n&quot;, GST_OBJECT_NAME(msg-&gt;src), err-&gt;message);
+            g_printerr(&quot;Debugging information: %s\n&quot;, debug_info ? debug_info : &quot;none&quot;);
+            g_clear_error(&amp;err);
+            g_free(debug_info);
+            break;
+        case GST_MESSAGE_EOS:
+            g_print(&quot;End-Of-Stream reached.\n&quot;);
+            gst_element_set_state(data.pipeline, GST_STATE_NULL);
+            g_object_set(data.source, &quot;location&quot;, &quot;e:/yiyezi.mp4&quot;, NULL);
+            gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
+            goto restart;
+        default:
+            /* We should not reach here because we only asked for ERRORs and EOS */
+            g_printerr(&quot;Unexpected message received.\n&quot;);
+            break;
+        }
+        gst_message_unref(msg);
+    }
+
+    gst_object_unref(bus);
+    gst_element_set_state(data.pipeline, GST_STATE_NULL);
+
+    gst_object_unref(data.pipeline);
+
+    return a.exec();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 使用 appsrc 实现 push-buffer 至 qtdemux
+// appsrc &gt; qtdemux
+// queue &gt; decodebin &gt; audioconvert &gt; audioresample &gt; autoaudiosink
+// queue &gt; h264parse &gt; avdec_h264 &gt; autovideosink
+
+#include &lt;QCoreApplication&gt;
+
+using namespace std;
+
+#include &lt;gst/gst.h&gt;
+#include &lt;gst/audio/audio.h&gt;
+#include &lt;string.h&gt;
+
+#define CHUNK_SIZE 1024
+
+typedef struct _CustomData {
+    GstElement *pipeline;
+    GstElement *app_source;
+    GstElement *demux;
+
+    GstElement *audio_queue;
+    GstElement *audio_decode;
+    GstElement *audio_convert;
+    GstElement *audio_resample;
+    GstElement *audio_sink;
+
+    GstElement *video_queue;
+    GstElement *video_parse;
+    GstElement *video_decode;
+    GstElement *video_sink;
+
+    GMappedFile *file;
+    guint8 *data;
+    gsize length;
+    guint64 offset;
+
+    guint sourceid;        /* To control the GSource */
+    GMainLoop *main_loop;  /* GLib's Main Loop */
+} CustomData;
+
+// 推送数据 ...
+static gboolean push_data(CustomData *data)
+{
+    GstBuffer *buffer;
+    guint len;
+    GstFlowReturn ret;
+
+    if(data-&gt;offset &gt;= data-&gt;length) {
+        /* we are EOS, send end-of-stream and remove the source */
+        g_signal_emit_by_name(data-&gt;app_source, &quot;end-of-stream&quot;, &amp;ret);
+        return FALSE;
+    }
+
+    /* read the next chunk */
+    buffer = gst_buffer_new();
+
+    len = CHUNK_SIZE;
+    if(data-&gt;offset + len &gt; data-&gt;length)
+        len = data-&gt;length - data-&gt;offset;
+
+    gst_buffer_append_memory(buffer,
+                             gst_memory_new_wrapped(GST_MEMORY_FLAG_READONLY,
+                                                    data-&gt;data, data-&gt;length, data-&gt;offset, len, NULL, NULL));
+
+    GST_DEBUG(&quot;feed buffer %p, offset %&quot; G_GUINT64_FORMAT &quot;-%u&quot;, buffer,
+              data-&gt;offset, len);
+
+    g_signal_emit_by_name(data-&gt;app_source, &quot;push-buffer&quot;, buffer, &amp;ret);
+    gst_buffer_unref(buffer);
+    if(ret != GST_FLOW_OK) {
+        /* some error, stop sending data */
+        g_print(&quot;some error, stop sending data&quot;);
+        return FALSE;
+    }
+
+    data-&gt;offset += len;
+
+    return TRUE;
+}
+
+// 当内部队列 appsrc 快要用尽（数据用完）时，将调用此函数
+static void start_feed(GstElement *source, guint size, CustomData *data) {
+    if(data-&gt;sourceid == 0) {
+        g_print(&quot;Start feeding\n&quot;);
+        // g_idle_add() 增加一个空闲任务，让应用程序在空闲时执行指定的函数
+        // g_idle_add() 该函数将数据写入到 appsrc 中，直到数据再次填满 ...
+        data-&gt;sourceid = g_idle_add((GSourceFunc) push_data, data);
+    }
+}
+
+// 当 appsrc 有足够的数据并且我们可以停止发送时，这个回调就会触发。
+// 我们从主循环中删除空闲处理程序 ...
+static void stop_feed(GstElement *source, CustomData *data) {
+    if(data-&gt;sourceid != 0) {
+        g_print(&quot;Stop feeding\n&quot;);
+        // 当 appsrc 中的数据填满，则移除任务 ...
+        g_source_remove(data-&gt;sourceid);
+        data-&gt;sourceid = 0;
+    }
+}
+
+// demux 的 pad_added 信号回调 ...
+static void pad_added_demux(GstElement *src, GstPad *new_pad, CustomData *data) {
+
+    // sink 是输入，即上游 Element 向本元素发送的数据。
+    // src 是输出，本元素向下游元素发送的数据。也就是输入数据经过本元素处理之后的输出。
+
+    g_print(&quot;Demux &gt; Received new pad '%s' from '%s':\n&quot;, GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+
+    if(strcmp(GST_PAD_NAME(new_pad), &quot;video_0&quot;) == 0)
+    {
+        // sink 是输入，即上游Element向本元素发送的数据。
+        // 获取视频 Queue 的输入接口 ...
+        GstPad *video_sink_pad = gst_element_get_static_pad(data-&gt;video_queue, &quot;sink&quot;);
+        if(gst_pad_is_linked(video_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(video_sink_pad);
+        }
+        // 将 New Pad 数据连接到 视频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, video_sink_pad);
+        gst_object_unref(video_sink_pad);
+    } else {
+        // sink 是输入，即上游Element向本元素发送的数据。
+        // 获取音频 Queue 的输入接口 ...
+        GstPad *audio_sink_pad = gst_element_get_static_pad(data-&gt;audio_queue, &quot;sink&quot;);
+        if(gst_pad_is_linked(audio_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(audio_sink_pad);
+        }
+        // 将 New Pad 数据连接到 音频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, audio_sink_pad);
+        gst_object_unref(audio_sink_pad);
+    }
+}
+
+// decbin 的 pad_added 信号回调 ...
+static void pad_added_decbin(GstElement *src, GstPad *new_pad, CustomData *data) {
+
+    // sink 是输入，即上游 Element 向本元素发送的数据。
+    // src 是输出，本元素向下游元素发送的数据。也就是输入数据经过本元素处理之后的输出。
+
+    g_print(&quot;Decbin &gt; Received new pad '%s' from '%s':\n&quot;, GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+
+    // ----------------------------------------- //
+    // 获取新的 Pad 的 Type ...
+    // 获取 Pad 当前的 Caps 根据不同的 Element 状态会有不同的结果
+    GstCaps *new_pad_caps = gst_pad_get_current_caps(new_pad);
+    // 从 Caps 中获取第一个结构 ...
+    GstStructure *new_pad_struct = gst_caps_get_structure(new_pad_caps, 0);
+    // 获取结构的名称 ...
+    const gchar *new_pad_type = gst_structure_get_name(new_pad_struct);
+    // ----------------------------------------- //
+
+    // 当 new pad 类型为 audio 时 ...
+    if(g_str_has_prefix(new_pad_type, &quot;audio/x-raw&quot;)) {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取音频 Queue 的输入接口 ...
+        GstPad *audio_sink_pad = gst_element_get_static_pad(data-&gt;audio_convert, &quot;sink&quot;);
+        if(gst_pad_is_linked(audio_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(audio_sink_pad);
+            goto exit;
+        }
+        // 将 New Pad 数据连接到 音频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, audio_sink_pad);
+        if(GST_PAD_LINK_FAILED(ret)) {
+            g_print(&quot;Type is '%s' but link failed.\n&quot;, new_pad_type);
+        } else {
+            g_print(&quot;Link succeeded(type '%s').\n&quot;, new_pad_type);
+        }
+    }
+
+exit:
+    /* Unreference the new pad's caps, if we got them */
+    if(new_pad_caps != NULL)
+        gst_caps_unref(new_pad_caps);
+}
+
+
+// 此函数在总线上发布错误消息时调用 ...
+static void error_cb(GstBus *bus, GstMessage *msg, CustomData *data) {
+    GError *err;
+    gchar *debug_info;
+    /* Print error details on the screen */
+    gst_message_parse_error(msg, &amp;err, &amp;debug_info);
+    g_printerr(&quot;Error received from element %s: %s\n&quot;, GST_OBJECT_NAME(msg-&gt;src), err-&gt;message);
+    g_printerr(&quot;Debugging information: %s\n&quot;, debug_info ? debug_info : &quot;none&quot;);
+    g_clear_error(&amp;err);
+    g_free(debug_info);
+    g_main_loop_quit(data-&gt;main_loop);
+}
+
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+
+    // 用户数据
+    CustomData data;
+    memset(&amp;data, 0, sizeof(data));
+
+    // Bus
+    GstBus *bus;
+
+    // 初始化 Gst
+    gst_init(&amp;argc, &amp;argv);
+    // gst_debug_set_default_threshold(GST_LEVEL_DEBUG);
+
+    // 映射本地文件 ...
+    GError *error = NULL;
+    data.file = g_mapped_file_new(&quot;e:/yiyezi.mp4&quot;, FALSE, &amp;error);
+    if(error) {
+        g_print(&quot;failed to open file: %s\n&quot;, error-&gt;message);
+        g_error_free(error);
+        return -2;
+    }
+
+    // 初始化本地文件 ...
+    data.length = g_mapped_file_get_length(data.file);
+    data.data =(guint8 *) g_mapped_file_get_contents(data.file);
+    data.offset = 0;
+
+    // 创建 Element ...
+    data.app_source = gst_element_factory_make(&quot;appsrc&quot;, &quot;app_source&quot;);
+    data.demux = gst_element_factory_make(&quot;qtdemux&quot;, &quot;demux&quot;);
+    // audio ...
+    data.audio_queue = gst_element_factory_make(&quot;queue&quot;, &quot;audio_queue&quot;);
+    data.audio_decode = gst_element_factory_make(&quot;decodebin&quot;, &quot;audio_decode&quot;);
+    data.audio_convert = gst_element_factory_make(&quot;audioconvert&quot;, &quot;audio_convert&quot;);
+    data.audio_resample = gst_element_factory_make(&quot;audioresample&quot;, &quot;audio_resample&quot;);
+    data.audio_sink = gst_element_factory_make(&quot;autoaudiosink&quot;, &quot;audio_sink&quot;);
+    // video ...
+    data.video_queue = gst_element_factory_make(&quot;queue&quot;, &quot;video_queue&quot;);
+    data.video_parse = gst_element_factory_make(&quot;h264parse&quot;, &quot;video_parse&quot;);
+    data.video_decode = gst_element_factory_make(&quot;avdec_h264&quot;, &quot;video_decode&quot;);
+    data.video_sink = gst_element_factory_make(&quot;autovideosink&quot;, &quot;video_sink&quot;);
+
+    // 创建管道 ...
+    data.pipeline = gst_pipeline_new(&quot;test-pipeline&quot;);
+
+    // 判断是否创建成功 ...
+    if(!data.pipeline || !data.app_source || !data.demux ||
+            !data.audio_queue || !data.audio_decode || !data.audio_convert || !data.audio_resample || !data.audio_sink ||
+            !data.video_queue || !data.video_parse || !data.video_decode || !data.video_sink) {
+        g_printerr(&quot;Not all elements could be created.\n&quot;);
+        return -1;
+    }
+
+    // 设置 appsrc size ...
+    g_object_set(data.app_source, &quot;size&quot;, (gint64) data.length, NULL);
+
+    // 当 appsrc 内需要数据时，通知回调填充 ...
+    g_signal_connect(data.app_source, &quot;need-data&quot;, G_CALLBACK(start_feed), &amp;data);
+    // 当 appsrc 内数据填满时，通过回调停止 ...
+    g_signal_connect(data.app_source, &quot;enough-data&quot;, G_CALLBACK(stop_feed), &amp;data);
+
+    // 将元素添加到管道中 ...
+    gst_bin_add_many(GST_BIN(data.pipeline), data.app_source, data.demux,
+                     data.audio_queue, data.audio_decode, data.audio_convert, data.audio_resample, data.audio_sink,
+                     data.video_queue, data.video_parse, data.video_decode, data.video_sink, NULL);
+
+    // 建立元素间的连接 ...
+    if(gst_element_link(data.app_source, data.demux) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+    if(gst_element_link_many(data.audio_queue, data.audio_decode, NULL) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+    if(gst_element_link_many(data.audio_convert, data.audio_resample, data.audio_sink, NULL) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+    if(gst_element_link_many(data.video_queue, data.video_parse, data.video_decode, data.video_sink, NULL) != TRUE ) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+
+    // 针对 Sometimes 类型 Pad 进行连接 ...
+    g_signal_connect(data.demux, &quot;pad-added&quot;, G_CALLBACK(pad_added_demux), &amp;data);
+    g_signal_connect(data.audio_decode, &quot;pad-added&quot;, G_CALLBACK(pad_added_decbin), &amp;data);
+
+    // 获取 Bus 连接 message::error 回调 ...
+    bus = gst_element_get_bus(data.pipeline);
+    gst_bus_add_signal_watch(bus);
+    g_signal_connect(G_OBJECT(bus), &quot;message::error&quot;,(GCallback) error_cb, &amp;data);
+    gst_object_unref(bus);
+
+    // 更新 Element 状态为 GST_STATE_PLAYING ...
+    gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
+
+    // Main Loop ...
+    data.main_loop = g_main_loop_new(NULL, FALSE);
+    g_main_loop_run(data.main_loop);
+
+    /* Free resources */
+    gst_element_set_state(data.pipeline, GST_STATE_NULL);
+    gst_object_unref(data.pipeline);
+
+    return a.exec();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 播放图片 ...
+gst-launch-1.0 filesrc location=/root/b.jpg ! jpegparse ! mppjpegdec ! imagefreeze ! kmssink
+
+// 检查输入格式，并且查看是否需要 parsed ...
+SINK template: 'sink'
+Availability: Always
+Capabilities:
+  image/jpeg
+             parsed: true
+
+// 默认图片播放 ...
+// filesrc &gt; decodebin &gt; imagefreeze &gt; autovideosink
+// gst-launch-1.0 filesrc location=e:/b.jpg ! jpegdec ! imagefreeze ! autovideosink
+// gst-launch-1.0 filesrc location=e:/b.png ! pngdec ! imagefreeze ! autovideosink
+
+#include &lt;QCoreApplication&gt;
+
+#include &lt;gst/gst.h&gt;
+#include &lt;glib.h&gt;
+
+using namespace std;
+
+typedef struct _CustomData {
+    GstElement *pipeline;
+    GstElement *source;
+    GstElement *decbin;
+    GstElement *freeze;
+    GstElement *sink;
+    GMainLoop *loop;
+} CustomData;
+
+// decbin 的 pad_added 信号回调 ...
+static void pad_added_decbin(GstElement *src, GstPad *new_pad, CustomData *data) {
+
+    // sink 是输入，即上游 Element 向本元素发送的数据。
+    // src 是输出，本元素向下游元素发送的数据。也就是输入数据经过本元素处理之后的输出。
+
+    g_print(&quot;Received new pad '%s' from '%s':\n&quot;, GST_PAD_NAME(new_pad), GST_ELEMENT_NAME(src));
+
+    // ----------------------------------------- //
+    // 获取新的 Pad 的 Type ...
+    /* Check the new pad's type */
+    // 获取 Pad 当前的 Caps 根据不同的 Element 状态会有不同的结果
+    GstCaps *new_pad_caps = gst_pad_get_current_caps(new_pad);
+    // 从 Caps 中获取第一个结构 ...
+    GstStructure *new_pad_struct = gst_caps_get_structure(new_pad_caps, 0);
+    // 获取结构的名称 ...
+    const gchar *new_pad_type = gst_structure_get_name(new_pad_struct);
+    // ----------------------------------------- //
+
+    // 当 new pad 类型为 video 时 ...
+    if (g_str_has_prefix(new_pad_type, &quot;video/x-raw&quot;)) {
+        // sink是输入，即上游Element向本元素发送的数据。
+        // 获取音频 Queue 的输入接口 ...
+        GstPad *audio_sink_pad = gst_element_get_static_pad(data-&gt;freeze, &quot;sink&quot;);
+        if(gst_pad_is_linked(audio_sink_pad)) {
+            g_print(&quot;We are already linked. Ignoring.\n&quot;);
+            gst_object_unref(audio_sink_pad);
+            goto exit;
+        }
+        // 将 New Pad 数据连接到 音频 Queue 的输入接口 ...
+        GstPadLinkReturn ret = gst_pad_link(new_pad, audio_sink_pad);
+        if(GST_PAD_LINK_FAILED(ret)) {
+            g_print(&quot;Type is '%s' but link failed.\n&quot;, new_pad_type);
+        } else {
+            g_print(&quot;Link succeeded(type '%s').\n&quot;, new_pad_type);
+        }
+    }
+
+exit:
+    /* Unreference the new pad's caps, if we got them */
+    if(new_pad_caps != NULL)
+        gst_caps_unref(new_pad_caps);
+}
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+
+    CustomData data;
+    memset(&amp;data, 0, sizeof(data));
+
+    GstBus *bus;
+    GstMessage *msg;
+
+    gst_init(&amp;argc, &amp;argv);
+
+    data.pipeline = gst_pipeline_new(&quot;test-pipeline&quot;);
+    data.source = gst_element_factory_make(&quot;filesrc&quot;, &quot;source&quot;);
+    data.decbin = gst_element_factory_make(&quot;decodebin&quot;, &quot;decoder&quot;);
+    data.freeze = gst_element_factory_make(&quot;imagefreeze&quot;, &quot;image_freeze&quot;);
+    data.sink = gst_element_factory_make(&quot;autovideosink&quot;, &quot;image_sink&quot;);
+
+    if(!data.pipeline || !data.source || !data.decbin || !data.freeze || !data.sink) {
+        g_print(&quot;One element could not be created\n&quot;);
+        return -1;
+    }
+
+    g_object_set(G_OBJECT(data.source), &quot;location&quot;, &quot;e:/b.jpg&quot;, NULL);
+
+    gst_bin_add_many(GST_BIN(data.pipeline), data.source, data.decbin, data.freeze, data.sink, NULL);
+    if (gst_element_link_many(data.source, data.decbin, NULL) != TRUE ||
+            gst_element_link_many(data.freeze, data.sink, NULL) != TRUE) {
+        g_printerr(&quot;Elements could not be linked.\n&quot;);
+        gst_object_unref(data.pipeline);
+        return -1;
+    }
+
+    g_signal_connect(data.decbin, &quot;pad-added&quot;, G_CALLBACK(pad_added_decbin), &amp;data);
+
+    gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
+    g_print(&quot;Running\n&quot;);
+
+    bus = gst_pipeline_get_bus(GST_PIPELINE(data.pipeline));
+    msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE,(GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+
+    /* Free resources */
+    if(msg != NULL)
+        gst_message_unref(msg);
+
+    gst_object_unref(bus);
+    gst_element_set_state(data.pipeline, GST_STATE_NULL);
+    gst_object_unref(data.pipeline);
+
+    return a.exec();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在 Playbin 中使用 Ghost_Pad 创建连接 ...
+
+void user_function(GstElement *fpsdisplaysink,
+                   gdouble fps, // 当前测量的 fps
+                   gdouble droprate, // 缓冲区丢失的速率
+                   gdouble avgfps, // 平均 fps
+                   gpointer user_data) {
+    g_print(&quot;fps is %f\n&quot;, avgfps);
+}
+
+data.playbin = gst_parse_launch(&quot;playbin3&quot;, NULL);
+data.fpsdisplaysink = gst_element_factory_make(&quot;fpsdisplaysink&quot;, &quot;fpsdisplay_sink&quot;);
+
+#ifdef G_OS_WIN32
+    data.video_convert = gst_element_factory_make(&quot;videoconvert&quot;, &quot;video_convert&quot;);
+    data.video_sink = gst_element_factory_make(&quot;autovideosink&quot;, &quot;video_sink&quot;);
+#else
+    data.video_convert = gst_element_factory_make(&quot;mppvideodec&quot;, &quot;video_convert&quot;);
+    data.video_sink = gst_element_factory_make(&quot;kmssink&quot;, &quot;video_sink&quot;);
+#endif
+
+g_object_set(data.fpsdisplaysink, &quot;signal-fps-measurements&quot;, TRUE,
+             &quot;fps-update-interval&quot;, 2000, &quot;text-overlay&quot;, FALSE,
+             &quot;video-sink&quot;, data.video_sink, NULL);
+g_signal_connect(data.fpsdisplaysink, &quot;fps-measurements&quot;, G_CALLBACK(user_function), NULL);
+
+GstElement *video_sink_bin = gst_bin_new(&quot;video_sink_bin&quot;);
+gst_bin_add_many(GST_BIN(video_sink_bin), data.video_convert, data.fpsdisplaysink, NULL);
+gst_element_link_many(data.video_convert, data.fpsdisplaysink, NULL);
+GstPad *pad = gst_element_get_static_pad(data.video_convert, &quot;sink&quot;);
+GstPad *ghost_pad = gst_ghost_pad_new(&quot;sink&quot;, pad);
+gst_pad_set_active(ghost_pad, TRUE);
+gst_element_add_pad(video_sink_bin, ghost_pad);
+gst_object_unref(pad);
+
+g_object_set(GST_OBJECT(data.playbin), &quot;video-sink&quot;, video_sink_bin, NULL);
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 自定义 playbin 接收器 + 循环播放 ...
+// playbin &gt; videoconvert &gt; autovideosink
+// playbin &gt; mppvideodec &gt; kmssink
+
+// playbin 允许选择所需的音频和视频接收器的两个属性 audio-sink 和 video-sink。
+// 应用程序只需要实例化适当的 GstElement 并将其传递给 playbin 这些属性
+
+// 关于切换播放
+// playbin 允许在 about-to-finish 信号时设置新的 uri 来指定下一个视频 ...
+
+#include &lt;QCoreApplication&gt;
+#include &quot;gst/gst.h&quot;
+
+using namespace std;
+
+typedef struct _CustomData {
+    GstElement *playbin;
+    GstElement *video_convert;
+    GstElement *video_sink;
+    GstElement *fpsdisplaysink;
+    GstElement *audio_sink;
+    vector&lt;QString&gt; playlist;
+    int playindex = 0;
+    GMainLoop *main_loop;
+} CustomData;
+
+void about_to_finish_callback(GstElement *playbin, CustomData *data)
+{
+    QString old = data-&gt;playlist.at(data-&gt;playindex);
+    data-&gt;playindex = data-&gt;playindex + 1 == data-&gt;playlist.size() ? 0 : data-&gt;playindex + 1;
+    QString name = data-&gt;playlist.at(data-&gt;playindex);
+    g_object_set(playbin, &quot;uri&quot;, QString(&quot;file:///%1&quot;).arg(name).toStdString().c_str(), NULL);
+    g_print(&quot;&gt; NEXT &gt; %s &gt; %s\n&quot;, old.toStdString().c_str(), name.toStdString().c_str());
+}
+
+static void error_callback(GstBus *bus, GstMessage *msg, CustomData *data) {
+    GError *err;
+    gchar *debug_info;
+
+    /* Print error details on the screen */
+    gst_message_parse_error(msg, &amp;err, &amp;debug_info);
+    g_printerr(&quot;Error received from element %s: %s\n&quot;, GST_OBJECT_NAME(msg-&gt;src), err-&gt;message);
+    g_printerr(&quot;Debugging information: %s\n&quot;, debug_info ? debug_info : &quot;none&quot;);
+    g_clear_error(&amp;err);
+    g_free(debug_info);
+
+    g_main_loop_quit(data-&gt;main_loop);
+}
+
+static void state_changed_callback(GstBus *bus, GstMessage *msg, CustomData *data) {
+    GstState old_state, new_state, pending_state;
+    gst_message_parse_state_changed(msg, &amp;old_state, &amp;new_state, &amp;pending_state);
+    if (GST_MESSAGE_SRC(msg) == GST_OBJECT(data-&gt;playbin)) {
+        g_print(&quot;Pipeline state changed from %s to %s:\n&quot;,
+                gst_element_state_get_name(old_state), gst_element_state_get_name(new_state));
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+
+    CustomData data;
+
+#ifdef G_OS_WIN32
+    data.playlist.push_back(&quot;e:/yiyezi.mp4&quot;);
+    data.playlist.push_back(&quot;e:/kaoya720.mp4&quot;);
+#else
+    data.playlist.push_back(&quot;/root/bright_me_up_h265_4k_30fps_15s.mp4&quot;);
+    data.playlist.push_back(&quot;/root/beijing_kaoya_h265_4k_30fps_15s.mp4&quot;);
+#endif
+
+    GstBus *bus;
+    GstMessage *msg;
+
+    gst_init(&amp;argc, &amp;argv);
+
+    // playbin3 可以解决最后一帧丢失问题 ...
+    data.playbin = gst_parse_launch(&quot;playbin&quot;, NULL);
+    data.audio_sink = gst_element_factory_make(&quot;alsasink&quot;, &quot;audio_sink&quot;);
+
+#ifdef G_OS_WIN32
+    data.video_convert = gst_element_factory_make(&quot;videoconvert&quot;, &quot;video_convert&quot;);
+    data.video_sink = gst_element_factory_make(&quot;autovideosink&quot;, &quot;video_sink&quot;);
+#else
+    // data.video_convert = gst_element_factory_make(&quot;mppvideodec&quot;, &quot;video_convert&quot;);
+    data.video_sink = gst_element_factory_make(&quot;kmssink&quot;, &quot;video_sink&quot;);
+#endif
+
+    if(!data.playbin || !data.video_sink ) {
+        g_printerr(&quot;Not all elements could be created.\n&quot;);
+        return -1;
+    }
+
+    g_object_set(data.playbin, &quot;uri&quot;, QString(&quot;file:///%1&quot;).arg(data.playlist.at(data.playindex)).toStdString().c_str(), NULL);
+    g_object_set(GST_OBJECT(data.playbin), &quot;video-sink&quot;, data.video_sink, NULL);
+    g_object_set(GST_OBJECT(data.playbin), &quot;audio-sink&quot;, data.audio_sink, NULL);
+    g_signal_connect(data.playbin, &quot;about-to-finish&quot;, G_CALLBACK(about_to_finish_callback), &amp;data);
+
+    bus = gst_element_get_bus(data.playbin);
+    gst_bus_add_signal_watch(bus);
+    g_signal_connect(G_OBJECT(bus), &quot;message::error&quot;,(GCallback)error_callback, &amp;data);
+    g_signal_connect(G_OBJECT(bus), &quot;message::state-changed&quot;, (GCallback)state_changed_callback, &amp;data);
+    // g_signal_connect(G_OBJECT(bus), &quot;message::eos&quot;, (GCallback)eos_callback, &amp;data);
+
+    gst_object_unref(bus);
+
+    // 暂停来实现图片切换需要监听 GST_MESSAGE_STATE_CHANGED 必要状态来获取素材的切换 ...
+    gst_element_set_state(data.playbin, GST_STATE_PLAYING);
+
+    data.main_loop = g_main_loop_new(NULL, FALSE);
+    g_main_loop_run(data.main_loop);
+
+    gst_element_set_state(data.playbin, GST_STATE_NULL);
+    gst_object_unref(data.playbin);
+
+    return a.exec();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 混合图像处理 ...
+
+gst-launch-1.0 videomixer name=mix sink_1::xpos=50 sink_1::ypos=50 sink_1::alpha=1.0 sink_1::zorder=3 sink_2::xpos=40 sink_2::ypos=40 sink_2::zorder=2 ! \
+videoconvert ! autovideosink \
+uridecodebin3 uri=file:///e:/kaoya720.mp4 name=dec_1 \
+dec_1. ! queue ! audioconvert ! audioresample ! autoaudiosink \
+dec_1. ! queue ! videoconvert ! videoscale ! mix. \
+uridecodebin3 uri=file:///e:/yiyezi.mp4 name=dec_2 \
+dec_2. ! queue ! videoconvert ! videoscale ! mix. \
+videotestsrc ! video/x-raw,framerate=10/1,width=800, height=540 ! queue ! mix.
+
+// 官方案例
+
+gst-launch-1.0 \
+  videotestsrc pattern=1 ! \
+  video/x-raw,format=AYUV,framerate=\(fraction\)10/1,width=100,height=100 ! \
+  videobox border-alpha=0 top=-70 bottom=-70 right=-220 ! \
+  videomixer name=mix sink_0::alpha=0.7 sink_1::alpha=0.5 ! \
+  videoconvert ! xvimagesink \
+  videotestsrc ! \
+  video/x-raw,format=AYUV,framerate=\(fraction\)5/1,width=320,height=240 ! mix.
+
+gst-launch-1.0 videotestsrc pattern=1 ! \
+  video/x-raw, framerate=\(fraction\)10/1, width=100, height=100 ! \
+  videomixer name=mix ! videoconvert ! ximagesink \
+  videotestsrc !  \
+  video/x-raw, framerate=\(fraction\)5/1, width=320, height=240 ! mix.
+
+gst-launch-1.0 videotestsrc pattern=1 ! \
+  video/x-raw,format =I420, framerate=\(fraction\)10/1, width=100, height=100 ! \
+  videomixer name=mix ! videoconvert ! ximagesink \
+  videotestsrc ! \
+  video/x-raw,format=I420, framerate=\(fraction\)5/1, width=320, height=240 ! mix.
+
+gst-launch-1.0 videomixer name=mixer sink_1::alpha=0.5 sink_1::xpos=50 sink_1::ypos=50 ! \
+  videoconvert ! ximagesink \
+  videotestsrc pattern=snow timestamp-offset=3000000000 ! \
+  &quot;video/x-raw,format=AYUV,width=640,height=480,framerate=(fraction)30/1&quot; ! \
+  timeoverlay ! queue2 ! mixer. \
+  videotestsrc pattern=smpte ! \
+  &quot;video/x-raw,format=AYUV,width=800,height=600,framerate=(fraction)10/1&quot; ! \
+  timeoverlay ! queue2 ! mixer.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/UBUNTU%E4%B9%8BRK3399%E7%BC%96%E8%AF%91QT%E4%B8%8EWebEngine/" title="UBUNTU之RK3399编译QT与WebEngine">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Gstreamer%E4%B9%8B%E5%9C%A8Windows%E4%B8%8ELinux%E7%B3%BB%E7%BB%9F%E4%B8%8A%E5%AE%89%E8%A3%85/" title="Gstreamer之在Windows与Linux系统上安装">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-09-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

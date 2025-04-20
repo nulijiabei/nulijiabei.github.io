@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang之锁和线程安全的Map</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang之锁和线程安全的Map </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<pre><code>Golang的包sync实现了两种类型的锁： sync.Mutex 和 sync.RWMutex。
+
+通过阅读源代码我们可以知道sync.RWMutex是基于sync.Mutex实现的，其中的只读锁的实现使用类似引用计数的方式。
+
+对于任意 sync.Mutex 或 sync.RWMutex 变量l。
+         如果 n &lt; m ，那么第n次 l.Unlock() 调用在第 m次 l.Lock()调用返回前发生。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下面代码来自：
+// https://github.com/astaxie/beego/blob/master/safemap.go
+// 用读写锁实现了安全的map
+package beego
+
+import (
+    &quot;sync&quot;
+)
+
+type BeeMap struct {
+    lock *sync.RWMutex
+    bm   map[interface{}]interface{}
+}
+
+func NewBeeMap() *BeeMap {
+    return &amp;BeeMap{
+        lock: new(sync.RWMutex),
+        bm:   make(map[interface{}]interface{}),
+    }
+}
+
+//Get from maps return the k's value
+func (m *BeeMap) Get(k interface{}) interface{} {
+    m.lock.RLock()
+    defer m.lock.RUnlock()
+    if val, ok := m.bm[k]; ok {
+        return val
+    }
+    return nil
+}
+
+// Maps the given key and value. Returns false
+// if the key is already in the map and changes nothing.
+func (m *BeeMap) Set(k interface{}, v interface{}) bool {
+    m.lock.Lock()
+    defer m.lock.Unlock()
+    if val, ok := m.bm[k]; !ok {
+        m.bm[k] = v
+    } else if val != v {
+        m.bm[k] = v
+    } else {
+        return false
+    }
+    return true
+}
+
+// Returns true if k is exist in the map.
+func (m *BeeMap) Check(k interface{}) bool {
+    m.lock.RLock()
+    defer m.lock.RUnlock()
+    if _, ok := m.bm[k]; !ok {
+        return false
+    }
+    return true
+}
+
+func (m *BeeMap) Delete(k interface{}) {
+    m.lock.Lock()
+    defer m.lock.Unlock()
+    delete(m.bm, k)
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E7%99%BE%E5%BA%A6%E5%9C%B0%E5%9B%BE%E5%85%B4%E8%B6%A3%E7%82%B9%E6%90%9C%E7%B4%A2/" title="Android之百度地图兴趣点搜索">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8B%E4%BC%A0%E5%8F%82%E5%92%8C%E4%BC%A0%E5%BC%95%E7%94%A8%E4%BB%8B%E7%BB%8D/" title="Golang之传参和传引用介绍">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-07-29</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

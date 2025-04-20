@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-GUI-客户端</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-GUI-客户端 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>自己写了个例子，学习学习</p>
+
+<hr />
+
+<pre><code>package main
+
+import (
+    &quot;github.com/andlabs/ui&quot;
+    //z &quot;github.com/nutzam/zgo&quot;
+    //&quot;io/ioutil&quot;
+    //&quot;net/http&quot;
+    //&quot;net/url&quot;
+    //&quot;os&quot;
+    &quot;fmt&quot;
+    &quot;reflect&quot;
+    //&quot;regexp&quot;
+    &quot;encoding/json&quot;
+    &quot;log&quot;
+    &quot;runtime&quot;
+    &quot;time&quot;
+)
+
+var (
+    Status = false
+    Server = &quot;127.0.0.1:8080&quot;
+)
+
+func main() {
+
+    // 设置CPU核心数量
+    runtime.GOMAXPROCS(runtime.NumCPU())
+
+    // 设置日志的结构
+    log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime | log.Lmicroseconds)
+
+    go ui.Do(initGUI)
+
+    err := ui.Go()
+    if err != nil {
+        panic(err)
+    }
+
+}
+
+func initGUI() {
+
+    // ------------------------------------------- //
+
+    //// 创建一个标签
+    //serLable := ui.NewLabel(&quot;服务器:&quot;)
+
+    //// 创建一个文本输入区域
+    //serAddr = ui.NewTextField()
+
+    //// 设置文本输入区域事件
+    //serAddr.OnChanged(func() {
+    //  go feedback()
+    //})
+
+    //// 创建一个按钮
+    //connButton := ui.NewButton(&quot;连接&quot;)
+
+    //// 设置按钮事件
+    //connButton.OnClicked(guiTranslate)
+
+    //// 设置为横向排列结构
+    //serAddr := ui.NewHorizontalStack(serLable, serAddr, connButton)
+
+    //// 设置第二个对象弹性填充
+    //serAddr.SetStretchy(1)
+
+    // ------------------------------------------- //
+
+    // 系统
+    sysTable := ui.NewTable(reflect.TypeOf(Sys{}))
+
+    // 系统更新线程
+    go (func() {
+
+        for {
+
+            // ------------------------- //
+            sysTable.Lock()
+            d := sysTable.Data().(*[]Sys)
+            *d = []Sys{}
+            sysTable.Unlock()
+            // ------------------------- //
+
+            var systems Systems
+
+            // 获取系统信息
+            sysData, err := Request(fmt.Sprintf(&quot;http://%s/wsys&quot;, Server))
+            if err != nil {
+                Status = false
+                log.Println(err)
+                time.Sleep(1 * time.Second)
+                continue
+            } else {
+                Status = true
+            }
+
+            err = json.Unmarshal(*sysData, &amp;systems)
+            if err != nil {
+                log.Println(err)
+                time.Sleep(1 * time.Second)
+                continue
+            }
+
+            s := make([]Sys, len(systems.System))
+            for i, systems := range systems.System {
+                s[i].Name = (*systems).Name
+                s[i].Sysboot = (*systems).Sysboot
+                s[i].System = (*systems).System
+                s[i].Remote_command = (*systems).Remote_command
+            }
+
+            // ------------------------- //
+            sysTable.Lock()
+            d = sysTable.Data().(*[]Sys)
+            *d = s
+            sysTable.Unlock()
+            // ------------------------- //
+
+            time.Sleep(1 * time.Second)
+
+        }
+
+    })()
+
+    // ------------------------------------------- //
+
+    // 创建一组系统数据列表
+    evos := make([]Evo, 0)
+
+    evos = append(evos, Evo{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;})
+    evos = append(evos, Evo{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;})
+    evos = append(evos, Evo{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;})
+    evos = append(evos, Evo{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;})
+    evos = append(evos, Evo{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;})
+    evos = append(evos, Evo{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;})
+    evos = append(evos, Evo{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;})
+
+    // 创建表,并导入系统数据
+    evoTable := ui.NewTable(reflect.TypeOf(evos[0]))
+    evoTable.Lock()
+    *(evoTable.Data().(*[]Evo)) = evos
+    evoTable.Unlock()
+
+    // ------------------------------------------- //
+
+    // 创建一组系统数据列表
+    mbrs := make([]Mbr, 0)
+    mbrs = append(mbrs, Mbr{&quot;1&quot;})
+    mbrs = append(mbrs, Mbr{&quot;1&quot;})
+    mbrs = append(mbrs, Mbr{&quot;1&quot;})
+
+    // 创建表,并导入系统数据
+    mbrTable := ui.NewTable(reflect.TypeOf(mbrs[0]))
+    mbrTable.Lock()
+    *(mbrTable.Data().(*[]Mbr)) = mbrs
+    mbrTable.Unlock()
+
+    // ------------------------------------------- //
+
+    // 创建一组系统数据列表
+    patchs := make([]Patch, 0)
+    patchs = append(patchs, Patch{&quot;1&quot;})
+    patchs = append(patchs, Patch{&quot;1&quot;})
+    patchs = append(patchs, Patch{&quot;1&quot;})
+
+    // 创建表,并导入系统数据
+    patchTable := ui.NewTable(reflect.TypeOf(patchs[0]))
+    patchTable.Lock()
+    *(patchTable.Data().(*[]Patch)) = patchs
+    patchTable.Unlock()
+
+    // ------------------------------------------- //
+
+    // 创建一组系统数据列表
+    runs := make([]Run, 0)
+    runs = append(runs, Run{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;})
+    runs = append(runs, Run{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;})
+    runs = append(runs, Run{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;})
+    runs = append(runs, Run{&quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;})
+
+    // 创建表,并导入系统数据
+    runTable := ui.NewTable(reflect.TypeOf(runs[0]))
+    runTable.Lock()
+    *(runTable.Data().(*[]Run)) = runs
+    runTable.Unlock()
+
+    // ------------------------------------------- //
+
+    // 创建一个标签
+    tab := ui.NewTab()
+    // 将表加入标签
+    tab.Append(&quot;系统&quot;, sysTable)
+    // 将表加入标签
+    tab.Append(&quot;进化&quot;, evoTable)
+    // 将表加入标签
+    tab.Append(&quot;分区表&quot;, mbrTable)
+    // 将表加入标签
+    tab.Append(&quot;补丁&quot;, patchTable)
+    // 将表加入标签
+    tab.Append(&quot;运行&quot;, runTable)
+
+    // ------------------------------------------- //
+
+    // 垂直堆叠
+    stack := ui.NewVerticalStack(tab)
+
+    // 弹性填充
+    stack.SetStretchy(0)
+
+    // 布局窗口
+    w := ui.NewWindow(&quot;北京德纳科技有限公司&quot;, 800, 400, stack)
+    w.OnClosing(func() bool {
+        ui.Stop()
+        return true
+    })
+    go (func() {
+        for {
+            if Status {
+                w.SetTitle(&quot;北京德纳科技有限公司(在线)&quot;)
+            } else {
+                w.SetTitle(&quot;北京德纳科技有限公司(离线)&quot;)
+            }
+            w.Show()
+            time.Sleep(1 * time.Second)
+        }
+    })()
+
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-GUI/" title="Golang-GUI">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-Andlabs-GUI/" title="Golang-Andlabs-GUI">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>PXE引导纯内存OpenSUSE方案</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>PXE引导纯内存OpenSUSE方案 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>mkinitrd：建立要载入ramdisk的映像文件
+</code></pre>
+
+<hr />
+
+<pre><code>mknod -m 0660 /dev/loop0 b 7 0
+</code></pre>
+
+<hr />
+
+<pre><code>emergency() {
+    local plymouth sulogin
+    if plymouth=$(type -p plymouth 2&gt; /dev/null) ; then
+    $plymouth quit
+    $plymouth --wait
+    fi
+    if test -w /proc/splash ; then
+    echo verbose &gt;| /proc/splash
+    fi
+    cd /
+    echo -n &quot;${1+$@} -- &quot;
+    if sulogin=$(type -p sulogin 2&gt; /dev/null); then
+    echo &quot;exiting to $sulogin&quot;
+    PATH=$PATH PS1='$ ' $sulogin /dev/console
+    else
+    echo &quot;exiting to /bin/sh&quot;
+    PATH=$PATH PS1='$ ' /bin/sh -i
+    fi
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// FTP 获取镜像方式（实现无盘)
+echo &quot;#################################&quot;
+
+echo &quot;Server -&gt;&quot; ${addr}
+
+/usr/bin/ftp -nv ${addr} &lt;&lt;!
+user anonymous anonymous
+prompt off
+hash
+bin
+lcd /
+mget image
+close
+!
+
+/sbin/depmod -a
+sleep 1
+
+/sbin/modprobe loop
+sleep 1
+
+/sbin/losetup /dev/loop0 /image &amp;&amp; ls -l /dev/loop0
+sleep 1
+
+/bin/mount /dev/loop0 /root
+sleep 1
+
+echo &quot;#################################&quot;
+</code></pre>
+
+<hr />
+
+<pre><code>// git@github.com:nulijiabei/boot.git
+
+// 注：image为根目录打包镜像,不要超过2G,需要LOOP驱动
+
+echo &quot;#################################&quot;
+
+root=/dev/loop0
+rootdev=/dev/loop0
+
+echo &quot; &quot;
+echo &quot;NEW ROOT IS root=&quot;$root&quot;&quot;
+echo &quot;NEW ROOTDEV IS rootdev=&quot;$rootdev&quot;&quot;
+
+echo &quot;depmod&quot;
+/sbin/depmod -a
+
+echo &quot;modprobe&quot;
+/sbin/modprobe loop
+
+echo &quot;ls&quot;
+ls -l /dev/loop0
+
+echo &quot;mount&quot;
+/bin/mount /dev/sda1 /disk
+sleep 5
+
+echo &quot;CP&quot;
+/bin/cp -av /disk/image /image &amp;&amp; ls -l /image
+sleep 5
+
+echo &quot;umount&quot;
+/bin/umount /disk
+sleep 5
+
+echo &quot;losetup&quot;
+/sbin/losetup /dev/loop0 /image
+sleep 5
+
+echo &quot;mount&quot;
+/bin/mount /dev/loop0 /root
+sleep 5
+
+echo &quot;ls&quot;
+ls -l /root
+
+echo &quot;#################################&quot;
+
+
+// 配置项
+
+// --------------------------------------------- //
+
+保证工作目录(777)权限
+
+// --------------------------------------------- //
+
+安装 vsftpd
+安装 tftp
+安装 dhcp
+安装 dhcp-server
+安装 yast2-tftp-server
+
+// --------------------------------------------- //
+
+// --------------------------------------------- //
+
+在 /etc/vsftpd.conf 增加
+
+write_enable=NO
+dirmessage_enable=YES
+nopriv_user=ftpsecure
+local_enable=YES
+anonymous_enable=YES
+anon_world_readable_only=YES
+syslog_enable=NO
+connect_from_port_20=YES
+ascii_upload_enable=YES
+pam_service_name=vsftpd
+ssl_enable=NO
+pasv_min_port=30000
+pasv_max_port=30100
+listen=YES
+anon_mkdir_write_enable=NO
+anon_root=/srv/tftpboot
+anon_upload_enable=NO
+chroot_local_user=NO
+ftpd_banner=Welcome message
+idle_session_timeout=900
+local_root=/srv/tftpboot
+log_ftp_protocol=NO
+max_clients=10
+max_per_ip=3
+pasv_enable=YES
+ssl_sslv2=NO
+ssl_sslv3=NO
+ssl_tlsv1=YES
+
+// --------------------------------------------- //
+
+// --------------------------------------------- //
+
+配置 /etc/dhcpd.conf
+
+# dhcpd.conf
+option domain-name-servers 202.106.0.20;
+
+ddns-update-style interim;
+
+ignore client-updates;
+
+allow booting;
+allow bootp;
+filename &quot;pxelinux.0&quot;;
+
+default-lease-time 1800;
+max-lease-time 7200;
+
+subnet 192.168.0.0 netmask 255.255.255.0 {
+    option broadcast-address 192.168.0.255;
+    server-name &quot;install-server&quot;;
+    range 192.168.0.10 192.168.0.224;
+    option routers 192.168.0.1;
+}
+
+// 指定IP地址
+host danooplayer {
+       hardware ethernet 00:E0:B4:0B:DD:70;
+       fixed-address 192.168.2.200;
+}   
+
+// --------------------------------------------- //
+
+// --------------------------------------------- //
+
+配置 /etc/sysconfig/dhcpd
+
+DHCPD_INTERFACE=&quot;eth0&quot;
+DHCPD6_INTERFACE=&quot;eth0&quot;
+DHCPD_IFUP_RESTART=&quot;&quot;
+DHCPD6_IFUP_RESTART=&quot;&quot;
+DHCPD_RUN_CHROOTED=&quot;yes&quot;
+DHCPD6_RUN_CHROOTED=&quot;yes&quot;
+DHCPD_CONF_INCLUDE_FILES=&quot;&quot;
+DHCPD6_CONF_INCLUDE_FILES=&quot;&quot;
+DHCPD_RUN_AS=&quot;dhcpd&quot;
+DHCPD6_RUN_AS=&quot;dhcpd&quot;
+DHCPD_OTHER_ARGS=&quot;&quot;
+DHCPD6_OTHER_ARGS=&quot;&quot;
+DHCPD_BINARY=&quot;&quot;
+DHCPD6_BINARY=&quot;&quot;
+
+// --------------------------------------------- //
+
+配置 /etc/xinetd.d/tftp
+
+service tftp
+{
+    socket_type     = dgram
+    protocol        = udp
+    wait            = yes
+    flags           = IPv4
+    user            = root
+    server          = /usr/sbin/in.tftpd
+    server_args     =  -s /srv/tftpboot
+    disable         = no
+}
+
+// --------------------------------------------- //
+
+配置 Yast 中 TFTP
+
+Enable
+/srv/tftpboot
+
+// --------------------------------------------- //
+
+配置 /srv/tftpboot 及镜像
+
+目录:
+pxelinux.0
+pxelinux.cfg/default
+danoo/vmlinuz
+danoo/tinycore.gz
+
+文件 pxelinux.cfg/default
+
+default linux
+prompt 1
+timeout 60
+
+label linux
+kernel danoo/vmlinuz
+append ip=dhcp initrd=danoo/tinycore.gz
+
+
+// --------------------------------------------- //
+</code></pre>
+
+<hr />
+
+<pre><code>// 解决无盘系统硬盘问题
+
+// 文件共享方案
+yast2-nfs-server
+nfs-kernel-server
+
+// 通过 NFS 共享分区 
+mount -t nfs ${MATRIX_SERVER}:/danoo/content/ /danoo/content/ -o nolock
+sleep 1
+
+// 通过 xinitrc 控制 程序启动
+if [ -e /danoo/content/xinitrc ];then
+    ldconfig
+    cp -aRrf /danoo/content/xinitrc /etc/X11/xinit/xinitrc
+    killall X
+fi
+</code></pre>
+
+<hr />
+
+<pre><code>// NTP - /etc/ntp.conf
+################################################################################
+## /etc/ntp.conf
+##
+## Sample NTP configuration file.
+## See package 'ntp-doc' for documentation, Mini-HOWTO and FAQ.
+## Copyright (c) 1998 S.u.S.E. GmbH Fuerth, Germany.
+##
+## Author: Michael Andres,  &lt;ma@suse.de&gt;
+##         Michael Skibbe,  &lt;mskibbe@suse.de&gt;
+##
+################################################################################
+
+##
+## Radio and modem clocks by convention have addresses in the 
+## form 127.127.t.u, where t is the clock type and u is a unit 
+## number in the range 0-3. 
+##
+## Most of these clocks require support in the form of a 
+## serial port or special bus peripheral. The particular  
+## device is normally specified by adding a soft link 
+## /dev/device-u to the particular hardware device involved, 
+## where u correspond to the unit number above. 
+## 
+## Generic DCF77 clock on serial port (Conrad DCF77)
+## Address:     127.127.8.u
+## Serial Port: /dev/refclock-u
+##  
+## (create soft link /dev/refclock-0 to the particular ttyS?)
+##
+# server 127.127.8.0 mode 5 prefer
+
+##
+## Undisciplined Local Clock. This is a fake driver intended for backup
+## and when no outside source of synchronized time is available.
+##
+server 127.127.1.0
+fudge 127.127.1.0 stratum 8 
+
+##
+## Add external Servers using
+## # rcntp addserver &lt;yourserver&gt;
+## 
+
+##
+## Miscellaneous stuff
+##
+
+driftfile /var/lib/ntp/drift/ntp.drift # path for drift file
+
+logfile   /var/log/ntp      # alternate log file
+# logconfig =syncstatus + sysevents
+# logconfig =all
+
+# statsdir /tmp/        # directory for statistics files
+# filegen peerstats  file peerstats  type day enable
+# filegen loopstats  file loopstats  type day enable
+# filegen clockstats file clockstats type day enable
+
+#
+# Authentication stuff
+#
+keys /etc/ntp.keys      # path for keys file
+trustedkey 1            # define trusted keys
+requestkey 1            # key (7) for accessing server variables
+# controlkey 15         # key (6) for accessing server variables
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>TinyCore Linux 进行PXE-ROM的启动</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 官方 - http://www.tinycorelinux.net
+Core(11 MB) 
+TinyCore(16 MB) 
+CorePlus(106 MB)
+
+// 下载镜像文件后解压会获取 
+[BOOT] 
+boot - 获取 vmlinuz、core.gz 启动必须文件
+cde 
+
+// 修改配置文件 pxelinux.cfg/default 即可
+...
+label linux
+kernel img/vmlinuz
+append ip=dhcp initrd=img/core.gz loglevel=3 base
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/adb%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="adb常用命令">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux-%E5%90%AF%E5%8A%A8%E6%97%B6%E6%98%BE%E7%A4%BA%E8%AF%A6%E7%BB%86%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B/" title="Linux-启动时显示详细启动过程">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-03</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

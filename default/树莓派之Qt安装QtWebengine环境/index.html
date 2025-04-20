@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>树莓派之Qt安装QtWebengine环境</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>树莓派之Qt安装QtWebengine环境 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>树莓派之Qt安装QtWebengine环境</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// QtWebengine 需要在 Xorg 环境下运行
+// Raspberry Pi 4B 支持 Xorg 硬件加速
+// Raspberry Pi OS with desktop 系统
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 准备工作
+sed -i 's/raspbian.raspberrypi.org/mirrors4.tuna.tsinghua.edu.cn\/raspbian/' /etc/apt/sources.list
+sed -i 's/archive.raspberrypi.org\/debian/mirrors4.tuna.tsinghua.edu.cn\/raspberrypi/' /etc/apt/sources.list.d/raspi.list
+apt-get update
+
+// 第一步：安装 Qt
+apt-get install qt5-default 
+
+// 第二步：查看 qt 版本
+root@raspberrypi:~# qmake -v
+QMake version 3.1
+Using Qt version 5.11.3 in /usr/lib/arm-linux-gnueabihf
+
+// 官方源中并没有 WebEngine 所以无法用 apt 安装
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 第四步：查找下载软件包
+https://www.debian.org/distrib/packages
+
+// 下面四个软件包
+1. libqt5webenginecore5_5.11.3+dfsg-2+deb10u1_armhf.deb 
+2. libqt5webengine5_5.11.3+dfsg-2+deb10u1_armhf.deb     
+3. libqt5webenginewidgets5_5.11.3+dfsg-2+deb10u1_armhf.deb
+4. qtwebengine5-dev_5.11.3+dfsg-2+deb10u1_armhf.deb
+
+// 下载对应的 armhf 版本
+https://packages.debian.org/buster/libqt5webenginecore5
+https://packages.debian.org/buster/libqt5webengine5
+https://packages.debian.org/buster/libqt5webenginewidgets5
+https://packages.debian.org/buster/qtwebengine5-dev
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 第五步：安装软件包
+dpkg -i libqt5webenginecore5_5.11.3+dfsg-2+deb10u1_armhf.deb
+dpkg -i libqt5webengine5_5.11.3+dfsg-2+deb10u1_armhf.deb
+dpkg -i libqt5webenginewidgets5_5.11.3+dfsg-2+deb10u1_armhf.deb
+dpkg -i qtwebengine5-dev_5.11.3+dfsg-2+deb10u1_armhf.deb
+
+// 在提示 dependency problems - leaving unconfigured 错误时
+sudo apt-get -f install // 一键安装依赖包
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 第六步：使用 WebEngine
+QT += core gui network webengine webenginewidgets 
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>硬件加速的一些相关配置</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 安装库
+sudo apt-get install libgles2-mesa libgles2-mesa-dev xorg-dev
+
+// 设置
+1. sudo raspi-config
+2. Advanced Options&gt;GL Driver
+2. GL (Fake KMS) OpenGL desktop driver with fake KMS
+3. Advanced Options&gt;Memory Split
+4. 键入128并单击确定
+5. 选择完成并重新启动系统。
+
+// 查看 3D 驱动是否正常工作
+cat /proc/device-tree/soc/firmwarekms@7e600000/status
+cat /proc/device-tree/v3dbus/v3d@7ec04000/status
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>减少屏幕撕裂</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 设置
+1. sudo raspi-config
+2. Advanced Options&gt; Compositor&gt;xcompmgr composition manager
+3. 选择 No
+4. 重新启动 Raspberry Pi
+
+// 或者直接删除
+rm -rf /etc/xdg/autostart/xcompmgr.desktop
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h3>WebEngine 配置</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查看 GPU 状态
+chrome://gpu
+
+// 状态
+Graphics Feature Status
+1. Canvas: Hardware accelerated
+2. CheckerImaging: Disable
+3. Flash: Hardware accelerated
+4. Flash Stage3D: Hardware accelerated
+5. Flash Stage3D Baseline profile: Hardware accelerated
+6. Compositing: Hardware accelerated
+7. Multiple Raster Threads: Enabled
+8. Native GpuMemoryBuffers: Software only. Hardware acceleration disabled
+9. Rasterization: Software only. Hardware acceleration disabled
+10. Video Decode: Unavailable
+11. WebGL: Hardware accelerated
+12. WebGL2: Hardware accelerated
+
+// 开启光栅化
+--enable-gpu-rasterization
+Rasterization: Hardware accelerated
+
+// 忽略黑名单后 Video Decode 显示开启
+--ignore-gpu-blacklist
+Video Decode: Hardware accelerated
+
+// 开启 Native GpuMemoryBuffers 
+--enable-native-gpu-memory-buffers 
+
+// 开启 CheckerImaging 
+--enable-checker-imaging
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 参数解释
+https://www.cnblogs.com/TimFang/articles/13540314.html
+
+// 互联网案例
+
+--ignore-gpu-blacklist 
+--enable-one-copy-rasterizer 
+--enable-gpu-rasterization 
+--enable-native-gpu-memory-buffers 
+--enable-checker-imaging --enable-quic 
+--site-per-process --enable-tcp-fastopen 
+--disable-features=MaterialDesignBookmarks 
+--disable-gpu-compositing 
+--enable-fast-unload 
+--enable-experimental-canvas-features 
+--enable-scroll-prediction 
+--answers-in-suggest 
+--ppapi-flash-path=/usr/lib/chromium-browser/libpepflashplayer.so 
+--ppapi-flash-args=enable_stagevideo_auto=0 
+--ppapi-flash-version= 
+--max-tiles-for-interest-area=512 
+--num-raster-threads=4 
+--default-tile-height=512
+
+// 相关讨论
+https://www.raspberrypi.org/forums/viewtopic.php?t=199543
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>QtWebEngine / VideoAcceleration 视频加速</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// QtWebEngine / VideoAcceleration 官方文档
+https://wiki.qt.io/QtWebEngine/VideoAcceleration
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Vue.js%E4%B9%8B%E4%BD%BF%E7%94%A8transition%E5%AE%9E%E7%8E%B0%E8%BF%87%E6%B8%A1%E4%B8%8E%E5%8A%A8%E7%94%BB/" title="Vue.js之使用transition实现过渡与动画">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Qt%E4%B9%8BQWebEngine%E4%B8%8EJavaScript%E4%BA%A4%E4%BA%92/" title="Qt之QWebEngine与JavaScript交互">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-12-13</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#pi-ref">pi <span>19</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

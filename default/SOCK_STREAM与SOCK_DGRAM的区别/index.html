@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SOCK_STREAM与SOCK_DGRAM的区别</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>SOCK_STREAM与SOCK_DGRAM的区别 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>SOCK_STREAM</p>
+
+<p>是有保障的（即能保证数据正确传送到对方）面向连接的SOCKET，多用于资料（如文件）传送。</p>
+
+<p>SOCK_DGRAM</p>
+
+<p>是无保障的面向消息的socket，主要用于在网络上发广播信息。</p>
+
+<hr />
+
+<p>SOCK_STREAM是基于TCP的，数据传输比较有保障。</p>
+
+<p>SOCK_DGRAM是基于UDP的，专门用于局域网，基于广播</p>
+
+<p>SOCK_STREAM 是数据流,一般是tcp/ip协议的编程</p>
+
+<p>SOCK_DGRAM分是数据抱,是udp协议网络编程</p>
+
+<hr />
+
+<p>新套接口的类型描述类型，如TCP（SOCK_STREAM）和UDP（SOCK_DGRAM）。</p>
+
+<p>常用的socket类型有，SOCK_STREAM、SOCK_DGRAM、SOCK_RAW、SOCK_PACKET、SOCK_SEQPACKET等等。</p>
+
+<p>指定协议。套接口所用的协议。如调用者不想指定，可用0。</p>
+
+<p>常用的协议有，IPPROTO_TCP、IPPROTO_UDP、IPPROTO_SCTP、IPPROTO_TIPC等</p>
+
+<p>它们分别对应TCP传输协议、UDP传输协议、STCP传输协议、TIPC传输协议。</p>
+
+<p>SOCK_STREAM 提供有序的、可靠的、双向的和基于连接的字节流，使用带外数据传送机制，为Internet地址族使用TCP。</p>
+
+<p>SOCK_DGRAM 支持无连接的、不可靠的和使用固定大小（通常很小）缓冲区的数据报服务，为Internet地址族使用UDP。</p>
+
+<p>SOCK_STREAM类型的套接口为全双向的字节流。</p>
+
+<p>对于流类套接口，在接收或发送数据前必需处于已连接状态。</p>
+
+<p>用connect()调用建立与另一套接口的连接</p>
+
+<p>连接成功后，即可用send()和recv()传送数据。当会话结束后，调用closesocket()。</p>
+
+<p>带外数据根据规定用send()和recv()来接收。</p>
+
+<p>实现SOCK_STREAM类型套接口的通讯协议保证数据不会丢失也不会重复。</p>
+
+<p>如果终端协议有缓冲区空间，且数据不能在一定时间成功发送，则认为连接中断，其后续的调用也将以WSAETIMEOUT错误返回。</p>
+
+<p>SOCK_DGRAM类型套接口允许使用sendto()和recvfrom()从任意端口发送或接收数据报。</p>
+
+<p>如果这样一个套接口用connect()与一个指定端口连接，则可用send()和recv()与该端口进行数据报的发送与接收。</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/iostream%2Cfstream%2Csstream/" title="iostream,fstream,sstream">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/openSUSE-%E6%BA%90/" title="openSUSE-源">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

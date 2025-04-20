@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之替代ListView的RecyclerView</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之替代ListView的RecyclerView </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>RecyclerView</h3>
+
+<blockquote>
+</blockquote>
+
+<p>RecyclerView是android-support-v7-21版本中新增的一个Widgets</p>
+
+<blockquote>
+</blockquote>
+
+<p>官方介绍RecyclerView是ListView的升级版本，更加先进和灵活。</p>
+
+<blockquote>
+</blockquote>
+
+<p>我们写一个简单的实例例，来看一下究竟有多先进和灵活。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 支持库
+com.android.support:recyclerview-v7:22.0.0
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Android之替代ListView的RecyclerView/1.png" alt="" width="300" height="500">
+<img src="/assets/media/Android之替代ListView的RecyclerView/2.png" alt="" width="300" height="500"></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>RecyclerView 首先的一个特点就是，将 layout 抽象成了一个 LayoutManager
+
+RecylerView 不负责子 View 的布局，我们可以自定义 LayoutManager 来实现不同的布局效果
+
+目前只提供了LinearLayoutManager可以指定方向，默认是垂直，可指定水平，实现了水平的ListView。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>RecyclerView 的另一个特点是标准化了 ViewHolde
+
+编写 Adapter 面向的是 ViewHoder 而不在是View 了， 复用的逻辑被封装了， 写起来更加简单。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>RecyclerView作为替代ListView使用，RecyclerView标准化了ViewHolder，ListView中convertView是复用的
+
+在RecyclerView中，是把ViewHolder作为缓存的单位了，然后convertView作为ViewHolder的成员变量保持在ViewHolder中
+
+也就是说，假设没有屏幕显示10个条目，则会创建10个ViewHolder缓存起来，每次复用的是ViewHolder
+
+所以他把getView这个方法变为了onCreateViewHolder。 ViewHolder更适合多种子布局的列表，尤其IM的对话列表。
+
+RecyclerView不提供setOnItemClickListener方法，你可以在ViewHolder中添加事件。RecyclerView的使用可以参考
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<pre><code>// 一个定义了RecyclerView的(Layout)XML
+// recycler.xml
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+android:layout_width=&quot;match_parent&quot;
+android:layout_height=&quot;match_parent&quot;
+tools:context=&quot;.MyActivity&quot;&gt;
+
+// RecyclerView 
+&lt;android.support.v7.widget.RecyclerView
+    android:id=&quot;@+id/recyclerView&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:scrollbars=&quot;vertical&quot; /&gt;
+
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+<hr />
+
+<pre><code>// recycler_adapter_item(Layout-XML)
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:orientation=&quot;horizontal&quot;
+    android:padding=&quot;10dp&quot;&gt;
+
+    &lt;LinearLayout
+    android:id=&quot;@+id/linearLayout&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:orientation=&quot;vertical&quot;&gt;
+
+    &lt;TextView
+        android:id=&quot;@+id/item_name&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:text=&quot;Name&quot;
+        android:textSize=&quot;18sp&quot; /&gt;
+
+    &lt;TextView
+        android:id=&quot;@+id/item_description&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_marginTop=&quot;2dp&quot;
+        android:text=&quot;Description&quot;
+        android:textColor=&quot;#888&quot;
+        android:textSize=&quot;12sp&quot; /&gt;
+
+    &lt;/LinearLayout&gt;
+
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+<hr />
+
+<pre><code>// 在Activity中使用RecyclerView
+public class MyRecyclerView extends Activity {
+
+    private RecyclerView recycler;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+        // 定义方法一
+        setContentView(R.layout.recycler);
+        recycler = (RecyclerView) findViewById(R.id.recyclerView);
+
+        // 定义方法二
+        recycler = new RecyclerView(this);
+        setContentView(recycler);
+
+        // 通过LinearLayoutManager设置方向
+        LinearLayoutManager manager = new new LinearLayoutManager(this);
+
+        // 设置方向
+        manager.setOrientation(LinearLayoutManager.HORIZONTAL);
+
+        // 设置 LayoutManager
+        recycler.setLayoutManager(manager);
+
+        // 通过ViewHoder设置内容
+        recycler.setAdapter(new RecyclerAdapter());
+
+    }
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// RecyclerView.Adapter
+class RecyclerAdapter extends RecyclerView.Adapter {
+
+    // RecyclerView.ViewHolder
+    class ViewHolder extends RecyclerView.ViewHolder {
+
+        private TextView item_name;
+        private TextView item_description;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            item_name = (TextView) itemView.findViewById(R.id.item_name);
+            item_description = (TextView) itemView.findViewById(R.id.item_description);
+        }
+
+        public TextView getItem_description() {
+            return item_description;
+        }
+
+        public TextView getItem_name() {
+            return item_name;
+        }
+
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        // 这里在onCreate的ViewHolder时加载一个View
+        return new ViewHolder(LayoutInflater.from(parent.getContext()).
+                                        inflate(R.layout.recycler_adapter_item, null));
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        // 这里通过操作载入的View来进行设置内容及事件等
+        ViewHolder vh = (ViewHolder) holder;
+        vh.getItem_name().setText(&quot;标题 +&quot; + String.valueOf(position));
+        vh.getItem_description().setText(&quot;说明 +&quot; + String.valueOf(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        // 内容的数量
+        return 10;
+    }
+
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BFragmentManager%E4%BB%8B%E7%BB%8D/" title="Android之FragmentManager介绍">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BRipple%E6%8C%89%E9%92%AE%E6%B0%B4%E6%B3%A2%E7%BA%B9%E6%95%88%E6%9E%9C/" title="Android之Ripple按钮水波纹效果">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-29</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

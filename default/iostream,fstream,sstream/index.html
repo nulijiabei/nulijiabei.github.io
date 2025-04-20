@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>iostream,fstream,sstream</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>iostream,fstream,sstream </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p><img src="/assets/media/iostream,fstream,sstream/iostream.gif" alt="" width="600"></p>
+
+<hr />
+
+<p><img src="/assets/media/iostream,fstream,sstream/2.jpg" alt="" width="600"></p>
+
+<hr />
+
+<p>文件的输入和输出:</p>
+
+<pre><code>ifstream：由istream派生而来，提供读文件的功能
+ofstream：由ostream派生而来，提供写文件的功能
+fstream：有iostream派生而来，提供读写同一个文件的功能
+</code></pre>
+
+<hr />
+
+<p>字符串流:</p>
+
+<pre><code>istringstream：由istream派生而来，提供读string的功能
+ostringstream：由ostream派生而来，提供写string的功能
+stringstream：由iostream派生而来，提供读写string的功能
+</code></pre>
+
+<hr />
+
+<p>文件流:</p>
+
+<pre><code>ifstream infile;
+
+// ifstream infile(path)
+infile.open(path.c_str()); 
+
+// 如果没有打开成功文件
+if(!infile)
+
+ofstream outfile
+
+// 第二个参数默认为out，清空文件准备写。app为在文件问追加。
+outfile.open(path.c_str(), ofstream::app); 
+
+// 最好在打开一文件前
+// 关闭可能张打开的文件，和清空错误标志；   
+in.close(); in.clear(); 
+</code></pre>
+
+<hr />
+
+<p>字符串流:</p>
+
+<pre><code>string line,word;
+while(getline(cin, line))
+{
+
+    istringstream string_stream(line);
+    while(string_stream &gt;&gt; word)
+    cout&lt;&lt;word&lt;&lt;endl;
+
+}
+</code></pre>
+
+<hr />
+
+<p>流之间可以相互转换:</p>
+
+<pre><code>stringstream word_stream(&quot;countryhu!&quot;);
+cout &lt;&lt; word_stream.str()&lt;&lt;endl;
+word_stream.str(&quot;hi,countryhu!&quot;);
+
+// 流读取一个字符
+stream.get()
+</code></pre>
+
+<hr />
+
+<p>例子:</p>
+
+<pre><code>ifstream inf(&quot;/json&quot;);
+stringstream in ;
+in &lt;&lt; inf.rdbuf();
+in.str().c_str();
+inf.close();
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E5%85%B3%E4%BA%8Ebind%E7%9A%84%E4%BD%BF%E7%94%A8/" title="关于bind的使用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/SOCK_STREAM%E4%B8%8ESOCK_DGRAM%E7%9A%84%E5%8C%BA%E5%88%AB/" title="SOCK_STREAM与SOCK_DGRAM的区别">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

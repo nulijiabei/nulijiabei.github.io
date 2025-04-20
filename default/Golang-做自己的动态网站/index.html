@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Golang-做自己的动态网站</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Golang-做自己的动态网站 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>// 制作自己的动态网站
+
+// 动态文件的路由和静态文件的路由是分开的
+// 动态文件使用http.HandleFunc进行设置
+// 静态文件使用http.Handle进行设置,需要使用http.FileServer
+
+// 在主方法中通过http.Handle增加静态路径
+// 在主方法中通过http.HandleFunc增加动态路径
+
+func main() {
+
+    // 设置CPU核心数量
+    runtime.GOMAXPROCS(runtime.NumCPU())
+
+    // 设置日志的结构
+    log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime | log.Lmicroseconds)
+
+    http.Handle(&quot;/css/&quot;, http.FileServer(http.Dir(&quot;template&quot;)))
+    http.Handle(&quot;/js/&quot;, http.FileServer(http.Dir(&quot;template&quot;)))
+    http.Handle(&quot;/files/&quot;, http.FileServer(http.Dir(&quot;template&quot;)))
+    http.Handle(&quot;/images/&quot;, http.FileServer(http.Dir(&quot;template&quot;)))
+    http.HandleFunc(&quot;/&quot;, index)
+
+    // 建立监听
+    if err := http.ListenAndServe(&quot;:8080&quot;, nil); err != nil {
+        // 踢出错误
+        log.Panic(err)
+    }
+
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// 其中 http.HandleFunc(&quot;/&quot;, index) 中 index 为:
+
+// 通过 r.ParseForm() 解码GET参数,如果出现admin则保存到cookie
+
+func index(w http.ResponseWriter, r *http.Request) {
+
+    // 解析参数
+    r.ParseForm()
+
+    // 增加 cookie
+    if _, ok := r.Form[&quot;admin&quot;]; ok {
+        // cookie
+        cookie := http.Cookie{Name: &quot;username&quot;, 
+                    Value: &quot;admin&quot;,
+                    Expires: time.Now().Add(24 * time.Hour)}
+        // cookie
+        http.SetCookie(w, &amp;cookie)
+    }
+
+    // 读取 cookie
+    if cookie, err := r.Cookie(&quot;username&quot;); err == nil {
+        // 权限
+        if cookie.Value == &quot;admin&quot; {
+            // 管理员
+            admin = &quot;admin&quot;
+        }
+    }
+
+
+    // 解析主页面
+    t, err := template.ParseFiles(&quot;template/index.html&quot;)
+    if err != nil {
+        // 输出错误信息
+        http.Error(w, err.Error(), 500)
+        return
+    }
+
+    // 执行
+    t.Execute(w, nil)
+
+    // 返回
+    return
+
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// 看到以上例子,你可能会想如何将内容放到动态网页的&quot;template/index.html&quot;中呢
+// 可以通过 t.Execute(w, nil) 中的,第二个参数
+
+// 下面是个列出目录文件到页面的例子
+
+type I struct {
+    Id   int
+    Name string
+    Size string
+    Date string
+    Stat string
+}
+
+type D struct {
+    // 文件列表
+    Files []*I
+}
+
+// 构造
+func NewD() *D {
+    d := new(D)
+    d.Files = make([]*I, 0)
+    return d
+}
+
+// 文件列表
+func filelist(w http.ResponseWriter, r *http.Request) {
+
+    // 管理员
+    var admin string
+
+    // cookie
+    if cookie, err := r.Cookie(&quot;username&quot;); err == nil {
+        // 权限
+        if cookie.Value == &quot;admin&quot; {
+            // 管理员
+            admin = &quot;admin&quot;
+        }
+    }
+
+    // 解析参数
+    r.ParseForm()
+
+    // 获取文件名称
+    fname := z.Trim(r.FormValue(&quot;f&quot;))
+
+    // 创建返回对象
+    d := NewD()
+
+    // ID
+    var id int
+
+    // 遍历本地文件
+    filepath.Walk(&quot;files&quot;, func(ph string, f os.FileInfo, err error) error {
+        // 文件不存在
+        if f == nil {
+            return nil
+        }
+        // 跳过文件夹
+        if f.IsDir() {
+            return nil
+        }
+        // 判断文件是否存在
+        if z.IsBlank(fname) {
+            // 累加
+            id++
+            // 记录文件
+            d.Files = append(d.Files,
+                     &amp;I{id, f.Name(),
+                     fmt.Sprintf(&quot;%d&quot;, f.Size()), f.ModTime().String(), admin})
+        } else {
+            // 检查包含
+            if strings.Contains(strings.ToLower(f.Name()), strings.ToLower(fname)) {
+                // 累加
+                id++
+                // 记录文件
+                d.Files = append(d.Files, 
+                         &amp;I{id, f.Name(),
+                         fmt.Sprintf(&quot;%d&quot;, f.Size()), f.ModTime().String(), admin})
+            }
+        }
+        // 返回
+        return nil
+    })
+
+    // 解析主页面
+    t, err := template.ParseFiles(&quot;template/files/filelist.html&quot;)
+    if err != nil {
+        // 输出错误信息
+        http.Error(w, err.Error(), 500)
+        return
+    }
+
+    // 执行
+    t.Execute(w, d)
+
+    // 返回
+    return
+
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// 而HTML页面是这样的 &quot;template/files/filelist.html&quot;
+// 对于判断来首,{ #去掉本注释# if .Stat}},是以,空,非空,来判断的
+
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;/tr&gt;  
+&lt;tr&gt;
+&lt;td&gt;编号&lt;/td&gt;
+&lt;td&gt;文件名称&lt;/td&gt;
+&lt;td&gt;文件大小&lt;/td&gt;
+&lt;td&gt;创建日期&lt;/td&gt;
+&lt;td&gt;下载&lt;/td&gt;
+&lt;td&gt;操作&lt;/td&gt;
+&lt;/tr&gt;
+{ #去掉本注释# {range .Files}} 
+&lt;tr&gt;  
+&lt;td&gt;{ #去掉本注释# {.Id}}&lt;/td&gt;
+&lt;td&gt;{ #去掉本注释# {.Name}}&lt;/td&gt;
+&lt;td&gt;{ #去掉本注释# {.Size}}&lt;/td&gt;
+&lt;td&gt;{ #去掉本注释# {.Date}}&lt;/td&gt;
+&lt;td&gt;&lt;a href=&quot;../download.go?f={ #去掉本注释# {.Name}}&quot;&gt;下载&lt;/a&gt;&lt;/td&gt;
+{ #去掉本注释# {if .Stat}}
+&lt;td&gt;&lt;a href=&quot;../rmfile.go?f={ #去掉本注释# {.Name}}&quot;&gt;删除&lt;/a&gt;&lt;/td&gt;
+{ #去掉本注释# {else}}
+&lt;td&gt;删除&lt;/td&gt;
+{ #去掉本注释# {end}}
+&lt;/tr&gt;
+{ #去掉本注释# {end}} 
+&lt;/table&gt;
+</code></pre>
+
+<hr />
+
+<pre><code>通过ServeMux方式
+</code></pre>
+
+<hr />
+
+<pre><code>package main
+
+import (
+    &quot;github.com/gorilla/sessions&quot;
+    &quot;log&quot;
+    &quot;net/http&quot;
+    &quot;runtime&quot;
+)
+
+// sessions
+var store *sessions.CookieStore
+
+func main() {
+
+    // 设置CPU核心数量
+    runtime.GOMAXPROCS(runtime.NumCPU())
+
+    // 设置日志的结构
+    log.SetFlags(log.Lshortfile | log.Ldate | log.Ltime | log.Lmicroseconds)
+
+    // sessions
+    store = sessions.NewCookieStore([]byte(&quot;something-very-secret&quot;))
+
+    // ServeMux
+    mux := http.NewServeMux()
+
+    // Handle
+    mux.Handle(&quot;/images/&quot;, http.FileServer(http.Dir(&quot;template&quot;)))
+
+    // HandleFunc
+    mux.HandleFunc(&quot;/&quot;, func(w http.ResponseWriter, r *http.Request) {
+        switch r.URL.Path {
+        case &quot;/&quot;:
+            index(w, r)
+        default:
+            http.NotFound(w, r)
+        }
+    })
+
+    // Listen
+    if err := http.ListenAndServe(&quot;:8080&quot;, mux); err != nil {
+        log.Panic(err)
+    }
+
+}
+</code></pre>
+
+<hr />
+
+<pre><code>// sessions
+session, _ := store.Get(r, &quot;get_name_session&quot;)
+session.Values[&quot;name&quot;] = username
+session.Save(r, w)
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-%E5%9C%A8%E7%BB%93%E6%9E%84%E4%BD%93%E7%9A%84%E6%A1%86%E6%9E%B6%E4%B8%AD%E5%8A%A0%E5%85%A5WEB%E6%9C%8D%E5%8A%A1/" title="Golang-在结构体的框架中加入WEB服务">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang-X.ORG-Screenshot-%E6%88%AA%E5%B1%8F/" title="Golang-X.ORG-Screenshot-截屏">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-08-08</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

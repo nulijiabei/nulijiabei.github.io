@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux之通过udev规则指定网络设备</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux之通过udev规则指定网络设备 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Linux之通过udev规则指定网络设备</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>sudo udevadm control --reload // 任何规则文件及相关脚本修改后都需要执行 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 查询udev数据库中的设备信息
+udevadm info -a -p /sys/class/net/eth0
+
+
+// 获取到的设备信息 ...
+looking at device '/devices/platform/soc/3f980000.usb/usb1/1-1/1-1.1/1-1.1.1/1-1.1.1:1.0/net/eth0':
+KERNEL==&quot;eth0&quot;
+SUBSYSTEM==&quot;net&quot;
+DRIVER==&quot;&quot;
+ATTR{addr_assign_type}==&quot;0&quot;
+ATTR{addr_len}==&quot;6&quot;
+ATTR{address}==&quot;b8:27:eb:a7:c3:e6&quot;
+ATTR{broadcast}==&quot;ff:ff:ff:ff:ff:ff&quot;
+ATTR{carrier}==&quot;0&quot;
+ATTR{carrier_changes}==&quot;1&quot;
+ATTR{dev_id}==&quot;0x0&quot;
+ATTR{dev_port}==&quot;0&quot;
+ATTR{dormant}==&quot;0&quot;
+ATTR{duplex}==&quot;half&quot;
+ATTR{flags}==&quot;0x1003&quot;
+ATTR{gro_flush_timeout}==&quot;0&quot;
+ATTR{ifalias}==&quot;&quot;
+ATTR{ifindex}==&quot;2&quot;
+ATTR{iflink}==&quot;2&quot;
+ATTR{link_mode}==&quot;0&quot;
+ATTR{mtu}==&quot;1500&quot;
+ATTR{netdev_group}==&quot;0&quot;
+ATTR{operstate}==&quot;down&quot;
+ATTR{proto_down}==&quot;0&quot;
+ATTR{speed}==&quot;10&quot;
+ATTR{tx_queue_len}==&quot;1000&quot;
+ATTR{type}==&quot;1&quot;
+
+looking at parent device '/devices/platform/soc/3f980000.usb/usb1/1-1/1-1.1/1-1.1.1/1-1.1.1:1.0':
+KERNELS==&quot;1-1.1.1:1.0&quot;
+SUBSYSTEMS==&quot;usb&quot;
+DRIVERS==&quot;lan78xx&quot;
+ATTRS{authorized}==&quot;1&quot;
+ATTRS{bAlternateSetting}==&quot; 0&quot;
+ATTRS{bInterfaceClass}==&quot;ff&quot;
+ATTRS{bInterfaceNumber}==&quot;00&quot;
+ATTRS{bInterfaceProtocol}==&quot;ff&quot;
+ATTRS{bInterfaceSubClass}==&quot;00&quot;
+ATTRS{bNumEndpoints}==&quot;03&quot;
+ATTRS{supports_autosuspend}==&quot;1&quot;
+
+looking at parent device '/devices/platform/soc/3f980000.usb/usb1/1-1/1-1.1/1-1.1.1':
+KERNELS==&quot;1-1.1.1&quot;
+SUBSYSTEMS==&quot;usb&quot;
+DRIVERS==&quot;usb&quot;
+ATTRS{authorized}==&quot;1&quot;
+ATTRS{avoid_reset_quirk}==&quot;0&quot;
+ATTRS{bConfigurationValue}==&quot;1&quot;
+ATTRS{bDeviceClass}==&quot;ff&quot;
+ATTRS{bDeviceProtocol}==&quot;ff&quot;
+ATTRS{bDeviceSubClass}==&quot;00&quot;
+ATTRS{bMaxPacketSize0}==&quot;64&quot;
+ATTRS{bMaxPower}==&quot;2mA&quot;
+ATTRS{bNumConfigurations}==&quot;1&quot;
+ATTRS{bNumInterfaces}==&quot; 1&quot;
+ATTRS{bcdDevice}==&quot;0300&quot;
+ATTRS{bmAttributes}==&quot;e0&quot;
+ATTRS{busnum}==&quot;1&quot;
+ATTRS{configuration}==&quot;&quot;
+ATTRS{devnum}==&quot;4&quot;
+ATTRS{devpath}==&quot;1.1.1&quot;
+ATTRS{idProduct}==&quot;7800&quot;
+ATTRS{idVendor}==&quot;0424&quot;
+ATTRS{ltm_capable}==&quot;no&quot;
+ATTRS{maxchild}==&quot;0&quot;
+ATTRS{quirks}==&quot;0x0&quot;
+ATTRS{removable}==&quot;fixed&quot;
+ATTRS{speed}==&quot;480&quot;
+ATTRS{urbnum}==&quot;1332&quot;
+ATTRS{version}==&quot; 2.10&quot;
+
+...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// add rndis_host 设备时执行脚本 ...
+
+# /etc/udev/rules.d/90-local.rules 
+ACTION==&quot;add&quot;, SUBSYSTEMS==&quot;usb&quot;, DRIVERS==&quot;rndis_host&quot;, RUN+=&quot;/danoo/bin/addnet.sh&quot;
+
+# /danoo/bin/addnet.sh 
+#!/bin/bash
+
+for interface in /sys/class/net/*; do
+    if [[ ${interface} == /sys/class/net/eth* ]]; then
+    ok=$(udevadm info ${interface} |grep -v grep |grep rndis_host |wc -l)
+    if [ ${ok} -ne 0 ];then
+         name=$(basename ${interface})
+         echo ${name} &gt; /dev/shm/rndis_host
+         ifconfig ${name} 192.168.0.99 netmask 255.255.255.0
+         ifconfig ${name} mtu 1400
+         route del default; route add default gw 192.168.0.1
+         echo 'nameserver 114.114.114.114' &gt; /etc/resolv.conf
+    fi
+    fi
+done
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 指定命名规则
+SUBSYSTEM==&quot;net&quot;,ACTION==&quot;add&quot;,DRIVERS==&quot;?*&quot;,ATTR{address}==&quot;00:00:00:00:00:01&quot;,ATTR{dev_id}==&quot;0x0&quot;,ATTR{type}==&quot;1&quot;,KERNEL==&quot;eth*&quot;,NAME=&quot;eth1&quot;
+SUBSYSTEM==&quot;net&quot;,ACTION==&quot;add&quot;,DRIVERS==&quot;?*&quot;,ATTR{address}==&quot;00:e0:40:68:4b:36&quot;,ATTR{type}==&quot;1&quot;,KERNEL==&quot;eth*&quot;,NAME=&quot;eth0&quot;
+SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, ATTR{address}!=&quot;00:00:00:00:00:00&quot;, ATTRS{modalias}==&quot;usb:*&quot;, ATTR{type}==&quot;1&quot;, KERNEL==&quot;eth*&quot;, NAME=&quot;eth1&quot;
+SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, ATTR{address}!=&quot;00:00:00:00:00:00&quot;, ATTRS{modalias}==&quot;pci:*&quot;, ATTRS{vendor}==&quot;0x10ec&quot;, ATTR{type}==&quot;1&quot;, KERNEL==&quot;eth*&quot;, NAME=&quot;eth0&quot;
+SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR{address}!=&quot;00:00:00:00:00:01&quot;, ATTR{dev_id}==&quot;0x0&quot;, ATTR{type}==&quot;1&quot;, KERNEL==&quot;wlan*&quot;, NAME=&quot;eth1&quot;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 参考
+
+In an ideal situation? Rewrite that as a udev rule so that it triggers automatically on connection. It will have to be evaluated after other rules so that any interface renaming has already happened by the time it gets evaluated (/etc/udev/rules.d/99-x-local.conf is probably the place to put it), but the basic rule should look similar to this:
+
+SUBSYSTEM==&quot;net&quot;, ENV{ID_BUS}==&quot;usb&quot;, ENV{ID_USB_DRIVER}==&quot;rndis_host&quot;, ACTION==&quot;add&quot;, RUN{program}+=&quot;/bin/sh -c 'echo $env{INTERFACE} &gt; /var/tmp/myfile'&quot;
+
+The first four parts match the exact event generated when the device gets connected, more specifically:
+
+SUBSYSTEM==&quot;net&quot; matches networking devices
+ENV{ID_BUS}==&quot;usb&quot; matches only those networking devices that are connected via USB.
+ENV{ID_USB_DRIVER}==&quot;rndis_host&quot; matches only USB devices that use the RNDIS host device driver (the standard one used by Android phones (and I think Windows and Blackberry too) for USB tethering.
+ACTION==&quot;add&quot; matches on the hotplug events only (so this only gets run when the device gets connected, though you could just as easily add a second similar rule matching on the &quot;remove&quot; action to do something when the phone gets unplugged).
+The final item adds a command to the queue of things that udev will invoke when the rule processing is done,. In this case, it's adding a shell invocation that will write out the interface name to the desired location (udev itself will substitute the $env{INTERFACE} for the actual interface name).
+
+I can't guarantee that that will work in all cases, but it at least seems to work for my Nexus 6P and should in theory work for most Android phones.
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Rockchip%E4%B9%8BFFmpeg%E9%80%9A%E8%BF%87MPP%E7%A1%AC%E8%A7%A3%E5%B9%B6%E8%BD%AC%E5%82%A8/" title="Rockchip之FFmpeg通过MPP硬解并转储">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B9%8B%E7%BC%96%E8%AF%91%E4%B8%8E%E5%AE%9A%E5%88%B6OMXPlayer/" title="树莓派之编译与定制OMXPlayer">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2019-04-11</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

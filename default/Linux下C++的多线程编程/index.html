@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux下C++的多线程编程</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux下C++的多线程编程 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>简单的多线程编程</p>
+
+<p>　　Linux系统下的多线程遵循POSIX线程接口，称为pthread。</p>
+
+<pre><code>编写Linux下的多线程程序，需要使用头文件pthread.h，连接时需要使用库libpthread.a。
+
+顺便说一下，Linux下pthread的实现是通过系统调用clone()来实现的。
+
+clone()是Linux所特有的系统调用，它的使用方式类似fork。
+
+// Threads.cpp
+#include 
+#include 
+#include 
+using namespace std;
+
+void *thread(void *ptr)
+{
+    for(int i = 0;i &lt; 3;i++) {
+    sleep(1);
+    cout &lt;&lt; &quot;This is a pthread.&quot; &lt;&lt; endl;
+    }
+    return 0;
+}
+
+int main() {
+    pthread_t id;
+    int ret = pthread_create(&amp;id, NULL, thread, NULL);
+    if(ret) {
+    cout &lt;&lt; &quot;Create pthread error!&quot; &lt;&lt; endl;
+    return 1;
+    }
+    for(int i = 0;i &lt; 3;i++) {
+    cout &lt;&lt;  &quot;This is the main process.&quot; &lt;&lt; endl;
+    sleep(1);
+    }
+    pthread_join(id, NULL);
+    return 0;
+}
+
+我们编译并运行此程序，可以得到如下结果：
+This is the main process.
+This is a pthread.
+This is the main process.
+This is the main process.
+This is a pthread.
+This is a pthread.
+
+再次运行，我们可能得到如下结果：
+This is a pthread.
+This is the main process.
+This is a pthread.
+This is the main process.
+This is a pthread.
+This is the main process.
+
+// 前后两次结果不一样，这是两个线程争夺CPU资源的结果。
+</code></pre>
+
+<hr />
+
+<p>上面的示例中，我们使用到了两个函数，pthread_create和pthread_join</p>
+
+<pre><code>并声明了一个pthread_t型的变量，它是一个线程的标识符。
+</code></pre>
+
+<p>函数pthread_create用来创建一个线程</p>
+
+<pre><code>当创建线程成功时，函数返回0，若不为0则说明创建线程失败
+
+常见的错误返回代码为EAGAIN和EINVAL。
+
+前者表示系统限制创建新的线程，例如线程数目过多了；
+
+后者表示第二个参数代表的线程属性值非法。
+
+创建线程成功后，新创建的线程则运行参数三和参数四确定的函数，原来的线程则继续运行下一行代码。
+</code></pre>
+
+<p>函数pthread_join用来等待一个线程的结束</p>
+
+<pre><code>一个线程的结束有两种途径，一种是象我们上面的例子一样，函数结束了，调用它的线程也就结束了；
+
+另一种方式是通过函数pthread_exit来实现。
+</code></pre>
+
+<hr />
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/C%2B%2B%E4%B9%8BMap%E4%BD%BF%E7%94%A8/" title="C++之Map使用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B/" title="系统启动过程">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-26</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

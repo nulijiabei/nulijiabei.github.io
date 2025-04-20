@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之ZXing扫描二维码</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之ZXing扫描二维码 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>安装 ZXing 环境</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下载 ZXing 项目源码
+http://www.jikexueyuan.com/course/134_2.html
+
+// 解压得到 ZXingBarCode 目录
+ZXingBarCode.zip
+
+// 在你项目的根目录创建一个lib目录
+[PATH]
+[app]
+    [src]
+    [res]
+    [build]
+    build.gradle
+    ...
+[build]
+[gradle]
+[lib]
+    // 将 ZXingBarCode 重名名为 barcode
+    [barcode]
+    [src]
+    [res]
+    [build]
+    ... 
+build.gradle
+settings.gradle
+...
+
+// 修改 settings.gradle 
+include ':app', ':lib:barcode'
+
+// 修改 [app]/build.gradle
+dependencies {
+    // Library
+    compile project(':lib:barcode')
+}
+
+// 创建 [lib]/[barcode]/build.gradle
+apply plugin: 'android-library'
+android {
+    compileSdkVersion 17
+    buildToolsVersion &quot;21.1.2&quot;
+    sourceSets {
+    main {
+    manifest.srcFile 'AndroidManifest.xml'
+    java.srcDirs = ['src']
+    resources.srcDirs = ['src']
+    aidl.srcDirs = ['aidl']
+    renderscript.srcDirs = ['src']
+    res.srcDirs = ['res']
+    assets.srcDirs = ['assets']
+    }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>遇到的一些问题</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 权限不足问题
+W/FlashlightManager﹕ Unexpected error while invoking 
+public void android.os.IHardwareService$Stub$Proxy.setFlashlightEnabled(boolean) 
+throws android.os.RemoteException
+java.lang.SecurityException: Requires FLASHLIGHT or HARDWARE_TEST permission
+
+// 在 AndroidManifest.xml 增加一项
+&lt;uses-permission android:name=&quot;android.permission.FLASHLIGHT&quot; /&gt;
+
+// navbar.9.png 问题
+// 使用 draw9patch 编辑 navbar.9.png 增加边界坐标
+
+// 找不到 com.google.zxing.*
+// 在项目 -&gt; Settings -&gt; 选择 barcode -&gt; Dependencies -&gt; + File dependency -&gt; 选择 barcode/libs/zxing.jar 
+
+// 两个软件启动图标问题
+// 修改 [barcode]/AndroidManifest.xml 去掉 &lt;application&gt;...&lt;/application&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>使用方法</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 修改 AndroidManifest.xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    package=&quot;com.example.nljb.nljb&quot; &gt;
+
+    &lt;!-- zxing library --&gt;
+    &lt;uses-permission android:name=&quot;android.permission.VIBRATE&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.CAMERA&quot; /&gt;
+    &lt;uses-permission android:name=&quot;android.permission.FLASHLIGHT&quot; /&gt;
+    &lt;uses-feature android:name=&quot;android.hardware.camera&quot; /&gt;
+    &lt;uses-feature android:name=&quot;android.hardware.camera.autofocus&quot; /&gt;
+    &lt;!-- zxing library --&gt;
+
+    &lt;application
+    android:allowBackup=&quot;true&quot;
+    android:icon=&quot;@drawable/ic_launcher&quot;
+    android:label=&quot;@string/app_name&quot;
+    android:theme=&quot;@style/AppTheme&quot; &gt;
+    &lt;activity
+        android:name=&quot;.MainActivity&quot;
+        android:label=&quot;@string/app_name&quot; &gt;
+        &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+
+        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+    &lt;!-- zxing library --&gt;
+    &lt;activity
+        android:configChanges=&quot;orientation|keyboardHidden&quot;
+        android:name=&quot;com.zxing.activity.CaptureActivity&quot;
+        android:screenOrientation=&quot;portrait&quot;
+        android:theme=&quot;@android:style/Theme.NoTitleBar.Fullscreen&quot;
+        android:windowSoftInputMode=&quot;stateAlwaysHidden&quot; &gt;
+    &lt;/activity&gt;
+    &lt;!-- zxing library --&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;
+
+// 在 Activity 使用 Intent 使用 ZXing
+public class MainActivity extends Activity {
+
+    // ...
+    Button button;
+
+    // 获取 zxing 返回结果
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (resultCode == RESULT_OK &amp;&amp; requestCode == 0)
+    {
+        String result = data.getExtras().getString(&quot;result&quot;);
+        button.setText(result);
+    }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    // 通过按钮触发 zxing Activity 摄像头扫描
+    button = (Button) findViewById(R.id.button);
+    button.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+        Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
+        startActivityForResult(intent, 0);
+
+        }
+    });
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>生成二维码</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// ...
+public class MainActivity extends Activity {
+
+    // ...
+    Button button;
+
+    ImageView imageView;
+
+    Bitmap qrcode;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+        Button button2 = (Button) findViewById(R.id.button2);
+
+    imageView = (ImageView) findViewById(R.id.imageView);
+
+    button2.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+        try {
+            // 生成 EncodingHandler.createQRCode , 内容及大小
+            qrcode = EncodingHandler.createQRCode(&quot;www.baidu.com&quot;, 400);
+        } catch (WriterException e) {
+            e.printStackTrace();
+        }
+        imageView.setImageBitmap(qrcode);
+        }
+    });
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BPreferenceFragment%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之PreferenceFragment使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BSlidingMenu%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之SlidingMenu使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-17</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之SlidingMenu使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之SlidingMenu使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>SlidingMenu 开源项目之侧滑菜单</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 下载 ZXing 项目源码
+https://github.com/jfeinstein10/SlidingMenu
+
+// 解压得到 SlidingMenu-master -&gt; library 目录
+SlidingMenu-master.zip
+
+// 在你项目的根目录创建一个lib目录
+[PATH]
+[app]
+    [src]
+    [res]
+    [build]
+    build.gradle
+    ...
+[build]
+[gradle]
+[lib]
+    // 将 SlidingMenu-master -&gt; library 重名名为 sliding
+    [sliding]
+    [src]
+    [res]
+    [build]
+    ... 
+build.gradle
+settings.gradle
+...
+
+// 修改 settings.gradle 
+include ':app', ':lib:sliding'
+
+// 修改 [app]/build.gradle
+dependencies {
+    // Library
+    compile project(':lib:sliding')
+}
+
+// 修改 [lib]/[sliding]/build.gradle
+...
+buildscript {
+    repositories {
+    mavenCentral()
+    }
+    dependencies {
+    classpath 'com.android.tools.build:gradle:0.4.+'
+    }
+}
+apply plugin: 'android-library'
+
+dependencies {
+    compile 'com.android.support:support-v4:13.0.0'
+}
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion &quot;21.1.2&quot;
+
+    defaultConfig {
+    minSdkVersion 7
+    targetSdkVersion 17
+    }
+
+    sourceSets {
+    main {
+        java.srcDirs = ['src']
+        resources.srcDirs = ['src']
+        aidl.srcDirs = ['src']
+        renderscript.srcDirs = ['src']
+        res.srcDirs = ['res']
+        assets.srcDirs = ['assets']
+
+        manifest.srcFile 'AndroidManifest.xml'
+    }
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>SlidingMenu 使用</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 设置左滑菜单
+menu.setMode(SlidingMenu.LEFT); 
+// 设置滑动的屏幕范围，该设置为全屏区域都可以滑动
+menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN); 
+// 设置阴影图片
+menu.setShadowDrawable(R.drawable.shadow);
+// 设置阴影图片的宽度
+menu.setShadowWidthRes(R.dimen.shadow_width); 
+// SlidingMenu划出时主页面显示的剩余宽度
+menu.setBehindOffsetRes(R.dimen.slidingmenu_offset); 
+// 设置SlidingMenu菜单的宽度
+menu.setBehindWidth(400);
+// SlidingMenu滑动时的渐变程度
+menu.setFadeDegree(0.35f); 
+// 使SlidingMenu附加在Activity上
+menu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT); 
+// 设置menu的布局文件
+menu.setMenu(R.layout.menu_layout); 
+// 动态判断自动关闭或开启SlidingMenu
+menu.toggle(); 
+// 显示SlidingMenu
+menu.showMenu(); 
+// 显示内容
+menu.showContent(); 
+// 监听slidingmenu打开
+menu.setOnOpenListener(onOpenListener); 
+
+// 监听slidingmenu关闭时事件
+menu.OnClosedListener(OnClosedListener); 
+// 监听slidingmenu关闭后事件
+menu.OnClosedListener(OnClosedListener); 
+
+// 属性，然后设置右侧菜单的布局文件
+menu.setMode(SlidingMenu.LEFT_RIGHT); 
+// 右侧菜单的阴影图片
+menu.setSecondaryShadowDrawable(R.drawable.shadowright); 
+
+
+// sliding_main.xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;
+    android:background=&quot;#ff000000&quot;&gt;
+
+    &lt;com.jeremyfeinstein.slidingmenu.lib.SlidingMenu
+    android:id=&quot;@+id/sliding&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;&gt;
+    &lt;/com.jeremyfeinstein.slidingmenu.lib.SlidingMenu&gt;
+
+&lt;/LinearLayout&gt;
+
+// Activity
+public class MainActivity extends Activity {
+
+    SlidingMenu slidingMenu;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    // 创建 SlidingMenu
+    slidingMenu = new SlidingMenu(MainActivity.this);
+    // 附加 SlidingMenu 到 MainActivity
+    // SLIDING_WINDOW会在SlidingMenu的内容部分包含ActionBar，而SLIDING_CONTENT不会
+    slidingMenu.attachToActivity(MainActivity.this, SlidingMenu.SLIDING_CONTENT);
+    // 设置左滑菜单
+    slidingMenu.setMode(SlidingMenu.LEFT);
+    //设置滑动的屏幕范围，该设置为全屏区域都可以滑动
+    slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+    //设置 menu 的布局文件
+    slidingMenu.setMenu(R.layout.sliding_main);
+
+    }
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BZXing%E6%89%AB%E6%8F%8F%E4%BA%8C%E7%BB%B4%E7%A0%81/" title="Android之ZXing扫描二维码">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BAsyncTask%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之AsyncTask的使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-17</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>对齐分区</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>对齐分区 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>使用 fdisk 的另一种方法是通过</p>
+
+<pre><code>fdisk -H 224 -S 56 /dev/sda 启动它
+</code></pre>
+
+<p>这会更改 cylinder/head/sector (CHS) 几何参数</p>
+
+<p>从而确保在将程序与柱面对齐时有合理的 4096 字节对齐，这也是默认情形。</p>
+
+<blockquote>
+</blockquote>
+
+<p>fdisk 系列是大多数 util-linux-ng 分发包附带的一部分</p>
+
+<p>支持直接编辑 MBR 数据结构，但它不能创建或修改文件系统。</p>
+
+<p>通过 util-linux-ng 2.17，fdisk 对分区的 8 扇区对齐不提供任何直接支持。</p>
+
+<p>通过 2.17.2 及其以上版本（我写本文时是最新版本），默认对齐仍然是基于柱面的。</p>
+
+<blockquote>
+</blockquote>
+
+<p>不过，您可以使用任何版本的 fdisk 合理对齐分区。</p>
+
+<p>为此，您应该在主菜单输入 u ， 将默认单元从柱面更改为扇区。</p>
+
+<p>然后输入初始扇区值，应为 8 的倍数。</p>
+
+<p>在理论上，为实现合理对齐，您可以将第一个分区的扇区数设为 8；</p>
+
+<blockquote>
+</blockquote>
+
+<p>但是，最好将第一个分区设置为 64 或更高的值，</p>
+
+<p>为 MBR 与第一个分区之间的未分配空间中的装载引导程序代码留出空间。</p>
+
+<blockquote>
+</blockquote>
+
+<p>Microsoft 面向 Windows Vista 和 Windows 7 的分区工具将第一个分区起始于扇区 2048，</p>
+
+<p>从跨平台角度来讲，这里是开始分区的安全地带。</p>
+
+<p>事实上，从 util-linux-ng 2.17.1 开始</p>
+
+<p>当您通过在主菜单输入 c 来禁用 DOS 兼容性模式时，这就是默认设置。我建议保持该设置。</p>
+
+<blockquote>
+</blockquote>
+
+<p>但是，要注意，fdisk 不自动对齐随后的分区。</p>
+
+<p>如果您指定以兆字节或更大字节为单位的分区大小，然后接受随后分区的默认值，</p>
+
+<p>随后的分区可能会被对齐，但这不一定。</p>
+
+<blockquote>
+</blockquote>
+
+<p>出于安全考虑， 您不应检验以 8 的倍数为初始值的每个分区。</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang-TCP-C%2BS-I%2BO-Event%2BFile-%E6%A1%86%E6%9E%B6/" title="Golang TCP C+S I+O Event+File 框架">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Home-Ftp-Server/" title="Home-Ftp-Server">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-08-06</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

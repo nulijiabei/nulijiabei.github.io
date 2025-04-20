@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Go之C中声明-Go内定义-C里调用</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Go之C中声明-Go内定义-C里调用 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p><a href="http://blog.golang.org/c-go-cgo">http://blog.golang.org/c-go-cgo</a></p>
+
+<h3>说起来容易，做起来难啊，研究了两天了 &hellip;</h3>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Go之C中声明-Go内定义-C里调用/1.png" alt="" width="600"></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// extern &quot;C&quot; 就不说了
+// inline 多处定义 ... 这样就可以在 Go 中定义了 ...
+extern &quot;C&quot; inline void drv_appmain() { /* CGO */ }
+
+// 在 start() 函数内, 调用 drv_appmain()
+// 也就是 Go 中的 drv_appmain() 了.
+extern &quot;C&quot; int start() {
+    drv_appmain();
+    int argc = 0;
+    char **argv = 0;
+    QApplication a(argc, argv);
+    QDialog w;
+    QTabWidget t(&amp;w);
+    t.resize(800, 600);
+    QWidget widget_a;
+    QWidget widget_b;
+    widget_a.resize(800,600);
+    widget_b.resize(800,600);
+    t.addTab(&amp;widget_a,  &quot;0&quot;);
+    t.addTab(&amp;widget_b,  &quot;1&quot;);
+    QMessageBox x;
+    x.show();
+    w.show();
+    return a.exec();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/Go之C中声明-Go内定义-C里调用/2.png" alt="" width="600"></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Go中做了什么呢 ...
+// 声明一下，使用的函数 
+// 调用启动函数 start()
+// 这句 //export drv_appmain 是必不可少的 ...
+// 在里面用Go畅所欲言吧...
+// 要注意的是，需要使用 C.int , C.uint ...
+package main
+
+/*
+    extern int start();
+    // 此处错误修正, export 下不需要此处声明
+    // extern void drv_appmain(); 
+*/
+// #cgo LDFLAGS: -L./ -ldemo
+import &quot;C&quot;
+import &quot;fmt&quot;
+
+func main() {
+    C.start()
+}
+
+//export drv_appmain
+func drv_appmain() {
+    fmt.Println(&quot;xxx&quot;)
+}
+</code></pre>
+
+<hr />
+
+<h3>传参呢</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 比如 增加一个 int 返回值
+extern &quot;C&quot; inline int drv_appmain() { /* CGO */ }
+
+// 调用输出这个值
+extern &quot;C&quot; int start() {
+    int i = drv_appmain();
+    qDebug(&quot;-&gt; %d&quot;, i);
+}
+
+// Go里面当然是 ...
+//export drv_appmain
+func drv_appmain() C.int {
+    return 100
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Golang%E4%B9%8BCGO%E4%B8%8EQT%E7%9B%B8%E4%BA%92%E4%BC%A0%E5%8F%82/" title="Golang之CGO与QT相互传参">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Golang%E4%B9%8BCGO%E4%B8%8EQT%E7%BB%91%E5%AE%9A%E7%BC%96%E8%AF%91/" title="Golang之CGO与QT绑定编译">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-12-24</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#golang-ref">golang <span>96</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

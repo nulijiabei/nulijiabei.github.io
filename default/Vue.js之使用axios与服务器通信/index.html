@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue.js之使用axios与服务器通信</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Vue.js之使用axios与服务器通信 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Vue.js之使用axios与服务器通信</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>使用 NPM 安装 axios
+// npm install axios
+
+在 Vue Cli 项目中使用，可以在 main.js 文件中导入 axios 
+// import Vue from 'vue'
+// import axios from 'axios'
+// Vue.prototype.$axios = axios;
+// 之后在组件内就可以通过this.$axios来调用axios的方法发送请求
+
+此外，还可以将 axios 结合 vue-axios 插件一起使用
+// npm install axios vue-axios
+
+安装了 vue-axios 插件之后，就不需要将 axios 绑定到 Vue 的原型链上了
+// import Vue from 'vue'
+// import axios from 'axios'
+// import VueAxios from 'vue-axios'
+// Vue.use(VueAxios, axios) // 安装插件
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// HTTP 最基本的请求就是 Get 和 Post 请求
+
+Get 和 Post 方法的原型如下：
+get(url[, config])
+post(url[, data[, config]])
+
+// 使用 axios 发送 Get 请求调用形式如下：
+&lt;script&gt;
+export default {
+this.axios
+  .get(&quot;/book?id=1&quot;)
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+};
+&lt;/script&gt;
+
+// 可以给 Get 方法传递一个配置对象作为参数
+this.axios
+  .get(&quot;/book&quot;, {
+    params: {
+      id: 1,
+    },
+  })
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+
+// 使用 axios 发送 Post 请求调用形式如下：
+this.axios
+  .post(&quot;/login&quot;, {
+    username: &quot;nulijiabei&quot;,
+    password: &quot;1234&quot;,
+  })
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 接收到服务器的响应信息后，需要对响应信息进行处理
+// 回到函数 response 是一个对象，该对象常用的属性是 
+// 1. data 用于获取服务器端发回的响应数据
+// 2. status 是服务器端发送的 HTTP 状态代码
+
+// response 对象的完整属性如下：
+
+1. data: {} // 是服务器发回的响应数据
+2. status 200 // 是服务器响应的 HTTP 状态代码
+3. statusText: 'OK' // 是服务器响应的HTTP状态描述
+4. headers:{} // 是服务器响应的消息报头
+5. config: {} // 是为请求提供的配置信息
+6. request: {} // 是生成此响应的请求
+
+// 成功响应后，获取数据的一般处理形式如下：
+this.axios
+  .get(&quot;/book?id=1&quot;)
+  .then(function (response) {
+    if (response.status === 200) {
+      console.log(response);
+      this.book = response.data;
+    }
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+
+// 如果出现错误，则会调用 catch 方法回调，并向该回调传递一个错误对象
+.catch(function (error) {
+    if (error.response) {
+      // 请求已经发送并接收服务器响应，但状态码不是 2XX
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+    } else if (error.request) {
+      // 请求已经发送，但是未收到相应
+      console.log(error.request);
+    } else {
+      // 在设置请求时出现问题而引发错误
+      console.log(&quot;Error&quot;, error.message);
+    }
+});
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>axios API</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>可以通过 axios 传递相关配置来创建请求，axios 原型如下：
+// axios(config)
+// axios(url[, config])
+
+Get 和 Post 请求的调用形式如下：
+
+// 发送 Get 请求
+axios('/book?id=1')
+
+// Get 请求，获取远端图片
+this.axios({
+  method: &quot;get&quot;,
+  url: &quot;/images/logo.png&quot;,
+  responseType: &quot;stream&quot;,
+}).then(function (response) {
+  response.data.pipe(fs.createWriteStream(&quot;logo.png&quot;));
+});
+
+// 发送 Post 请求
+axios({
+    method: 'post',
+    url: 'login',
+    data: {
+        username: 'nulijiabei',
+        password: '1234,
+    }
+});
+
+为了方便使用，axios 库为所有支持的请求方法提供了别名：
+
+// axios.request(config)
+// axios.get(url[, config])
+// axios.delete(url[, config])
+// axios.head(url[, config])
+// axios.options(url[, config])
+// axios.post(url[, config])
+// axios.put(url[, config])
+// axios.patch(url[, config])
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>axios 库为请求提供了配置对象，该对象中可以设置很多选项
+
+{
+    // 是用于请求的服务器地址
+    url: '/book', 
+
+    // 是发起请求时使用的请求方法
+    method: 'get', 
+
+    // baseURL 将自动加载 url 前面，除非 url 是一个绝对 URL
+    // 为 axios 实例设置一个 baseURL，就可以将相对 URL 传递给该示例的方法
+    baseURL: 'https://some-domain.com/api/',
+
+    // 允许将请求数据发送到服务器前对其进行修改
+    // 只能用于 PUT、POST、PATCH 这几个请求方法
+    // 数组中的函数必须返回一个字符串、Buffer的实例、ArrayBuffer、FormData、Stream
+    transformRequest: [function (data) {
+        // 对 data 进行任意转换处理
+        return data;
+    }],
+
+    // 允许在将相应数据传递给 then/catch 之前对其进行更改
+    transformResponse: [function (data) {
+        // 对 data 进行任意转换处理
+        return data;
+    }],
+
+    // 是要发送的自定义请求头
+    header: { 'X-Requested-With': 'XMLHttpRequest' },
+
+    // 是与请求一起发送的 URL 参数
+    // 必须是一个普通对象(plain object)或URLSearchParams对象
+    params: { ID: 1 },
+
+    // 是一个负责 params 序列化的可选函数
+    paramsSerializer: function(params) {
+        return Qs.stringify(params, {arrayFormat: 'brackets'})
+    },
+
+    // 是作为请求体被发送的数据
+    // 只适用于请求放松 PUT、POST、PATCH
+    // 在没有设置 transformRequest 时，必须是以下类型之一：
+    // - string、plain object、ArrayBuffer、ArrayBufferView、URLSearchParams
+    // - 浏览器专属：FromData、File、Blob
+    // - Node 专属：Stream
+    data: { firstName: 'Fred' },
+
+    // 指定请求超时的毫秒数，默认是0，标识无超时时间
+    // 如果请求耗费的时间超时了，则请求被终止
+    timeout: 1000,
+
+    // 标识跨域请求时是否需要使用凭证
+    withCredentials: false,
+
+    // 允许自定义处理请求，以使测试更加容易
+    // 返回一个 promise 并提供一个有效的响应
+    adapter: function (config) {
+    },
+
+    // 标识用该使用HTTPS基础验证，并提供凭据
+    // 这将设置一个 Authorization 报头，覆盖使用 headers 设置的现有的 Authorization 自定义报头
+    // auth: {
+        username: 'janedoe',
+        password: 's00pers3cret',
+    },
+
+    // 标识服务器响应的数据类型
+    // 可以是 arraybuffer、blob、document、json、text、stream
+    responseType: 'json', 
+
+    // 表示用于解码响应数据的编码
+    // 注意：对于 stream 相应类型，将忽略
+    responseEncoding: 'utf8',
+
+    // 是用作 xsrf token 值的 cookie 的名称
+    xsrfCookieName: 'XSRF-TOKEN', 
+
+    // 是携带 xsrf token 值的 http 报头的名字
+    xsrfHeaderName: 'X-XSRF-TOKEN', 
+
+    // 允许为上传处理进度事件
+    onUploadProgress: function (progressEvent) {
+        // 对原生进度事件的处理
+    },
+
+    // 允许为下载处理进度事件
+    onDownloadProgress: function (progressEvent) {
+        // 对原生进度事件的处理
+    },
+
+    // 定义允许的响应内容的最大大小(以字节为单位)
+    maxContentLength: 2000,
+
+    // 定义对于给定的HTTP响应状态码是解析(resolve)还是决绝(reject)这个promise
+    // 如果 validateStatus 返回 true (或者设置为null或undefined)
+    // promise 将被解析(resolve), 否则, promise 将被拒绝(reject)
+    // validateStatus: function(status) {
+        return status &gt;= 200 &amp;&amp; status &lt; 300;
+    },
+
+    // 定义在 node.js 中 follow 的最大重定向数目
+    // 如果设置为0，将不会follow任何重定向
+    maxRedirects: 5,
+
+    // 定义要在 node.js 中使用的 UNIX 套接字
+    // 例如：'/var/run/docker.sock' 向 docker 守护进程发送请求
+    // 只能指定 socketPath 或 proxy, 如果两者都指定，则使用 socketPath
+    socketPath: null,
+
+    // 用于定义在 node.js 执行 http 和 https 时要使用的自定义代理
+    // 用于配置类似 keepAlive 的选项，keepAlive 默认没有启用
+    httpAgent: new http.Agent({ keepAlive: true }),
+    httpsAgent: new https.Agent({ keepAlive: true }),
+
+    // proxy 定义代理服务器的主机名和端口
+    // auth 标识 HTTP 基础验证应当于连接代理，并提供凭证
+    // 这将会设置一个 Proxy-Authorization 报头
+    // 覆盖使用 headers 设置的任何现有的自定义 Proxy-Authorization 报头
+    proxy: {
+        host: '127.0.0.1',
+        port: 9000,
+        auth: {
+            username: 'mikeymike',
+            password: 'rapunz31',
+        },
+    },
+
+    // 指定用于取消请求的 cancel token
+    cancelToken: new CancelToken(function (cancel) {
+    })
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>并发请求</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>有时需要同时向服务端发起多个请求，这可以利用 axios 库提供的并发请求助手函数来实现
+
+axios.all(iterable)
+axios.spread(callback)
+
+例如:
+
+function getUserAccount() {
+    return axios.get('/user/12345');
+}
+
+function getUserPermissions() {
+    return axios.get('/user/12345/permissions');
+}
+
+axios.all([getUserAccount(), getUserPermissions()])
+.then(axios.spread(function (acct, perms) {
+    // 两个请求现在都执行完成
+    // acct 是 getUserAccount() 方法请求的响应结果
+    // perms 是 getUserPermissions() 方法请求的响应结果
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>创建实例</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 可以使用自定义配置调用 axios.create([config]) 方法来创建一个 axios 实例
+// 之后使用该实例向服务端发起请求，就不用每次请求时重复设置配置选项了
+
+const instance = axios.create({
+    baseUrl: 'https://some-domain.com/api/',
+    timeout: 1000,
+    headers: { 'X-Custom-Header': 'foobar' }
+});
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>配置默认值</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 对于每次请求相同的配置选项，可以通过为配置选项设置默认值来简化代码的编写。
+// 项目中用到的全局axios默认值可以在项目入口文件main.js中按照如下形式进行设置
+
+axios.defaults.baseUrl = &quot;Https://api.example.com';
+axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
+axios.defaults.withCredentials = true
+
+// 也可以在定义实例中设置配置默认值，这些配置选项只有在使用该实例发起请求时才生效
+
+// 创建实例时设置配置默认值
+const instance = axios.create({
+    baseUrl: 'https://api.example.com'
+});
+
+// 实例创建后设置配置默认值
+instance.defaults.headers.common['Authorization'] = AUTH_TOKEN;
+
+// 配置将按优先顺序进行合并
+// 1. 优先 lib/defaults.js 中设置库的默认值
+// 2. 然后是实例的 defaults 属性
+// 3. 最后是请求的 config 参数
+
+// 此时配置中，超时配置的默认值是：0
+var instance = axios.create(); 
+
+// 覆写库的超时默认值
+// 现在，在超时前，使用该实例发起的所有请求都会等待 2.5s
+instance.defaults.timeout = 2500;
+
+// 在发起请求时，覆写超时值
+instance.get('/longRequest', {
+    timeout: 5000,
+});
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>拦截器</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 有时需要统一处理 HTTP 的请求和响应，例如登录验证，这时就可以使用 axios 的拦截器
+// 分为请求拦截器和响应拦截器，他们会在请求或响应被then或catch处理前拦截它们 ...
+
+// axios 拦截器的使用形式如下：
+
+// 添加请求拦截器
+axios.interceptors.request.use(function (config) {
+    // 在发送请求之前做些什么
+    return config;
+}, function (error) {
+    // 对请求错误做些什么
+    return Promise.reject(error);
+});
+
+// 添加响应拦截器
+axios.interceptors.response.use(function (response) {
+    // 对响应数据做点什么
+    return response;
+}, function (error) {
+    // 对响应错误做点什么
+    return Promise.reject(error);
+});
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 之前有例子使用全局守卫实现了一个用户登录验证的例子。
+// 不过这种方式只是简单的前端路由控制，用户一旦登录成功
+// 前端就保存了登录状态，允许用户访问受保护的资源 ...
+
+// 如果在这期间，该用户在服务端失效了
+// 例如：用户长时间未操作，服务端强制下线了，又或者管理员将用户来如黑名单
+// 那么，前端就应该及时更新用户的状态，对用户的后续访问做出控制。
+
+// 这种情况下，就应该使用axios的拦截器结合HTTP状态码进行用户是否已登录的判断
+
+// 示例代码：
+
+// 请求拦截器
+axios.interceptors.request.use(
+    config =&gt; {
+        if (token) {
+            // 判断是否存在 token, 如果存在，则每个 http header 都加上 token
+            config.headers.Authorization = `token ${store.state.token}`;
+        }
+        return config;
+    },
+    err =&gt; {
+        return Promise.reject(err);
+});
+
+// 相应拦截器
+axios.interceptors.response.use(
+    response =&gt; {
+        return response;
+    },
+    error =&gt; {
+        if (error.response) {
+            switch (error.response.status) {
+                case 401:
+                    // 返回 401 清除 token 信息并跳转到登录页面
+                    router.replact({
+                        path: 'login',
+                        query: { redirect: router.currentRoute.fullPath }
+                    })
+            }
+        }
+        return Promise.reject(error.response.data);
+});
+
+// 如果之后想移除拦截器，则可以按如下方法来调用
+const myInterceptor = axios.interceptors.request.use(function () { });
+axios.interceptors.request.eject(myInterceptor);
+
+// 也可以为自定义的 axios 实例添加拦截器
+const instance = axios.create();
+instance.interceptors.request.use(function () { });
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Vue.js%E4%B9%8B%E4%BD%BF%E7%94%A8Vuex%E7%AE%A1%E7%90%86%E7%8A%B6%E6%80%81/" title="Vue.js之使用Vuex管理状态">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Vue.js%E4%B9%8B%E4%BD%BF%E7%94%A8Vue-Router%E5%BC%80%E5%8F%91%E5%8D%95%E9%A1%B5%E5%BA%94%E7%94%A8/" title="Vue.js之使用Vue-Router开发单页应用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-11-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#javascript-ref">javascript <span>11</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

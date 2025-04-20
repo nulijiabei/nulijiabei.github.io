@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux-软件看门狗-watchdog</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux-软件看门狗-watchdog </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Linux 自带了一个 watchdog 的实现，用于监视系统的运行</p>
+
+<blockquote>
+</blockquote>
+
+<p>包括一个内核 watchdog module 和一个用户空间的 watchdog 程序。</p>
+
+<blockquote>
+</blockquote>
+
+<p>内核 watchdog 模块通过 /dev/watchdog 这个字符设备与用户空间通信。</p>
+
+<blockquote>
+</blockquote>
+
+<p>用户空间程序一旦打开 /dev/watchdog 设备（俗称“开门放狗”）</p>
+
+<blockquote>
+</blockquote>
+
+<p>就会导致在内核中启动一个1分钟的定时器（系统默认时间）</p>
+
+<blockquote>
+</blockquote>
+
+<p>此后，用户空间程序需要保证在1分钟之内向这个设备写入数据（俗称“定期喂狗”）</p>
+
+<blockquote>
+</blockquote>
+
+<p>每次写操作会导致重新设定定时器。</p>
+
+<blockquote>
+</blockquote>
+
+<p>如果用户空间程序在1分钟之内没有写操作，定时器到期会导致一次系统 reboot 操作（“狗咬人了”呵呵）。</p>
+
+<blockquote>
+</blockquote>
+
+<p>通过这种机制，我们可以保证系统核心进程大部分时间都处于运行状态</p>
+
+<blockquote>
+</blockquote>
+
+<p>即使特定情形下进程崩溃，因无法正常定时“喂狗”，Linux系统在看门狗作用下重新启动（reboot）</p>
+
+<blockquote>
+</blockquote>
+
+<p>核心进程又运行起来了,多用于嵌入式系统。</p>
+
+<hr />
+
+<p>打开 /dev/watchdog 设备（“开门放狗”）：</p>
+
+<pre><code>int fd_watchdog = open(&quot;/dev/watchdog&quot;, O_WRONLY);  
+if(fd_watchdog == -1) {  
+    int err = errno;  
+    printf(&quot;\n!!! FAILED to open /dev/watchdog, errno: %d, %s\n&quot;, err, strerror(err));  
+    syslog(LOG_WARNING, &quot;FAILED to open /dev/watchdog, errno: %d, %s&quot;, err, strerror(err));  
+}
+</code></pre>
+
+<hr />
+
+<p>每隔一段时间向 /dev/watchdog 设备写入数据（“定期喂狗”）：</p>
+
+<pre><code>//feed the watchdog  
+if(fd_watchdog &gt;= 0) {  
+    static unsigned char food = 0;  
+    ssize_t eaten = write(fd_watchdog, &amp;food, 1);  
+    if(eaten != 1) {  
+    puts(&quot;\n!!! FAILED feeding watchdog&quot;);  
+    syslog(LOG_WARNING, &quot;FAILED feeding watchdog&quot;);  
+    }  
+} 
+</code></pre>
+
+<hr />
+
+<p>关闭 /dev/watchdog 设备，通常不需要这个步骤：</p>
+
+<pre><code>close(fd_watchdog);    
+</code></pre>
+
+<hr />
+
+<p>所需头文件：</p>
+
+<pre><code>#include &lt;unistd.h&gt;  
+#include &lt;sys/stat.h&gt;  
+#include &lt;syslog.h&gt;  
+#include &lt;errno.h&gt;  
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/XRandR/" title="XRandR">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/CxImage/" title="CxImage">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-09-30</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Java之Extends和Implements的区别</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Java之Extends和Implements的区别 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>Extends 继承</h3>
+
+<blockquote>
+</blockquote>
+
+<p>只要类被定义为(final)就是不能被继承的</p>
+
+<blockquote>
+</blockquote>
+
+<p>Extends继承一个已有的类,被继承的类称为父类(超类,基类),新的类称为子类(派生类)</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>1. public继承
+    明显父类public成员在子类中仍然是public，所以子类对象可以调用父类的接口
+
+2. protected继承
+    protected继承后，父类public和protected成员都变成子类的protected成员了
+    也就是说子类对象无法调用父类的接口，只能将父类的函数当作子类的内部实现
+
+3. private继承
+    private继承后，父类public和protected成员都变成子类的private了，它比protected继承更严格。
+    也就说这些父类的成员只能被继承一次，再继续继承，父类的成员就不可见了。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>class A {
+    int i;
+    void f() {}
+    void A() {} // 构造
+}
+
+// B 继承 A
+class B extends A {
+    int j;  
+    void f() {} // 重写
+    void g() {}
+    void B() {  // 构造
+        // 调用父类的构造方法
+        super();
+    }
+}
+
+B b = new B();
+b.i   // 继承的
+b.f() // 重写后的
+b.j   // 自有的
+b.g() // 自有的
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>Implements 接口实现</h3>
+
+<blockquote>
+</blockquote>
+
+<p>Implements是一个类实现一个接口用的关键字，它是用来实现接口中定义的抽象方法</p>
+
+<blockquote>
+</blockquote>
+
+<p>interface接口内部全部是由全局常量和公共抽象方法所组成</p>
+
+<blockquote>
+</blockquote>
+
+<p>对于class而言，extends用于(单)继承一个类(class)，而implements用于实现一个接口(interface)</p>
+
+<blockquote>
+</blockquote>
+
+<p>Implements，实现父类，子类不可以覆盖父类的方法或者变量。</p>
+
+<p>即使子类定义与父类相同的变量或者函数，也会被父类取代掉</p>
+
+<blockquote>
+</blockquote>
+
+<p>interface定义一些方法,并没有实现,需要implements来实现才可用</p>
+
+<p>extend可以继承一个接口,但仍是一个接口,也需要implements之后才可用</p>
+
+<blockquote>
+</blockquote>
+
+<p>这样的好处是：架构师定义好接口，让工程师实现就可以了。整个项目开发效率和开发成本大大降低。</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 接口
+public interface People {
+    public void say();
+}
+
+public interface People2 {
+    public void say2();
+}
+
+// 等着被实现
+public class Chinese implements People, People2 {
+    public void say() {
+        System.out.println(&quot; 你好！&quot;);
+    }
+    public void say2() {
+        System.out.println(&quot; 你好！&quot;);
+    }
+}
+
+People chinese = new Chinese() ;
+chinese.say();
+chinese.say();
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Java%E4%B9%8BStatic%E5%85%A8%E5%B1%80%E5%B1%9E%E6%80%A7%E7%9A%84%E4%BD%BF%E7%94%A8/" title="Java之Static全局属性的使用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BOnTouchListener%E4%B8%8EOnGestureListener%E7%9A%84%E5%8C%BA%E5%88%AB/" title="Android之OnTouchListener与OnGestureListener的区别">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-04-22</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#java-ref">java <span>7</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

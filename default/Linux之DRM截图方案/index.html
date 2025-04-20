@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux之DRM截图方案</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux之DRM截图方案 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>Linux之DRM截图方案</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 该方案来自 google chromium
+https://chromium-review.googlesource.com/c/chromiumos/platform/factory/+/367611
+
+// 需要安装 ...
+apt-get install python-pip
+pip install pillow
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code># Copyright 2016 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+&quot;&quot;&quot;DRM library wrapper.
+
+Based on:
+  third_party/autotest/files/client/cros/graphics/drm.py
+
+A wrapper around the Direct Rendering Manager (DRM) library, which itself is a
+wrapper around the Direct Rendering Interface (DRI) between the kernel and
+userland.
+
+Since we are masochists, we use ctypes instead of cffi to load libdrm and
+access several symbols within it. We use Python's file descriptor and mmap
+wrappers.
+
+At some point in the future, cffi could be used, for approximately the same
+cost in lines of code.
+&quot;&quot;&quot;
+
+from ctypes import *
+import mmap
+import os
+import tempfile
+
+from PIL import Image
+
+
+class DrmVersion(Structure):
+    &quot;&quot;&quot;
+    The version of a DRM node.
+    &quot;&quot;&quot;
+
+    _fields_ = [
+    (&quot;version_major&quot;, c_int),
+    (&quot;version_minor&quot;, c_int),
+    (&quot;version_patchlevel&quot;, c_int),
+    (&quot;name_len&quot;, c_int),
+    (&quot;name&quot;, c_char_p),
+    (&quot;date_len&quot;, c_int),
+    (&quot;date&quot;, c_char_p),
+    (&quot;desc_len&quot;, c_int),
+    (&quot;desc&quot;, c_char_p),
+    ]
+
+    _l = None
+
+    def __repr__(self):
+    return &quot;%s %d.%d.%d (%s) (%s)&quot; % (
+        self.name,
+        self.version_major,
+        self.version_minor,
+        self.version_patchlevel,
+        self.desc,
+        self.date,
+    )
+
+    def __del__(self):
+    if self._l:
+        self._l.drmFreeVersion(self)
+
+
+class DrmModeResources(Structure):
+    &quot;&quot;&quot;
+    Resources associated with setting modes on a DRM node.
+    &quot;&quot;&quot;
+
+    _fields_ = [
+    (&quot;count_fbs&quot;, c_int),
+    (&quot;fbs&quot;, POINTER(c_uint)),
+    (&quot;count_crtcs&quot;, c_int),
+    (&quot;crtcs&quot;, POINTER(c_uint)),
+    # XXX incomplete struct!
+    ]
+
+    _fd = None
+    _l = None
+
+    def __repr__(self):
+    return &quot;&lt;DRM mode resources&gt;&quot;
+
+    def __del__(self):
+    if self._l:
+        self._l.drmModeFreeResources(self)
+
+    def getCrtc(self, index):
+    &quot;&quot;&quot;
+    Obtain the CRTC at a given index.
+
+    @param index: The CRTC to get.
+    &quot;&quot;&quot;
+
+    if not 0 &lt;= index &lt; self.count_crtcs:
+        raise IndexError(&quot;CRTC index out of range&quot;)
+
+    crtc = self._l.drmModeGetCrtc(self._fd, self.crtcs[index]).contents
+    crtc._fd = self._fd
+    crtc._l = self._l
+    return crtc
+
+
+class DrmModeCrtc(Structure):
+    &quot;&quot;&quot;
+    A DRM modesetting CRTC.
+    &quot;&quot;&quot;
+
+    _fields_ = [
+    (&quot;crtc_id&quot;, c_uint),
+    (&quot;buffer_id&quot;, c_uint),
+    # XXX incomplete struct!
+    ]
+
+    _fd = None
+    _l = None
+
+    def __repr__(self):
+    return &quot;&lt;CRTC (%d)&gt;&quot; % self.crtc_id
+
+    def __del__(self):
+    if self._l:
+        self._l.drmModeFreeCrtc(self)
+
+    def hasFb(self):
+    &quot;&quot;&quot;
+    Whether this CRTC has an associated framebuffer.
+    &quot;&quot;&quot;
+
+    return self.buffer_id != 0
+
+    def fb(self):
+    &quot;&quot;&quot;
+    Obtain the framebuffer, if one is associated.
+    &quot;&quot;&quot;
+
+    if self.hasFb():
+        fb = self._l.drmModeGetFB(self._fd, self.buffer_id).contents
+        fb._fd = self._fd
+        fb._l = self._l
+        return fb
+
+
+class drm_mode_map_dumb(Structure):
+    &quot;&quot;&quot;
+    Request a mapping of a modesetting buffer.
+
+    The map will be &quot;dumb;&quot; it will be accessible via mmap() but very slow.
+    &quot;&quot;&quot;
+
+    _fields_ = [
+    (&quot;handle&quot;, c_uint),
+    (&quot;pad&quot;, c_uint),
+    (&quot;offset&quot;, c_ulonglong),
+    ]
+
+
+# This constant is not defined in any one header; it is the pieced-together
+# incantation for the ioctl that performs dumb mappings. I would love for this
+# to not have to be here, but it can't be imported from any header easily.
+DRM_IOCTL_MODE_MAP_DUMB = 0xc01064b3
+
+
+class DrmModeFB(Structure):
+    &quot;&quot;&quot;
+    A DRM modesetting framebuffer.
+    &quot;&quot;&quot;
+
+    _fields_ = [
+    (&quot;fb_id&quot;, c_uint),
+    (&quot;width&quot;, c_uint),
+    (&quot;height&quot;, c_uint),
+    (&quot;pitch&quot;, c_uint),
+    (&quot;bpp&quot;, c_uint),
+    (&quot;depth&quot;, c_uint),
+    (&quot;handle&quot;, c_uint),
+    ]
+
+    _l = None
+    _map = None
+
+    def __repr__(self):
+    s = &quot;&lt;Framebuffer (%dx%d (pitch %d bytes), %d bits/pixel, depth %d)&quot;
+    vitals = s % (
+        self.width,
+        self.height,
+        self.pitch,
+        self.bpp,
+        self.depth,
+    )
+    if self._map:
+        tail = &quot; (mapped)&gt;&quot;
+    else:
+        tail = &quot;&gt;&quot;
+    return vitals + tail
+
+    def __del__(self):
+    if self._l:
+        self._l.drmModeFreeFB(self)
+
+    def map(self):
+    &quot;&quot;&quot;
+    Map the framebuffer.
+    &quot;&quot;&quot;
+
+    if self._map:
+        return
+
+    mapDumb = drm_mode_map_dumb()
+    mapDumb.handle = self.handle
+
+    rv = self._l.drmIoctl(self._fd, DRM_IOCTL_MODE_MAP_DUMB,
+        pointer(mapDumb))
+    if rv:
+        raise IOError(rv, os.strerror(rv))
+
+    size = self.pitch * self.height
+
+    # mmap.mmap() has a totally different order of arguments in Python
+    # compared to C; check the documentation before altering this
+    # incantation.
+    self._map = mmap.mmap(self._fd, size, flags=mmap.MAP_SHARED,
+        prot=mmap.PROT_READ, offset=mapDumb.offset)
+
+    def unmap(self):
+    &quot;&quot;&quot;
+    Unmap the framebuffer.
+    &quot;&quot;&quot;
+
+    if self._map:
+        self._map.close()
+        self._map = None
+
+
+def loadDRM():
+    &quot;&quot;&quot;
+    Load a handle to libdrm.
+
+    In addition to loading, this function also configures the argument and
+    return types of functions.
+    &quot;&quot;&quot;
+
+    l = cdll.LoadLibrary(&quot;libdrm.so&quot;)
+
+    l.drmGetVersion.argtypes = [c_int]
+    l.drmGetVersion.restype = POINTER(DrmVersion)
+
+    l.drmFreeVersion.argtypes = [POINTER(DrmVersion)]
+    l.drmFreeVersion.restype = None
+
+    l.drmModeGetResources.argtypes = [c_int]
+    l.drmModeGetResources.restype = POINTER(DrmModeResources)
+
+    l.drmModeFreeResources.argtypes = [POINTER(DrmModeResources)]
+    l.drmModeFreeResources.restype = None
+
+    l.drmModeGetCrtc.argtypes = [c_int, c_uint]
+    l.drmModeGetCrtc.restype = POINTER(DrmModeCrtc)
+
+    l.drmModeFreeCrtc.argtypes = [POINTER(DrmModeCrtc)]
+    l.drmModeFreeCrtc.restype = None
+
+    l.drmModeGetFB.argtypes = [c_int, c_uint]
+    l.drmModeGetFB.restype = POINTER(DrmModeFB)
+
+    l.drmModeFreeFB.argtypes = [POINTER(DrmModeFB)]
+    l.drmModeFreeFB.restype = None
+
+    l.drmIoctl.argtypes = [c_int, c_ulong, c_voidp]
+    l.drmIoctl.restype = c_int
+
+    return l
+
+
+class DRM(object):
+    &quot;&quot;&quot;
+    A DRM node.
+    &quot;&quot;&quot;
+
+    def __init__(self, library, fd):
+    self._l = library
+    self._fd = fd
+
+    def __repr__(self):
+    return &quot;&lt;DRM (FD %d)&gt;&quot; % self._fd
+
+    @classmethod
+    def fromHandle(cls, handle):
+    &quot;&quot;&quot;
+    Create a node from a file handle.
+
+    @param handle: A file-like object backed by a file descriptor.
+    &quot;&quot;&quot;
+
+    self = cls(loadDRM(), handle.fileno())
+    # We must keep the handle alive, and we cannot trust the caller to
+    # keep it alive for us.
+    self._handle = handle
+    return self
+
+    def version(self):
+    &quot;&quot;&quot;
+    Obtain the version.
+    &quot;&quot;&quot;
+
+    v = self._l.drmGetVersion(self._fd).contents
+    v._l = self._l
+    return v
+
+    def resources(self):
+    &quot;&quot;&quot;
+    Obtain the modesetting resources.
+    &quot;&quot;&quot;
+
+    r = self._l.drmModeGetResources(self._fd).contents
+    r._fd = self._fd
+    r._l = self._l
+    return r
+
+
+def drmFromMinor(minor):
+    &quot;&quot;&quot;
+    Given a DRM node number, open the corresponding node.
+
+    @param minor: The number of the minor node to open.
+    &quot;&quot;&quot;
+
+    path = &quot;/dev/dri/card%d&quot; % minor
+    handle = open(path)
+    return DRM.fromHandle(handle)
+
+
+def _bgrx24(i):
+    b = ord(next(i))
+    g = ord(next(i))
+    r = ord(next(i))
+    next(i)
+    return r, g, b
+
+
+def _screenshot(image, fb):
+    fb.map()
+    m = fb._map
+    lineLength = fb.width * fb.bpp // 8
+    pitch = fb.pitch
+    pixels = []
+
+    if fb.depth == 24:
+    unformat = _bgrx24
+    else:
+    raise RuntimeError(&quot;Couldn't unformat FB: %r&quot; % fb)
+
+    for y in range(fb.height):
+    offset = y * pitch
+    m.seek(offset)
+    channels = m.read(lineLength)
+    ichannels = iter(channels)
+    for x in range(fb.width):
+        rgb = unformat(ichannels)
+        image.putpixel((x, y), rgb)
+
+    fb.unmap()
+
+    return pixels
+
+
+def screenshot():
+    &quot;&quot;&quot;
+    Take a screenshot, returning an image object.
+    &quot;&quot;&quot;
+
+    d = drmFromMinor(0)
+    fb = d.resources().getCrtc(0).fb()
+    image = Image.new(&quot;RGB&quot;, (fb.width, fb.height))
+    pixels = _screenshot(image, fb)
+
+    fd, screencap = tempfile.mkstemp(prefix='screencap_', suffix='.png')
+    os.close(fd)
+    image.save(screencap, optimize=True)
+
+if __name__ == '__main__':
+      screenshot()
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Vue.js%E4%B9%8B%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E5%AE%9E%E6%88%98/" title="Vue.js之从入门到实战">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/UBUNTU%E4%B9%8BRK3399%E7%BC%96%E8%AF%91QT%E4%B8%8EWebEngine/" title="UBUNTU之RK3399编译QT与WebEngine">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-11-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

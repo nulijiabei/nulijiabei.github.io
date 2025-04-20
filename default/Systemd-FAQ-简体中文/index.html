@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Systemd-FAQ-简体中文</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Systemd-FAQ-简体中文 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Systemd FAQ (简体中文)</p>
+
+<p><a href="https://wiki.archlinux.org/index.php/Systemd_FAQ_(简体中文">https://wiki.archlinux.org/index.php/Systemd_FAQ_(简体中文</a>)</p>
+
+<p><a href="https://wiki.archlinux.org/index.php/Systemd_FAQ_%28%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87%29">https://wiki.archlinux.org/index.php/Systemd_FAQ_%28%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87%29</a></p>
+
+<p><a href="http://blip.tv/linuxconfau/beyond-init-systemd-4715015">http://blip.tv/linuxconfau/beyond-init-systemd-4715015</a>   (Beyond init: systemd)</p>
+
+<p>Contents</p>
+
+<pre><code>1 常见问题
+1.1 Q: 为什么控制台上会显示日志信息？
+1.2 Q: 如何修改启用的可登陆的 tty 控制台（getty）数量？
+1.3 Q: 怎样输出更详细的开机信息？
+1.4 Q: 开机后控制台信息会被清空，如何避免？
+1.5 Q: 我不用官方内核，内核版本和编译参数有什么要注意的吗？
+1.6 Q: 怎样知道一个目标需要哪些进程服务？
+1.7 Q: 电脑关闭了但电源没有断。
+1.8 Q: 切换到 systemd 后，为什么 fakeRAID 没有挂载?
+1.9 Q: 如何在启动的时候，运行自定义的一个脚本？
+1.10 Q: .service 状态显示绿色的 &quot;active (exited)&quot; (例如 iptables)
+1.11 Q: Failed to issue method call: File exists 错误
+</code></pre>
+
+<hr />
+
+<p>常见问题</p>
+
+<p>Q: 为什么控制台上会显示日志信息？</p>
+
+<pre><code>A:请自行设置内核日志等级（loglevel）
+以前，/etc/rc.sysinit 帮我们把 dmesg 的日志等级设置为 3，是比较合适的。
+内核参数中加入 loglevel=3 或 quiet 即可。
+</code></pre>
+
+<p>Q: 如何修改启用的可登陆的 tty 控制台（getty）数量？</p>
+
+<pre><code>A:添加新的 getty：
+在 /etc/systemd/system/getty.target.wants/ 添加新的软链接即可：
+# ln -sf /usr/lib/systemd/system/getty@.service /etc/systemd/system/getty.target.wants/getty@tty9.service
+# systemctl start getty@tty9.service
+移除 getty：
+从 /etc/systemd/system/getty.target.wants/ 删除对应的软链接即可：
+# rm /etc/systemd/system/getty.target.wants/getty@tty5.service /etc/systemd/system/getty.target.wants/getty@tty6.service
+# systemctl stop getty@tty5.service getty@tty6.service
+用户也可以通过编辑/etc/systemd/logind.conf，将NAutoVTs修改为需要的 TTY 个数
+用这种方式，按需启动将会保持，而之前的方式将会在启动时就启动 TTY.
+systemd 不使用 /etc/inittab 文件。
+注意: 自 systemd 版本 30，系统默认只开启一个 getty
+只有切换到别的 tty 时，才会开启新的 getty（socket 激活式）
+但仍可使用上述方法强制添加新的 getty。
+</code></pre>
+
+<p>Q: 怎样输出更详细的开机信息？</p>
+
+<pre><code>A:如果内核信息输出后就什么信息都不输出了，很可能是因为你在内核参数中添加了 quiet
+删除即可，然后你就可以看到一列列绿色的 [ OK ] 和红色的 [ FAILED ]了
+所有信息都记录在系统日志，可以通过 $ systemctl 查看系统状态，通过 journalctl 查看日志。
+</code></pre>
+
+<p>Q: 开机后控制台信息会被清空，如何避免？</p>
+
+<pre><code>A:自己写一个 getty@tty1.service 文件 
+把/usr/lib/systemd/system/getty@.service复制到/etc/systemd/system/getty@tty1.service
+修改 TTYVTDisallocate 为 no.
+</code></pre>
+
+<p>Q: 电脑关闭了但电源没有断。</p>
+
+<pre><code>A:使用 $ systemctl poweroff
+而不是 systemctl halt.
+</code></pre>
+
+<p>Q: 切换到 systemd 后，为什么 fakeRAID 没有挂载?</p>
+
+<pre><code>A:请确保使用了
+# systemctl enable dmraid.service
+</code></pre>
+
+<p>Q: 如何在启动的时候，运行自定义的一个脚本？</p>
+
+<pre><code>A:在/etc/systemd/system中新建一个文件(名称可以为 myscript.service) 
+然后在其中写入如下内容：
+
+[Unit]
+Description=My script
+
+[Service]
+ExecStart=/usr/bin/my-script
+
+[Install]
+WantedBy=multi-user.target 
+然后开启该守护进程
+# systemctl enable myscript.service
+本例是说当目标multi-usr载入的时候，会启动你这个自定义脚本。
+</code></pre>
+
+<p>Q: .service 状态显示绿色的 &ldquo;active (exited)&rdquo; (例如 iptables)</p>
+
+<pre><code>A:这很正常，本例中的 iptables 并不是守护进程，而是由内核控制，所以装载完规则后自动退出了。
+通过下面命令检查规则是否正确加载 # iptables --list
+</code></pre>
+
+<p>Q: Failed to issue method call: File exists 错误</p>
+
+<pre><code>A:此错误一般发生在systemctl enable创建系统连接到/etc/systemd/system/的时候
+一般是在切换显示管理器(例如从 GDM 到 KDM)时出现，这时/etc/systemd/system/display-manager.service 已经存在
+要解决此问题，使用 systemctl -f enable 覆盖原有链接。
+</code></pre>
+
+<hr />
+
+<p>在之前是直接将 /etc/inittab 文件中id:5:initdefault 数字修改为  id:3:initdefault 就可以了.</p>
+
+<p>现在再进入这个文件提示不再使用了.</p>
+
+<p>需要修改 /etc/systemd/system/default.target 这个软连接文件.</p>
+
+<p>这个软连接默认指向第5运行等级(GUI):</p>
+
+<pre><code>/etc/systemd/system/default.target -&gt; /lib/systemd/system/runlevel5.target
+</code></pre>
+
+<p>现在只要将这个软连接指向需要的运行等级就行了. 比如命令行界面多用户模式:</p>
+
+<pre><code>cd /etc/systemd/system
+mv default.target runlevel5.target
+ln -s /lib/systemd/system/runlevel3.target default.target
+</code></pre>
+
+<p>这样使默认启动等级的target指向等级为3(CLI)的运行等级target.</p>
+
+<pre><code>/etc/systemd/system/default.target -&gt; /lib/systemd/system/runlevel3.target
+</code></pre>
+
+<p>然后重启系统就默认进入命令行多用户模式了,不会再启动GDM了.</p>
+
+<p>如果想从GUI模式快速重新启动到命令行模式,可以直接使用命令 init 3</p>
+
+<p>下次如果想要改回去,只要把default.target改下名称,把runlevel5.target再改回default.target就行啦.</p>
+
+<pre><code>mv default.target runlevel3.target
+mv runlevel5.target default.target
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Error-in-service-module/" title="Error-in-service-module">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E9%80%9A%E8%BF%87%E4%BB%A3%E7%A0%81%E4%BA%86%E8%A7%A3-Golang-interface/" title="通过代码了解-Golang-interface">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-08</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

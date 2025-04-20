@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之ViewPagerAdapter使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之ViewPagerAdapter使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>PagerAdapter 介绍</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>属于：android.support.v4.view.PagerAdapter;
+扩展：com.android.support:support-v4
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// activity_main.xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;android.support.v4.view.ViewPager
+    android:id=&quot;@+id/viewpager&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:background=&quot;#00000000&quot;&gt;
+    &lt;/android.support.v4.view.ViewPager&gt;
+
+&lt;/RelativeLayout&gt;
+
+// one.xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;ImageView
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:background=&quot;@drawable/guide_1&quot;
+    /&gt;
+
+&lt;/LinearLayout&gt;
+
+// two.xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;ImageView
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:background=&quot;@drawable/guide_2&quot;
+    /&gt;
+
+&lt;/LinearLayout&gt;
+
+// three.xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;ImageView
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:background=&quot;@drawable/guide_3&quot;
+    /&gt;
+
+&lt;/LinearLayout&gt;
+
+// Activity
+public class MainActivity extends Activity {
+
+    private ViewPager vp;
+    private ViewPagerAdapter vpa;
+    private List&lt;View&gt; views;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    // 获取 LayoutInflater
+    LayoutInflater inflater = LayoutInflater.from(this);
+
+    // 获取 View 并加入 List
+    views = new ArrayList&lt;View&gt;();
+    views.add(inflater.inflate(R.layout.one, null));
+    views.add(inflater.inflate(R.layout.two, null));
+    views.add(inflater.inflate(R.layout.three, null));
+
+    // 将 ViewList 传入 ViewPagerAdapter
+    vpa = new ViewPagerAdapter(views, this);
+
+    // 获取 android.support.v4.view.ViewPager
+    vp = (ViewPager) findViewById(R.id.viewpager);
+
+    // 设置 Adapter
+    vp.setAdapter(vpa);
+    }
+
+}
+
+//  ViewPagerAdapter
+public class ViewPagerAdapter extends PagerAdapter {
+
+    /*
+    理解：PagerAdapter
+    一，调用 getCount() 获取需要初始化的 ViewGroup 数量
+    二，调用 instantiateItem() 实例化页卡，按顺序
+    三，调用 destroyItem() 销毁，按顺序
+     */
+
+    // 所有 View
+    private List&lt;View&gt; views;
+
+    // 上下文
+    private Context context;
+
+    // 构造
+    public ViewPagerAdapter(List&lt;View&gt; views, Context context) {
+    this.views = views;
+    this.context = context;
+    }
+
+    // 销毁时被调用
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+    // ViewGroup 所有的View
+    // position 位置,第几个
+    // 销毁时删除 View
+    container.removeView(views.get(position));
+    // super.destroyItem(container, position, object);
+    }
+
+    // 实例化页卡
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+    // 添加 View
+    container.addView(views.get(position));
+    // 返回添加的 View 对象
+    return views.get(position);
+    // return super.instantiateItem(container, position);
+    }
+
+    // 所包含的 Item 总个数
+    @Override
+    public int getCount() {
+    // 返回 views 总数
+    return views.size();
+    }
+
+    @Override
+    public boolean isViewFromObject(View view, Object o) {
+    return (view == o);
+    }
+
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>设置启动页</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 正常情况下 AndroidManifest.xml
+    &lt;application
+    android:allowBackup=&quot;true&quot;
+    android:icon=&quot;@mipmap/ic_launcher&quot;
+    android:label=&quot;@string/app_name&quot;
+    android:theme=&quot;@style/AppTheme&quot; &gt;
+    &lt;activity
+        android:name=&quot;.MainActivity&quot;
+        android:label=&quot;@string/app_name&quot; &gt;
+        &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+
+        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+    &lt;activity
+        android:name=&quot;.MainActivity2Activity&quot;
+        android:label=&quot;@string/title_activity_main_activity2&quot; &gt;
+    &lt;/activity&gt;
+    &lt;/application&gt;
+
+// 作为启动页 AndroidManifest.xml
+    &lt;application
+    android:allowBackup=&quot;true&quot;
+    android:icon=&quot;@mipmap/ic_launcher&quot;
+    android:label=&quot;@string/app_name&quot;
+    android:theme=&quot;@style/AppTheme&quot; &gt;
+    &lt;activity
+        android:name=&quot;.MainActivity&quot;
+        android:label=&quot;@string/app_name&quot; &gt;
+    &lt;/activity&gt;
+    &lt;activity android:name=&quot;.MainActivity2Activity&quot;&gt;
+        &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+
+        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+        &lt;/intent-filter&gt;
+    &lt;/activity&gt;
+    &lt;/application&gt;
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>添加导航点</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// activity_main.xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;android.support.v4.view.ViewPager
+    android:id=&quot;@+id/viewpager&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:background=&quot;#00000000&quot;&gt;
+    &lt;/android.support.v4.view.ViewPager&gt;
+
+    // 添加一排导航点 ImageView
+    &lt;LinearLayout
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_alignParentBottom=&quot;true&quot;
+    android:gravity=&quot;center_horizontal&quot;
+    android:orientation=&quot;horizontal&quot;&gt;
+
+    &lt;ImageView
+        android:id=&quot;@+id/iv1&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:src=&quot;@drawable/login_point_selected&quot;/&gt;
+
+    &lt;ImageView
+        android:id=&quot;@+id/iv2&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:src=&quot;@drawable/login_point&quot;/&gt;
+
+    &lt;ImageView
+        android:id=&quot;@+id/iv3&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:src=&quot;@drawable/login_point&quot;/&gt;
+
+    &lt;/LinearLayout&gt;
+
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Activity
+public class MainActivity extends Activity implements ViewPager.OnPageChangeListener {
+
+    private ViewPager vp;
+    private ViewPagerAdapter vpa;
+    private List&lt;View&gt; views;
+    private ImageView[] dots;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    // 获取 LayoutInflater
+    LayoutInflater inflater = LayoutInflater.from(this);
+
+    // 获取 View 并加入 List
+    views = new ArrayList&lt;View&gt;();
+    views.add(inflater.inflate(R.layout.one, null));
+    views.add(inflater.inflate(R.layout.two, null));
+    views.add(inflater.inflate(R.layout.three, null));
+
+    // 将 ViewList 传入 ViewPagerAdapter
+    vpa = new ViewPagerAdapter(views, this);
+
+    // 获取 android.support.v4.view.ViewPager
+    vp = (ViewPager) findViewById(R.id.viewpager);
+
+    // 设置 Adapter
+    vp.setAdapter(vpa);
+
+    // 回调
+    // vp.setOnPageChangeListener(new ViewPager.OnPageChangeListener() { ... };
+    // 新版本改变: vPager.addOnPageChangeListener(this);
+    vp.setOnPageChangeListener(this);
+
+    // 添加 ImageView 对象到 ImageView[]
+    dots = new ImageView[views.size()];
+    dots[0] = (ImageView) findViewById(R.id.iv1);
+    dots[1] = (ImageView) findViewById(R.id.iv2);
+    dots[2] = (ImageView) findViewById(R.id.iv3);
+
+    }
+
+    // 当页面被滑动时
+    @Override
+    public void onPageScrolled(int i, float v, int i2) {
+
+    }
+
+    // 当前新的页面被选中时调用
+    @Override
+    public void onPageSelected(int i) {
+    // 获取当前选择页
+    // 修改 Image 图片
+    for (int n = 0; n &lt; dots.length; n++) {
+        if (i == n) {
+        // R.drawable.login_point_selected 黑色
+        dots[n].setImageResource(R.drawable.login_point_selected);
+        } else {
+        // R.drawable.login_point 白色
+        dots[n].setImageResource(R.drawable.login_point);
+        }
+    }
+    }
+
+    // 当滑动页面改变时
+    @Override
+    public void onPageScrollStateChanged(int i) {
+
+    }
+
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>添加进入按钮</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// three.xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;ImageView
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:background=&quot;@drawable/guide_3&quot;
+    /&gt;
+
+    &lt;LinearLayout
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_alignParentBottom=&quot;true&quot;
+    android:gravity=&quot;center_horizontal&quot;
+    android:orientation=&quot;horizontal&quot;&gt;
+
+    // 添加一个按钮
+    &lt;Button
+        android:id=&quot;@+id/start_but&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:text=&quot;进入&quot; /&gt;
+
+    &lt;/LinearLayout&gt;
+
+&lt;/RelativeLayout&gt;
+
+// Activity
+public class MainActivity extends Activity implements ViewPager.OnPageChangeListener {
+
+    private ViewPager vp;
+    private ViewPagerAdapter vpa;
+    private List&lt;View&gt; views;
+    private ImageView[] dots;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.gulde);
+
+    ......
+
+    // 添加 ImageView 对象到 ImageView[]
+    dots = new ImageView[views.size()];
+    dots[0] = (ImageView) findViewById(R.id.iv1);
+    dots[1] = (ImageView) findViewById(R.id.iv2);
+    dots[2] = (ImageView) findViewById(R.id.iv3);
+
+    // 这里注意，按钮是属于 R.id.iv3 的
+    Button button = (Button) views.get(2).findViewById(R.id.start_but);
+    button.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+        Intent intent = new Intent(MainActivity.this, MainActivity2.class);
+        startActivity(intent);
+        finish();
+        }
+    });
+
+    }
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BVibrator%E6%8C%AF%E5%8A%A8%E5%99%A8%E7%9A%84%E4%BD%BF%E7%94%A8/" title="Android之Vibrator振动器的使用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BOnClickListener%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之OnClickListener使用方法">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-24</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

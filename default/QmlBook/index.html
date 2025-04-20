@@ -1,0 +1,3848 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>QmlBook</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>QmlBook </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<pre><code>https://cwc1987.gitbooks.io/qmlbook-in-chinese/
+
+Qt Quick QML Types
+http://doc.qt.io/qt-5/qtquick-qmlmodule.html
+
+Qt Quick Controls QML Types
+http://doc.qt.io/qt-5/qtquick-controls-qmlmodule.html
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h2>快速入门（Quick Starter）</h2>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>语法（QML Syntax）</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 让我们开始用一个简单的QML文件例子来解释这个语法。
+import QtQuick 2.6
+import QtQuick.Window 2.2
+
+// 窗口
+Window {
+
+    visible: true // 显示/隐藏
+    id: root // 根元素ID推荐使用root
+    width: 640
+    height: 480
+    title: qsTr(&quot;Hello World&quot;)
+
+    // 元素可以嵌套，这意味着一个父元素可以拥有多个子元素。
+    // 子元素可以通过访问parent关键字来访问它们的父元素。
+
+    // 矩形
+    Rectangle {
+        // name this element a
+        id: a
+
+        // properties: &lt;name&gt;: &lt;value&gt;
+        width: parent.width; height: parent.height
+
+        // color property
+        color: &quot;#D8D8D8&quot;
+
+        // Declare a nested element (child of root)
+        Image {
+            id: rocket
+
+            // reference the parent
+            x: (parent.width - width)/2; y: 40
+
+            source: 'rocket.png'
+        }
+
+        // Another child of root
+        Text {
+            // un-named element
+
+            // reference element by id
+            y: rocket.y + rocket.height + 20
+
+            // reference root element
+            width: root.width
+
+            horizontalAlignment: Text.AlignHCenter
+            text: 'Rocket'
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>属性（Properties）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Text {
+    // 一个id在一个QML文档中是唯一的，并且不能被设置为其它值，也无法被查询
+    // (1) identifier
+    id: thisLabel
+
+    // 一个属性能够设置一个值，这个值依赖于它的类型。
+    // 如果没有对一个属性赋值，那么它将会被初始化为一个默认值。
+    // (2) set x- and y-position
+    x: 24; y: 16
+
+    // 一个属性能够依赖一个或多个其它的属性，这种操作称作属性绑定。
+    // (3) bind height to 2 * width
+    height: 2 * width
+
+    // 添加自己定义的属性需要使用property修饰符，然后跟上类型，名字和可选择的初始化值
+    /*
+    注意如果属性名与已定义的默认属性名不重复，使用default关键字你可以将一个属性定义为默认属性。
+    这在你添加子元素时用得着，如果他们是可视化的元素，子元素会自动的添加默认属性的子类型链表
+    （children property list）
+    */
+    // (4) custom property
+    property int times: 24
+
+    // alias关键字允许我们转发一个属性或者转发一个属性对象自身到另一个作用域
+    // 我们将在后面定义组件导出内部属性或者引用根级元素id会使用到这个技术。
+    // 一个属性别名不需要类型，它使用引用的属性类型或者对象类型。
+    // (5) property alias
+    property alias anotherTimes: thisLabel.times
+
+    // int整型数据会自动的转换为string字符串类型数据
+    // (6) set text appended by value
+    text: &quot;Greetings &quot; + times
+
+    // 一些属性是按组分配的属性。
+    // 当一个属性需要结构化并且相关的属性需要联系在一起时，我们可以这样使用它。
+    // 另一个组属性的编码方式是 font{family: &quot;UBuntu&quot;; pixelSize: 24 }。
+    // (7) font is a grouped property
+    font.family: &quot;Ubuntu&quot;
+    font.pixelSize: 24
+
+    // 一些属性是元素自身的附加属性。
+    // 这样做是为了全局的相关元素在应用程序中只出现一次
+    // (8) KeyNavigation is an attached property
+    KeyNavigation.tab: otherLabel
+
+    // 对于每个元素你都可以提供一个信号操作。
+    // 这个操作在属性值改变时被调用。
+    // (9) signal handler for property changes
+    onHeightChanged: console.log('height:', height)
+
+    // focus is neeed to receive key events
+    focus: true
+
+    // change color based on focus value
+    color: focus?&quot;red&quot;:&quot;black&quot;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>脚本（Scripting）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Text {
+    id: label
+
+    x: 24; y: 24
+
+    // custom counter property for space presses
+    property int spacePresses: 0
+
+    text: &quot;Space pressed: &quot; + spacePresses + &quot; times&quot;
+
+    // (1) handler for text changes
+    onTextChanged: console.log(&quot;text changed to:&quot;, text)
+
+    // need focus to receive key events
+    focus: true
+
+    // (2) handler with some JS
+    Keys.onSpacePressed: {
+        increment()
+    }
+
+    // clear the text on escape
+    Keys.onEscapePressed: {
+        label.text = ''
+    }
+
+    // (3) a JS function
+    function increment() {
+        spacePresses = spacePresses + 1
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>基本元素（Basic Elements）</h4>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>元素可以被分为可视化元素与非可视化元素。
+
+<ul>
+<li>一个可视化元素（例如矩形框Rectangle）有着几何形状并且可以在屏幕上显示。</li>
+<li>一个非可视化元素（例如计时器Timer）提供了常用的功能，通常用于操作可视化元素。</li>
+</ul></li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<h4>基础元素对象（Item Element）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>Item（基本元素对象）通常被用来作为其它元素的容器使用，类似HTML语言中的div元素。</p>
+
+<p>Item（基础元素对象）是所有可视化元素的基础对象，所有其它的可视化元素都继承自Item。</p>
+</blockquote>
+
+<ul>
+<li>它自身不会有任何绘制操作，但是定义了所有可视化元素共有的属性：
+
+<ul>
+<li>Geometry（几何属性）
+
+<ul>
+<li>x,y（坐标）定义了元素左上角的位置，width，height（长和宽）定义元素的显示范围</li>
+<li>z（堆叠次序）定义元素之间的重叠顺序。</li>
+</ul></li>
+<li>Layout handling（布局操作）
+
+<ul>
+<li>anchors（锚定），包括左（left），右（right），上（top），下（bottom）</li>
+<li>水平与垂直居中（vertical center，horizontal center）</li>
+<li>与margins（间距）一起定义了元素与其它元素之间的位置关系。</li>
+</ul></li>
+<li>Key handlikng（按键操作）
+
+<ul>
+<li>附加属性key（按键）和keyNavigation（按键定位）属性来控制按键操作</li>
+<li>处理输入焦点（focus）可用操作。</li>
+</ul></li>
+<li>Transformation（转换）
+
+<ul>
+<li>缩放（scale）和rotate（旋转）转换，通用的x,y,z属性列表转换（transform）</li>
+<li>旋转基点设置（transformOrigin）。</li>
+</ul></li>
+<li>Visual（可视化）
+
+<ul>
+<li>不透明度（opacity）控制透明度，visible（是否可见）控制元素是否显示</li>
+<li>clip（裁剪）用来限制元素边界的绘制，smooth（平滑）用来提高渲染质量。</li>
+</ul></li>
+<li>State definition（状态定义）
+
+<ul>
+<li>states（状态列表属性）提供了元素当前所支持的状态列表</li>
+<li>当前属性的改变也可以使用transitions（转变）属性列表来定义状态转变动画。</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<h4>矩形框元素（Rectangle Element）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Rectangle {
+    id: rect1
+    x: 12; y: 12
+    width: 76; height: 96
+    color: &quot;lightsteelblue&quot;
+}
+Rectangle {
+    id: rect2
+    x: 112; y: 12
+    width: 76; height: 96
+    border.color: &quot;lightsteelblue&quot; // 边界颜色
+    border.width: 4 // 边界宽度
+    radius: 8 // 半径
+}
+
+// 此外，填充的颜色与矩形的边框也支持自定义的渐变色。
+// 一个渐变色是由一系列的梯度值定义的。每一个值定义了一个位置与颜色。
+// 位置标记了y轴上的位置（0 = 顶，1 = 底）。
+// GradientStop（倾斜点）的颜色标记了颜色的位置。
+Rectangle {
+    id: rect1
+    x: 12; y: 12
+    width: 176; height: 96
+    gradient: Gradient {
+        GradientStop { position: 0.0; color: &quot;lightsteelblue&quot; }
+        GradientStop { position: 1.0; color: &quot;slategray&quot; }
+    }
+    border.color: &quot;slategray&quot;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>文本元素（Text Element）</h4>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>文本可以使用horizontalAlignment与verticalAlignment属性来设置它的对齐效果</li>
+<li>你可以使用style和styleColor属性来配置文字的外框效果，浮雕效果或者凹陷效果</li>
+<li>对于过长的文本，你可能需要使用省略号来表示，你可以使用elide属性来完成这个操作
+
+<ul>
+<li>elide属性允许你设置文本左边，右边或者中间的省略位置</li>
+<li>如果你不想&rsquo;&hellip;.&lsquo;省略号出现，并且希望使用文字换行的方式显示所有的文本</li>
+<li>你可以使用wrapMode属性（这个属性只在明确设置了宽度后才生效）</li>
+</ul></li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Text {
+    text: &quot;The quick brown fox&quot; // 文本
+    color: &quot;#303030&quot;
+    font.family: &quot;Ubuntu&quot; // 字体
+    font.pixelSize: 28
+}
+
+Text {
+    width: 40; height: 120
+    text: 'A very long text'
+    // '...' shall appear in the middle
+    elide: Text.ElideMiddle
+    // red sunken text styling
+    style: Text.Sunken
+    styleColor: '#FF4444'
+    // align text to the top
+    verticalAlignment: Text.AlignTop
+    // only sensible when no elide mode
+    // wrapMode: Text.WordWrap
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>图像元素（Image Element）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>一个图像元素（Image Element）能够显示不同格式的图像（例如PNG,JPG,GIF,BMP）</p>
+</blockquote>
+
+<ul>
+<li>source属性（source property）提供了图像文件的链接信息</li>
+<li>fillMode（文件模式）属性能够控制元素对象的大小调整行为。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>一个URL可以是使用&rsquo;/&lsquo;语法的本地路径（&rdquo;./images/home.png&rdquo;）或者一个网络链接</li>
+<li>使用PreserveAspectCrop可以避免裁剪图像数据被渲染到图像边界外 &hellip;</li>
+<li>默认情况下裁剪是被禁用的（clip:false），你需要打开裁剪（clip:true）来约束边界矩形的绘制</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Image {
+    x: 12; y: 12
+    // width: 48
+    // height: 118
+    source: &quot;assets/rocket.png&quot;
+}
+
+Image {
+    x: 112; y: 12
+    width: 48
+    height: 118/2
+    source: &quot;assets/rocket.png&quot;
+    fillMode: Image.PreserveAspectCrop
+    clip: true
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>鼠标区域元素（MouseArea Element）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>为了与不同的元素交互，你通常需要使用MouseArea（鼠标区域）元素
+当用户与可视化端口交互时，mouseArea通常被用来与可视化元素对象一起执行命令</p>
+
+<p>这是非常重要的概念，输入处理与可视化显示分开。这样你的交互区域可以比你显示的区域大很多。</p>
+</blockquote>
+
+<pre><code>Rectangle {
+    id: rect1
+    x: 12; y: 12
+    width: 76; height: 96
+    color: &quot;lightsteelblue&quot;
+    MouseArea {
+        id: area
+        width: parent.width
+        height: parent.height
+        onClicked: rect2.visible = !rect2.visible
+    }
+}
+
+Rectangle {
+    id: rect2
+    x: 112; y: 12
+    width: 76; height: 96
+    border.color: &quot;lightsteelblue&quot;
+    border.width: 4
+    radius: 8
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>组件（Compontents）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>一个组件是一个可以重复使用的元素，QML提供几种不同的方法来创建组件
+但是目前我们只对其中一种方法进行讲解：一个文件就是一个基础组件</p>
+</blockquote>
+
+<pre><code>// Button.qml
+
+// 一个矩形
+Rectangle {
+    // ID为root
+    id: root
+
+    // 将内部嵌套的QML元素的属性导出到外面使用
+    property alias text: label.text // 绑定 label.text
+    signal clicked // 声明信号（实现在mail.qml中）
+
+    width: 116; height: 26
+    color: &quot;lightsteelblue&quot;
+    border.color: &quot;slategrey&quot;
+
+    // Button 文本 ...
+    Text {
+        id: labels
+        anchors.centerIn: parent
+        text: &quot;Start&quot;
+    }
+
+    // 鼠标区域
+    MouseArea {
+        anchors.fill: parent
+        // 点击时调用 root.clicked()
+        onClicked: {
+            root.clicked()
+        }
+    }
+}
+
+
+// 我们使用了QML的alias（别名）的功能，它可以将内部嵌套的QML元素的属性导出到外面使用。
+// 有一点很重要，只有根级目录的属性才能够被其它文件的组件访问。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 使用我们新的Button元素只需要在我们的文件中简单的声明一下就可以了:
+
+Window {
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr(&quot;Hello World&quot;)
+
+    Button { // our Button component
+        id: button
+        x: 12; y: 12
+        text: &quot;Start&quot;
+        onClicked: {
+            status.text = &quot;Button clicked!&quot;
+        }
+    }
+
+    Text { // text changes when button was clicked
+        id: status
+        x: 12; y: 76
+        width: 116; height: 26
+        text: &quot;waiting ...&quot;
+        horizontalAlignment: Text.AlignHCenter
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 就个人而言，可以更进一步的使用基础元素对象（Item）作为根元素。
+// 这样可以防止用户改变我们设计的按钮的颜色，并且可以提供出更多相关控制的API（应用程序接口）
+
+Item {
+    id: root
+    Rectangle {
+        anchors.fill parent
+        color: &quot;lightsteelblue&quot;
+        border.color: &quot;slategrey&quot;
+    }
+    ...
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>简单的转换（Simple Transformations）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>转换操作改变了一个对象的几何状态。QML元素对象通常能够被平移，旋转，缩放。下面我们将讲解这些简单的操作和一些更高级的用法</p>
+</blockquote>
+
+<ul>
+<li>简单的位移是通过改变x,y坐标来完成的。</li>
+<li>旋转是改变rotation（旋转）属性来完成的，这个值使用角度作为单位（0~360）。</li>
+<li>缩放是通过改变scale（比例）的属性来完成的，小于1意味着缩小，大于1意味着放大。</li>
+<li>旋转与缩放不会改变对象的几何形状，对象的x,y（坐标）与width/height（宽/高）也类似。</li>
+<li>请记住：文档中元素的顺序很重要 &hellip;</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>import QtQuick 2.0
+
+Item {
+    // set width based on given background
+    width: bg.width
+    height: bg.height
+
+    Image { // nice background image
+        id: bg
+        source: &quot;assets/background.png&quot;
+    }
+
+    MouseArea {
+        id: backgroundClicker
+        // needs to be before the images as order matters
+        // otherwise this mousearea would be before the other elements
+        // and consume the mouse events
+        anchors.fill: parent
+        onClicked: {
+            // reset our little scene
+            rocket1.x = 20 // 坐标
+            rocket2.rotation = 0 // 旋转
+            rocket3.rotation = 0
+            rocket3.scale = 1.0 // 比例
+        }
+    }
+
+    ClickableImage {
+        id: rocket1
+        x: 20; y: 100
+        source: &quot;assets/rocket.png&quot;
+        onClicked: {
+            // increase the x-position on click
+            x += 5
+        }
+    }
+
+    ClickableImage {
+        id: rocket2
+        x: 140; y: 100
+        source: &quot;assets/rocket.png&quot;
+        smooth: true // need antialising // 打开平滑
+        onClicked: {
+            // increase the rotation on click
+            rotation += 5
+        }
+    }
+
+    ClickableImage {
+        id: rocket3
+        x: 240; y: 100
+        source: &quot;assets/rocket.png&quot;
+        smooth: true // need antialising // 打开平滑
+        onClicked: {
+            // several transformations
+            rotation += 5
+            scale -= 0.05
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>定位元素（Positioning Element）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>有一些QML元素被用于放置元素对象，它们被称作定位器，QtQuick模块提供了Row，Column，Grid，Flow用来作为定位器</p>
+</blockquote>
+
+<pre><code>// 定义一个红色的矩形
+// RedSquare.qml
+
+import QtQuick 2.0
+
+Rectangle {
+    width: 48
+    height: 48
+    color: &quot;#ea7025&quot;
+    border.color: Qt.lighter(color)
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Column（列）元素将它的子对象通过顶部对齐的列方式进行排列
+Window {
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr(&quot;Hello World&quot;)
+
+    Rectangle {
+        width: 640
+        height: 480
+
+        Column {
+            id: column
+            anchors.centerIn: parent
+            spacing: 8
+            RedSquare { }
+            RedSquare { width: 96 }
+            RedSquare { }
+        }
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Row（行）元素将它的子对象从左到右，或者从右到左依次排列，排列方式取决于layoutDirection属性
+Window {
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr(&quot;Hello World&quot;)
+
+    Rectangle {
+        width: 640
+        height: 480
+
+        Row {
+            id: row
+            anchors.centerIn: parent
+            spacing: 20
+            RedSquare { }
+            RedSquare { height:96 }
+            RedSquare { }
+        }
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Grid（栅格）元素通过设置rows（行数）和columns（列数）将子对象排列在一个栅格中
+Window {
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr(&quot;Hello World&quot;)
+
+    Rectangle {
+        width: 640
+        height: 480
+
+        Grid {
+            id: grid
+            rows: 2
+            columns: 2
+            anchors.centerIn: parent
+            spacing: 8
+            RedSquare { }
+            RedSquare { }
+            RedSquare { }
+            RedSquare { }
+        }
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 最后一个定位器是Flow（流）。通过flow（流）属性和layoutDirection（布局方向）属性来控制流的方向
+Window {
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr(&quot;Hello World&quot;)
+
+    Rectangle {
+        width: 160
+        height: 160
+
+        Flow { // Rectangle 宽度不够时自动换行 ...
+            anchors.fill: parent
+            anchors.margins: 20
+            spacing: 20
+            RedSquare { }
+            RedSquare { }
+            RedSquare { }
+        }
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 循环 ...
+// 通常Repeater（重复元素）与定位器一起使用。
+// 它的工作方式就像for循环与迭代器的模式一样。
+// 在这个最简单的例子中，仅仅提供了一个循环的例子。
+
+Window {
+        visible: true
+        width: 640
+        height: 480
+        title: qsTr(&quot;Hello World&quot;)
+
+        Rectangle {
+                id: root
+                width: 640
+                height: 480
+                // 声明变量 ...
+                property variant colorArray: [&quot;#00bde3&quot;, &quot;#67c111&quot;, &quot;#ea7025&quot;]
+
+                Grid{
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        spacing: 4
+                        Repeater { // Repeater 重复器
+                                model: 16
+                                Rectangle {
+                                        width: 56; height: 56
+                                        property int colorIndex: Math.floor(Math.random()*3)
+                                        color: root.colorArray[colorIndex]
+                                        border.color: Qt.lighter(color)
+                                        Text {
+                                                anchors.centerIn: parent
+                                                color: &quot;#f0f0f0&quot;
+                                                text: &quot;Cell &quot; + index
+                                        }
+                                }
+                        }
+                }
+        }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>布局元素（Layout Items）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>QML使用anchors（锚）对元素进行布局。</p>
+
+<p>anchoring（锚定）是基础元素对象的基本属性，可以被所有的可视化QML元素使用</p>
+</blockquote>
+
+<ul>
+<li>一个元素有6条锚定线
+    -（top顶，bottom底，left左，right右，horizontalCenter水平中，verticalCenter垂直中）。</li>
+<li>在文本元素（Text Element）中有一条文本的锚定基线（baseline）。</li>
+<li>每一条锚定线都有一个偏移（offset）值
+    - 在top（顶），bottom（底），left（左），right（右）的锚定线中它们也被称作边距。</li>
+<li>对于horizontalCenter（水平中）与verticalCenter（垂直中）与baseline（文本基线）中被称作偏移值。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 元素填充它的父元素。
+Rectangle {
+    Text {
+        width: 12
+        anchors.fill: parent // 锚定: 充满(fill),父(parent)
+        anchors.margins: 8 // （间距）定义了元素与其它元素之间的位置关系。
+        text: '(1)'
+    }
+}
+
+// 元素左对齐它的父元素。
+Rectangle {
+     Text {
+         width: 48
+         y: 8
+         anchors.left: parent.left 锚定: 左，对齐父左
+         anchors.leftMargin: 8
+         text: '(2)'
+     }
+ }
+
+// 元素的左边与它父元素的右边对齐。
+Rectangle {
+     Text {
+         width: 48
+         anchors.left: parent.right // 元素左，对齐父右
+         text: '(3)'
+     }
+ }
+
+// 元素中间对齐
+Rectangle {
+     Rectangle {
+         id: blue1
+         width: 48; height: 24
+         y: 8
+                     // Blue1与它的父元素水平中间对齐
+         anchors.horizontalCenter: parent.horizontalCenter
+     }
+     Rectangle {
+                     // Blue2与Blue1中间对齐，并且它的顶部对齐Blue1的
+         id: blue2
+         width: 72; height: 24
+         anchors.top: blue1.bottom
+         anchors.topMargin: 4
+         anchors.horizontalCenter: blue1.horizontalCenter
+         text: '(4)'
+     }
+ }
+
+// 元素在它的父元素中居中。
+Rectangle {
+     Rectangle {
+         width: 48
+         anchors.centerIn: parent
+         text: '(5)'
+     }
+ }
+
+// 元素水平方向居中对齐父元素并向后偏移12像素，垂直方向居中对齐。
+Rectangle {
+     Rectangle {
+         width: 48
+         anchors.horizontalCenter: parent.horizontalCenter
+         anchors.horizontalCenterOffset: -12
+         anchors.verticalCenter: parent.verticalCenter
+         text: '(6)'
+     }
+ }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>输入元素（Input Element）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>我们已经使用过MouseArea（鼠标区域）作为鼠标输入元素。</p>
+
+<p>我们开始介绍文本编辑的元素：TextInput（文本输入）和TextEdit（文本编辑）。</p>
+</blockquote>
+
+<h4>文本输入（TextInput）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 文本输入允许用户输入一行文本。
+// 这个元素支持使用正则表达式验证器来限制输入和输入掩码的模式设置。
+Rectangle {
+        width: 200
+        height: 80
+        color: &quot;linen&quot;
+
+        TextInput {
+                id: input1
+                x: 8; y: 8
+                width: 96; height: 20
+                focus: true
+                text: &quot;Text Input 1&quot;
+        }
+
+        TextInput {
+                id: input2
+                x: 8; y: 36
+                width: 96; height: 20
+                text: &quot;Text Input 2&quot;
+        }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 用户可以通过点击TextInput来改变焦点。
+// 为了支持键盘改变焦点，我们可以使用KeyNavigation（按键向导）这个附加属性。
+// KeyNavigation（按键向导）附加属性可以预先设置一个元素id绑定切换焦点的按键。
+Rectangle {
+        width: 200
+        height: 80
+        color: &quot;linen&quot;
+
+        TextInput {
+                id: input1
+                x: 8; y: 8
+                width: 96; height: 20
+                focus: true
+                text: &quot;Text Input 1&quot;
+                KeyNavigation.tab: input2
+        }
+
+        TextInput {
+                id: input2
+                x: 8; y: 36
+                width: 96; height: 20
+                text: &quot;Text Input 2&quot;
+                KeyNavigation.tab: input1
+        }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 一个文本输入元素（text input element）只显示一个闪烁符和已经输入的文本
+// TLineEditV1.qml
+Rectangle {
+    width: 96; height: input.height + 8
+    color: &quot;lightsteelblue&quot;
+    border.color: &quot;gray&quot;
+
+    property alias text: input.text
+    // 如果你想要完整的导出TextInput元素
+    // 你可以使用property alias input: input来导出这个元素
+    // 第一个input是属性名字，第二个input是元素id。
+    property alias input: input
+
+    TextInput {
+        id: input
+        anchors.fill: parent
+        anchors.margins: 4
+        focus: true
+    }
+}
+
+    TLineEditV1 {
+    height: 30
+    text: &quot;aa&quot; // 导出 text
+    input.text: &quot;bbb&quot; // 完整的导出 input
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 我们使用TLineEditV1组件重写了我们的KeyNavigation（按键向导）的例子。
+Rectangle {
+    ...
+    TLineEditV1 {
+        id: input1
+        ...
+    }
+    TLineEditV1 {
+        id: input2
+        ...
+    }
+}
+
+// 尝试使用Tab按键来导航，你会发现焦点无法切换到input2上。
+// 这个例子中使用focus:true的方法不正确，这个问题是因为焦点被转移到input2元素时
+// 包含TlineEditV1的顶部元素接收了这个焦点并且没有将焦点转发给TextInput（文本输入）
+// 为了防止这个问题，QML提供了FocusScope（焦点区域）。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>焦点区域（FocusScope）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>一个焦点区域（focus scope）定义了如果焦点区域接收到焦点
+它的最后一个使用focus:true的子元素接收焦点
+它将会把焦点传递给最后申请焦点的子元素。
+我们创建了第二个版本的TLineEdit组件，称作TLineEditV2，使用焦点区域（focus scope）作为根元素。
+
+// FocusScope(焦点区域)
+FocusScope {
+        width: 96; height: input.height + 8
+        Rectangle {
+                anchors.fill: parent
+                color: &quot;lightsteelblue&quot;
+                border.color: &quot;gray&quot;
+
+        }
+
+        property alias text: input.text
+        property alias input: input
+
+        TextInput {
+                id: input
+                anchors.fill: parent
+                anchors.margins: 4
+                focus: true
+        }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>文本编辑（TextEdit）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>文本编辑（TextEdit）元素与文本输入（TextInput）非常类似，它支持多行文本编辑。</p>
+</blockquote>
+
+<pre><code>// TTextEdit.qml
+
+import QtQuick 2.0
+
+FocusScope {
+        width: 96; height: 96
+        Rectangle {
+                anchors.fill: parent
+                color: &quot;lightsteelblue&quot;
+                border.color: &quot;gray&quot;
+
+        }
+
+        property alias text: input.text
+        property alias input: input
+
+        TextEdit {
+                id: input
+                anchors.fill: parent
+                anchors.margins: 4
+                focus: true
+        }
+}
+
+import QtQuick 2.0
+
+Rectangle {
+        width: 136
+        height: 120
+        color: &quot;linen&quot;
+
+        TTextEdit {
+                id: input
+                x: 8; y: 8
+                width: 120; height: 104
+                focus: true
+                text: &quot;Text Edit&quot;
+        }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>按键元素（Key Element）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>附加属性key允许你基于某个按键的点击来执行代码。</p>
+</blockquote>
+
+<ul>
+<li>使用up，down按键来移动一个方块</li>
+<li>使用left，right按键来旋转一个元素</li>
+<li>使用plus，minus按键来缩放一个元素</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Window {
+        visible: true
+        width: 640
+        height: 480
+        title: qsTr(&quot;Hello World&quot;)
+
+        Rectangle {
+
+                width: 400; height: 200
+
+                Rectangle {
+                        width: 38; height: 38
+                        color: &quot;#ea7025&quot;
+                        id: square
+                        x: 20; y: 20
+                }
+                focus: true
+                Keys.onLeftPressed: square.x -= 8
+                Keys.onRightPressed: square.x += 8
+                Keys.onUpPressed: square.y -= 8
+                Keys.onDownPressed: square.y += 8
+                Keys.onPressed: {
+                        switch(event.key) {
+                        case Qt.Key_Plus:
+                                square.scale += 0.2
+                                break;
+                        case Qt.Key_Minus:
+                                square.scale -= 0.2
+                                break;
+                        }
+
+                }
+        }
+}
+</code></pre>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h2>动态元素（Fluid Elements）</h2>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>动画（Animations）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>动画被用于属性的改变。一个动画定义了属性值改变的曲线，将一个属性值变化从一个值过渡到另一个值</p>
+
+<p>所有在QtQuick中的动画都由同一个计时器来控制，因此它们始终都保持同步，这也提高了动画的性能和显示效果。</p>
+</blockquote>
+
+<h4>动画元素（Animation Elements）</h4>
+
+<blockquote>
+</blockquote>
+
+<ul>
+<li>PropertyAnimation（属性动画）- 使用属性值改变播放的动画</li>
+<li>NumberAnimation（数字动画）- 使用数字改变播放的动画</li>
+<li>ColorAnimation（颜色动画）- 使用颜色改变播放的动画</li>
+<li>RotationAnimation（旋转动画）- 使用旋转改变播放的动画</li>
+</ul>
+
+<p><strong>QtQuick还提供了一切特殊场景下使用的动画</strong></p>
+
+<ul>
+<li>PauseAnimation（停止动画）- 运行暂停一个动画</li>
+<li>SequentialAnimation（顺序动画）- 允许动画有序播放</li>
+<li>ParallelAnimation（并行动画）- 允许动画同时播放</li>
+<li>AnchorAnimation（锚定动画）- 使用锚定改变播放的动画</li>
+<li>ParentAnimation（父元素动画）- 使用父对象改变播放的动画</li>
+<li>SmotthedAnimation（平滑动画）- 跟踪一个平滑值播放的动画</li>
+<li>SpringAnimation（弹簧动画）- 跟踪一个弹簧变换的值播放的动画</li>
+<li>PathAnimation（路径动画）- 跟踪一个元素对象的路径的动画</li>
+<li>Vector3dAnimation（3D容器动画）- 使用QVector3d值改变播放的动画</li>
+</ul>
+
+<p><strong>当使用更加复杂的动画时，我们可能需要在播放一个动画时中改变一个属性或者运行一个脚本</strong></p>
+
+<ul>
+<li>PropertyAction（属性动作）- 在播放动画时改变属性</li>
+<li>ScriptAction（脚本动作）- 在播放动画时运行脚本</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<h4>应用动画（Applying Animations）</h4>
+
+<blockquote>
+</blockquote>
+
+<p><em>动画可以通过以下几种方式来应用：</em></p>
+
+<ul>
+<li>属性动画 - 在元素完整加载后自动运行</li>
+<li>属性动作 - 当属性值改变时自动运行</li>
+<li>独立运行动画 - 使用start()函数明确指定运行或者running属性被设置为true（比如通过属性绑定）</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// ClickableImageV2.qml
+// 扩展可点击图像元素版本2（ClickableImage Version2）
+Item {
+    id: root
+    // 父几何对象依赖于子几何对象
+    // 我们使用了Column（列）定位器
+    // 并且使用基于列的子矩形（childRect）
+    // 属性来计算它的宽度和高度（width and height）
+    width: container.childrenRect.width
+    height: container.childrenRect.height
+    property alias text: label.text
+    property alias source: image.source
+    signal clicked
+
+    Column {
+        id: container
+        Image {
+            id: image
+        }
+        Text {
+            id: label
+            width: image.width
+            horizontalAlignment: Text.AlignHCenter
+            // 我们使用文本元素的wrapMode属性来设置文本与图像一样宽并且可以自动换行
+            wrapMode: Text.WordWrap
+            color: &quot;#111111&quot;
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: root.clicked()
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 同时向上移动 ...
+
+ClickableImageV2 {
+     id: rocket1
+     x: 40; y: 200
+     source: &quot;rocket.png&quot;
+     text: &quot;animation on property&quot;
+     NumberAnimation on y {
+         to: 40; duration: 4000
+     }
+ }
+
+ClickableImageV2 {
+     id: rocket2
+     x: 40 + 170; y: 200
+     source: &quot;rocket.png&quot;
+     text: &quot;animation on property&quot;
+     NumberAnimation on y {
+         to: 40; duration: 4000
+     }
+ }
+
+ClickableImageV2 {
+     id: rocket3
+     x: 40 + 170 + 170; y: 200
+     source: &quot;rocket.png&quot;
+     text: &quot;animation on property&quot;
+     NumberAnimation on y {
+         to: 40; duration: 4000
+     }
+ }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// Behavior
+ClickableImageV2 {
+    id: rocket2
+    x: 152; y: 200
+    source: &quot;rocket.png&quot;
+    text: &quot;behavior on property&quot;
+    // Behavior 定义了特定的属性变化时的默认动画。
+    // 此处：当 y 发生变化时触发 ... 动画
+    Behavior on y {
+        NumberAnimation { duration: 4000 }
+    }
+    // 点击则 y = 40 ... 触发动画
+    onClicked: y = 40
+    // 随机 y 值 ...
+    // onClicked: y = 40+Math.random()*(205-40)
+}   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// standalone animation
+ClickableImageV2 {
+    id: rocket3
+    x: 264; y: 200
+    source: &quot;rocket.png&quot;
+    onClicked: anim.start()
+    // onClicked: anim.restart()
+
+    text: &quot;standalone animation&quot;
+
+    // 每一个动画都有start()，stop()，resume()，restart()函数
+    // 这个动画由一个私有的元素定义
+    // 并且可以写在文档的任何地方
+    NumberAnimation {
+        id: anim
+        target: rocket3
+        properties: &quot;y&quot;
+        from: 205 // 定义了一个from属性的值允许动画可以重复运行
+        to: 40
+        duration: 4000
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Image {
+    id: rocket3
+    x: 264; y: 200
+    source: &quot;rocket.png&quot;
+
+    // 每一个动画都有start()，stop()，resume()，restart()函数
+    // 这个动画由一个私有的元素定义
+    // 并且可以写在文档的任何地方
+    NumberAnimation {
+        id: anim
+        target: rocket3
+        properties: &quot;y&quot;
+        from: 205 // 定义了一个from属性的值允许动画可以重复运行
+        to: 40
+        duration: 4000
+        running: area.pressed // 鼠标长按 ...
+    }
+
+    /*
+        canceled()
+        clicked(MouseEvent  mouse)
+        doubleClicked(MouseEvent  mouse)
+        entered()
+        exited()
+        positionChanged(MouseEvent  mouse)
+        pressAndHold(MouseEvent  mouse)
+        pressed(MouseEvent  mouse)
+        released(MouseEvent  mouse)
+        wheel(MouseEvent  mouse)
+    */
+    MouseArea {
+        anchors.fill: parent
+        id: area
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>缓冲曲线（Easing Curves）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 扩展可点击图像V3（ClickableImage V3）
+// ClickableImageV3.qml
+// Simple image which can be clicked
+
+import QtQuick 2.0
+
+Item {
+    id: root
+    width: container.childrenRect.width + 16
+    height: container.childrenRect.height + 16
+    property alias text: label.text
+    property alias source: image.source
+    signal clicked
+
+    // M1&gt;&gt;
+    // ... add a framed rectangle as container
+    property bool framed : false
+
+    Rectangle {
+        anchors.fill: parent
+        color: &quot;white&quot;
+        visible: root.framed
+    }
+}
+
+/*
+    这个例子的代码非常简洁。
+    我们使用了一连串的缓冲曲线的名称（property variant easings）
+    并且在一个Repeater（重复元素）中将它们分配给一个ClickableImage。
+    图片的源路径通过一个命名方案来定义，一个叫做“InQuad”的缓冲曲线在“curves/InQuad.png”中有一个对应的图片。
+    如果你点击一个曲线图，这个点击将会分配一个缓冲类型给动画然后重新启动动画。
+    动画自身是用来设置方块的x坐标属性在2秒内变化的独立动画。
+*/
+
+// easingtypes.qml
+
+import QtQuick 2.0
+
+DarkSquare {
+    id: root
+    width: 600
+    height: 340
+
+    // A list of easing types
+    property variant easings : [
+        &quot;Linear&quot;, &quot;InQuad&quot;, &quot;OutQuad&quot;, &quot;InOutQuad&quot;,
+        &quot;InCubic&quot;, &quot;InSine&quot;, &quot;InCirc&quot;, &quot;InElastic&quot;,
+        &quot;InBack&quot;, &quot;InBounce&quot; ]
+
+
+    Grid {
+        id: container
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.margins: 16
+        height: 200
+        columns: 5
+        spacing: 16
+        // iterates over the 'easings' list
+        Repeater {
+            model: easings
+            ClickableImageV3 {
+                framed: true
+                // the current data entry from 'easings' list
+                text: modelData
+                source: &quot;curves/&quot; + modelData + &quot;.png&quot;
+                onClicked: {
+                    // set the easing type on the animation
+                    anim.easing.type = modelData
+                    // restart the animation
+                    anim.restart()
+                }
+            }
+        }
+    }
+
+    // The square to be animated
+    GreenSquare {
+        id: square
+        x: 40; y: 260
+    }
+
+    // The animation to test the easing types
+    NumberAnimation {
+        id: anim
+        target: square
+        from: 40; to: root.width - 40 - square.width
+        properties: &quot;x&quot;
+        duration: 2000
+    }
+}
+
+/*
+    除了duration属性与easing.type属性，你也可以对动画进行微调。
+    例如PropertyAnimation属性，大多数动画都支持附加的
+        easing.amplitude（缓冲振幅），easing.overshoot（缓冲溢出），easing.period（缓冲周期）
+        这些属性允许你对个别的缓冲曲线进行微调。不是所有的缓冲曲线都支持这些参数。
+    可以查看Qt PropertyAnimation文档中的缓冲列表（easing table）来查看一个缓冲曲线的相关参数。
+*/
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>动画分组（Grouped Animations）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>/*
+    通常使用的动画比一个属性的动画更加复杂。
+    例如你想同时运行几个动画并把他们连接起来，或者在一个一个的运行，或者在两个动画之间执行一个脚本。
+    动画分组提供了很好的帮助，作为命名建议可以叫做一组动画。
+    有两种方法来分组：平行与连续。
+    你可以使用SequentialAnimation（连续动画）和ParallelAnimation（平行动画）来实现它们
+    它们作为动画的容器来包含其它的动画元素。
+*/
+
+// ClickableImageV3.qml 
+Item {
+    id: root
+    width: container.childrenRect.width
+    height: container.childrenRect.height
+
+    property alias text: label.text
+    property alias source: image.source
+    signal clicked
+
+    Column {
+        id: container
+        Image {
+            id: image
+        }
+        Text {
+            id: label
+            width: image.width
+            horizontalAlignment: Text.AlignHCenter
+            // 我们使用文本元素的wrapMode属性来设置文本与图像一样宽并且可以自动换行
+            wrapMode: Text.WordWrap
+            color: &quot;#111111&quot;
+        }
+    }
+
+    property bool framed : false
+
+    Rectangle {
+        anchors.fill: parent
+        color: &quot;white&quot;
+        visible: root.framed
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: root.clicked()
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 动画组合 ...
+// 分组动画也可以被嵌套，例如一个连续动画可以拥有两个平行动画作为子动画
+// ParallelAnimation 平行动画
+Rectangle {
+    id: root
+    width: 300
+    height: 200
+    property int duration: 3000
+
+    ClickableImageV3 {
+        id: rocket
+        x: 20; y: 120
+        source: &quot;rocket.png&quot;
+        onClicked: anim.restart()
+    }
+
+    // ParallelAnimation 平行动画
+    ParallelAnimation {
+        id: anim
+        // 这个动画改变的是y值
+        NumberAnimation {
+            target: rocket
+            properties: &quot;y&quot;
+            to: 20
+            duration: root.duration
+        }
+        // 这个动画改变的是x值
+        NumberAnimation {
+            target: rocket
+            properties: &quot;x&quot;
+            to: 160
+            duration: root.duration
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 动画组合 ..
+// 分组动画也可以被嵌套，例如一个连续动画可以拥有两个平行动画作为子动画
+// SequentialAnimation（连续动画）
+Rectangle {
+    id: root
+    width: 300
+    height: 200
+    property int duration: 3000
+
+    ClickableImageV3 {
+        id: rocket
+        x: 20; y: 120
+        source: &quot;rocket.png&quot;
+        onClicked: anim.restart()
+    }
+
+    // 先执行Y移动，后执行X移动
+    SequentialAnimation {
+        id: anim
+        NumberAnimation {
+            target: rocket
+            properties: &quot;y&quot;
+            to: 20
+            // 60% of time to travel up
+            duration: root.duration*0.6
+        }
+        NumberAnimation {
+            target: rocket
+            properties: &quot;x&quot;
+            to: 160
+            // 40% of time to travel sideways
+            duration: root.duration*0.4
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 最终组合动画
+Item {
+    id: root
+    width: 480
+    height: 300
+    property int duration: 3000
+
+    Image {
+          id: ball
+          x: 20; y: 240
+          source: &quot;rocket.png&quot;
+
+          MouseArea {
+              anchors.fill: parent
+              onClicked: {
+                  ball.x = 20; ball.y = 240
+                  anim.restart()
+              }
+          }
+      }
+
+    ParallelAnimation {
+        id: anim
+        SequentialAnimation {
+            NumberAnimation {
+                target: ball
+                properties: &quot;y&quot;
+                to: 20
+                duration: root.duration * 0.4
+                easing.type: Easing.OutCirc
+            }
+            NumberAnimation {
+                target: ball
+                properties: &quot;y&quot;
+                to: 240
+                duration: root.duration * 0.6
+                easing.type: Easing.OutBounce
+            }
+        }
+        NumberAnimation {
+            target: ball
+            properties: &quot;x&quot;
+            to: 400
+            duration: root.duration
+        }
+        RotationAnimation {
+            target: ball
+            properties: &quot;rotation&quot;
+            to: 720
+            duration: root.duration * 1.1
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 组合动画学习 ...
+/*
+      ListElement { name: &quot;Easing.Linear&quot;; type: Easing.Linear; ballColor: &quot;DarkRed&quot; }
+      ListElement { name: &quot;Easing.InQuad&quot;; type: Easing.InQuad; ballColor: &quot;IndianRed&quot; }
+      ListElement { name: &quot;Easing.OutQuad&quot;; type: Easing.OutQuad; ballColor: &quot;Salmon&quot; }
+      ListElement { name: &quot;Easing.InOutQuad&quot;; type: Easing.InOutQuad; ballColor: &quot;Tomato&quot; }
+      ListElement { name: &quot;Easing.OutInQuad&quot;; type: Easing.OutInQuad; ballColor: &quot;DarkOrange&quot; }
+      ListElement { name: &quot;Easing.InCubic&quot;; type: Easing.InCubic; ballColor: &quot;Gold&quot; }
+      ListElement { name: &quot;Easing.OutCubic&quot;; type: Easing.OutCubic; ballColor: &quot;Yellow&quot; }
+      ListElement { name: &quot;Easing.InOutCubic&quot;; type: Easing.InOutCubic; ballColor: &quot;PeachPuff&quot; }
+      ListElement { name: &quot;Easing.OutInCubic&quot;; type: Easing.OutInCubic; ballColor: &quot;Thistle&quot; }
+      ListElement { name: &quot;Easing.InQuart&quot;; type: Easing.InQuart; ballColor: &quot;Orchid&quot; }
+      ListElement { name: &quot;Easing.OutQuart&quot;; type: Easing.OutQuart; ballColor: &quot;Purple&quot; }
+      ListElement { name: &quot;Easing.InOutQuart&quot;; type: Easing.InOutQuart; ballColor: &quot;SlateBlue&quot; }
+      ListElement { name: &quot;Easing.OutInQuart&quot;; type: Easing.OutInQuart; ballColor: &quot;Chartreuse&quot; }
+      ListElement { name: &quot;Easing.InQuint&quot;; type: Easing.InQuint; ballColor: &quot;LimeGreen&quot; }
+      ListElement { name: &quot;Easing.OutQuint&quot;; type: Easing.OutQuint; ballColor: &quot;SeaGreen&quot; }
+      ListElement { name: &quot;Easing.InOutQuint&quot;; type: Easing.InOutQuint; ballColor: &quot;DarkGreen&quot; }
+      ListElement { name: &quot;Easing.OutInQuint&quot;; type: Easing.OutInQuint; ballColor: &quot;Olive&quot; }
+      ListElement { name: &quot;Easing.InSine&quot;; type: Easing.InSine; ballColor: &quot;DarkSeaGreen&quot; }
+      ListElement { name: &quot;Easing.OutSine&quot;; type: Easing.OutSine; ballColor: &quot;Teal&quot; }
+      ListElement { name: &quot;Easing.InOutSine&quot;; type: Easing.InOutSine; ballColor: &quot;Turquoise&quot; }
+      ListElement { name: &quot;Easing.OutInSine&quot;; type: Easing.OutInSine; ballColor: &quot;SteelBlue&quot; }
+      ListElement { name: &quot;Easing.InExpo&quot;; type: Easing.InExpo; ballColor: &quot;SkyBlue&quot; }
+      ListElement { name: &quot;Easing.OutExpo&quot;; type: Easing.OutExpo; ballColor: &quot;RoyalBlue&quot; }
+      ListElement { name: &quot;Easing.InOutExpo&quot;; type: Easing.InOutExpo; ballColor: &quot;MediumBlue&quot; }
+      ListElement { name: &quot;Easing.OutInExpo&quot;; type: Easing.OutInExpo; ballColor: &quot;MidnightBlue&quot; }
+      ListElement { name: &quot;Easing.InCirc&quot;; type: Easing.InCirc; ballColor: &quot;CornSilk&quot; }
+      ListElement { name: &quot;Easing.OutCirc&quot;; type: Easing.OutCirc; ballColor: &quot;Bisque&quot; }
+      ListElement { name: &quot;Easing.InOutCirc&quot;; type: Easing.InOutCirc; ballColor: &quot;RosyBrown&quot; }
+      ListElement { name: &quot;Easing.OutInCirc&quot;; type: Easing.OutInCirc; ballColor: &quot;SandyBrown&quot; }
+      ListElement { name: &quot;Easing.InElastic&quot;; type: Easing.InElastic; ballColor: &quot;DarkGoldenRod&quot; }
+      ListElement { name: &quot;Easing.OutElastic&quot;; type: Easing.OutElastic; ballColor: &quot;Chocolate&quot; }
+      ListElement { name: &quot;Easing.InOutElastic&quot;; type: Easing.InOutElastic; ballColor: &quot;SaddleBrown&quot; }
+      ListElement { name: &quot;Easing.OutInElastic&quot;; type: Easing.OutInElastic; ballColor: &quot;Brown&quot; }
+      ListElement { name: &quot;Easing.InBack&quot;; type: Easing.InBack; ballColor: &quot;Maroon&quot; }
+      ListElement { name: &quot;Easing.OutBack&quot;; type: Easing.OutBack; ballColor: &quot;LavenderBlush&quot; }
+      ListElement { name: &quot;Easing.InOutBack&quot;; type: Easing.InOutBack; ballColor: &quot;MistyRose&quot; }
+      ListElement { name: &quot;Easing.OutInBack&quot;; type: Easing.OutInBack; ballColor: &quot;Gainsboro&quot; }
+      ListElement { name: &quot;Easing.OutBounce&quot;; type: Easing.OutBounce; ballColor: &quot;Silver&quot; }
+      ListElement { name: &quot;Easing.InBounce&quot;; type: Easing.InBounce; ballColor: &quot;DimGray&quot; }
+      ListElement { name: &quot;Easing.InOutBounce&quot;; type: Easing.InOutBounce; ballColor: &quot;SlateGray&quot; }
+      ListElement { name: &quot;Easing.OutInBounce&quot;; type: Easing.OutInBounce; ballColor: &quot;DarkSlateGray&quot; }
+      ListElement { name: &quot;Easing.Bezier&quot;; type: Easing.Bezier; ballColor: &quot;Chartreuse&quot;; }
+  */
+Item {
+    id: root
+    width: 480
+    height: 300
+    property int duration: 3000
+
+    Image {
+          id: ball
+          x: 20; y: 240
+          source: &quot;rocket.png&quot;
+
+          MouseArea {
+              anchors.fill: parent
+              // 点击开始动画 ...
+              onClicked: {
+                  ball.x = 20; ball.y = 240
+                  anim.restart()
+              }
+          }
+      }
+
+    // 平行动画
+    // 平行元素的所有子动画都会平行运行，它允许你在同一时间使用不同的属性来播放动画。
+    ParallelAnimation {
+        id: anim
+        // 同时：1, 连续动画(允许动画有序播放)
+        SequentialAnimation {
+            // 先改动 y 值
+            NumberAnimation {
+                target: ball // target 目标
+                properties: &quot;y&quot;
+                to: 20
+                duration: root.duration * 0.4
+                // Easing曲线定义动画如何在起始值和终止值见产生插值.
+                // 不同的easing曲线定义了一系列的插值.
+                // easing曲线简化了创建动画的效果--如弹跳效果, 加速, 减速, 和周期动画.
+                // Easing.OutCirc缓冲曲线，它看起来更像是一个圆周运动
+                easing.type: Easing.OutCirc
+            }
+            // 后改动 y 值
+            NumberAnimation {
+                target: ball // target 目标
+                properties: &quot;y&quot;
+                to: 240
+                duration: root.duration * 0.6
+                // Easing曲线定义动画如何在起始值和终止值见产生插值.
+                // 不同的easing曲线定义了一系列的插值.
+                // easing曲线简化了创建动画的效果--如弹跳效果, 加速, 减速, 和周期动画.
+                // Easing.OutBounce缓冲曲线，因为在最后球会发生反弹
+                easing.type: Easing.OutBounce
+            }
+        }
+        // 同时：2, 改动 x 值
+        NumberAnimation {
+            target: ball
+            properties: &quot;x&quot;
+            to: 400 // x 移动到 400
+            duration: root.duration // 移动时间/速度
+        }
+        // 同时：3, 旋转动画- 使用旋转改变播放的动画
+        RotationAnimation {
+            target: ball
+            properties: &quot;rotation&quot;
+            to: 720 // 旋转角度
+            from: 0 // 循环 ...
+            duration: root.duration * 1.1 // 旋转时间/速度
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>状态与过渡（States and Transitions）</h3>
+
+<p>-</p>
+
+<ul>
+<li>通常我们将用户界面描述为一种状态。一个状态定义了一组属性的改变，并且会在一定的条件下被触发</li>
+<li>另外在这些状态转化的过程中可以有一个过渡，定义了这些属性的动画或者一些附加的动作。</li>
+<li>当进入一个新的状态时，动作也可以被执行。</li>
+</ul>
+
+<blockquote>
+</blockquote>
+
+<h4>状态（States）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 可以使用一个简单逻辑的脚本来替换QML状态。
+// 开发人员很容易落入这种陷阱，写的代码更像一个JavaScript程序而不是一个QML程序
+
+// 预先初始化两种状态，随着不同的事件改变不同的状态 ...
+Item {
+
+    width: 640
+    height: 480
+
+    // 默认状态
+    state: &quot;stop&quot;
+
+    states: [
+        // 状态 stop
+        State {
+            name: &quot;stop&quot;
+            PropertyChanges { target: light1; color: &quot;red&quot; }
+            PropertyChanges { target: light2; color: &quot;black&quot; }
+        },
+        // 状态 go
+        State {
+            name: &quot;go&quot;
+            PropertyChanges { target: light1; color: &quot;black&quot; }
+            PropertyChanges { target: light2; color: &quot;green&quot; }
+        }
+    ]
+
+    // 状态对应对象
+    Rectangle {
+        id: light1
+        x: 25; y: 15
+        width: 100; height: width
+        radius: width/2 // 半径
+        color: &quot;black&quot;
+    }
+
+    // 状态对应对象
+    Rectangle {
+        id: light2
+        x: 25; y: 135
+        width: 100; height: width
+        radius: width/2 // 半径
+        color: &quot;black&quot;
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: parent.state = (parent.state = &quot;stop&quot;? &quot;go&quot; : &quot;stop&quot;)
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>过渡（Transitions）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>一系列的过渡能够被加入任何元素，一个过渡由状态的改变触发执行。你可以使用属性的from:和to:来定义状态改变的指定过渡。
+这两个属性就像一个过滤器，当过滤器为true时，过渡生效。你也可以使用“”来表示任何状态。
+例如from:&ldquo;&rdquo;; to:&rdquo;*&ldquo;表示从任一状态到另一个任一状态的默认值，这意味着过渡用于每个状态的切换。</p>
+</blockquote>
+
+<pre><code>Item {
+
+    width: 640
+    height: 480
+
+    state: &quot;stop&quot;
+
+    states: [
+        State {
+            name: &quot;stop&quot;
+            PropertyChanges { target: light1; color: &quot;red&quot; }
+            PropertyChanges { target: light2; color: &quot;black&quot; }
+        },
+        State {
+            name: &quot;go&quot;
+            PropertyChanges { target: light1; color: &quot;black&quot; }
+            PropertyChanges { target: light2; color: &quot;green&quot; }
+        }
+    ]
+
+    Rectangle {
+        id: light1
+        x: 25; y: 15
+        width: 100; height: width
+        radius: width/2
+        color: &quot;black&quot;
+    }
+
+    Rectangle {
+        id: light2
+        x: 25; y: 135
+        width: 100; height: width
+        radius: width/2
+        color: &quot;black&quot;
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: parent.state = (parent.state = &quot;stop&quot;? &quot;go&quot; : &quot;stop&quot;)
+    }
+
+    // 过渡动画
+    transitions: [
+        Transition {
+            from: &quot;stop&quot;; to: &quot;go&quot;
+            ColorAnimation { target: light1; properties: &quot;color&quot;; duration: 1000 }
+            ColorAnimation { target: light2; properties: &quot;color&quot;; duration: 1000 }
+        }
+    ]
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h2>模型－视图－代理</h2>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>基础模型（Basic Model）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>最基本的分离数据与显示的方法是使用Repeater元素。它被用于实例化一组元素项，并且很容易与一个用于填充用户界面的定位器相结合。</p>
+</blockquote>
+
+<pre><code>// 列显示10个Text
+Column {
+    spacing: 2
+
+    Repeater {
+        model: 10
+
+        Rectangle {
+            width: 100
+            height: 20
+
+            radius: 3
+
+            color: &quot;lightBlue&quot;
+
+            Text {
+                anchors.centerIn: parent
+                text: index
+            }
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 遍历数据
+Column {
+    spacing: 2　// 间距
+
+    Repeater {
+        // 此值可以在 modelData 中获得 ...　index 为下标
+        model: [&quot;Enterprise&quot;, &quot;Colombia&quot;, &quot;Challenger&quot;, &quot;Discovery&quot;, &quot;Endeavour&quot;, &quot;Atlantis&quot;]
+
+        Rectangle {
+            width: 100
+            height: 20
+
+            radius: 3
+
+            color: &quot;lightBlue&quot;
+
+            Text {
+                anchors.centerIn: parent
+                text: index +&quot;: &quot;+modelData
+            }
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 使用的模型，ListModel（链表模型）
+Column {
+    spacing: 2
+
+    Repeater {
+        model: ListModel {
+            ListElement { name: &quot;Mercury&quot;; surfaceColor: &quot;gray&quot;; index: 0; }
+            ListElement { name: &quot;Venus&quot;; surfaceColor: &quot;yellow&quot;; index: 1; }
+            ListElement { name: &quot;Earth&quot;; surfaceColor: &quot;blue&quot;; index: 2; }
+            ListElement { name: &quot;Mars&quot;; surfaceColor: &quot;orange&quot;; index: 3; }
+            ListElement { name: &quot;Jupiter&quot;; surfaceColor: &quot;orange&quot;; index: 4; }
+            ListElement { name: &quot;Saturn&quot;; surfaceColor: &quot;yellow&quot;; index: 5; }
+            ListElement { name: &quot;Uranus&quot;; surfaceColor: &quot;lightBlue&quot;; index: 6; }
+            ListElement { name: &quot;Neptune&quot;; surfaceColor: &quot;lightBlue&quot;; index: 7; }
+        }
+
+        Rectangle {
+            width: 150
+            height: 40
+
+            radius: 3
+
+            color: &quot;lightBlue&quot;
+
+            // Text
+            Text {
+                anchors.centerIn: parent
+                // text 取决为 name
+                text: name
+            }
+
+            // ICON
+            Rectangle {
+
+                Text {
+                    // text 取决为 index
+                    text: index
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: 2
+
+                width: 32
+                height: 32
+
+                radius: 8
+
+                border.color: &quot;black&quot;
+                border.width: 1
+
+                // 颜色取决为 surfaceColor
+                color: surfaceColor
+            }
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>动态视图（Dynamic Views）</h4>
+
+<p>－</p>
+
+<blockquote>
+<p>　QtQuick提供了ListView和GridView元素，这两个都是基于Flickable（可滑动）区域的元素，因此用户可以放入更大的数据。
+同时，它们限制了同时实例化的代理数量。对于一个大型的模型，这意味着在同一个场景下只会加载有限的元素。</p>
+</blockquote>
+
+<pre><code>// 我们由ListView开始
+/*
+    视图末尾的行为是由到boundsBehavior属性的控制的。
+    这是一个枚举值，并且可以配置为默认的Flickable.DragAndOvershootBounds
+    视图可以通过它的边界线来拖拽和翻阅，配置为Flickable.StopAtBounds，视图将不再可以移动到它的边界线之外。
+    配置为Flickable.DragOverBounds，用户可以将视图拖拽到它的边界线外，但是在边界线上翻阅将无效。
+  */
+
+/*
+    使用snapMode属性可以限制一个视图内元素的停止位置。
+    默认行为下是ListView.NoSnap，允许视图内元素在任何位置停止。
+    将snapMode属性设置为ListView.SnapToItem，视图顶部将会与元素对象的顶部对齐排列。
+    使用ListView.SnapOneItem，当鼠标或者触摸释放时，视图将会停止在第一个可见的元素，这种模式对于浏览页面非常便利。
+  */
+Rectangle {
+    width: 80
+    height: 300
+
+    color: &quot;white&quot;
+
+    // ListView它使用了一个model，使用delegate来实例化，并且在两个delegate之间能够设置间隔sapcing
+    ListView {
+        anchors.fill: parent
+        anchors.margins: 20
+
+        // ListView通过设置clip属性为true，来激活裁剪功能
+        clip: true
+
+        model: 100
+
+        // 代理
+        delegate: numberDelegate
+        spacing: 5
+    }
+
+    Component {
+        id: numberDelegate
+
+        Rectangle {
+            width: 40
+            height: 40
+
+            color: &quot;lightGreen&quot;
+
+            Text {
+                anchors.centerIn: parent
+                font.pixelSize: 16
+                text: index
+            }
+        }
+    }
+}
+
+// 链表视图的方向由属性orientation控制。(orientation: ListView.Horizontal)
+// 它能够被设置为默认值ListView.Vertical或者ListView.Horizonta
+// 可以通过设置layoutDirection属性来控制元素顺序方向，它可以设置为Qt.LeftToRight或者Qt.RightToLeft。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>键盘导航和高亮</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>在使用键盘甚至仅仅通过方向键选择一个元素的场景下，需要有标识当前选中元素的机制。在QML中，这被叫做高亮。</p>
+</blockquote>
+
+<p><em>视图支持设置一个当前视图中显示代理元素中的高亮代理。它是一个附加的代理元素，这个元素仅仅只实例化一次，并移动到与当前元素相同的位置</em></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>/*
+    当使用高亮与链表视图（ListView）结合时，一些属性可以用来控制它的行为。
+    highlightRangeMode控制了高亮如何影响视图中当前的显示。
+    默认设置ListView.NoHighLighRange意味着高亮与视图中的元素距离不相关。
+  */
+/*
+    ListView.StrictlyEnforceRnage确保了高亮始终可见
+    如果某个动作尝试将高亮移出当前视图可见范围，
+    当前元素将会自动切换，确保了高亮始终可见。
+  */
+/*
+    ListView.ApplyRange，它尝试保持高亮代理始终可见
+    但是不会强制切换当前元素始终可见。
+    如果在需要的情况下高亮代理允许被移出当前视图。
+  */
+/*
+    在默认配置下，视图负责高亮移动到指定位置，移动的速度与大小的改变能够被控制
+    使用一个速度值或者一个动作持续时间来完成它。
+    这些属性包括highlightMoveSpeed，highlightMoveDuration，highlightResizeSpeed和highlightResizeDuration。
+    默认下速度被设置为每秒400像素，动作持续时间为-1，表明速度和距离控制了动作的持续时间。
+    如果速度与动作持续时间都被设置，动画将会采用速度较快的结果来完成。
+  */
+/*
+    为了更加详细的控制高亮的移动，highlightFollowCurrentItem属性设置为false。
+    这意味着视图将不再负责高亮代理的移动。取而代之可以通过一个行为（Bahavior）或者一个动画来控制它。
+  */
+Rectangle {
+    width: 240
+    height: 300
+
+    color: &quot;white&quot;
+
+    ListView {
+        anchors.fill: parent
+        anchors.margins: 20
+
+        clip: true
+
+        model: 100
+
+        delegate: numberDelegate
+        spacing: 5
+
+        // highlight属性，指出使用的高亮代理元素
+        highlight: highlightComponent
+        // 首先是focus属性设置为true，它设置链表视图能够获得键盘焦点
+        focus: true
+    }
+
+    // 高亮代理
+    Component {
+        id: highlightComponent
+
+        Rectangle {
+            // ListView.view.width属性被绑定用于高亮元素的宽度
+            width: ListView.view.width
+            color: &quot;lightGreen&quot;
+        }
+    }
+
+    Component {
+        id: numberDelegate
+
+        Item {
+            width: 40
+            height: 40
+
+            Text {
+                anchors.centerIn: parent
+
+                font.pixelSize: 10
+
+                text: index
+            }
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>/*
+    在下面的例子中，高亮代理的y坐标属性与ListView.view.currentItem.y属性绑定。
+    这确保了高亮始终跟随当前元素。
+    然而，由于我们没有让视图来移动这个高亮代理，我们需要控制这个元素如何移动
+    通过Behavior on y来完成这个操作，在下面的例子中，移动分为三步完成：淡出，移动，淡入。
+    注意怎样使用SequentialAnimation和PropertyAnimation元素与NumberAnimation结合创建更加复杂的移动效果。
+*/
+Component {
+    id: highlightComponent
+
+// 从新封装了一个Item并增加动画效果
+    Item {
+    // 宽度与 listview 等宽
+        width: ListView.view.width
+    // 高度跟随当前 item current height
+        height: ListView.view.currentItem.height
+
+    // 永远更随着 item current y ...
+        y: ListView.view.currentItem.y
+
+        Behavior on y {
+            SequentialAnimation {
+                PropertyAnimation { 
+            target: highlightRectangle; property: &quot;opacity&quot;; to: 0; duration: 200 }
+                NumberAnimation { duration: 1 }
+                PropertyAnimation { 
+            target: highlightRectangle; property: &quot;opacity&quot;; to: 1; duration: 200 }
+            }
+        }
+
+        Rectangle {
+            id: highlightRectangle
+            anchors.fill: parent
+            color: &quot;lightGreen&quot;
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>页眉与页脚（Header and Footer）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>我们能够向链表视图中插入一个页眉（header）元素和一个页脚（footer）元素</p>
+</blockquote>
+
+<pre><code>// 页眉与页脚代理元素不遵循链表视图（ListView）的间隔（spacing）属性
+// 它们被直接放在相邻的链表元素之上或之下。
+// 这意味着页眉与页脚的间隔必须通过页眉与页脚元素自己设置。
+Rectangle {
+    width: 80
+    height: 300
+
+    color: &quot;white&quot;
+
+    ListView {
+        anchors.fill: parent
+        anchors.margins: 20
+
+        clip: true
+
+        model: 4
+
+        delegate: numberDelegate
+        spacing: 5
+
+        header: headerComponent
+        footer: footerComponent
+    }
+
+    Component {
+        id: headerComponent
+
+        Rectangle {
+            width: 40
+            height: 20
+
+            color: &quot;yellow&quot;
+        }
+    }
+
+    Component {
+        id: footerComponent
+
+        Rectangle {
+            width: 40
+            height: 20
+
+            color: &quot;red&quot;
+        }
+    }
+
+    Component {
+        id: numberDelegate
+
+        Rectangle {
+            width: 40
+            height: 40
+
+            color: &quot;lightGreen&quot;
+
+            Text {
+                anchors.centerIn: parent
+
+                font.pixelSize: 10
+
+                text: index
+            }
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>网格视图（The GridView）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>使用网格视图（GridView）与使用链表视图（ListView）的方式非常类似。
+真正不同的地方是网格视图（GridView）使用了一个二维数组来存放元素，而链表视图（ListView）是使用的线性链表来存放元素。</p>
+</blockquote>
+
+<pre><code> /*
+    网格视图（GridView）不依赖于元素间隔和大小来配置元素。
+    它使用单元宽度（cellWidth）与单元高度（cellHeight）属性来控制数组内的二维元素的内容。
+    每个元素从左上角开始依次放入单元格。
+*/
+
+/*
+    一个网格视图（GridView）也包含了页脚与页眉
+    也可以使用高亮代理并且支持捕捉模式（snap mode）的多种反弹行为。
+    它也可以使用不同的方向（orientations）与定向（directions）来定位。
+  */
+/*
+    定向使用flow属性来控制。它可以被设置为GridView.LeftToRight或者GridView.TopToBottom。
+    模型的值从左往右向网格中填充，行添加是从上往下。
+    视图使用一个垂直方向的滚动条。后面添加的元素也是由上到下，由左到右。
+    此外还有flow属性和layoutDirection属性，能够适配网格从左到右或者从右到左，这依赖于你使用的设置值。
+  */
+Rectangle {
+    width: 240
+    height: 300
+
+    color: &quot;white&quot;
+
+    // 网格视图
+    GridView {
+        anchors.fill: parent
+        anchors.margins: 20
+
+        // 裁剪
+        clip: true
+
+        // 100个
+        model: 100
+
+        // 使用单元宽度（cellWidth）与单元高度（cellHeight）属性来控制数组内的二维元素的内容。
+        // 每个元素从左上角开始依次放入单元格。
+        cellWidth: 45
+        cellHeight: 45
+
+        // 代理
+        delegate: numberDelegate
+    }
+
+    // 代理
+    Component {
+        id: numberDelegate
+
+        // 内容
+        Rectangle {
+            width: 40
+            height: 40
+
+            color: &quot;lightGreen&quot;
+
+            Text {
+                anchors.centerIn: parent
+
+                font.pixelSize: 10
+
+                text: index
+            }
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>代理（Delegate）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>当使用模型与视图来自定义用户界面时，代理在创建显示时扮演了大量的角色。
+在模型中的每个元素通过代理来实现可视化，用户真实可见的是这些代理元素。</p>
+</blockquote>
+
+<pre><code>// 每个代理访问到索引号或者绑定的属性，一些是来自数据模型，一些来自视图。
+// 来自模型的数据将会通过属性传递到代理。来自视图的数据将会通过属性传递视图中与代理相关的状态信息。
+
+ /*
+通常使用的视图绑定属性是ListView.isCurrentItem和ListView.view。
+第一个是一个布尔值，标识这个元素是否是视图当前元素，这个值是只读的，引用自当前视图。
+通过访问视图，可以创建可复用的代理，这些代理在被包含时会自动匹配视图的大小。
+在下面这个例子中，每个代理的width（宽度）属性与视图的width（宽度）属性绑定
+    每个代理的背景颜色color依赖于绑定的属性ListView.isCurrentItem属性。
+*/
+
+Rectangle {
+    width: 120
+    height: 300
+
+    color: &quot;white&quot;
+
+    // ListView
+    ListView {
+        anchors.fill: parent
+        anchors.margins: 20
+
+        clip: true
+
+        model: 100
+
+        delegate: numberDelegate
+        spacing: 5
+
+        focus: true
+    }
+
+    // 代理
+    Component {
+        id: numberDelegate
+
+        Rectangle {
+            width: ListView.view.width
+            height: 40
+
+            // 如果是 curent item 则指定颜色
+            color: ListView.isCurrentItem?&quot;gray&quot;:&quot;lightGray&quot;
+
+            Text {
+                anchors.centerIn: parent
+
+                font.pixelSize: 10
+
+                text: index
+            }
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>动画添加与移除元素（Animating Added and Removed Items）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>在某些情况下，视图中的显示内容会随着时间而改变。由于模型数据的改变，元素会添加或者移除</p>
+</blockquote>
+
+<p><em>为了方便使用，QML视图为每个代理绑定了两个信号，onAdd和onRemove。使用动画连接它们，可以方便创建识别哪些内容被添加或删除的动画</em></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Rectangle {
+    width: 480
+    height: 300
+
+    color: &quot;white&quot;
+
+    // 链表模型（类似：c++ vector）
+    ListModel {
+        id: theModel
+
+        // 数据
+        ListElement { number: 0 }
+        ListElement { number: 1 }
+        ListElement { number: 2 }
+        ListElement { number: 3 }
+        ListElement { number: 4 }
+        ListElement { number: 5 }
+        ListElement { number: 6 }
+        ListElement { number: 7 }
+        ListElement { number: 8 }
+        ListElement { number: 9 }
+    }
+
+    // 添加按钮
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 20
+
+        height: 40
+
+        color: &quot;darkGreen&quot;
+
+        Text {
+            anchors.centerIn: parent
+
+            text: &quot;Add item!&quot;
+        }
+
+        MouseArea {
+            anchors.fill: parent
+
+            onClicked: {
+                // 向链表中添加数据
+                theModel.append({&quot;number&quot;: ++parent.count});
+            }
+        }
+
+        property int count: 9
+    }
+
+    // 网格视图
+    GridView {
+        anchors.fill: parent
+        anchors.margins: 20
+        anchors.bottomMargin: 80
+
+        // 裁剪
+        clip: true
+
+        // 指定链表数据
+        model: theModel
+
+        // 网格大小
+        cellWidth: 45
+        cellHeight: 45
+
+        // 代理
+        delegate: numberDelegate
+    }
+
+    // 代理
+    Component {
+        id: numberDelegate
+
+        // 网格内容
+        Rectangle {
+            id: wrapper
+
+            width: 40
+            height: 40
+
+            color: &quot;lightGreen&quot;
+
+            Text {
+                anchors.centerIn: parent
+                font.pixelSize: 10
+                text: number
+            }
+
+            // 鼠标区域
+            MouseArea {
+                anchors.fill: parent
+
+                onClicked: {
+                    // GridView.delayRemove 代表该 GridView 数据是否可以销毁, 默认 false 不可以
+                    // 判断 GridView 数据是否可以销毁
+                    if (!wrapper.GridView.delayRemove)
+                        theModel.remove(index);
+                }
+            }
+
+            // SequentialAnimation 顺序动画
+            // 当执行 onRemove 时触发该动画
+            GridView.onRemove: SequentialAnimation {
+                // PropertyAction 属性动作(在播放动画时改变属性)
+                // 改变属性为可销毁
+                PropertyAction { target: wrapper; property: &quot;GridView.delayRemove&quot;; value: true }
+                // 数字动画
+                // property - http://doc.qt.io/qt-4.8/qml-propertyanimation.html#property-prop
+                NumberAnimation {
+                    target: wrapper  // 绑定目标
+                    /*
+                      指定特定的属性动画元素
+                      property 与 properties 具有相同含义
+                      */
+                    property: &quot;scale&quot;
+                    to: 0
+                    duration: 250
+                    easing.type: Easing.InOutQuad
+                }
+                // 改变属性为不可销毁
+                PropertyAction { target: wrapper; property: &quot;GridView.delayRemove&quot;; value: false }
+            }
+
+            // SequentialAnimation 顺序动画
+            // 当执行 onAdd 时触发该动画
+            GridView.onAdd: SequentialAnimation {
+                // 数字动画
+                NumberAnimation {
+                    target: wrapper  // 绑定目标
+                    property: &quot;scale&quot;
+                    from: 0
+                    to: 1
+                    duration: 250
+                    easing.type: Easing.InOutQuad
+                }
+            }
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>形变的代理（Shape-Shifting Delegates）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>在使用链表时通常会使用当前项激活时展开的机制。
+这个操作可以被用于动态的将当前项目填充到整个屏幕来添加一个新的用户界面
+或者为链表中的当前项提供更多的信息。</p>
+</blockquote>
+
+<pre><code>// 6.4.2 形变的代理（Shape-Shifting Delegates）
+// https://cwc1987.gitbooks.io/qmlbook-in-chinese/content/model-view-delegate/delegate.html
+Item {
+    width: 300
+    height: 480
+
+    // ListView
+    ListView {
+        id: listView
+
+        anchors.fill: parent
+        // 代理
+        delegate: detailsDelegate
+        // 数据
+        model: planets
+    }
+
+    // 链表数据
+    ListModel {
+        id: planets
+
+        ListElement { name: &quot;Mercury&quot;; imageSource: &quot;images/mercury.jpeg&quot;; 
+        facts: &quot;Mercury is the smallest planet in the Solar System.  \
+    It is the closest planet to the sun. It makes one trip around the Sun once every 87.969 days.&quot; }
+        ListElement { name: &quot;Venus&quot;; imageSource: &quot;images/venus.jpeg&quot;; 
+        facts: &quot;Venus is the second planet from the Sun. It is a terrestrial planet because it has a solid, rocky surface. \
+    The other terrestrial planets are Mercury, Earth and Mars. Astronomers have known Venus for thousands of years.&quot; }
+        ListElement { name: &quot;Earth&quot;; imageSource: &quot;images/earth.jpeg&quot;; 
+        facts: &quot;The Earth is the third planet from the Sun. It is one of the four terrestrial planets in our Solar System. \
+    This means most of its mass is solid. The other three are Mercury, Venus and Mars. The Earth is also called the Blue Planet, 'Planet Earth', and 'Terra'.&quot; }
+        ListElement { name: &quot;Mars&quot;; imageSource: &quot;images/mars.jpeg&quot;; 
+        facts: &quot;Mars is the fourth planet from the Sun in the Solar System. Mars is dry, rocky and cold. \ 
+    It is home to the largest volcano in the Solar System. Mars is named after \
+    the mythological Roman god of war because it is a red planet, which signifies the colour of blood.&quot; }
+    }
+
+    // 代理
+    Component {
+        id: detailsDelegate
+
+        // 内容
+        Item {
+            id: wrapper
+
+            width: listView.width
+            height: 30
+
+            // 未展开(文字部分)
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+
+                height: 30
+
+                color: &quot;#ffaa00&quot;
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    font.pixelSize: parent.height-4
+
+                    text: name
+                }
+            }
+
+            // 未展开（图片部分）
+            Rectangle {
+                id: image
+
+                // 黑色
+                color: &quot;black&quot;
+
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.rightMargin: 2
+                anchors.topMargin: 2
+
+                width: 26
+                height: 26
+
+                Image {
+                    anchors.fill: parent
+
+                    /*
+                        Image.Stretch- 缩放图片，使用拉伸
+                        Image.PreserveAspectFit- 图片按比例缩放，但不裁减。
+                        Image.PreserveAspectCrop-图片按比例缩放，裁减
+                        Image.Tile -图片在水平方向和垂直方向瓷砖平铺。
+                        Image.TileVertically- 图片水平拉什，垂直平铺
+                        Image.TileHorizontally- 图片垂直拉什，水平平铺
+                        Image.Pad - 图片不改变
+                      */
+                    fillMode: Image.PreserveAspectFit
+
+                    source: imageSource
+                }
+            }
+
+            // 鼠标区域
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    parent.state = &quot;expanded&quot;
+                }
+            }
+
+
+            // 展开区域（文字部分）
+            Item {
+                id: factsView
+
+                anchors.top: image.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+
+                // 完全透明
+                opacity: 0
+
+                Rectangle {
+                    anchors.fill: parent
+
+                    color: &quot;#cccccc&quot;
+
+                    Text {
+                        anchors.fill: parent
+                        anchors.margins: 5
+
+                        clip: true
+                        wrapMode: Text.WordWrap
+
+                        font.pixelSize: 12
+
+                        text: facts
+                    }
+                }
+            }
+
+            // 展开区域（关闭按钮）
+            Rectangle {
+                id: closeButton
+
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.rightMargin: 2
+                anchors.topMargin: 2
+
+                width: 26
+                height: 26
+
+                // 红色
+                color: &quot;red&quot;
+
+                opacity: 0
+
+                // 点击改变状态
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: wrapper.state = &quot;&quot;
+                }
+            }
+
+            // 状态
+            states: [
+                State {
+                    name: &quot;expanded&quot;
+
+                    // 改变　wrapper 高度
+                    PropertyChanges { target: wrapper; height: listView.height; }
+                    // 改变　image　宽高位置　...
+                    PropertyChanges { target: image; width: listView.width; height: listView.width; 
+            anchors.rightMargin: 0; anchors.topMargin: 30 }
+                    // 改变　factsView(文字区域) 不透明
+                    PropertyChanges { target: factsView; opacity: 1 }
+                    // 改变 closeButton(关闭按钮) 不透明
+                    PropertyChanges { target: closeButton; opacity: 1 }
+                    // 改变 wrapper.ListView.view 的 contentY 等于 wrapper.y
+                    // interactive: false 关闭互动
+                    PropertyChanges { target: wrapper.ListView.view; contentY: wrapper.y; interactive: false }
+                }
+            ]
+
+            // 过渡
+            transitions: [
+                Transition {
+                    NumberAnimation {
+                        duration: 200;
+                        properties: &quot;height,width,anchors.rightMargin,anchors.topMargin,opacity,contentY&quot;
+                    }
+                }
+            ]
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>高级用法（Advanced Techniques）</h3>
+
+<blockquote>
+</blockquote>
+
+<h4>路径视图（The PathView）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>路径视图（PathView）非常强大，但也非常复杂，这个视图由QtQuick提供。
+它创建了一个可以让子项沿着任意路径移动的视图。
+沿着相同的路径，使用缩放（scale），透明（opacity）等元素可以更加详细的控制过程。</p>
+</blockquote>
+
+<pre><code>// https://cwc1987.gitbooks.io/qmlbook-in-chinese/content/model-view-delegate/advanced_techniques.html
+Item {
+    id: root
+    anchors.fill: parent
+
+    PathView {
+         anchors.fill: parent
+
+         // 代理
+         delegate: flipCardDelegate
+         model: 100
+
+         // 路径（path）属性使用一个路径（path）元素来定义路径视图（PathView）内代理的滚动路径。
+         // 路径使用startx与starty属性来链接路径（path）元素，例如PathLine,PathQuad和PathCubic。
+         // 这些元素都使用二维数组来构造路径。
+         path: Path {
+             startX: root.width/2
+             startY: 0
+
+             // 使用PathPercent元素，它确保了中间的元素居中，并且给其它的元素提供了足够的空间
+             // 使用PathAttribute元素来控制旋转，大小和深度值（z-value）。
+             // 使用PathLine元素来从起点到终端绘制一条线　...
+
+             PathAttribute { name: &quot;itemZ&quot;; value: 0 }
+             PathAttribute { name: &quot;itemAngle&quot;; value: -90.0; }
+             PathAttribute { name: &quot;itemScale&quot;; value: 0.5; }
+             PathLine { x: root.width/2; y: root.height*0.4; }
+             PathPercent { value: 0.48; }
+             PathLine { x: root.width/2; y: root.height*0.5; }
+             PathAttribute { name: &quot;itemAngle&quot;; value: 0.0; }
+             PathAttribute { name: &quot;itemScale&quot;; value: 1.0; }
+             PathAttribute { name: &quot;itemZ&quot;; value: 100 }
+             PathLine { x: root.width/2; y: root.height*0.6; }
+             PathPercent { value: 0.52; }
+             PathLine { x: root.width/2; y: root.height; }
+             PathAttribute { name: &quot;itemAngle&quot;; value: 90.0; }
+             PathAttribute { name: &quot;itemScale&quot;; value: 0.5; }
+             PathAttribute { name: &quot;itemZ&quot;; value: 0 }
+         }
+
+         // pathItemCount属性，控制了一次可见的子项总数
+         pathItemCount: 16
+
+         /*
+           preferredHightlightBegin与preferredHighlightEnd属性由PathView（路径视图）输入到图片元素中。
+           它们的值在0~1之间。结束值大于等于开始值。例如设置这些属性值为0.5，当前项只会显示当前百分之50的图像在这个路径上。
+           */
+         // preferredHighLightBegin属性控制了高亮区间
+         preferredHighlightBegin: 0.5
+         // preferredHighlightEnd与highlightRangeMode，控制了当前项怎样沿着路径显示。
+         preferredHighlightEnd: 0.5
+     }
+
+    // 代理
+    Component {
+        id: flipCardDelegate
+
+        Item {
+            id: wrapper
+
+            width: 64
+            height: 64
+
+            // 通常对于这个属性都绑定为可见，这样允许路径视图（PathView）缓冲不可见的元素
+            // 这不是通过剪裁处理来实现的，与链表视图（ListView）或者栅格视图（GridView）不同
+            visible: PathView.onPath
+
+            scale: PathView.itemScale
+            z: PathView.itemZ
+
+            // 代理如下面所示，使用了一些从PathAttribute中链接的属性，itemZ,itemAngle和itemScale。
+            // 需要注意代理链接的属性只在wrapper中可用。因此，rotX属性在Rotation元素中定义为可访问值。
+            property variant rotX: PathView.itemAngle
+            transform: Rotation { axis { x: 1; y: 0; z: 0 } angle: wrapper.rotX; origin { x: 32; y: 32; } }
+
+            Rectangle {
+                anchors.fill: parent
+                color: &quot;lightGray&quot;
+                border.color: &quot;black&quot;
+                border.width: 3
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: index
+                font.pixelSize: 30
+            }
+        }
+    }
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>链表分段（Lists with Sections）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>有时，链表的数据需要划分段。例如使用首字母来划分联系人，或者音乐。使用链表视图可以把平面列表按类别划分。</p>
+</blockquote>
+
+<pre><code>/*
+    为了使用分段，section.property与section.criteria必须安装。
+    section.property定义了哪些属性用于内容的划分。
+    在这里，最重要的是知道每一段由哪些连续的元素构成，否则相同的属性名可能出现在几个不同的地方。
+*/
+
+/*
+    section.criteria能够被设置为ViewSection.FullString或者ViewSection.FirstCharacter。
+    默认下使用第一个值，能够被用于模型中有清晰的分段，例如音乐专辑。
+    第二个是使用一个属性的首字母来分段，这说明任何属性都可以被使用。
+    通常的例子是用于联系人名单的姓。
+  */
+/*
+    当段被定义好后，每个子项能够使用绑定属性
+    ListView.section，ListView.previousSection与ListView.nextSection来访问。
+    使用这些属性，可以检测段的第一个与最后一个子项。
+  */
+Rectangle {
+    width: 300
+    height: 290
+
+    color: &quot;white&quot;
+
+    ListModel {
+        id: spaceMen
+
+        ListElement { name: &quot;Abdul Ahad Mohmand&quot;; nation: &quot;Afganistan&quot;; }
+        ListElement { name: &quot;Marcos Pontes&quot;; nation: &quot;Brazil&quot;; }
+        ListElement { name: &quot;Alexandar Panayotov Alexandrov&quot;; nation: &quot;Bulgaria&quot;; }
+        ListElement { name: &quot;Georgi Ivanov&quot;; nation: &quot;Bulgaria&quot;; }
+        ListElement { name: &quot;Roberta Bondar&quot;; nation: &quot;Canada&quot;; }
+        ListElement { name: &quot;Marc Garneau&quot;; nation: &quot;Canada&quot;; }
+        ListElement { name: &quot;Chris Hadfield&quot;; nation: &quot;Canada&quot;; }
+        ListElement { name: &quot;Guy Laliberte&quot;; nation: &quot;Canada&quot;; }
+        ListElement { name: &quot;Steven MacLean&quot;; nation: &quot;Canada&quot;; }
+        ListElement { name: &quot;Julie Payette&quot;; nation: &quot;Canada&quot;; }
+        ListElement { name: &quot;Robert Thirsk&quot;; nation: &quot;Canada&quot;; }
+        ListElement { name: &quot;Bjarni Tryggvason&quot;; nation: &quot;Canada&quot;; }
+        ListElement { name: &quot;Dafydd Williams&quot;; nation: &quot;Canada&quot;; }
+    }
+
+    ListView {
+        anchors.fill: parent
+        anchors.margins: 20
+
+        // 切割
+        clip: true
+
+        // 数据
+        model: spaceMen
+
+        // 代理
+        delegate: spaceManDelegate
+
+        // 按那个属性进行分组(指定ListModel数据中属性)
+        section.property: &quot;nation&quot;
+        // 指定分组代理
+        section.delegate: sectionDelegate
+    }
+
+    // 代理
+    Component {
+        id: spaceManDelegate
+
+        Item {
+            width: 260
+            height: 20
+
+            Text {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: 10
+
+                font.pixelSize: 12
+
+                text: name
+            }
+        }
+    }
+
+    // 分组代理
+    Component {
+        id: sectionDelegate
+
+        Rectangle {
+            width: 260
+            height: 20
+
+            color: &quot;lightGray&quot;
+
+            Text {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.leftMargin: 10
+
+                font.pixelSize: 12
+                font.bold: true
+
+                text: section
+            }
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>XML模型（A Model from XML）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>由于XML是一种常见的数据格式，QML提供了XmlListModel元素来包装XML数据。这个元素能够获取本地或者网络上的XML数据，然后通过XPath解析这些数据。</p>
+</blockquote>
+
+<pre><code>Item {
+    width: 300
+    height: 480
+
+    Component {
+        id: imageDelegate
+
+        Item {
+            width: listView.width
+            height: 400
+
+        Column {
+                Text {
+                    text: title
+                }
+
+                Image {
+                    source: imageSource
+                }
+            }
+        }
+    }
+
+    XmlListModel {
+        id: imageModel
+
+        source: &quot;http://feeds.nationalgeographic.com/ng/photography/photo-of-the-day/&quot;
+        query: &quot;/rss/channel/item&quot;
+
+        XmlRole { name: &quot;title&quot;; query: &quot;title/string()&quot; }
+        XmlRole { name: &quot;imageSource&quot;; query: &quot;substring-before(substring-after(description/string(), 'img src=\&quot;'), '\&quot;')&quot; }
+    }
+
+    ListView {
+        id: listView
+
+        anchors.fill: parent
+
+        model: imageModel
+        delegate: imageDelegate
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>性能协调（Tunning Performance）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>一个模型视图的性能很大程度上依赖于代理的创建。
+例如滚动下拉一个链表视图时，代理从外部加入到视图底部，并且从视图顶部移出。
+如果设置剪裁（clip）属性为false，并且代理项花了很多时间来初始化，用户会感觉到视图滚动体验很差。
+
+为了优化这个问题，你可以在滚动时使用像素来调整。
+使用cacheBuffer属性，在上诉情况下的垂直滚动
+它将会调整在链表视图的上下需要预先准备好多少像素的代理项
+结合异步加载图像元素（Image），例如在它们进入视图之前加载。
+
+创建更多的代理项将会牺牲一些流畅的体验，并且花更多的时间来初始化每个代理。
+这并不代表可以解决一些更加复杂的代理项的问题。在每次实例化代理时，它的内容都会被评估和编辑。
+这需要花费时间，如果它花费了太多的时间，它将会导致一个很差的滚动体验。
+在一个代理中包含太多的元素也会降低滚动的性能。
+
+为了补救这个问题，我们推荐使用动态加载元素。当它们需要时，可以初始化这些附加的元素。
+例如，一个展开代理可能推迟它的详细内容的实例化，直到需要使用它时。每个代理中最好减少JavaScript的数量。
+将每个代理中复杂的JavaScript调用放在外面来实现。
+这将会减少每个代理在创建时编译JavaScript。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h2>网络（Networking）</h2>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>通过HTTP服务UI（Serving UI via HTTP）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>通过HTTP加载一个简单的用户界面，我们需要一个web服务器，它为UI文件服务。
+但是首先我们需要有用户界面，我们在项目里创建一个创建了红色矩形框的main.qml。</p>
+</blockquote>
+
+<pre><code>// http://localhost:8000/main.qml
+import QtQuick 2.0
+
+Rectangle {
+    width: 320
+    height: 320
+    color: '#ff0000'
+}
+
+// 动态加载
+Loader {
+    id: root
+    source: 'http://localhost:8080/main2.qml'
+    onLoaded: {
+        root.width = item.width
+        root.height = item.height
+    }
+}
+
+// 也可以使用 $ qmlscene --resize-to-root remote.qml
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>网络组件（Networked Components）</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 我们在远程端添加一个按钮作为可以复用的组件。
+- src/main.qml
+- src/Button.qml
+Rectangle {
+    width: 320
+    height: 320
+    color: '#ff0000'
+
+    Button {
+        anchors.centerIn: parent
+        text: 'Click Me'
+        onClicked: Qt.quit()
+    }
+}
+
+// 我们看到一个错误：
+http://localhost:8080/main2.qml:11:5: Button is not a type
+
+// 我们可以在main.qml中使用import声明来强制QML加载元素：
+import &quot;http://localhost:8080&quot; as Remote
+Remote.Button { ... }
+
+// 一个更好的选择是在服务器端使用qmldir文件来控制输出：
+// qmldir
+Button 1.0 Button.qml
+import &quot;http://localhost:8080&quot; 1.0 as Remote
+Remote.Button { ... }
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>模板（Templating）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>总之，模板可以实现，但是不推荐，无法完整发挥QML的长处。一个更好的方法是使用web服务提供JSON或者XML数据服务。</p>
+</blockquote>
+
+<pre><code>/*
+    当QML访问一个组件时，缓冲渲染树（render-tree），并且只加载缓冲版本来渲染。
+    磁盘上的修改版本或者远程的修改在没有重新启动客户端时不会被检测到。
+    为了克服这个问题，我们需要跟踪。我们使用URL后缀来加载链接（例如http://localhost:8080/main.qml#1234），“#1234”就是后缀标识。
+    HTTP服务器总是为相同的文档服务，但是QML将使用完整的链接来保存这个文档，包括链接标识。
+    每次我们访问的这个链接的标识获得改变，QML缓冲无法获得这个信息。这个后缀标识可以是当前时间的毫秒或者一个随机数。
+*/
+Loader {
+    source: 'http://localhost:8080/main.qml#' + new Date().getTime()
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>HTTP请求（HTTP Requests）</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>XMLHttpRequest对象允许用户注册一个响应操作函数和一个链接。
+一个请求能够使用http动作来发送（如get，post，put，delete，等等）
+当响应到达时，会调用注册的操作函数。操作函数会被调用多次
+每次调用请求的状态都已经改变（例如信息头部已接收，或者响应完成）
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在响应操作中，我们访问原始响应文本并且将它转换为一个javascript对象。
+// JSON对象是一个可以使用的JS对象（在javascript中，一个对象可以是对象或者一个数组）。
+// toString()转换似乎让代码更加稳定。在不使用显式的转换下我有几次都解析错误。
+function request() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
+            print('HEADERS_RECEIVED');
+        } else if(xhr.readyState === XMLHttpRequest.DONE) {
+            var object = JSON.parse(xhr.responseText.toString());
+            print(JSON.stringify(object, null, 2));
+        }
+    }
+    xhr.open(&quot;GET&quot;, &quot;http://118.144.129.194:9992/vlc/face/status&quot;);
+    xhr.send();
+}
+
+Rectangle {
+    anchors.fill: parent
+    color: &quot;red&quot;
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            request()
+        }
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 示例
+Rectangle {
+    width: 320
+    height: 480
+    ListView {
+        id: view
+        anchors.fill: parent
+        delegate: Thumbnail {
+            width: view.width
+            text: modelData.title
+            iconSource: modelData.media.m
+        }
+    }
+
+    function request() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
+                print('HEADERS_RECEIVED')
+            } else if(xhr.readyState === XMLHttpRequest.DONE) {
+                print('DONE')
+                var json = JSON.parse(xhr.responseText.toString())
+                view.model = json.items
+            }
+        }
+        xhr.open(&quot;GET&quot;, &quot;http://api.flickr.com/services/feeds/photos_public.gne?format=json&amp;nojsoncallback=1&amp;tags=munich&quot;);
+        xhr.send();
+    }
+
+    Component.onCompleted: {
+        request()
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>本地文件（Local files）</h4>
+
+<p>-</p>
+
+<blockquote>
+<p>使用XMLHttpRequest也可以加载本地文件（XML/JSON）</p>
+</blockquote>
+
+<pre><code>// 例如加载一个本地名为“colors.json”的文件可以这样使用：
+Rectangle {
+    width: 360
+    height: 360
+    color: '#000'
+
+    GridView {
+        id: view
+        anchors.fill: parent
+        cellWidth: width/4
+        cellHeight: cellWidth
+        delegate: Rectangle {
+            width: view.cellWidth
+            height: view.cellHeight
+            color: modelData.value
+        }
+    }
+
+    function request() {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
+                print('HEADERS_RECEIVED')
+            } else if(xhr.readyState === XMLHttpRequest.DONE) {
+                print('DONE');
+                var obj = JSON.parse(xhr.responseText.toString());
+                view.model = obj.colors
+            }
+        }
+        xhr.open(&quot;GET&quot;, &quot;colors.json&quot;);
+        xhr.send();
+    }
+
+    Component.onCompleted: {
+        request()
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 也可以使用XmlListModel来替代XMLHttpRequest访问本地文件。
+// XmlListModel只能用来读取XML文件，不能读取JSON文件。
+import QtQuick.XmlListModel 2.0
+
+XmlListModel {
+    source: &quot;http://localhost:8080/colors.xml&quot;
+    query: &quot;/colors&quot;
+    XmlRole { name: 'color'; query: 'name/string()' }
+    XmlRole { name: 'value'; query: 'value/string()' }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h2>存储（Storage）</h2>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>配置（Settings）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>Qt自身就提供了基于系统方式的应用程序配置（又名选项，偏好）C++类 QSettings。
+它使用基于当前操作系统的方式存储配置。此外，它支持通用的INI文件格式用来操作跨平台的配置文件。</p>
+</blockquote>
+
+<pre><code>// 每次配置的改变都会被保存
+Rectangle {
+    id: root
+    width: 320; height: 240
+    color: '#000000'
+    Settings {
+        id: settings
+        property alias color: root.color
+    }
+    MousArea {
+        anchors.fill: parent
+        onClicked: root.color = Qt.hsla(Math.random(), 0.5, 0.5, 1.0);
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 需要保存时才会被保存
+Rectangle {
+    id: root
+    color: settings.color
+    Settings {
+        id: settings
+        property color color: '#000000'
+    }
+    function storeSettings() { // executed maybe on destruction
+        settings.color = root.color
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 可以使用category属性存储不同种类的配置。
+Settings {
+    category: 'window'
+    property alias x: window.x
+    property alias y: window.x
+    property alias width: window.width
+    property alias height: window.height
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 配置同城根据你的应用程序名称，组织和域存储。
+// 这些信息通常在你的C++ main函数中设置。
+int main(int argc, char** argv) {
+    ...
+    QCoreApplication::setApplicationName(&quot;Awesome Application&quot;);
+    QCoreApplication::setOrganizationName(&quot;Awesome Company&quot;);
+    QCoreApplication::setOrganizationDomain(&quot;org.awesome&quot;);
+    ...
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h3>本地存储 - SQL（Local Storage - SQL）</h3>
+
+<p>-</p>
+
+<blockquote>
+<p>Qt Quick支持一个与浏览器由区别的本地存储编程接口</p>
+</blockquote>
+
+<p><em>需要使用&rdquo;import QtQuick.LocalStorage 2.0&rdquo;语句来导入后才能使用这个编程接口</em></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 通常使用基于给定的数据库名称和版本号使用系统特定位置的唯一文件ID号来存储数据到一个SQLITE数据库中。
+// 无法列出或者删除已有的数据库。你可以使用QQmlEngine::offlineStoragePate()来寻找本地存储。
+
+// 使用这个编程接口你首选需要创建一个数据库对象，然后在这个数据库上创建数据库事务。
+// 每个事务可以包含一个或多个SQL查询。当一个SQL查询在事务中失败后，事务会回滚。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>import QtQuick 2.2
+import QtQuick.LocalStorage 2.0
+
+Item {
+    Component.onCompleted: {
+        var db = LocalStorage.openDatabaseSync(&quot;MyExample&quot;, &quot;1.0&quot;, &quot;Example database&quot;, 10000);
+        db.transaction( function(tx) {
+            var result = tx.executeSql('select * from notes');
+            for(var i = 0; i &lt; result.rows.length; i++) {
+                    print(result.rows[i].text);
+                }
+            }
+        });
+    }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+<p>Qt 发布了 Qt Quick 的一个全新模块：Qt Quick Controls 这个模块提供了大量类似 Qt Widgets 模块那样可重用的组件</p>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Dialog-QML-Type/" title="Dialog QML Type">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Bash%E5%B0%8F%E6%95%B0%E6%AF%94%E8%BE%83/" title="Bash小数比较">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2017-07-08</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#qt-ref">qt <span>27</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

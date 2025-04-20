@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>C++之socket.cpp监听解码</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>C++之socket.cpp监听解码 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <pre><code>#include &lt;iostream&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;json/json.h&gt;
+
+using namespace std;
+
+// 常量
+#define SERVPORT 4444
+#define BACKLOG 10
+#define MAXSIZE 1024
+
+int main() {
+
+    // 声明
+    int sockfd, client_fd;
+    struct sockaddr_in my_addr;
+    struct sockaddr_in remote_addr;
+
+    // 创建
+    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    perror(&quot;socket create failed!&quot;);
+    exit(1);
+    }
+
+    // 绑定端口地址
+    my_addr.sin_family = AF_INET;
+    my_addr.sin_port = htons(SERVPORT);
+    my_addr.sin_addr.s_addr = INADDR_ANY;
+    bzero(&amp;(my_addr.sin_zero), 8);
+
+    // 捆绑
+    if (bind(sockfd, (struct sockaddr*) &amp;my_addr, sizeof(struct sockaddr))
+        == -1) {
+    perror(&quot;bind error!&quot;);
+    exit(1);
+    }
+
+    // 监听端口
+    if (listen(sockfd, BACKLOG) == -1) {
+    perror(&quot;listen error&quot;);
+    exit(1);
+    }
+
+    // 接受连接
+    int sin_size = sizeof(struct sockaddr_in);
+    if ((client_fd = accept(sockfd, (struct sockaddr *) &amp;remote_addr,
+        (socklen_t *) &amp;sin_size)) == -1) {
+    perror(&quot;accept error!&quot;);
+    exit(1);
+    }
+
+    // 变量
+    string json_str;
+    char buf[MAXSIZE];
+
+    // 处理
+    while (1) {
+
+    // 归零
+    bzero(buf, MAXSIZE);
+
+    // 接受client发送的请示信息
+    if (recv(client_fd, buf, MAXSIZE, 0) == 0)
+        continue;
+
+    buf[strlen(buf) - 1] = ' ';
+    buf[strlen(buf) - 2] = '\0';
+
+    if (strcmp(buf, &quot;QUIT&quot;) == 0) {
+        printf(&quot;%s\n&quot;, &quot;bye!&quot;);
+        close(sockfd);
+        exit(0);
+    }
+
+    // (Char[]-&gt;String)
+    json_str.insert(0, buf);
+
+    // 解析(Json-&gt;Value)
+    Json::Reader reader;
+    Json::Value root;
+    if (!reader.parse(json_str, root, false)) {
+        cout &lt;&lt; &quot;parse error&quot; &lt;&lt; endl;
+        exit(1);
+    }
+
+    // 获取
+    cout &lt;&lt; &quot;Name:&quot; &lt;&lt; root[&quot;name&quot;].asString() &lt;&lt; endl;
+
+    // 写入(Value-&gt;Json)
+    Json::FastWriter writer;
+    json_str = writer.write(root);
+    cout &lt;&lt; json_str &lt;&lt; endl;
+
+    }
+
+    // 返回
+    return 0;
+}
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/C%2B%2B%E4%B9%8B%E9%80%9A%E8%BF%87SDL%E8%BE%93%E5%87%BA%E4%B8%80%E5%BC%A0%E5%9B%BE%E7%89%87/" title="C++之通过SDL输出一张图片">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/C%2B%2B%E4%B9%8BJsoncpp%E7%9A%84%E4%BD%BF%E7%94%A8/" title="C++之Jsoncpp的使用">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-03</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#c%2B%2B-ref">c++ <span>30</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

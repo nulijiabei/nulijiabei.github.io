@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之Toast简单使用方法</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之Toast简单使用方法 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>Toast是Android中用来显示显示信息的一种机制，和Dialog不一样的是</p>
+
+<p>Toast是没有焦点的，而且Toast显示的时间有限，过一定的时间就会自动消失。</p>
+
+<hr />
+
+<pre><code>// 直接创建一个Toast并且显示
+Toast.makeText(getApplicationContext(), &quot;欢迎&quot;, Toast.LENGTH_SHORT).show();
+// 也可以创建后设置一些参数再显示
+Toast toast = Toast.makeText(getApplicationContext(), &quot;欢迎&quot;, Toast.LENGTH_SHORT);
+// 短时间 Toast.LENGTH_SHORT 长时间 Toast.LENGTH_LONG
+// 当然，也可以具体设置显示的时间
+toast.setDuration(Toast.LENGTH_SHORT);
+// 也可以加入一个 View 显示
+View toast.setView(...);
+// 位置, 也可以指定显示位置，默认为屏幕下部居中位置
+toast.setGravity(Gravity.CENTER, 0 ,0);
+// 开始显示
+toast.show();
+</code></pre>
+
+<hr />
+
+<pre><code>// 增加图片显示
+toast = Toast.makeText(getApplicationContext(),
+&quot;带图片的Toast&quot;, Toast.LENGTH_LONG);
+// 同上
+toast.setGravity(Gravity.CENTER, 0, 0);
+// 获取 Layout 
+LinearLayout toastView = (LinearLayout) toast.getView();
+// 创建 ImageView
+ImageView imageCodeProject = new ImageView(getApplicationContext());
+// 设置 icon
+imageCodeProject.setImageResource(R.drawable.icon);
+// 添加到 toast
+toastView.addView(imageCodeProject, 0);
+// 显示
+toast.show();
+</code></pre>
+
+<hr />
+
+<pre><code>LayoutInflater inflater = getLayoutInflater();
+View layout = inflater.inflate(R.layout.custom,
+(ViewGroup) findViewById(R.id.llToast));
+ImageView image = (ImageView) layout
+.findViewById(R.id.tvImageToast);
+image.setImageResource(R.drawable.icon);
+TextView title = (TextView) layout.findViewById(R.id.tvTitleToast);
+title.setText(&quot;Attention&quot;);
+TextView text = (TextView) layout.findViewById(R.id.tvTextToast);
+text.setText(&quot;完全自定义Toast&quot;);
+toast = new Toast(getApplicationContext());
+toast.setGravity(Gravity.RIGHT | Gravity.TOP, 12, 40);
+toast.setDuration(Toast.LENGTH_LONG);
+toast.setView(layout);
+toast.show();
+</code></pre>
+
+<hr />
+
+<pre><code>new Thread(new Runnable() {
+    public void run() {
+     showToast();
+    }
+   }).start();
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8BAlertDialog%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/" title="Android之AlertDialog使用方法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8BPopupWindow%E5%9C%A8%E5%A4%96%E7%82%B9%E5%87%BB%E6%B6%88%E5%A4%B1/" title="Android之PopupWindow在外点击消失">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-03-06</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

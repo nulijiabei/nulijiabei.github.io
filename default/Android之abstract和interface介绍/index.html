@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Android之abstract和interface介绍</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Android之abstract和interface介绍 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h3>abstract , interface</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 抽象类
+abstract class Abc {
+
+    // 抽象类中的抽象方法
+    public abstract void setData(int i);
+
+    public void Print() {
+        // 调用了抽象方法
+        setData(100);
+    }
+
+}
+
+// 该类继承抽象类
+class Bcd extends Abc {
+
+    @Override
+    public void setData(int i) {
+        System.out.print(i);
+    }
+
+}
+
+// 主类
+class Main {
+
+    // 主方法
+    public Main() {
+        // 继承抽象类的类必须实现抽象方法
+        // 除非继承抽象类的类型也是抽象类
+        Bcd bcd = new Bcd();
+        bcd.Print();
+    }
+
+    // 另外一种情况
+    // 实现抽象类的时,必须实现类中抽象方法
+    Abc abc = new Abc() {
+        @Override
+        public void setData(int i) {
+            System.out.print(i);
+        }
+    };
+
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 抽象类
+abstract class Server {
+
+    private int port;
+
+    // 抽象类中的抽象方法
+    public abstract void failure(String data);
+    public abstract void success(int code);
+
+    public void start() {
+        // ... start ...
+        if (true | false) {
+            success(String data);
+        } else {
+            failuer(int code);
+        }
+    }
+
+} 
+
+// 主类
+class Main {
+    public Main() {
+        Server server = new Server() {
+            @Override
+            public void success(String data) {
+                System.out.print(data)
+            }
+            @Override
+            public void failure(int code) {
+                System.out.print(code)
+            }
+        };
+        server.start();
+    }
+}   
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>abstract class和interface在Java语言中都是用来进行抽象类定义.</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>使用abstract class的方式定义Demo抽象类的方式如下：</p>
+
+<blockquote>
+<pre><code>abstract class Demo ｛
+    abstract void method1();
+    abstract void method2();
+    …
+｝
+</code></pre>
+</blockquote>
+
+<p>使用interface的方式定义Demo抽象类的方式如下：</p>
+
+<blockquote>
+<pre><code>interface Demo {
+    void method1();
+    void method2();
+    …
+}
+</code></pre>
+</blockquote>
+
+<p>在abstract class方式中，Demo可以有自己的数据成员，也可以有非abstarct的成员方法</p>
+
+<p>而在interface方式的实现中，Demo只能够有静态的不能被修改的数据成员（也就是必须是static final的）</p>
+
+<p>所有的成员方法都是abstract的。从某种意义上说，interface是一种特殊形式的abstract class。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>考虑这样一个例子，假设在我们的问题领域中有一个关于Door的抽象概念，该Door具有执行两个动作open和close</p>
+
+<p>此时我们可以通过abstract class或者interface来定义一个表示该抽象概念的类型，定义方式分别如下所示：</p>
+
+<blockquote>
+</blockquote>
+
+<p>使用abstract class方式定义Door：</p>
+
+<blockquote>
+<pre><code>abstract class Door {
+        abstract void open();
+        abstract void close()；
+}
+</code></pre>
+</blockquote>
+
+<p>使用interface方式定义Door：</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>interface Door {
+    void open();
+    void close();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>其他具体的Door类型可以extends使用abstract class方式定义的Door或者implements使用interface方式定义的Door。</p>
+
+<p>看起来好像使用abstract class和interface没有大的区别。</p>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<p>如果现在要求Door还要具有报警的功能。我们该如何设计针对该例子的类结构呢</p>
+
+<blockquote>
+</blockquote>
+
+<p>解决方案一：</p>
+
+<blockquote>
+</blockquote>
+
+<p>简单的在Door的定义中增加一个alarm方法，如下：</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>abstract class Door {
+        abstract void open();
+        abstract void close()；
+        abstract void alarm();
+}
+</code></pre>
+
+<blockquote>
+<pre><code>或者
+</code></pre>
+</blockquote>
+
+<pre><code>interface Door {
+        void open();
+    void close();
+    void alarm();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>那么具有报警功能的AlarmDoor的定义方式如下：</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>class AlarmDoor extends Door {
+        void open() { … }
+        void close() { … }
+        void alarm() { … }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>或者
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>class AlarmDoor implements Door ｛
+    void open() { … }
+    void close() { … }
+    void alarm() { … }
+｝
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>这种方法违反了面向对象设计中的一个核心原则ISP（Interface Segregation Priciple）</p>
+
+<p>在Door的定义中把Door概念本身固有的行为方法和另外一个概念&rdquo;报警器&rdquo;的行为方法混在了一起。</p>
+
+<p>这样引起的一个问题是那些仅仅依赖于Door这个概念的模块会因为&rdquo;报警器&rdquo;这个概念的改变而改变，反之依然。</p>
+
+<blockquote>
+</blockquote>
+
+<p>解决方案二：</p>
+
+<blockquote>
+</blockquote>
+
+<p>既然open、close和alarm属于两个不同的概念，根据ISP原则应该把它们分别定义在代表这两个概念的抽象类中。</p>
+
+<p>定义方式有：这两个概念都使用abstract class方式定义；</p>
+
+<p>两个概念都使用interface方式定义；一个概念使用abstract class方式定义，另一个概念使用interface方式定义。</p>
+
+<blockquote>
+</blockquote>
+
+<p>方式定义。如下所示：</p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>abstract class Door {
+        abstract void open();
+        abstract void close()；
+}
+
+interface Alarm {
+    void alarm();
+}
+
+class AlarmDoor extends Door implements Alarm {
+    void open() { … }
+    void close() { … }
+    void alarm() { … }
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p>这种实现方式基本上能够明确的反映出我们对于问题领域的理解，正确的揭示我们的设计意图。</p>
+
+<p>其实abstract class表示的是&rdquo;is a&rdquo;关系, interface表示的是&rdquo;like a&rdquo;关系，大家在选择时可以作为一个依据</p>
+
+<blockquote>
+</blockquote>
+
+<p>abstract class和interface是Java语言中的两种定义抽象类的方式，它们之间有很大的相似性。</p>
+
+<p>但是对于它们的选择却又往往反映出对于问题领域中的概念本质的理解</p>
+
+<p>对于设计意图的反映是否正确、合理，因为它们表现了概念间的不同的关系（虽然都能够实现需求的功能）。</p>
+
+<p>这其实也是语言的一种的惯用法，希望读者朋友能够细细体会。</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Android%E4%B9%8B%E6%B7%BB%E5%8A%A0%E5%BF%AB%E6%8D%B7%E6%96%B9%E5%BC%8F%E5%88%B0%E6%89%8B%E6%9C%BA%E6%A1%8C%E9%9D%A2/" title="Android之添加快捷方式到手机桌面">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Android%E4%B9%8B%E5%A7%94%E6%89%98%E6%A8%A1%E5%BC%8F%E5%BC%80%E5%8F%91/" title="Android之委托模式开发">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2015-07-05</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#android-ref">android <span>107</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

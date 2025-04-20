@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Linux-通过文件修改密码</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Linux-通过文件修改密码 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <p>1,/etc/rc.d/rc.local 此文件可以写系统启动后开启的命令</p>
+
+<pre><code>如 su – root -c ‘/home/mysql/ultserver/userver &amp;’
+</code></pre>
+
+<p>2,/etc/profile 系统环境变量设置点</p>
+
+<pre><code>export JAVA_HOME=/usr/java/jdk1.5.0_06
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JABA_HOME/lib/tools.jar
+</code></pre>
+
+<p>3,.bashrc 或 .bash_profile 设置用户而不是系统的环境变量</p>
+
+<p>4,/etc/shadow 内容包括用户及被加密的密码以及其它/etc/passwd 不能包括的信息，比如用户的有效期限</p>
+
+<pre><code>einan:$1$VE.Mq2Xf$2c9Qi7EQ9JP8GKF8gH7PB1:13072:0:99999:7:::
+linuxsir:$1$IPDvUhXP$8R6J/VtPXvLyXxhLWPrnt/:13072:0:99999:7::13108:
+
+第一字段：用户名（也被称为登录名），在/etc/shadow中，用户名和/etc/passwd 是相同的，这样就把passwd 和shadow
+中用的用户记录联系在一起；这个字段是非空的；
+第二字段：密码（已被加密），如果是有些用户在这段是x，表示这个用户不能登录到系统；这个字段是非空的；
+第三字段：上次修改口令的时间；这个时间是从1970年01月01日算起到最近一次修改口令的时间间隔（天数），
+您可以通过passwd 来修改用户的密码，然后查看/etc/shadow中此字段的变化；
+第四字段：两次修改口令间隔最少的天数；如果设置为0,则禁用此功能；也就是说用户必须经过多少天才能修改其口令；
+此项功能用处不是太大；默认值是通过/etc/login.defs文件定义中获取，PASS_MIN_DAYS 中有定义；
+第五字段：两次修改口令间隔最多的天数；这个能增强管理员管理用户口令的时效性，应该说在增强了
+系统的安全性；如果是系统默认值，是在添加用户时由/etc/login.defs文件定义中获取，在 
+PASS_MAX_DAYS 中定义；
+第六字段：提前多少天警告用户口令将过期；当用户登录系统后，系统登录程序提醒用户口令将
+要作废；如果是系统默认值，是在添加用户时由/etc/login.defs文件定义中获取，
+在PASS_WARN_AGE 中定义；
+第七字段：在口令过期之后多少天禁用此用户；此字段表示用户口令作废多少天后，
+系统会禁用此用户，也就是说系统会不能再让此用户登录，也不会提示用户过期，是完全禁用；
+第八字段：用户过期日期；此字段指定了用户作废的天数（从1970年的1月1日开始的天数），
+如果这个字段的值为空，帐号永久可用；
+第九字段：保留字段，目前为空，以备将来Linux发展之用；如果更为详细的，
+请用 man shadow来查看帮助，您会得到更为详尽的资料；
+
+/etc/password 帐户花名册
+
+beinan:x:500:500:beinan sun:/home/beinan:/bin/bash
+linuxsir:x:505:502:linuxsir open,linuxsir office,13898667715:/home/linuxsir:/bin/bash
+beinan:x:500:500:beinan sun:/home/beinan:/bin/bash
+linuxsir:x:501:502::/home/linuxsir:/bin/bash
+
+第一字段：用户名（也被称为登录名）；在上面的例子中，我们看到这两个用户的用户名分别是 
+beinan 和linuxsir；
+第二字段：口令；在例子中我们看到的是一个x，其实密码已被映射到/etc/shadow 文件中；
+第三字段：UID ；请参看本文的UID的解说；
+第四字段：GID；请参看本文的GID的解说；
+第五字段：用户名全称，这是可选的，可以不设置，在beinan这个用户中，用户的全称是beinan sun ；
+而linuxsir 这个用户是没有设置全称；
+第六字段：用户的家目录所在位置；beinan 这个用户是/home/beinan ，而linuxsir 这个用户是
+/home/linuxsir ；
+第七字段：用户所用SHELL 的类型，beinan和linuxsir 都用的是 bash ；所以设置为/bin/bash ； 
+</code></pre>
+
+<p>5,/etc/init.d/：所有服务的预设启动 script 都是放在这里的，例如要启动或者关闭 iptables 的话：</p>
+
+<pre><code>/etc/init.d/iptables start 
+/etc/init.d/iptables stop
+</code></pre>
+
+<p>6./etc/inittab 设置启动level，如果要从图形界面启动切换到字符界面就需要修改这个文件</p>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Linux-%E9%A9%B1%E5%8A%A8%E5%8A%A0%E8%BD%BD/" title="Linux-驱动加载">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Linux-%E9%80%9A%E8%BF%87-proc-%E6%9F%A5%E7%9C%8B%E7%A1%AC%E4%BB%B6%E4%BF%A1%E6%81%AF/" title="Linux-通过-proc-查看硬件信息">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-07-04</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

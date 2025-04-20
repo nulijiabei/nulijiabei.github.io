@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>OpenCV之三帧差分法运动检测</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>OpenCV之三帧差分法运动检测 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<pre><code>#include &quot;opencv2/core/core.hpp&quot;
+#include &quot;opencv2/highgui/highgui.hpp&quot;
+#include &quot;opencv2/imgproc/imgproc.hpp&quot;
+#include &lt;stdio.h&gt;
+
+#define threshold_diff1 25 //设置简单帧差法阈值
+#define threshold_diff2 25 //设置简单帧差法阈值
+
+using namespace cv;
+using namespace std;
+
+int main(int argc,unsigned char* argv[])
+{
+    Mat img_src1,img_src2,img_src3;//3帧法需要3帧图片
+    Mat img_dst,gray1,gray2,gray3;
+    Mat gray_diff1,gray_diff2;//存储2次相减的图片
+    Mat gray_diff11,gray_diff12;
+    Mat gray_diff21,gray_diff22;
+    Mat gray;//用来显示前景的
+    bool pause=false;
+
+    VideoCapture vido_file(&quot;/home/danoo/b60.avi&quot;);//在这里改相应的文件名
+    namedWindow(&quot;foreground&quot;,0);
+    for (;;)
+    {
+    if(!false)
+    {
+        vido_file &gt;&gt;img_src1;
+        cvtColor(img_src1,gray1,CV_BGR2GRAY);
+
+        waitKey(33);
+        vido_file &gt;&gt;img_src2;
+        cvtColor(img_src2,gray2,CV_BGR2GRAY);
+        imshow(&quot;video_src&quot;,img_src2);//
+
+        waitKey(33);
+        vido_file &gt;&gt;img_src3;
+        cvtColor(img_src3,gray3,CV_BGR2GRAY);
+
+        Sobel(gray1,gray1,  CV_8U,1,0,3,0.4,128);
+        Sobel(gray2,gray2,  CV_8U,1,0,3,0.4,128);
+        Sobel(gray3,gray3,  CV_8U,1,0,3,0.4,128);
+
+        subtract(gray2,gray1,gray_diff11);//第二帧减第一帧
+        subtract(gray1,gray2,gray_diff12);
+        add(gray_diff11,gray_diff12,gray_diff1);
+        subtract(gray3,gray2,gray_diff21);//第三帧减第二帧
+        subtract(gray2,gray3,gray_diff22);
+        add(gray_diff21,gray_diff22,gray_diff2);
+
+        for(int i=0;i&lt;gray_diff1.rows;i++)
+        for(int j=0;j&lt;gray_diff1.cols;j++)
+        {
+            if(abs(gray_diff1.at&lt;unsigned char&gt;(i,j))&gt;=threshold_diff1)//这里模板参数一定要用unsigned char，否则就一直报错
+            gray_diff1.at&lt;unsigned char&gt;(i,j)=255;            //第一次相减阈值处理
+            else gray_diff1.at&lt;unsigned char&gt;(i,j)=0;
+
+            if(abs(gray_diff2.at&lt;unsigned char&gt;(i,j))&gt;=threshold_diff2)//第二次相减阈值处理
+            gray_diff2.at&lt;unsigned char&gt;(i,j)=255;
+            else gray_diff2.at&lt;unsigned char&gt;(i,j)=0;
+        }
+        bitwise_and(gray_diff1,gray_diff2,gray);
+
+        dilate(gray,gray,Mat());erode(gray,gray,Mat());
+
+        imshow(&quot;foreground&quot;,gray);
+    }
+    if( cvWaitKey(33) &gt;= 0 )
+        break;
+    }
+    return 0;
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 帧差法
+
+// 帧间差分法的原理简单，计算量小，能够快速检测出场景中的运动目标
+// 采用两帧差分法检测出的目标会出现重影的现象，采用三帧差分法，可以检测出较为完整的运动目标
+// 帧间差分法的局限性是仅能在三帧中进行差异运算 ... 差异大效果好 ...
+// 对于摄像头的画面进行帧差法检测可以通过控制画面采集的时间来实现更好的检测效果 ...
+// 可以尝试通过刚性位移检测该运动移动方向 ...
+
+Mat a1, a2, a3;
+Mat g1, g2, g3;
+Mat d1, d2, d3;
+Mat frame;
+VideoCapture m_cap = VideoCapture(&quot;E:/bbb.mp4&quot;);
+while(true)
+{
+
+    // 连续三帧对于高速移动的物体有着较好的检测效果 ...
+    m_cap &gt;&gt; a1;
+    m_cap &gt;&gt; a2;
+    m_cap &gt;&gt; a3;
+
+    cvtColor(a1, g1, COLOR_BGR2GRAY); // 转换颜色空间 ...
+    cvtColor(a2, g2, COLOR_BGR2GRAY); // 转换颜色空间 ...
+    cvtColor(a3, g3, COLOR_BGR2GRAY); // 转换颜色空间 ...
+
+    absdiff(g1, g2, d1); // 做差求绝对值 ...
+    absdiff(g2, g3, d2); // 做差求绝对值 ...
+    bitwise_and(d1, d2, d3); // 与运算 ...
+
+    // 图像上的像素点的灰度值设置为0或255, 这样将使整个图像呈现出明显的黑白效果
+    threshold(d3, frame, 20, 255.0, THRESH_BINARY); // 二值化
+
+    dilate(frame, frame, Mat()); // 膨胀(膨胀是将白色区域扩大)
+    // erode(frame, frame, Mat()); // 腐蚀(腐蚀是将黑色区域扩大)
+
+    int count = 0;
+    Mat_&lt;uchar&gt;::iterator it = frame.begin&lt;uchar&gt;();
+    Mat_&lt;uchar&gt;::iterator itend = frame.end&lt;uchar&gt;();
+    for (; it != itend; ++it) {
+        if ((*it)&gt;0) count+=1; // 二值化后，像素点是0或者255
+    }
+    m_log-&gt;debug(QString(&quot;&gt;&gt; %1&quot;).arg(count));
+
+    imshow(&quot;windows&quot;, frame);
+    waitKey(1000/30);
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Linux%E4%B9%8BHuawei%E8%AE%BE%E5%A4%87%E4%B8%8D%E8%83%BD%E6%AD%A3%E5%B8%B8%E8%AF%86%E5%88%ABttyUSB%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95/" title="Linux之Huawei设备不能正常识别ttyUSB解决办法">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/OpenCV%E4%B9%8B%E4%BB%8Evideo%E8%AE%BE%E5%A4%87%E5%BD%95%E5%88%B6%E8%A7%86%E9%A2%91/" title="OpenCV之从video设备录制视频">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2017-09-21</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#opencv-ref">opencv <span>6</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

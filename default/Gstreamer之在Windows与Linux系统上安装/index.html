@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Gstreamer之在Windows与Linux系统上安装</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Gstreamer之在Windows与Linux系统上安装 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>什么是 Gstreamer？</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Gstreamer是一个支持Windows，Linux，Android， iOS的跨平台的多媒体框架，
+应用程序可以通过管道（Pipeline）的方式，将多媒体处理的各个步骤串联起来，达到预期的效果。
+每个步骤通过元素（Element）基于GObject对象系统通过插件（plugins）的方式实现，方便了各项功能的扩展。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<p><img src="/assets/media/2020-08-30-Gstreamer之在Windows与Linux系统上安装/aa.png" alt="" width="600"></p>
+
+<blockquote>
+</blockquote>
+
+<pre><code>Gstreamer框架根据各个模块的成熟度以及所使用的开源协议，将core及plugins置于不同的源码包中：
+1. gstreamer: 包含core framework及core elements。
+2. gst-plugins-base: gstreamer应用所需的必要插件。
+3. gst-plugins-good: 高质量的采用LGPL授权的插件。
+4. gst-plugins-ugly: 高质量，但使用了GPL等其他授权方式的库的插件，比如使用GPL的x264，x265。
+5. gst-plugins-bad: 质量有待提高的插件，成熟后可以移到good插件列表中。
+6. gst-libav: 对libav封装，使其能在gstreamer框架中使用。
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 官方文档
+https://gstreamer.freedesktop.org/data/doc/gstreamer/head/
+https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gstreamer-plugins/html/
+https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/
+https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-bad-plugins/html/
+https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-good-plugins/html/
+https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-gl-plugins/
+https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-ugly-plugins/html/
+https://gstreamer.freedesktop.org/data/doc/gstreamer/head/gstreamer-vaapi-plugins/html/
+
+// 官方样例
+https://github.com/GStreamer/gst-plugins-base/tree/master/tests/examples
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<h4>Gstreamer之在Windows与Linux系统上安装</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在 Linux 系统上安装 ...
+
+// 官方安装文档 ...
+https://.freedesktop.org/documentation/installing/on-linux.html?gi-language=c
+
+// 官方安装
+apt-get install 
+libgstreamer1.0-0 
+gstreamer1.0-plugins-base 
+gstreamer1.0-plugins-good 
+gstreamer1.0-plugins-bad 
+gstreamer1.0-plugins-ugly 
+gstreamer1.0-libav gstreamer1.0-doc 
+gstreamer1.0-tools gstreamer1.0-x 
+gstreamer1.0-alsa gstreamer1.0-gl 
+gstreamer1.0-gtk3 
+gstreamer1.0-qt5 
+gstreamer1.0-pulseaudio
+
+// 开发 ...
+apt-get install libgstreamer1.0-dev
+apt-get install libgstreamer-plugins-base1.0-dev
+</code></pre>
+
+<blockquote>
+<p>在 Windows 系统上安装 &hellip;</p>
+</blockquote>
+
+<pre><code>// 官方安装文档 ...
+https://gstreamer.freedesktop.org/documentation/installing/on-windows.html?gi-language=c
+
+// 下载 MinGw 或 MSVC 运行时与开发包 ...
+https://gstreamer.freedesktop.org/download/
+
+// 安装 ... 这里使用 MinGw 32 样例
+gstreamer-1.0-devel-mingw-x86-1.16.2.msi
+gstreamer-1.0-mingw-x86-1.16.2.msi
+
+// 环境变量
+PATH 增加 D:\gstreamer\1.0\x86\bin
+GST_PLUGIN_PATH 设置 D:\gstreamer\1.0\x86
+</code></pre>
+
+<blockquote>
+<p>Linux 测试指令 &hellip;</p>
+</blockquote>
+
+<pre><code>gst-launch-1.0
+// 列出当前系统中支持的所有Element
+// 这些Element可用于构造Pipeline.
+
+// DEBUG
+GST_DEBUG=fpsdisplaysink:5
+--gst-debug=kmssink:5  
+--gst-debug=qtdemux:5 
+
+// 测试
+gst-launch-1.0 videotestsrc ! kmssink
+gst-launch-1.0 videotestsrc ! xvimagesink 
+gst-launch-1.0 videotestsrc ! kmssink plane-properties=s,rotation=4
+gst-launch-1.0 audiotestsrc ! audioconvert ! audioresample ! osssink
+gst-launch-1.0 videotestsrc ! kmssink render-rectangle='&lt;0,0,1920,1080&gt;' can-scale=0
+</code></pre>
+
+<blockquote>
+<p>Windows 测试代码 &hellip;</p>
+</blockquote>
+
+<pre><code>// 在 Qt 环境下 MinGW 32 编译 ...
+
+#include &lt;QCoreApplication&gt;
+#include &quot;gst/gst.h&quot;
+
+using namespace std;
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+
+    // Element 就像一个黑盒子, 一个管道 ...
+    // 从 Element 的一端输入数据, Element 对数据进行一些处理，然后数据从 Element 的另一端输出
+    GstElement *pipeline;
+
+    // Bus(总线) 主要用于向用户提供内部 Elements 的事件信息
+    // 每一个管道默认包含一个总线，所以应用程序不需要再创建总线
+    // 应用程序只需要在总线上设置一个类似于对象的信号处理器的消息处理器
+    GstBus *bus;
+
+    // Bus 发出的消息是 GstMessage 结构
+    GstMessage *msg;
+
+    /* Initialize GStreamer */
+    gst_init(&amp;argc, &amp;argv);
+
+    /* Build the pipeline */
+    // gst_parse_launch 通过分析管道说明创建管道 ...
+    // playbin 整合的元件，内部建立工厂管道
+    pipeline = gst_parse_launch(&quot;playbin uri=file:///e:/yiyezi.mp4&quot;, NULL);
+
+    /* Start playing */
+    // GST_STATE_VOID_PENDING   无效挂起状态
+    // GST_STATE_NULL           元素的空状态或初始状态
+    // GST_STATE_READY          元素已准备好转到“暂停”。
+    // GST_STATE_PAUSED         元素已暂停
+    // GST_STATE_PLAYING        元素正在播放
+    // 设置 Element 状态为 GST_STATE_PLAYING
+    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+    /* Wait until error or EOS */
+    // 从 Element(管道) 中获得 Bus(总线)
+    bus = gst_element_get_bus(pipeline);
+
+    // 从总线上获取一条消息，该消息的类型与消息类型的掩码类型匹配，直到指定的超时时间为止（并丢弃所有与提供的掩码不匹配的消息）
+    // 也就是直到从 Bus(总线) 总获取到 GST_MESSAGE_ERROR 或 GST_MESSAGE_EOS 消息时才返回 ...
+    msg = gst_bus_timed_pop_filtered(bus, GST_CLOCK_TIME_NONE, (GstMessageType) (GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+
+    /* Free resources */
+    if (msg != NULL)
+    // 减少 Message 的引用计数, 如果为零则销毁
+    gst_message_unref(msg);
+
+    // 减少 Bus(总线) 的引用计数, 如果为零则销毁
+    gst_object_unref(bus);
+    // 设置 Element 状态为 GST_STATE_NULL
+    gst_element_set_state(pipeline, GST_STATE_NULL);
+    // 减少 Element(管道) 的引用计数, 如果为零则销毁
+    gst_object_unref(pipeline);
+
+    return a.exec();
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>win32 {
+    INCLUDEPATH += D:\gstreamer\1.0\x86\include\gstreamer-1.0
+    INCLUDEPATH += D:\gstreamer\1.0\x86\include\glib-2.0
+    INCLUDEPATH += D:\gstreamer\1.0\x86\lib\glib-2.0\include
+    LIBS += D:\gstreamer\1.0\x86\lib\gstreamer-1.0.lib
+}
+
+unix {
+    INCLUDEPATH += /usr/include/gstreamer-1.0
+    INCLUDEPATH += /usr/include/glib-2.0
+    INCLUDEPATH += /usr/lib/aarch64-linux-gnu/glib-2.0/include
+    LIBS += -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0
+}
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<h4>Rockchip Linux 扩展</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 编译安装 ...
+https://github.com/rockchip-linux/mpp
+https://github.com/rockchip-linux/gstreamer-rockchip
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 视频播放 ...
+gst-launch-1.0 --gst-plugin-path=/usr/local/lib/gstreamer-1.0 filesrc location=/root/bright_me_up_3840x2160_30fps.mp4 ! qtdemux ! queue ! h264parse ! mppvideodec ! fpsdisplaysink text-overlay=false video-sink=kmssink
+
+// 视频 and 音频播放 ...
+gst-launch-1.0 filesrc location=bright_me_up_3840x2160_30fps.mp4 ! qtdemux name=demux  demux.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! autoaudiosink demux.video_0 ! queue ! h264parse ! mppvideodec ! fpsdisplaysink text-overlay=false video-sink=kmssink
+
+// Debug ...
+GST_DEBUG=fpsdisplaysink:5 gst-launch-1.0  filesrc location=bright_me_up_3840x2160_30fps.mp4 ! qtdemux name=demux  demux.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! autoaudiosink demux.video_0 ! queue ! h264parse ! mppvideodec ! videorate ! video/x-raw,framerate=30/1,width=3840,height=2160 ! fpsdisplaysink text-overlay=false video-sink=kmssink
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Gstreamer%E4%B9%8B%E5%BA%94%E7%94%A8%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5/" title="Gstreamer之应用项目实践">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Gstreamer%E4%B9%8B%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90/" title="Gstreamer之基础教程案例分析">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2020-08-30</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

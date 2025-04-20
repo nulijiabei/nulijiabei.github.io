@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Darwin Streaming Server</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>Darwin Streaming Server </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <h3>1、什么是Darwin Streaming Server</h3>
+
+<blockquote>
+</blockquote>
+
+<p>目前主流的流媒体服务器有</p>
+
+<p>微软的windows media server</p>
+
+<p>RealNetworks的Helixserver</p>
+
+<p>苹果公司的Darwin Streaming Server.</p>
+
+<p>微软的windows media server只能在windows下使用</p>
+
+<p>RealNetworks的Helixserver是一款跨平台的软件，功能强大，但非免费。</p>
+
+<p>Darwin Streaming Server简称DSS。</p>
+
+<p>DSS是Apple公司提供的开源实时流媒体播放服务器程序。</p>
+
+<p>整个程序使用C++编写，在设计上遵循高性能，简单，模块化等程序设计原则，务求做到程序高效，可扩充性好。</p>
+
+<p>并且DSS是一个开放源代码的，基于标准的流媒体服务器</p>
+
+<p>可以运行在Windows NT和Windows 2000，以及几个UNIX实现上，包括Mac OS X，Linux，FreeBSD，和Solaris操作系统上的。</p>
+
+<hr />
+
+<h3>2、在Linux中编译安装Darwin Streaming Server</h3>
+
+<blockquote>
+</blockquote>
+
+<p>首先需要进行一些必要的准备工作：</p>
+
+<pre><code>apt-get install patch make gcc g++ 
+</code></pre>
+
+<p>准备好软件暂存的目录，并从官网下载软件的源码：</p>
+
+<pre><code>mkdir soft
+cd soft
+wget http://dss.macosforge.org/downloads/DarwinStreamingSrvr6.0.3-Source.tar
+</code></pre>
+
+<p>源码下载完成后，需要解压tar包，</p>
+
+<pre><code>tar xvf DarwinStreamingSrvr6.0.3-Source.tar
+</code></pre>
+
+<p>给源码安装补丁文件，进入DarwinStreamingSrvr6.0.3-Source目录，并打补丁：</p>
+
+<pre><code>cd DarwinStreamingSrvr6.0.3-Source
+wget http://www.abrahamsson.com/dss-6.0.3.patch
+patch -p1 &lt; dss-6.0.3.patch  
+</code></pre>
+
+<p>执行</p>
+
+<pre><code>./Buildit 
+</code></pre>
+
+<p>编译完成后，我们来生成linux下的dss安装包</p>
+
+<pre><code>执行 ./buildtarball 
+</code></pre>
+
+<p>生成 DarwinStreamingSrvr-Linux.tar.gz</p>
+
+<p>解压缩</p>
+
+<pre><code>tar -zxvf DarwinStreamingSrvr-Linux.tar.gz 
+cd DarwinStreamingSrvr-Linux 
+</code></pre>
+
+<p>对Install文件做修改</p>
+
+<pre><code>if [ $INSTALL_OS = &quot;Linux&quot; ]; then 
+    /usr/sbin/useradd -M qtss &gt; /dev/null 2&gt;&amp;1 
+else 
+    /usr/sbin/useradd qtss &gt; /dev/null 2&gt;&amp;1 
+fi
+</code></pre>
+
+<p>将-M修改成-m</p>
+
+<p><img src="/assets/media/Darwin-Streaming-Server/1.png" alt="" width="600"></p>
+
+<p>执行./Install</p>
+
+<pre><code>Please enter a new administrator user name: 【新管理员】
+Please enter a new administrator Password: 【密码】
+</code></pre>
+
+<p>查看是否安裝成功</p>
+
+<pre><code>ps aux | grep Darwin(查看流媒体服务器的进程) 
+root ... ... ... /usr/local/sbin/DarwinStreamingServer
+qtss ... ... ... /usr/local/sbin/DarwinStreamingServer
+netstat -ntulp | grep Darwin(查看流媒体服务器的端口)
+</code></pre>
+
+<p><img src="/assets/media/Darwin-Streaming-Server/2.png" alt="" width="600"></p>
+
+<hr />
+
+<h3>3、启动 Darwin Streaming Server</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>sudo /usr/local/sbin/DarwinStreamingServer
+</code></pre>
+
+<p>启动 Web 管理介面 (tcp port 1220)</p>
+
+<pre><code>sudo /usr/local/sbin/streamingadminserver.pl
+</code></pre>
+
+<p>ps. 以上两项在刚安装好的时候会自动启动，不需手动执行</p>
+
+<p>小技巧：自动启动流媒体服务器的方法：</p>
+
+<p>自动运行流媒体服务器序非常简单，把上述命令添加在/etc/rc.d/rc.local脚本中即可。</p>
+
+<p>最后在服务器输入 http://你的IP:1220/来访问web管理</p>
+
+<p><img src="/assets/media/Darwin-Streaming-Server/3.png" alt="" width="600"></p>
+
+<p>默认的媒体文件存放在/usr/local/movies</p>
+
+<p>你可以在web管理面板修改这个路径。</p>
+
+<hr />
+
+<h3>4、访问自己的流媒体服务</h3>
+
+<blockquote>
+</blockquote>
+
+<p>可以使用VLC media player这个软件，输入</p>
+
+<pre><code>rtsp://你的IP/sample_100kbit.mp4
+</code></pre>
+
+<p>来播放默认的测试视频。如果你的网速够给力的话效果还不错 ：)</p>
+
+<hr />
+
+<h3>视频需要 MP4Box 处理一下，否则无法播放</h3>
+
+<blockquote>
+</blockquote>
+
+<pre><code>MP4Box -hint xxx.mp4 // hints the given file for rtp/rtsp
+
+yum -y install freeglut
+
+yum -y install freeglut-devel
+
+wget http://downloads.sourceforge.net/gpac/gpac-0.4.5.tar.gz
+
+wget http://downloads.sourceforge.net/gpac/gpac_extra_libs-0.4.5.tar.gz
+
+tar zxvf gpac-0.4.5.tar.gz
+
+tar zxvf gpac_extra_libs-0.4.5.tar.gz
+
+cd gpac
+
+cp -r ../gpac_extra_libs/* extra_lib/
+
+chmod +x configure
+
+./configure
+
+make lib
+
+make apps
+
+make install
+
+cp bin/gcc/libgpac.so /usr/lib
+
+ldconfig
+
+MP4Box -version
+</code></pre>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/Go-SSH-%E4%BD%BF%E7%94%A8/" title="Go-SSH-使用">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/Go-SSH/" title="Go-SSH">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2014-11-14</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#system-ref">system <span>82</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

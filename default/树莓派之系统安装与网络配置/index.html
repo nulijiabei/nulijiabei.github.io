@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>树莓派之系统安装与网络配置</title>
+  
+    <meta name="author" content="nljb">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/twitter/stylesheets/bootstrap.min.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/stylesheets/style.css" type="text/css" rel="stylesheet" media="all">
+<link href="/assets/twitter/widgets/google_prettify/stylesheets/twitter-bootstrap.css" type="text/css" rel="stylesheet" media="all">
+ 
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+  </head>
+
+  <body>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">NLJB - 别问我为啥叫加贝(哥名里有贺)</a>
+          <ul class="nav">
+            
+              
+
+
+  <li><a href="/archive">存档</a></li>
+
+
+            
+              
+
+
+  <li><a href="/tags">标签</a></li>
+
+
+            
+              
+
+
+  <li><a href="/categories">分类</a></li>
+
+
+            
+              
+
+
+  <li><a href="/pages">页面</a></li>
+
+
+            
+              
+
+
+  <li><a href="/about">关于我</a></li>
+
+
+            
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+  <h1>树莓派之系统安装与网络配置 </h1>
+</div>
+
+<div class="row">
+  <div class="span12">
+    <blockquote>
+</blockquote>
+
+<h4>树莓派之系统安装与网络配置</h4>
+
+<blockquote>
+</blockquote>
+
+<pre><code>硬件:
+    树莓派zero(w)
+    PC一台(这里用的win10)
+    普通micro数据线
+    读卡器和8G容量以上的TF卡
+
+软件:
+    win32diskimager
+    树莓派官方固件 (https://www.raspberrypi.org/downloads/raspbian/)
+    Linux (虚拟机实体机都可以)
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在 windows 系统下运行 win32diskimager 程序
+// 选择系统u盘，并选择 raspbian 镜像 ... 开始安装 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 在安装完系统之后先不要着急将存储卡放回到树莓派上 ...
+// 将存储卡挂载到 Linux 系统或虚拟机中 ... 会看到两个分区 ...
+// 一般来说 sda1（boot分区）、sda2（root分区）
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 开启SSH
+// 挂载 boot 分区，在分区根目录创建名字为 ssh 的文件
+touch ssh
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 开放树莓派虚拟网卡功能实现数据线互联 ...
+// 在 boot 分区中修改 config.txt 文件 ... 末行加入 ...
+dtoverlay=dwc2
+
+// 在 boot 分区中修改 cmdline.txt 文件 ... 找到 rootwite 
+// 在 rootwite 后边加入 modules-load=dwc2,g_ether 注意空格
+modules-load=dwc2,g_ether
+
+// 配置有线及WIFI ...
+// 挂载 root 分区，在分区内修改 /etc/network/interfaces 文件
+
+// 有线部分 ...
+allow-hotplug usb0
+auto usb0
+iface usb0 inet static
+address 192.168.137.2
+netmask 255.255.255.0
+# gateway 192.168.137.1 // 这里说明一下，如果WIFI就把有线网关禁用
+dns-nameservers 114.114.114.114
+
+// WIFI 部分 ...
+auto wlan0 
+iface wlan0 inet dhcp
+wpa_conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+# 配置 /etc/wpa_supplicant/wpa_supplicant.conf
+network={
+    ssid=&quot;wifiname&quot;
+    psk=&quot;password&quot;
+}
+
+// 如果是开放网络把 psk 那行改成 key_mgmt=NONE
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 配置完成后将USB数据线接入到电脑(Linux虚拟机)
+// 注意：虚拟机需要选择加载的USB设备 ...
+// 此时在 Linux 虚拟机中会看到新设备 ifconfig usb0
+ifconfig usb0 192.168.137.1
+// 我们在配置网络的时候已经为树莓派配置了 IP(192.168.137.2)
+ping 192.168.137.2
+ssh pi@192.168.137.2
+
+// 注意：发现有时在配置虚拟机IP后网络依然无法PING通 ...
+// 尝试后发现重新加载 Linux 虚拟机 USB 设备后正常 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 以上，SSH与网络均配置完毕 ...
+// 开机后通过 ifconfig 检查网络是否连接 ...
+// 通过 SSH 登录即可 ...
+// 注意：默认用户名 pi  密码 raspberry
+
+// 查看 wifi 的一些命令 
+iwconfig 
+iwlist scan ... 等等 ...
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 通过树莓派配置工具开启相关功能 ...
+// 可以配置 SSH 、VNC、等 ...
+sudo raspi-config
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<hr />
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 更换科大源
+sudo sed -i 's|mirrordirector.raspbian.org|mirrors.ustc.edu.cn/raspbian|g' /etc/apt/sources.list
+sudo sed -i 's|archive.raspbian.org|mirrors.ustc.edu.cn/raspbian|g' /etc/apt/sources.list
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+<pre><code>// 感谢
+https://www.cnblogs.com/systemVITO/p/8046643.html
+</code></pre>
+
+<blockquote>
+</blockquote>
+
+    <hr>
+    <div class="pagination">
+      <ul>
+        <ul>
+          
+            <li class="prev"><a href="/default/%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B9%8B%E9%83%A8%E7%BD%B2QT%E4%B8%8EFFmpeg%E7%A1%AC%E8%A7%A3%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83/" title="树莓派之部署QT与FFmpeg硬解开发环境">&larr; Previous</a></li>
+          
+          
+
+            <li><a href="/archive">Archive</a></li>
+
+          
+            <li class="next"><a href="/default/%E4%BD%BF%E7%94%A8nmcli-network-manager%E7%AE%A1%E7%90%86wifi%E7%BD%91%E7%BB%9C/" title="使用nmcli-network-manager管理wifi网络">Next &rarr;</a></li>
+          
+          
+        </ul>
+      </ul>
+    </div>
+    <hr>
+    <!-- -->
+  </div>
+ <!-- 
+  <div class="span2">
+    <h4>Published</h4>
+    <div class="date"><span>2018-09-23</span></div>
+    <br>
+    <h4>Categories</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/categories/#default-ref">default <span>412</span></a>
+</li>
+    
+    </ul>
+    <br>
+    <h4>Tags</h4>
+    <ul class="tag_box">
+    
+      <li>
+  <a href="/tags/#pi-ref">pi <span>19</span></a>
+</li>
+    
+    </ul>
+  </div>
+ -->
+</div>
+
+      </div>
+
+      <footer>
+        <p>&copy; nljb 2015
+          with help from <a href="http://github.com/wendal/gor" target="_blank" title="Gor -- Fast Blog">Gor</a>
+	  and Idea from <a href="http://ruhoh.com" target="_blank" title="The Definitive Technical Blogging Framework">ruhoh</a>
+  	  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1252992903'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s95.cnzz.com/z_stat.php%3Fid%3D1252992903%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+        </p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    
+<script src="//cdnjscn.b0.upaiyun.com/libs/prettify/r298/prettify.min.js"></script>
+<script>
+  var pres = document.getElementsByTagName("pre");
+  for (var i=0; i < pres.length; ++i) {
+    pres[i].className = "prettyprint ";
+  }
+  prettyPrint();
+</script>
+
+    
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  var pluginUrl = '//www.google-analytics.com/plugins/ga/inpage_linkid.js';
+  _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
+  _gaq.push(['_setAccount', 'UA-123-12']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>
